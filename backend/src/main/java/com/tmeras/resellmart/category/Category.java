@@ -1,8 +1,7 @@
 package com.tmeras.resellmart.category;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -19,6 +18,8 @@ public class Category {
 
     private String name;
 
-    // TODO: Add self-refelential relationship
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Category parentCategory;
 
 }

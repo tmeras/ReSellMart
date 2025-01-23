@@ -1,5 +1,6 @@
 package com.tmeras.resellmart.product;
 
+import com.tmeras.resellmart.category.Category;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,14 +22,15 @@ public class Product {
 
     private Double price;
 
-    private Double discounted_price;
+    private Double discountedPrice;
 
     @Enumerated(EnumType.STRING)
-    private ProductCondition product_condition;
+    private ProductCondition productCondition;
 
-    private Integer available_quantity;
+    private Integer availableQuantity;
 
-    // TODO: Add relationship to category
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Category category;
 
     // TODO: Add relationship to seller
 
