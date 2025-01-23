@@ -19,6 +19,6 @@ public class Category {
 
     private String name;
 
-    // TODO: Add relationship to product entity
+    // TODO: Add self-refelential relationship
 
 }
