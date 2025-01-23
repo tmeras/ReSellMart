@@ -24,7 +24,7 @@ public class Product {
     private Double discounted_price;
 
     @Enumerated(EnumType.STRING)
-    private String condition;
+    private ProductCondition product_condition;
 
     private Integer available_quantity;
 
