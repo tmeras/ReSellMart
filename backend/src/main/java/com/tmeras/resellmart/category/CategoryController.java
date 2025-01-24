@@ -27,5 +27,4 @@ public class CategoryController {
     ) {
         return new ResponseEntity<>(categoryService.findById(categoryId), HttpStatus.OK);
     }
-
 }

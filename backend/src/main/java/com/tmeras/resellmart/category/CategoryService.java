@@ -1,5 +1,6 @@
 package com.tmeras.resellmart.category;
 
+import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +18,9 @@ public class CategoryService {
         Category category = categoryMapper.toCategory(categoryRequest);
         Category parentCategory = categoryRequest.getParentId() == null ? null :
                 categoryRepository.findById(categoryRequest.getParentId())
-                        .orElseThrow(() -> new RuntimeException("Parent category with id " +
-                                categoryRequest.getParentId() + " not found")); //TODO: Custom exceptions
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Parent category", "id", categoryRequest.getParentId())
+                        );
         category.setParentCategory(parentCategory);
 
         Category savedCategory = categoryRepository.save(category);
@@ -28,6 +30,6 @@ public class CategoryService {
     public CategoryResponse findById(Integer categoryId) {
         return categoryRepository.findById(categoryId)
                 .map(categoryMapper::toCategoryResponse)
-                .orElseThrow(() -> new RuntimeException("Category with id " + categoryId + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
     }
 }
