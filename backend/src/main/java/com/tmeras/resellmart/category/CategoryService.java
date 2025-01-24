@@ -17,11 +17,17 @@ public class CategoryService {
         Category category = categoryMapper.toCategory(categoryRequest);
         Category parentCategory = categoryRequest.getParentId() == null ? null :
                 categoryRepository.findById(categoryRequest.getParentId())
-                        .orElseThrow(() -> new RuntimeException("Parent category not found"));
+                        .orElseThrow(() -> new RuntimeException("Parent category with id " +
+                                categoryRequest.getParentId() + " not found")); //TODO: Custom exceptions
         category.setParentCategory(parentCategory);
 
         Category savedCategory = categoryRepository.save(category);
         return categoryMapper.toCategoryResponse(savedCategory);
     }
 
+    public CategoryResponse findById(Integer categoryId) {
+        return categoryRepository.findById(categoryId)
+                .map(categoryMapper::toCategoryResponse)
+                .orElseThrow(() -> new RuntimeException("Category with id " + categoryId + " not found"));
+    }
 }
