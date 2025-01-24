@@ -7,7 +7,7 @@ import lombok.*;
 @Entity
 @Getter
 @Setter
-@RequiredArgsConstructor
+@AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class Product {
