@@ -14,6 +14,12 @@ services:
     networks:
       - resellmart_network
     restart: unless-stopped
+  mail-dev:
+    container_name: mail_dev_resellmart
+    image: maildev/maildev
+    ports:
+      - 1080:1080
+      - 1025:1025
 
 volumes:
   db_data:
