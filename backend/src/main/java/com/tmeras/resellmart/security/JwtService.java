@@ -29,7 +29,7 @@ public class JwtService {
         return generateToken(new HashMap<>(), userDetails);
     }
 
-    private String generateToken(Map<String,Object> claims, UserDetails userDetails) {
+    public String generateToken(Map<String,Object> claims, UserDetails userDetails) {
         return buildToken(claims, userDetails, jwtExpirationTime);
     }
 
@@ -50,16 +50,16 @@ public class JwtService {
                 .compact();
     }
 
-    private boolean isTokenValid(String token, UserDetails userDetails) {
+    public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-    private Date extractExpiration(String token) {
+    public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
