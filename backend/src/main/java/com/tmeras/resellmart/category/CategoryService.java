@@ -2,6 +2,7 @@ package com.tmeras.resellmart.category;
 
 import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.APIException;
+import com.tmeras.resellmart.exception.ResourceAlreadyExistsException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,7 +26,7 @@ public class CategoryService {
         categoryRequest.setId(null);
 
         if (categoryRepository.findByName(categoryRequest.getName()).isPresent())
-            throw new APIException("Category with name: " + categoryRequest.getName() + " already exists");
+            throw new ResourceAlreadyExistsException("A category with the name: " + categoryRequest.getName() + " already exists");
 
         Category category = categoryMapper.toCategory(categoryRequest);
         Category parentCategory = categoryRequest.getParentId() == null ? null :

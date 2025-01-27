@@ -10,4 +10,7 @@ public class AppConstants {
     public static final String SORT_PRODUCTS_BY = "id";
     public static final String SORT_ORDERS_BY = "id";
     public static final String SORT_USERS_BY = "id";
+
+    // Thymeleaf template names
+    public static final String USER_ACTIVATION_TEMPLATE = "activate_account";
 }

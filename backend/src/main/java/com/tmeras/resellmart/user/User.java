@@ -43,6 +43,10 @@ public class User implements UserDetails, Principal {
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;
 
+    public String getRealName() {
+        return name;
+    }
+
     @Override
     public String getName() {
         return this.email;
