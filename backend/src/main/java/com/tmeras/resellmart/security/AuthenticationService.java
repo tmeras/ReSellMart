@@ -5,6 +5,7 @@ import com.tmeras.resellmart.email.EmailService;
 import com.tmeras.resellmart.exception.APIException;
 import com.tmeras.resellmart.exception.ResourceAlreadyExistsException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
+import com.tmeras.resellmart.mfa.MfaService;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.user.User;
@@ -18,11 +19,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.tmeras.resellmart.token.JwtService;
+import com.tmeras.resellmart.token.Token;
+import com.tmeras.resellmart.token.TokenRepository;
+import com.tmeras.resellmart.token.TokenType;
 
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -37,18 +43,13 @@ import java.util.Set;
 public class AuthenticationService {
 
     private final RoleRepository roleRepository;
-
     private final UserRepository userRepository;
-
     private final TokenRepository tokenRepository;
-
     private final EmailService emailService;
-
     private final PasswordEncoder passwordEncoder;
-
     private final AuthenticationManager authenticationManager;
-
     private final JwtService jwtService;
+    private final MfaService mfaService;
 
     @Value("${application.mailing.frontend.activation-url}")
     private String activationUrl;
@@ -56,7 +57,8 @@ public class AuthenticationService {
     @Value("${application.security.jwt.refresh-token.expiration}")
     private long refreshExpirationTime;
 
-    public void register(RegistrationRequest registrationRequest) throws MessagingException {
+    @Transactional(rollbackOn = MessagingException.class)
+    public AuthenticationResponse register(RegistrationRequest registrationRequest) throws MessagingException {
         Role userRole = roleRepository.findByName("USER")
                 .orElseThrow(() -> new ResourceNotFoundException("USER role was not found"));
 
@@ -73,10 +75,23 @@ public class AuthenticationService {
                 .homeCountry(registrationRequest.getHomeCountry())
                 .dob(registrationRequest.getDob())
                 .enabled(false)
+                .mfaEnabled(registrationRequest.isMfaEnabled())
                 .build();
+
+        // Generate secret and QR code image if MFA is enabled
+        String qrImageUri = null;
+        if (registrationRequest.isMfaEnabled()) {
+            user.setSecret(mfaService.generateSecret());
+            qrImageUri = mfaService.generateQrCodeImageUri(user.getSecret(), user.getEmail());
+        }
 
         userRepository.save(user);
         sendActivationEmail(user);
+
+        return AuthenticationResponse.builder()
+                .qrImageUri(qrImageUri)
+                .mfaEnabled(registrationRequest.isMfaEnabled())
+                .build();
     }
 
     private void sendActivationEmail(User user) throws MessagingException {
@@ -126,25 +141,14 @@ public class AuthenticationService {
                 )
         );
         User user = (User) authentication.getPrincipal();
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("name", user.getRealName());
-        String accessToken = jwtService.generateAccessToken(claims, user);
 
-        String refreshToken = jwtService.generateRefreshToken(user);
-        tokenRepository.save(Token.builder()
-                .token(refreshToken)
-                .tokenType(TokenType.BEARER)
-                .createdAt(LocalDateTime.now())
-                .expiresAt(LocalDateTime.now().plus(refreshExpirationTime, ChronoUnit.MILLIS))
-                .revoked(false)
-                .user(user)
-                .build()
-        );
+        // Client needs to send OTP
+        if (user.isMfaEnabled())
+            return AuthenticationResponse.builder()
+                    .mfaEnabled(true)
+                    .build();
 
-        return AuthenticationResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+        return generateTokens(user);
     }
 
     @Transactional(
@@ -207,5 +211,42 @@ public class AuthenticationService {
             }
         }
         throw new JwtException("Invalid refresh token");
+    }
+
+    public AuthenticationResponse verifyOtp(VerificationRequest verificationRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        verificationRequest.getEmail(),
+                        verificationRequest.getPassword()
+                )
+        );
+        User user = (User) authentication.getPrincipal();
+
+        if (mfaService.isOtpNotValid(user.getSecret(), verificationRequest.getOtp()))
+            throw new BadCredentialsException("OTP is not valid");
+
+        return generateTokens(user);
+    }
+
+    private AuthenticationResponse generateTokens(User user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("name", user.getRealName());
+        String accessToken = jwtService.generateAccessToken(claims, user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+        tokenRepository.save(Token.builder()
+                .token(refreshToken)
+                .tokenType(TokenType.BEARER)
+                .createdAt(LocalDateTime.now())
+                .expiresAt(LocalDateTime.now().plus(refreshExpirationTime, ChronoUnit.MILLIS))
+                .revoked(false)
+                .user(user)
+                .build()
+        );
+
+        return AuthenticationResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .mfaEnabled(user.isMfaEnabled())
+                .build();
     }
 }

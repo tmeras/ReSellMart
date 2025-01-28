@@ -19,11 +19,10 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(
+    public ResponseEntity<AuthenticationResponse> register(
             @Valid @RequestBody RegistrationRequest registrationRequest
     ) throws MessagingException {
-        authenticationService.register(registrationRequest);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(authenticationService.register(registrationRequest),HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
@@ -47,5 +46,12 @@ public class AuthenticationController {
             HttpServletResponse response
     ) throws IOException {
         authenticationService.refreshToken(request, response);
+    }
+
+    @PostMapping("/verify")
+    public ResponseEntity<AuthenticationResponse> verifyOtp(
+            @Valid @RequestBody VerificationRequest verificationRequest
+    ) {
+        return new ResponseEntity<>(authenticationService.verifyOtp(verificationRequest), HttpStatus.OK);
     }
 }

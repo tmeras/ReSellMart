@@ -6,10 +6,10 @@ import lombok.*;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationRequest {
+@Builder
+public class VerificationRequest {
 
     @NotBlank(message = "Email must not be empty")
     @Email(message = "Email is not in a valid format")
@@ -17,4 +17,7 @@ public class AuthenticationRequest {
 
     @NotBlank(message = "Password must not be empty")
     private String password;
+
+    @NotBlank(message = "OTP must not be empty")
+    private String otp;
 }

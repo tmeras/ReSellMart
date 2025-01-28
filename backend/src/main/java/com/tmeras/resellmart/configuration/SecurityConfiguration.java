@@ -24,9 +24,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfiguration {
 
     private final AuthenticationProvider authenticationProvider;
-
     private final JwtFilter jwtFilter;
-
     private final LogoutHandler logoutHandler;
 
     @Bean

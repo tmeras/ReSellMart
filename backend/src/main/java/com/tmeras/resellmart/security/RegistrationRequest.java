@@ -1,15 +1,15 @@
 package com.tmeras.resellmart.security;
 
 import jakarta.validation.constraints.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class RegistrationRequest {
 
     @NotBlank(message = "Name must not be empty")
@@ -32,4 +32,6 @@ public class RegistrationRequest {
 
     @Past
     private LocalDate dob;
+
+    private boolean mfaEnabled;
 }

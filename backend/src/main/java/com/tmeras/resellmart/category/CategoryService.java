@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
-
     private final CategoryMapper categoryMapper;
 
     public CategoryResponse save(CategoryRequest categoryRequest) {

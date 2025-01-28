@@ -20,7 +20,6 @@ import java.util.Map;
 public class EmailService {
 
     private final JavaMailSender mailSender;
-
     private final SpringTemplateEngine templateEngine;
 
     @Async

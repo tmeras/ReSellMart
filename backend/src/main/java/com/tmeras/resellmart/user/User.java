@@ -38,7 +38,12 @@ public class User implements UserDetails, Principal {
 
     private LocalDate dob;
 
-    private Boolean enabled;
+    private boolean enabled;
+
+    private boolean mfaEnabled;
+
+    // Secret used for MFA
+    private String secret;
 
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;
@@ -66,6 +71,7 @@ public class User implements UserDetails, Principal {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles
                 .stream()
+                // TODO: Add ROLE_ prefix???
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .toList();
     }
