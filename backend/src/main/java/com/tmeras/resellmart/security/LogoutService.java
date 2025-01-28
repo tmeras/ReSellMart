@@ -1,16 +1,16 @@
 package com.tmeras.resellmart.security;
 
-import com.tmeras.resellmart.exception.APIException;
-import com.tmeras.resellmart.user.User;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
+import com.tmeras.resellmart.token.JwtService;
+import com.tmeras.resellmart.token.Token;
+import com.tmeras.resellmart.token.TokenRepository;
 
 import java.io.IOException;
 import java.util.List;

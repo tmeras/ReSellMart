@@ -1,4 +1,4 @@
-package com.tmeras.resellmart.security;
+package com.tmeras.resellmart.token;
 
 public enum TokenType {
 

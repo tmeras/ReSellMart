@@ -1,4 +1,4 @@
-package com.tmeras.resellmart.security;
+package com.tmeras.resellmart.token;
 
 import com.tmeras.resellmart.user.User;
 import jakarta.persistence.*;
