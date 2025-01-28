@@ -1,5 +1,6 @@
 package com.tmeras.resellmart.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tmeras.resellmart.email.EmailService;
 import com.tmeras.resellmart.exception.APIException;
 import com.tmeras.resellmart.exception.ResourceAlreadyExistsException;
@@ -8,18 +9,25 @@ import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
+import io.jsonwebtoken.JwtException;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -44,6 +52,9 @@ public class AuthenticationService {
 
     @Value("${application.mailing.frontend.activation-url}")
     private String activationUrl;
+
+    @Value("${application.security.jwt.refresh-token.expiration}")
+    private long refreshExpirationTime;
 
     public void register(RegistrationRequest registrationRequest) throws MessagingException {
         Role userRole = roleRepository.findByName("USER")
@@ -82,14 +93,16 @@ public class AuthenticationService {
 
     private String generateAndSaveActivationCode(User user) {
         String generatedCode = generateActivationCode(6);
-        Token token = Token.builder()
+        tokenRepository.save(Token.builder()
                 .token(generatedCode)
+                .tokenType(TokenType.ACTIVATION)
                 .createdAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plusMinutes(15))
+                .revoked(false)
                 .user(user)
-                .build();
+                .build()
+        );
 
-        tokenRepository.save(token);
         return generatedCode;
     }
 
@@ -112,17 +125,27 @@ public class AuthenticationService {
                         authenticationRequest.getPassword()
                 )
         );
-
-        Map<String, Object> claims = new HashMap<>();
         User user = (User) authentication.getPrincipal();
+        Map<String, Object> claims = new HashMap<>();
         claims.put("name", user.getRealName());
-        String jwt = jwtService.generateToken(claims, user);
+        String accessToken = jwtService.generateAccessToken(claims, user);
+
+        String refreshToken = jwtService.generateRefreshToken(user);
+        tokenRepository.save(Token.builder()
+                .token(refreshToken)
+                .tokenType(TokenType.BEARER)
+                .createdAt(LocalDateTime.now())
+                .expiresAt(LocalDateTime.now().plus(refreshExpirationTime, ChronoUnit.MILLIS))
+                .revoked(false)
+                .user(user)
+                .build()
+        );
 
         return AuthenticationResponse.builder()
-                .token(jwt)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
-
 
     @Transactional(
             rollbackOn = MessagingException.class,
@@ -147,5 +170,42 @@ public class AuthenticationService {
 
         savedToken.setValidatedAt(LocalDateTime.now());
         tokenRepository.save(savedToken);
+    }
+
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        final String refreshToken;
+        final String userEmail;
+
+        if (authHeader == null || !authHeader.startsWith("Bearer "))
+            throw new JwtException("No refresh token in Bearer header");
+
+        refreshToken = authHeader.substring(7);
+        userEmail = jwtService.extractUsername(refreshToken);
+        if (userEmail != null) {
+            User user = userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new UsernameNotFoundException("User with the email \"" + userEmail + "\" not found"));
+
+            boolean isTokenRevoked = tokenRepository.findByToken(refreshToken)
+                    .map(Token::isRevoked)
+                    .orElseThrow(() -> new JwtException("Refresh token not found"));
+
+            if (!isTokenRevoked && jwtService.isTokenValid(refreshToken, user)) {
+                Map<String, Object> claims = new HashMap<>();
+                claims.put("name", user.getRealName());
+                String newAccessToken = jwtService.generateAccessToken(claims, user);
+
+                AuthenticationResponse authenticationResponse =
+                        AuthenticationResponse.builder()
+                                .accessToken(newAccessToken)
+                                .refreshToken(refreshToken)
+                                .build();
+
+                response.setContentType("application/json");
+                new ObjectMapper().writeValue(response.getOutputStream(), authenticationResponse);
+                return;
+            }
+        }
+        throw new JwtException("Invalid refresh token");
     }
 }

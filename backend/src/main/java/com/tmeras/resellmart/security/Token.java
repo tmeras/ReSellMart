@@ -20,11 +20,16 @@ public class Token {
 
     private String token;
 
+    @Enumerated(EnumType.STRING)
+    private TokenType tokenType;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime expiresAt;
 
     private LocalDateTime validatedAt;
+
+    private boolean revoked;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)

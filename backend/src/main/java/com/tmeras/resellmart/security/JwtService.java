@@ -18,21 +18,24 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    @Value("${application.security.jwt.expiration}")
-    private long jwtExpirationTime;
-
     @Value("${application.security.jwt.secret-key}")
     private String secretKey;
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    @Value("${application.security.jwt.access-token.expiration}")
+    private long accessExpirationTime;
+
+    @Value("${application.security.jwt.refresh-token.expiration}")
+    private long refreshExpirationTime;
+
+    public String generateAccessToken(Map<String,Object> claims, UserDetails userDetails) {
+        return buildToken(claims, userDetails, accessExpirationTime);
     }
 
-    public String generateToken(Map<String,Object> claims, UserDetails userDetails) {
-        return buildToken(claims, userDetails, jwtExpirationTime);
+    public String generateRefreshToken(UserDetails userDetails) {
+        return buildToken(new HashMap<>(), userDetails, refreshExpirationTime);
     }
 
-    private String buildToken(Map<String, Object> customClaims, UserDetails userDetails, long jwtExpirationTime) {
+    private String buildToken(Map<String, Object> customClaims, UserDetails userDetails, long expirationTime) {
         var authorities = userDetails.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
@@ -43,7 +46,7 @@ public class JwtService {
                 .setClaims(customClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationTime))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .claim("authorities", authorities)
                 .signWith(getSigningKey())
                 .compact();
@@ -66,7 +69,7 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    public<T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
