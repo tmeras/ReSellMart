@@ -12,7 +12,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,14 +26,15 @@ public class CategoryService {
         if (categoryRepository.findByName(categoryRequest.getName()).isPresent())
             throw new ResourceAlreadyExistsException("A category with the name: " + categoryRequest.getName() + " already exists");
 
-        Category category = categoryMapper.toCategory(categoryRequest);
         Category parentCategory = categoryRequest.getParentId() == null ? null :
                 categoryRepository.findById(categoryRequest.getParentId())
                         .orElseThrow(() -> new ResourceNotFoundException(
-                                "No parent category found with id: " + categoryRequest.getParentId())
+                                "No parent category found with ID: " + categoryRequest.getParentId())
                         );
         if (parentCategory != null && parentCategory.getParentCategory() != null)
             throw new APIException("Parent category should not have a parent");
+
+        Category category = categoryMapper.toCategory(categoryRequest);
         category.setParentCategory(parentCategory);
 
         Category savedCategory = categoryRepository.save(category);
@@ -44,7 +44,7 @@ public class CategoryService {
     public CategoryResponse findById(Integer categoryId) {
         return categoryRepository.findById(categoryId)
                 .map(categoryMapper::toCategoryResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("No category found with id:" + categoryId));
+                .orElseThrow(() -> new ResourceNotFoundException("No category found with ID:" + categoryId));
     }
 
     public PageResponse<CategoryResponse> findAll(
@@ -93,21 +93,20 @@ public class CategoryService {
 
     public List<CategoryResponse> findAllParents() {
         List<Category> categories = categoryRepository.findAllParents();
-        List<CategoryResponse> categoryResponses = categories.stream()
+
+        return categories.stream()
                 .map(categoryMapper::toCategoryResponse)
                 .toList();
-
-        return categoryResponses;
     }
 
     public CategoryResponse update(CategoryRequest categoryRequest, Integer categoryId) {
-        Category savedCategory = categoryRepository.findById(categoryId).orElseThrow(
-                () ->new ResourceNotFoundException("No category found with id:" + categoryId));
+        Category existingCategory = categoryRepository.findById(categoryId)
+                .orElseThrow(() ->new ResourceNotFoundException("No category found with ID:" + categoryId));
 
         // Only allow updates to category name
-        savedCategory.setName(categoryRequest.getName());
+        existingCategory.setName(categoryRequest.getName());
 
-        Category updatedCategory = categoryRepository.save(savedCategory);
+        Category updatedCategory = categoryRepository.save(existingCategory);
         return categoryMapper.toCategoryResponse(updatedCategory);
     }
 
