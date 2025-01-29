@@ -25,4 +25,11 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
             AND p.category.id = :categoryId
     """)
     Page<Product> findAllByCategoryId(Pageable pageable, Integer categoryId, Integer sellerId);
+
+    @Query("""
+            SELECT p FROM Product p
+            WHERE p.available = true AND p.seller.id <> :sellerId
+            AND p.name LIKE %:keyword%
+    """)
+    Page<Product> findAllByKeyword(Pageable pageable, String keyword, Integer sellerId);
 }

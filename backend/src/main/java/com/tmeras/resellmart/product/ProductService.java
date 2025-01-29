@@ -142,7 +142,28 @@ public class ProductService {
         );
     }
 
-    // TODO: Search??
+    public PageResponse<ProductResponse> findAllByKeyword(
+            Integer pageNumber, Integer pageSize, String sortBy, String sortDirection, String keyword, Authentication authentication
+    ) {
+        User currentUser = (User) authentication.getPrincipal();
+        Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        //"%" + keyword.toLowerCase() + "%"
+        Page<Product> products = productRepository.findAllByKeyword(pageable, keyword, currentUser.getId());
+        List<ProductResponse> productResponses = products.stream()
+                .map(productMapper::toProductResponse)
+                .toList();
+
+        return new PageResponse<>(
+                productResponses,
+                products.getNumber(),
+                products.getSize(),
+                products.getTotalElements(),
+                products.getTotalPages(),
+                products.isFirst(),
+                products.isLast()
+        );    }
 
     public ProductResponse update(ProductRequest productRequest, Integer productId, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();

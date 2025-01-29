@@ -86,6 +86,20 @@ public class ProductController {
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<PageResponse<ProductResponse>> findAllByKeyword(
+            @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
+            @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_PRODUCTS_BY, required = false) String sortBy,
+            @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection,
+            @RequestParam(name = "keyword") String keyword,
+            Authentication authentication
+    ) {
+        PageResponse<ProductResponse> foundProducts =
+                productService.findAllByKeyword(pageNumber, pageSize, sortBy, sortDirection, keyword, authentication);
+        return new ResponseEntity<>(foundProducts, HttpStatus.OK);
+    }
+
     @PutMapping("/{product-id}")
     public ResponseEntity<ProductResponse> update(
             @Valid @RequestBody ProductRequest productRequest,
