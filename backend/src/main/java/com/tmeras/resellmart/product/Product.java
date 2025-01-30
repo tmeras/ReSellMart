@@ -5,6 +5,9 @@ import com.tmeras.resellmart.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -40,5 +43,10 @@ public class Product {
     @JoinColumn(nullable = false)
     private User seller;
 
-    // TODO: Add product image(s) (separate entity??)
+    @OneToMany(
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JoinColumn(name = "productId", nullable = false)
+    private List<ProductImage> images = new ArrayList<>();
 }

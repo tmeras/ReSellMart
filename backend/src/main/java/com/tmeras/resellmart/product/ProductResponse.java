@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.tmeras.resellmart.category.CategoryResponse;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -27,6 +29,8 @@ public class ProductResponse {
     private Integer availableQuantity;
 
     private boolean available;
+
+    private List<byte[]> images;
 
     private CategoryResponse categoryResponse;
 

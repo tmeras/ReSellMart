@@ -1,8 +1,13 @@
 package com.tmeras.resellmart.product;
 
 import com.tmeras.resellmart.category.CategoryMapper;
+import com.tmeras.resellmart.file.FileUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,10 +25,15 @@ public class ProductMapper {
                 .productCondition(productRequest.getProductCondition())
                 .availableQuantity(productRequest.getAvailableQuantity())
                 .available(productRequest.isAvailable())
+                .images(new ArrayList<>())
                 .build();
     }
 
     public ProductResponse toProductResponse(Product product) {
+        List<byte[]> images = new ArrayList<>();
+        for (ProductImage productImage : product.getImages())
+            images.add(FileUtils.readFileFromPath(productImage.getFilePath()));
+
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -33,6 +43,7 @@ public class ProductMapper {
                 .productCondition(product.getProductCondition())
                 .availableQuantity(product.getAvailableQuantity())
                 .available(product.isAvailable())
+                .images(images)
                 .categoryResponse(categoryMapper.toCategoryResponse(product.getCategory()))
                 .sellerName(product.getSeller().getRealName())
                 .build();

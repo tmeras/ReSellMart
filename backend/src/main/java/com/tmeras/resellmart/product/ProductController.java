@@ -8,6 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -53,7 +57,7 @@ public class ProductController {
             @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection,
             Authentication authentication
     ) {
-        // Get all products except those sold by the logged-in user
+        // Get all products excluding those sold by the logged-in user
         PageResponse<ProductResponse> foundProducts =
                 productService.findAllExceptSeller(pageNumber, pageSize, sortBy, sortDirection, authentication);
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
@@ -81,6 +85,7 @@ public class ProductController {
             @PathVariable(name = "category-id") Integer categoryId,
             Authentication authentication
     ) {
+        // Get all products belonging to the specified category excluding those sold by the logged-in user
         PageResponse<ProductResponse> foundProducts =
                 productService.findAllByCategoryId(pageNumber, pageSize, sortBy, sortDirection, categoryId, authentication);
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
@@ -95,6 +100,7 @@ public class ProductController {
             @RequestParam(name = "keyword") String keyword,
             Authentication authentication
     ) {
+        // Search for products based on the provided keyword excluding those sold by the logged-in user
         PageResponse<ProductResponse> foundProducts =
                 productService.findAllByKeyword(pageNumber, pageSize, sortBy, sortDirection, keyword, authentication);
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
@@ -108,6 +114,16 @@ public class ProductController {
     ) {
         ProductResponse updatedProduct = productService.update(productRequest, productId, authentication);
         return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/{product-id}/images", consumes = "multipart/form-data")
+    public ResponseEntity<?> uploadProductImages(
+            @PathVariable(name = "product-id") Integer productId,
+            @RequestPart("images") List<MultipartFile> images,
+            Authentication authentication
+    ) throws IOException {
+        productService.uploadProductImages(images, productId, authentication);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/{product-id}")
