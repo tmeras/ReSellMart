@@ -22,6 +22,9 @@ public class FileService {
     @Value("${application.file.upload.product-images-path}")
     private String productImageUploadPath;
 
+    @Value("${application.file.upload.user-images-path}")
+    private String userImageUploadPath;
+
     public List<String> saveProductImages(
             @NonNull List<MultipartFile> images, @NonNull Integer productId
     ) throws IOException {
