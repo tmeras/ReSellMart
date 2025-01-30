@@ -16,4 +16,6 @@ public class ProductImage {
     private Integer id;
 
     private String filePath;
+
+    // TODO: Add primary field
 }
