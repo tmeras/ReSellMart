@@ -1,8 +1,12 @@
 package com.tmeras.resellmart.product;
 
 import com.tmeras.resellmart.category.Category;
+import com.tmeras.resellmart.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -29,9 +33,20 @@ public class Product {
 
     private Integer availableQuantity;
 
+    private boolean available;
+
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private Category category;
 
-    // TODO: Add relationship to seller
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
+    private User seller;
 
+    @OneToMany(
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JoinColumn(name = "productId", nullable = false)
+    private List<ProductImage> images = new ArrayList<>();
 }

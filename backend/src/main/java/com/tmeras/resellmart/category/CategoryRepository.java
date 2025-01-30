@@ -13,16 +13,16 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
     Optional<Category> findByName(String name);
 
     @Query("""
-            SELECT category
-            FROM Category category
-            WHERE category.parentCategory.id = :parentId
+            SELECT c
+            FROM Category c
+            WHERE c.parentCategory.id = :parentId
         """)
     Page<Category> findAllByParentId(Pageable pageable, Integer parentId);
 
     @Query("""
-            SELECT category
-            FROM Category category
-            WHERE category.parentCategory is NULL
+            SELECT c
+            FROM Category c
+            WHERE c.parentCategory is NULL
         """)
     List<Category> findAllParents();
 }

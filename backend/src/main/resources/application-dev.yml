@@ -38,10 +38,13 @@ application:
       access-token:
         expiration: 3600000 # 1 hour
         #expiration: 60000 # 1 minute
-
       refresh-token:
         expiration: 604800000 # 1 week
         #expiration: 120000 # 2 minutes
   mailing:
     frontend:
       activation-url: "TODO"
+  file:
+    upload:
+      product-images-path: ./uploads/product-images
+      user-images-path: ./uploads/user-images

@@ -32,7 +32,10 @@ public class JwtFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        System.out.println("In JWT FILTER");
+       /* if (true) {
+            filterChain.doFilter(request, response);
+            return;
+        }*/
 
         // No authentication required for these paths
         if (request.getServletPath().contains("/api/auth")) {
