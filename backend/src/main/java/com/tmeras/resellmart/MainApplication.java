@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDate;
 import java.util.Set;
 
 @SpringBootApplication
@@ -48,7 +47,6 @@ public class MainApplication {
 						User.builder()
 								.email("test@test.com")
 								.name("test user")
-								.dob(LocalDate.of(2001, 7, 30))
 								.roles(Set.of(userRole))
 								.mfaEnabled(false)
 								.homeCountry("Greece")
@@ -60,7 +58,6 @@ public class MainApplication {
 						User.builder()
 								.email("admin@test.com")
 								.name("test admin user")
-								.dob(LocalDate.of(1996, 2, 18))
 								.roles(Set.of(adminRole))
 								.mfaEnabled(false)
 								.homeCountry("Greece")

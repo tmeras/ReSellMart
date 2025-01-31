@@ -28,6 +28,7 @@ import java.util.Set;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final ProductImageRepository productImageRepository;
     private final CategoryRepository categoryRepository;
     private final ProductMapper productMapper;
     private final FileService fileService;
@@ -36,7 +37,7 @@ public class ProductService {
         productRequest.setId(null);
         User currentUser = (User) authentication.getPrincipal();
         Category category = categoryRepository.findById(productRequest.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("No category found with ID " + productRequest.getCategoryId()));
+                .orElseThrow(() -> new ResourceNotFoundException("No category found with ID: " + productRequest.getCategoryId()));
 
         if (productRequest.getPrice() < productRequest.getDiscountedPrice())
             throw new APIException("Discounted price cannot be higher than regular price");
@@ -52,7 +53,7 @@ public class ProductService {
     public ProductResponse findById(Integer productId) {
         return productRepository.findById(productId)
                 .map(productMapper::toProductResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID " + productId));
+                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
     }
 
     @PreAuthorize("hasRole('ADMIN')") //Only admins should be able to view both available and unavailable products
@@ -172,9 +173,9 @@ public class ProductService {
     public ProductResponse update(ProductRequest productRequest, Integer productId, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
         Category category = categoryRepository.findById(productRequest.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("No category found with ID " + productRequest.getCategoryId()));
+                .orElseThrow(() -> new ResourceNotFoundException("No category found with ID: " + productRequest.getCategoryId()));
         Product existingproduct = productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID " + productId));
+                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
 
         if (!Objects.equals(existingproduct.getSeller().getId(), currentUser.getId()))
             throw new OperationNotPermittedException("You do not have permission to update this product");
@@ -195,7 +196,7 @@ public class ProductService {
     public void uploadProductImages(List<MultipartFile> images, Integer productId, Authentication authentication) throws IOException {
         User currentUser = (User) authentication.getPrincipal();
         Product existingproduct = productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID " + productId));
+                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
 
         if (!Objects.equals(existingproduct.getSeller().getId(), currentUser.getId()))
             throw new OperationNotPermittedException("You do not have permission to upload images for this product");
@@ -206,7 +207,6 @@ public class ProductService {
         for (MultipartFile image : images) {
             String fileName = image.getOriginalFilename();
             String fileExtension = fileService.getFileExtension(fileName);
-
             Set<String> validImageExtensions = Set.of("jpg", "jpeg", "png", "gif", "bmp", "tiff");
             if (!validImageExtensions.contains(fileExtension))
                 throw new APIException("Only images can be uploaded");
@@ -222,9 +222,34 @@ public class ProductService {
         for (String filePath: filePaths) {
             ProductImage productImage = ProductImage.builder()
                     .filePath(filePath)
+                    .displayed(false)
                     .build();
             existingproduct.getImages().add(productImage);
         }
+        existingproduct.getImages().get(0).setDisplayed(true);
+        productRepository.save(existingproduct);
+    }
+
+    public void displayImage(Integer productId, Integer imageId, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        Product existingproduct = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
+        ProductImage existingImage = productImageRepository.findById(imageId)
+                .orElseThrow(() -> new ResourceNotFoundException("No product image found with ID: " + imageId));
+
+        if (!existingproduct.getImages().contains(existingImage))
+            throw new APIException("The image is related to a different product");
+
+        if (!Objects.equals(existingproduct.getSeller().getId(), currentUser.getId()))
+            throw new OperationNotPermittedException("You do not have permission to manage images for this product");
+
+        // Make displayed=false for all images of this product
+        // before making displayed=true for the specified image
+        for (ProductImage productImage: existingproduct.getImages())
+            productImage.setDisplayed(false);
+        int imageIndex = existingproduct.getImages().indexOf(existingImage);
+        existingproduct.getImages().get(imageIndex).setDisplayed(true);
+
         productRepository.save(existingproduct);
     }
 

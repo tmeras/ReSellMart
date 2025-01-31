@@ -73,7 +73,6 @@ public class AuthenticationService {
                 .password(passwordEncoder.encode(registrationRequest.getPassword()))
                 .roles(Set.of(userRole))
                 .homeCountry(registrationRequest.getHomeCountry())
-                .dob(registrationRequest.getDob())
                 .enabled(false)
                 .mfaEnabled(registrationRequest.isMfaEnabled())
                 .build();

@@ -30,8 +30,5 @@ public class RegistrationRequest {
     @NotBlank(message = "Home country must not be empty")
     private String homeCountry;
 
-    @Past
-    private LocalDate dob;
-
     private boolean mfaEnabled;
 }

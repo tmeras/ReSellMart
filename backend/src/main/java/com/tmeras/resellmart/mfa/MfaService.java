@@ -1,6 +1,6 @@
 package com.tmeras.resellmart.mfa;
 
-import com.tmeras.resellmart.exception.APIException;
+import com.tmeras.resellmart.exception.InternalServerException;
 import dev.samstevens.totp.code.*;
 import dev.samstevens.totp.exceptions.QrGenerationException;
 import dev.samstevens.totp.qr.QrData;
@@ -35,7 +35,7 @@ public class MfaService {
         try {
             imageData = generator.generate(data);
         } catch (QrGenerationException ex) {
-            throw new APIException("Error generate MFA QR code image");
+            throw new InternalServerException("Error generating MFA QR code image");
         }
 
         return getDataUriForImage(imageData, generator.getImageMimeType());

@@ -43,6 +43,11 @@ public class FileService {
         return uploadFile(image, productImageUploadPath, fileUploadSubPath, fileNo);
     }
 
+    public String saveUserImage(@NonNull MultipartFile image, @NonNull Integer userId) throws IOException {
+        final String fileUploadSubPath = "users" + File.separator + userId;
+        return uploadFile(image, userImageUploadPath, fileUploadSubPath, 1);
+    }
+
     public String uploadFile(
             @NonNull MultipartFile file, @NonNull String fileUploadPath, @NonNull String fileUploadSubPath, @NonNull Integer fileId
     ) throws IOException{
@@ -51,7 +56,7 @@ public class FileService {
         if (!targetFolder.exists()) {
             boolean folderCreated = targetFolder.mkdirs();
             if (!folderCreated)
-                throw new FileException("Failed to create target folder");
+                throw new IOException("Failed to create target folder");
         }
 
         final String fileExtension = getFileExtension(file.getOriginalFilename());

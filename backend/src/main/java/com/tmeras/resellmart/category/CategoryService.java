@@ -25,7 +25,7 @@ public class CategoryService {
         categoryRequest.setId(null);
 
         if (categoryRepository.findByName(categoryRequest.getName()).isPresent())
-            throw new ResourceAlreadyExistsException("A category with the name: " + categoryRequest.getName() + " already exists");
+            throw new ResourceAlreadyExistsException("A category with the name: '" + categoryRequest.getName() + "' already exists");
 
         Category parentCategory = categoryRequest.getParentId() == null ? null :
                 categoryRepository.findById(categoryRequest.getParentId())

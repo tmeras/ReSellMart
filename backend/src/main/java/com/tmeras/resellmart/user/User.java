@@ -36,7 +36,8 @@ public class User implements UserDetails, Principal {
 
     private String homeCountry;
 
-    private LocalDate dob;
+    // Path pointing to the user's profile picture
+    private String imagePath;
 
     private boolean enabled;
 

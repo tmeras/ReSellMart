@@ -2,10 +2,10 @@ package com.tmeras.resellmart.product;
 
 import com.tmeras.resellmart.category.CategoryMapper;
 import com.tmeras.resellmart.file.FileUtils;
+import com.tmeras.resellmart.user.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +14,7 @@ import java.util.List;
 public class ProductMapper {
 
     private final CategoryMapper categoryMapper;
+    private final UserMapper userMapper;
 
     public Product toProduct(ProductRequest productRequest) {
         return Product.builder()
@@ -30,9 +31,9 @@ public class ProductMapper {
     }
 
     public ProductResponse toProductResponse(Product product) {
-        List<byte[]> images = new ArrayList<>();
+        List<ProductImageResponse> productImageResponses = new ArrayList<>();
         for (ProductImage productImage : product.getImages())
-            images.add(FileUtils.readFileFromPath(productImage.getFilePath()));
+            productImageResponses.add(toProductImageResponse(productImage));
 
         return ProductResponse.builder()
                 .id(product.getId())
@@ -43,9 +44,17 @@ public class ProductMapper {
                 .productCondition(product.getProductCondition())
                 .availableQuantity(product.getAvailableQuantity())
                 .available(product.isAvailable())
-                .images(images)
-                .categoryResponse(categoryMapper.toCategoryResponse(product.getCategory()))
-                .sellerName(product.getSeller().getRealName())
+                .productImages(productImageResponses)
+                .category(categoryMapper.toCategoryResponse(product.getCategory()))
+                .seller(userMapper.toUserResponse(product.getSeller()))
+                .build();
+    }
+
+    private ProductImageResponse toProductImageResponse(ProductImage productImage) {
+        return ProductImageResponse.builder()
+                .id(productImage.getId())
+                .image(FileUtils.readFileFromPath(productImage.getFilePath()))
+                .displayed(productImage.isDisplayed())
                 .build();
     }
 }
