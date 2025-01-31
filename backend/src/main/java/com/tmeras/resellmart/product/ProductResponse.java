@@ -30,9 +30,9 @@ public class ProductResponse {
 
     private boolean available;
 
-    private List<byte[]> images;
+    private List<ProductImageResponse> productImages;
 
-    private CategoryResponse categoryResponse;
+    private CategoryResponse category;
 
     // TODO: Return user response
     private String sellerName;

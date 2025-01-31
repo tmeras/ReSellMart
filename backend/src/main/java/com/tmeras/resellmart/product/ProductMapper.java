@@ -5,7 +5,6 @@ import com.tmeras.resellmart.file.FileUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,9 +29,9 @@ public class ProductMapper {
     }
 
     public ProductResponse toProductResponse(Product product) {
-        List<byte[]> images = new ArrayList<>();
+        List<ProductImageResponse> productImageResponses = new ArrayList<>();
         for (ProductImage productImage : product.getImages())
-            images.add(FileUtils.readFileFromPath(productImage.getFilePath()));
+            productImageResponses.add(toProductImageResponse(productImage));
 
         return ProductResponse.builder()
                 .id(product.getId())
@@ -43,9 +42,17 @@ public class ProductMapper {
                 .productCondition(product.getProductCondition())
                 .availableQuantity(product.getAvailableQuantity())
                 .available(product.isAvailable())
-                .images(images)
-                .categoryResponse(categoryMapper.toCategoryResponse(product.getCategory()))
+                .productImages(productImageResponses)
+                .category(categoryMapper.toCategoryResponse(product.getCategory()))
                 .sellerName(product.getSeller().getRealName())
+                .build();
+    }
+
+    private ProductImageResponse toProductImageResponse(ProductImage productImage) {
+        return ProductImageResponse.builder()
+                .id(productImage.getId())
+                .image(FileUtils.readFileFromPath(productImage.getFilePath()))
+                .displayed(productImage.isDisplayed())
                 .build();
     }
 }

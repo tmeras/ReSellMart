@@ -55,4 +55,6 @@ public class UserController {
         userService.uploadUserImage(image, userId, authentication);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    // TODO: User deletion endpoint (mind related entities)
 }

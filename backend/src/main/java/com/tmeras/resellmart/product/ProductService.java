@@ -28,6 +28,7 @@ import java.util.Set;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final ProductImageRepository productImageRepository;
     private final CategoryRepository categoryRepository;
     private final ProductMapper productMapper;
     private final FileService fileService;
@@ -221,9 +222,34 @@ public class ProductService {
         for (String filePath: filePaths) {
             ProductImage productImage = ProductImage.builder()
                     .filePath(filePath)
+                    .displayed(false)
                     .build();
             existingproduct.getImages().add(productImage);
         }
+        existingproduct.getImages().get(0).setDisplayed(true);
+        productRepository.save(existingproduct);
+    }
+
+    public void displayImage(Integer productId, Integer imageId, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        Product existingproduct = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
+        ProductImage existingImage = productImageRepository.findById(imageId)
+                .orElseThrow(() -> new ResourceNotFoundException("No product image found with ID: " + imageId));
+
+        if (!existingproduct.getImages().contains(existingImage))
+            throw new APIException("The image is related to a different product");
+
+        if (!Objects.equals(existingproduct.getSeller().getId(), currentUser.getId()))
+            throw new OperationNotPermittedException("You do not have permission to manage images for this product");
+
+        // Make displayed=false for all images of this product
+        // before making displayed=true for the specified image
+        for (ProductImage productImage: existingproduct.getImages())
+            productImage.setDisplayed(false);
+        int imageIndex = existingproduct.getImages().indexOf(existingImage);
+        existingproduct.getImages().get(imageIndex).setDisplayed(true);
+
         productRepository.save(existingproduct);
     }
 
