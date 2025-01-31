@@ -2,6 +2,7 @@ package com.tmeras.resellmart.product;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.tmeras.resellmart.category.CategoryResponse;
+import com.tmeras.resellmart.user.UserResponse;
 import lombok.*;
 
 import java.util.List;
@@ -34,6 +35,5 @@ public class ProductResponse {
 
     private CategoryResponse category;
 
-    // TODO: Return user response
-    private String sellerName;
+    private UserResponse seller;
 }

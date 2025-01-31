@@ -2,6 +2,7 @@ package com.tmeras.resellmart.product;
 
 import com.tmeras.resellmart.category.CategoryMapper;
 import com.tmeras.resellmart.file.FileUtils;
+import com.tmeras.resellmart.user.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.util.List;
 public class ProductMapper {
 
     private final CategoryMapper categoryMapper;
+    private final UserMapper userMapper;
 
     public Product toProduct(ProductRequest productRequest) {
         return Product.builder()
@@ -44,7 +46,7 @@ public class ProductMapper {
                 .available(product.isAvailable())
                 .productImages(productImageResponses)
                 .category(categoryMapper.toCategoryResponse(product.getCategory()))
-                .sellerName(product.getSeller().getRealName())
+                .seller(userMapper.toUserResponse(product.getSeller()))
                 .build();
     }
 
