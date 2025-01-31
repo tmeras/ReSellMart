@@ -11,7 +11,6 @@ public class UserMapper {
     public User toUser(UserRequest userRequest) {
         return User.builder()
                 .name(userRequest.getName())
-                .email(userRequest.getEmail())
                 .homeCountry(userRequest.getHomeCountry())
                 .mfaEnabled(userRequest.isMfaEnabled())
                 .build();
@@ -25,6 +24,7 @@ public class UserMapper {
                 .name(user.getRealName())
                 .email(user.getEmail())
                 .homeCountry(user.getHomeCountry())
+                .mfaEnabled(user.isMfaEnabled())
                 .profileImage(profileImage)
                 .roles(user.getRoles())
                 .build();

@@ -15,10 +15,6 @@ public class UserRequest {
     @NotBlank(message = "Name should not be empty")
     private String name;
 
-    @Email(message = "Email is not in a valid format")
-    @NotBlank
-    private String email;
-
     @NotNull(message = "Home country should not be empty")
     private String homeCountry;
 

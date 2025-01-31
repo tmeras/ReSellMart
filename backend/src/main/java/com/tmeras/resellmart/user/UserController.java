@@ -2,10 +2,15 @@ package com.tmeras.resellmart.user;
 
 import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/users")
@@ -31,5 +36,23 @@ public class UserController {
         return new ResponseEntity<>(foundUsers, HttpStatus.OK);
     }
 
+    @PutMapping("/{user-id}")
+    public ResponseEntity<UserResponse> update(
+            @Valid @RequestBody UserRequest userRequest,
+            @PathVariable(name = "user-id") Integer userId,
+            Authentication authentication
+    ) {
+        UserResponse updatedUser = userService.update(userRequest, userId, authentication);
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+    }
 
+    @PutMapping("/{user-id}/image")
+    public ResponseEntity<?> uploadUserImage(
+            @PathVariable(name = "user-id") Integer userId,
+            @RequestPart("image") MultipartFile image,
+            Authentication authentication
+    ) throws IOException {
+        userService.uploadUserImage(image, userId, authentication);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

@@ -36,7 +36,7 @@ public class ProductService {
         productRequest.setId(null);
         User currentUser = (User) authentication.getPrincipal();
         Category category = categoryRepository.findById(productRequest.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("No category found with ID " + productRequest.getCategoryId()));
+                .orElseThrow(() -> new ResourceNotFoundException("No category found with ID: " + productRequest.getCategoryId()));
 
         if (productRequest.getPrice() < productRequest.getDiscountedPrice())
             throw new APIException("Discounted price cannot be higher than regular price");
@@ -52,7 +52,7 @@ public class ProductService {
     public ProductResponse findById(Integer productId) {
         return productRepository.findById(productId)
                 .map(productMapper::toProductResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID " + productId));
+                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
     }
 
     @PreAuthorize("hasRole('ADMIN')") //Only admins should be able to view both available and unavailable products
@@ -172,9 +172,9 @@ public class ProductService {
     public ProductResponse update(ProductRequest productRequest, Integer productId, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
         Category category = categoryRepository.findById(productRequest.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("No category found with ID " + productRequest.getCategoryId()));
+                .orElseThrow(() -> new ResourceNotFoundException("No category found with ID: " + productRequest.getCategoryId()));
         Product existingproduct = productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID " + productId));
+                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
 
         if (!Objects.equals(existingproduct.getSeller().getId(), currentUser.getId()))
             throw new OperationNotPermittedException("You do not have permission to update this product");
@@ -195,7 +195,7 @@ public class ProductService {
     public void uploadProductImages(List<MultipartFile> images, Integer productId, Authentication authentication) throws IOException {
         User currentUser = (User) authentication.getPrincipal();
         Product existingproduct = productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID " + productId));
+                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
 
         if (!Objects.equals(existingproduct.getSeller().getId(), currentUser.getId()))
             throw new OperationNotPermittedException("You do not have permission to upload images for this product");
@@ -206,7 +206,6 @@ public class ProductService {
         for (MultipartFile image : images) {
             String fileName = image.getOriginalFilename();
             String fileExtension = fileService.getFileExtension(fileName);
-
             Set<String> validImageExtensions = Set.of("jpg", "jpeg", "png", "gif", "bmp", "tiff");
             if (!validImageExtensions.contains(fileExtension))
                 throw new APIException("Only images can be uploaded");

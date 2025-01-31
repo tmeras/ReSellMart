@@ -1,5 +1,6 @@
 package com.tmeras.resellmart.user;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.tmeras.resellmart.role.Role;
 import lombok.*;
 
@@ -10,6 +11,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserResponse {
 
     private String name;
@@ -23,4 +25,6 @@ public class UserResponse {
     private byte[] profileImage;
 
     private Set<Role> roles;
+
+    private String qrImageUri;
 }
