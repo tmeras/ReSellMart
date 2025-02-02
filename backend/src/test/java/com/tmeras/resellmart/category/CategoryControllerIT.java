@@ -114,6 +114,16 @@ class CategoryControllerIT {
     }
 
     @Test
+    public void shouldNotCreateCategoryWhenInvalidCategory() {
+        CategoryRequest categoryRequest = CategoryRequest.builder().build();
+
+        ResponseEntity<CategoryResponse> response =
+                restTemplate.exchange("/api/categories", HttpMethod.POST, new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
     public void shouldFindAllCategories() {
         ResponseEntity<PageResponse<CategoryResponse>> response =
                 restTemplate.exchange("/api/categories", HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
