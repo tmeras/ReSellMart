@@ -1,7 +1,7 @@
 services:
   db:
     container_name: mysql_resellmart
-    image: mysql
+    image: mysql:9.2.0
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: resellmart_db
