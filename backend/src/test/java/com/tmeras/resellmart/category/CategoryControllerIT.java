@@ -165,4 +165,36 @@ class CategoryControllerIT {
         assertThat(response.getBody().size()).isEqualTo(1);
         assertThat(response.getBody().get(0).getName()).isEqualTo(testParentCategory.getName());
     }
+
+    @Test
+    public void shouldUpdateCategoryWhenValidCategoryId() {
+        CategoryRequest categoryRequest = new CategoryRequest(1, "Updated category", null);
+
+        ResponseEntity<CategoryResponse> response =
+                restTemplate.exchange("/api/categories/" + testParentCategory.getId(), HttpMethod.PUT, new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getId()).isEqualTo(testParentCategory.getId());
+        assertThat(response.getBody().getName()).isEqualTo(categoryRequest.getName());
+        assertThat(response.getBody().getParentId()).isNull();
+    }
+
+    @Test
+    public void shouldNotUpdateCategoryWhenInvalidCategoryId() {
+        CategoryRequest categoryRequest = new CategoryRequest(1, "Updated category", null);
+
+        ResponseEntity<CategoryResponse> response =
+                restTemplate.exchange("/api/categories/99", HttpMethod.PUT, new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    public void shouldDeleteCategory() {
+        ResponseEntity<CategoryResponse> response =
+                restTemplate.exchange("/api/categories/" + testChildCategory.getId(), HttpMethod.DELETE, new HttpEntity<>(headers), CategoryResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    }
 }
