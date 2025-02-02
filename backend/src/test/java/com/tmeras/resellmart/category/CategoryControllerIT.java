@@ -107,6 +107,35 @@ class CategoryControllerIT {
     }
 
     @Test
+    public void shouldNotCreateCategoryWhenDuplicateCategoryName() {
+        CategoryRequest categoryRequest = CategoryRequest.builder().name("Test category A").build();
+
+        ResponseEntity<CategoryResponse> response =
+                restTemplate.exchange("/api/categories", HttpMethod.POST, new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+    }
+
+    @Test
+    public void shouldNotCreateCategoryWhenInvalidParentId() {
+        CategoryRequest categoryRequest = CategoryRequest.builder().name("New category").parentId(99).build();
+
+        ResponseEntity<CategoryResponse> response =
+                restTemplate.exchange("/api/categories", HttpMethod.POST, new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    public void shouldNotCreateCategoryWhenInvalidParent() {
+        CategoryRequest categoryRequest = CategoryRequest.builder().name("New category").parentId(testChildCategory.getId()).build();
+
+        ResponseEntity<CategoryResponse> response =
+                restTemplate.exchange("/api/categories", HttpMethod.POST, new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);    }
+
+    @Test
     public void shouldNotCreateCategoryWhenInvalidCategory() {
         CategoryRequest categoryRequest = CategoryRequest.builder().build();
 
