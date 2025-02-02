@@ -24,7 +24,7 @@ public class MainApplication {
 		SpringApplication.run(MainApplication.class, args);
 	}
 
-/*	// TODO: Disable during testing
+	/*// TODO: Disable during testing
 	@Bean
 	public CommandLineRunner runner(
 			RoleRepository roleRepository,
@@ -65,7 +65,8 @@ public class MainApplication {
 								.enabled(true)
 								.password(passwordEncoder.encode("Bacon12!"))
 								.build()
-				);				categoryRepository.save(
+				);
+				categoryRepository.save(
 						Category.builder()
 								.name("First category")
 								.build()

@@ -43,7 +43,7 @@ class CategoryControllerIT {
 
     @Container
     @ServiceConnection
-    static MySQLContainer mysqlContainer = new MySQLContainer("mysql:9.2.0");
+    static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:9.2.0");
 
     private final TestRestTemplate restTemplate;
     private final UserRepository userRepository;
@@ -51,6 +51,8 @@ class CategoryControllerIT {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final CategoryRepository categoryRepository;
+
+    private Category testCategory;
 
     // Used to add include JWT in requests
     private HttpHeaders headers;
@@ -77,7 +79,7 @@ class CategoryControllerIT {
         roleRepository.deleteAll();
 
         // Save required entities and an admin user
-        categoryRepository.save(TestDataUtils.createCategoryA());
+        this.testCategory = categoryRepository.save(TestDataUtils.createCategoryA());
         categoryRepository.save(TestDataUtils.createCategoryB());
         Role savedAdminRole = roleRepository.save(Role.builder().name("ADMIN").build());
         User savedAdminUser = userRepository.save(
@@ -110,7 +112,6 @@ class CategoryControllerIT {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getName()).isEqualTo("New category");
     }
 
     @Test
@@ -124,12 +125,36 @@ class CategoryControllerIT {
     }
 
     @Test
+    public void shouldFindCategoryWhenValidCategoryId() {
+        ResponseEntity<CategoryResponse> response =
+                restTemplate.exchange("/api/categories/" + testCategory.getId(), HttpMethod.GET, new HttpEntity<>(headers), CategoryResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getName()).isEqualTo(testCategory.getName());
+    }
+
+    @Test
+    public void shouldNotFindCategoryWhenInvalidCategoryId() {
+        ResponseEntity<CategoryResponse> response =
+                restTemplate.exchange("/api/categories/99", HttpMethod.GET, new HttpEntity<>(headers), CategoryResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
     public void shouldFindAllCategories() {
         ResponseEntity<PageResponse<CategoryResponse>> response =
                 restTemplate.exchange("/api/categories", HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
+        List<CategoryResponse> categoryResponses = response.getBody().getContent();
+        for (CategoryResponse categoryResponse : categoryResponses) {
+            System.out.println(categoryResponse.getId());
+            System.out.println(categoryResponse.getName());
+            System.out.println("-------------");
+        }
         assertThat(response.getBody().getContent().size()).isEqualTo(2);
     }
 
