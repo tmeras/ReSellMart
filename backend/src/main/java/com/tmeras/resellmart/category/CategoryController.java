@@ -45,7 +45,7 @@ public class CategoryController {
         return new ResponseEntity<>(foundCategories, HttpStatus.OK);
     }
 
-    @GetMapping("/parent/{parent-id}")
+    @GetMapping("/parents/{parent-id}")
     public ResponseEntity<PageResponse<CategoryResponse>> findAllByParentId(
             @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,

@@ -7,25 +7,15 @@ import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.token.JwtService;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -35,7 +25,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -52,7 +41,8 @@ class CategoryControllerIT {
     private final JwtService jwtService;
     private final CategoryRepository categoryRepository;
 
-    private Category testCategory;
+    private Category testParentCategory;
+    private Category testChildCategory;
 
     // Used to add include JWT in requests
     private HttpHeaders headers;
@@ -79,8 +69,10 @@ class CategoryControllerIT {
         roleRepository.deleteAll();
 
         // Save required entities and an admin user
-        this.testCategory = categoryRepository.save(TestDataUtils.createCategoryA());
-        categoryRepository.save(TestDataUtils.createCategoryB());
+        this.testParentCategory = categoryRepository.save(TestDataUtils.createCategoryA());
+        this.testChildCategory = TestDataUtils.createCategoryB();
+        this.testChildCategory.setParentCategory(testParentCategory);
+        categoryRepository.save(testChildCategory);
         Role savedAdminRole = roleRepository.save(Role.builder().name("ADMIN").build());
         User savedAdminUser = userRepository.save(
                 User.builder()
@@ -93,8 +85,8 @@ class CategoryControllerIT {
 
         // Generate test JWT with admin user details to include in each authenticated request
         String testJwt = jwtService.generateAccessToken(new HashMap<>(), savedAdminUser);
-        headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + testJwt);
+        this.headers = new HttpHeaders();
+        this.headers.set("Authorization", "Bearer " + testJwt);
     }
 
     @Test
@@ -127,11 +119,11 @@ class CategoryControllerIT {
     @Test
     public void shouldFindCategoryWhenValidCategoryId() {
         ResponseEntity<CategoryResponse> response =
-                restTemplate.exchange("/api/categories/" + testCategory.getId(), HttpMethod.GET, new HttpEntity<>(headers), CategoryResponse.class);
+                restTemplate.exchange("/api/categories/" + testParentCategory.getId(), HttpMethod.GET, new HttpEntity<>(headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getName()).isEqualTo(testCategory.getName());
+        assertThat(response.getBody().getName()).isEqualTo(testParentCategory.getName());
     }
 
     @Test
@@ -149,15 +141,28 @@ class CategoryControllerIT {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        List<CategoryResponse> categoryResponses = response.getBody().getContent();
-        for (CategoryResponse categoryResponse : categoryResponses) {
-            System.out.println(categoryResponse.getId());
-            System.out.println(categoryResponse.getName());
-            System.out.println("-------------");
-        }
         assertThat(response.getBody().getContent().size()).isEqualTo(2);
     }
 
+    @Test
+    public void shouldFindAllCategoriesByParentId() {
+        ResponseEntity<PageResponse<CategoryResponse>> response =
+                restTemplate.exchange("/api/categories/parents/" + testParentCategory.getId(), HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
 
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getContent().size()).isEqualTo(1);
+        assertThat(response.getBody().getContent().get(0).getName()).isEqualTo(testChildCategory.getName());
+    }
 
+    @Test
+    public void shouldFindAllParentCategories() {
+        ResponseEntity<List<CategoryResponse>> response =
+                restTemplate.exchange("/api/categories/parents", HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().size()).isEqualTo(1);
+        assertThat(response.getBody().get(0).getName()).isEqualTo(testParentCategory.getName());
+    }
 }
