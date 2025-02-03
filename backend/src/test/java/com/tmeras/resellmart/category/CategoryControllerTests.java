@@ -23,10 +23,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(
@@ -165,5 +164,27 @@ public class CategoryControllerTests {
         assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(categoryResponses));
     }
 
+    @Test
+    public void shouldUpdateCategory() throws Exception {
+        parentCategoryRequest.setName("Updated category name");
+        parentCategoryResponse.setName("Updated category name");
 
+        when(categoryService.update(any(CategoryRequest.class), eq(parentCategoryRequest.getId()))).thenReturn(parentCategoryResponse);
+
+        MvcResult mvcResult = mockMvc.perform(put("/api/categories/" + parentCategoryRequest.getId())
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(parentCategoryRequest))
+        ).andExpect(status().isOk()).andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(parentCategoryResponse));
+    }
+
+    @Test
+    public void shouldDeleteCategory() throws Exception {
+        mockMvc.perform(delete("/api/categories/" + parentCategoryRequest.getId()))
+                .andExpect(status().isNoContent());
+
+        verify(categoryService, times(1)).delete(parentCategoryRequest.getId());
+    }
 }
