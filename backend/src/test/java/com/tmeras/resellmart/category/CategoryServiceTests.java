@@ -19,7 +19,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CategoryServiceTests {
@@ -165,5 +165,35 @@ public class CategoryServiceTests {
 
         assertThat(categoryResponses.size()).isEqualTo(1);
         assertThat(categoryResponses.get(0)).isEqualTo(categoryResponseA);
+    }
+
+    @Test
+    public void shouldUpdateCategoryWhenValidCategoryId() {
+        categoryRequestA.setName("Updated test category A");
+        categoryResponseA.setName("Updated test category A");
+        Category updatedCategoryA = new Category(1, "Updated test category A", null);
+
+        when(categoryRepository.findById(categoryA.getId())).thenReturn(Optional.of(categoryA));
+        when(categoryRepository.save(categoryA)).thenReturn(updatedCategoryA);
+        when(categoryMapper.toCategoryResponse(updatedCategoryA)).thenReturn(categoryResponseA);
+
+        CategoryResponse categoryResponse = categoryService.update(categoryRequestA, categoryA.getId());
+
+        assertThat(categoryResponse).isEqualTo(categoryResponseA);
+    }
+
+    @Test
+    public void shouldNotUpdateCategoryWhenInvalidCategoryId() {
+        when(categoryRepository.findById(99)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> categoryService.update(categoryRequestA, 99))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    public void shouldDeleteCategory() {
+        categoryService.delete(categoryA.getId());
+
+        verify(categoryRepository, times(1)).deleteById(categoryA.getId());
     }
 }
