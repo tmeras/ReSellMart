@@ -114,16 +114,56 @@ public class CategoryControllerTests {
                 2, 1,
                 true, true
         );
+
         when(categoryService.findAll(
                 AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                 AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR)
         ).thenReturn(pageResponse);
 
-        MvcResult  mvcResult = mockMvc.perform(get("/api/categories"))
+        MvcResult mvcResult = mockMvc.perform(get("/api/categories"))
                 .andExpect(status().isOk())
                 .andReturn();
         String jsonResponse = mvcResult.getResponse().getContentAsString();
 
         assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(pageResponse));
     }
+
+    @Test
+    public void shouldFindAllCategoriesByParentId() throws Exception {
+        PageResponse<CategoryResponse> pageResponse = new PageResponse<>(
+                List.of(childCategoryResponse),
+                0, 5,
+                1, 1,
+                true, true
+        );
+
+        when(categoryService.findAllByParentId(
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR,
+                childCategoryRequest.getParentId())
+        ).thenReturn(pageResponse);
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/categories/parents/" + childCategoryRequest.getParentId()))
+                .andExpect(status().isOk())
+                .andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(pageResponse));
+    }
+
+    @Test
+    public void shouldFindAllParentCategories() throws Exception {
+        List<CategoryResponse> categoryResponses = List.of(parentCategoryResponse);
+
+        when(categoryService.findAllParents()).thenReturn(categoryResponses);
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/categories/parents"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(categoryResponses));
+    }
+
+
 }
