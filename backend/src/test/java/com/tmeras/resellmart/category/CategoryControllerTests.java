@@ -22,8 +22,11 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(
@@ -66,6 +69,29 @@ public class CategoryControllerTests {
 
         // Set the authentication into SecurityContext
         SecurityContextHolder.getContext().setAuthentication(auth);*/
+    }
+
+    @Test
+    public void shouldCreateCategoryWhenValidCategory() throws Exception {
+        when(categoryService.save(any(CategoryRequest.class))).thenReturn(parentCategoryResponse);
+
+        MvcResult mvcResult = mockMvc.perform(post("/api/categories")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(parentCategoryRequest))
+        ).andExpect(status().isCreated()).andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(parentCategoryResponse));
+    }
+
+    @Test
+    public void shouldNotCreateCategoryWhenInvalidCategory() throws Exception {
+        parentCategoryRequest.setName(null);
+
+        mockMvc.perform(post("/api/categories")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(parentCategoryRequest))
+        ).andExpect(status().isBadRequest());
     }
 
     @Test
