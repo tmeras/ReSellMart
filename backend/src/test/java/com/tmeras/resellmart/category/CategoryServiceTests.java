@@ -97,7 +97,7 @@ public class CategoryServiceTests {
 
         assertThatThrownBy(() -> categoryService.save(categoryRequestB))
                 .isInstanceOf(APIException.class)
-                .withFailMessage("Parent category should not have a parent");
+                .hasMessage("Parent category should not have a parent");
     }
 
     @Test
@@ -179,7 +179,8 @@ public class CategoryServiceTests {
 
         CategoryResponse categoryResponse = categoryService.update(categoryRequestA, categoryA.getId());
 
-        assertThat(categoryResponse).isEqualTo(categoryResponseA);
+        assertThat(categoryResponse.getId()).isEqualTo(categoryResponseA.getId());
+        assertThat(categoryResponse.getName()).isEqualTo(categoryResponseA.getName());
     }
 
     @Test

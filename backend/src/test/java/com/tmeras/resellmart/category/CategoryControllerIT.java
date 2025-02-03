@@ -32,7 +32,7 @@ class CategoryControllerIT {
 
     @Container
     @ServiceConnection
-    static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:9.2.0");
+    private static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:9.2.0");
 
     private final TestRestTemplate restTemplate;
     private final UserRepository userRepository;
@@ -41,8 +41,8 @@ class CategoryControllerIT {
     private final JwtService jwtService;
     private final CategoryRepository categoryRepository;
 
-    private Category testParentCategory;
-    private Category testChildCategory;
+    private Category parentCategory;
+    private Category childCategory;
 
     // Used to add include JWT in requests
     private HttpHeaders headers;
@@ -63,38 +63,32 @@ class CategoryControllerIT {
 
     @BeforeEach
     public void setUp() {
-        // Empty database tables
+        // Empty relevant database tables
         categoryRepository.deleteAll();
         userRepository.deleteAll();
         roleRepository.deleteAll();
 
         // Save required entities and an admin user (need to set IDs to null before inserting to avoid
-        // errors related to MySQL's AUTO_INCREMENT counter not resetting between test)
-        testParentCategory = TestDataUtils.createCategoryA();
-        testParentCategory.setId(null);
-        testParentCategory = categoryRepository.save(testParentCategory);
-
-        testChildCategory = TestDataUtils.createCategoryB();
-        testChildCategory.setId(null);
-        testChildCategory.setParentCategory(testParentCategory);
-        testChildCategory = categoryRepository.save(testChildCategory);
-
+        // errors related to MySQL's AUTO_INCREMENT counter not resetting between tests)
         Role adminRole = roleRepository.save(Role.builder().name("ADMIN").build());
         User user = TestDataUtils.createUserA(Set.of(adminRole));
         user.setId(null);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user = userRepository.save(user);
 
+        parentCategory = TestDataUtils.createCategoryA();
+        parentCategory.setId(null);
+        parentCategory = categoryRepository.save(parentCategory);
+
+        childCategory = TestDataUtils.createCategoryB();
+        childCategory.setId(null);
+        childCategory.setParentCategory(parentCategory);
+        childCategory = categoryRepository.save(childCategory);
+
         // Generate test JWT with admin user details to include in each authenticated request
         String testJwt = jwtService.generateAccessToken(new HashMap<>(), user);
         headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + testJwt);
-    }
-
-    @Test
-    public void containerRunning() {
-        assertThat(mysqlContainer.isCreated()).isTrue();
-        assertThat(mysqlContainer.isRunning()).isTrue();
     }
 
     @Test
@@ -130,7 +124,7 @@ class CategoryControllerIT {
 
     @Test
     public void shouldNotCreateCategoryWhenInvalidParent() {
-        CategoryRequest categoryRequest = CategoryRequest.builder().name("New category").parentId(testChildCategory.getId()).build();
+        CategoryRequest categoryRequest = CategoryRequest.builder().name("New category").parentId(childCategory.getId()).build();
 
         ResponseEntity<CategoryResponse> response =
                 restTemplate.exchange("/api/categories", HttpMethod.POST, new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
@@ -150,11 +144,11 @@ class CategoryControllerIT {
     @Test
     public void shouldFindCategoryWhenValidCategoryId() {
         ResponseEntity<CategoryResponse> response =
-                restTemplate.exchange("/api/categories/" + testParentCategory.getId(), HttpMethod.GET, new HttpEntity<>(headers), CategoryResponse.class);
+                restTemplate.exchange("/api/categories/" + parentCategory.getId(), HttpMethod.GET, new HttpEntity<>(headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getName()).isEqualTo(testParentCategory.getName());
+        assertThat(response.getBody().getName()).isEqualTo(parentCategory.getName());
     }
 
     @Test
@@ -178,12 +172,12 @@ class CategoryControllerIT {
     @Test
     public void shouldFindAllCategoriesByParentId() {
         ResponseEntity<PageResponse<CategoryResponse>> response =
-                restTemplate.exchange("/api/categories/parents/" + testParentCategory.getId(), HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
+                restTemplate.exchange("/api/categories/parents/" + parentCategory.getId(), HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getContent().size()).isEqualTo(1);
-        assertThat(response.getBody().getContent().get(0).getName()).isEqualTo(testChildCategory.getName());
+        assertThat(response.getBody().getContent().get(0).getName()).isEqualTo(childCategory.getName());
     }
 
     @Test
@@ -194,7 +188,7 @@ class CategoryControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().size()).isEqualTo(1);
-        assertThat(response.getBody().get(0).getName()).isEqualTo(testParentCategory.getName());
+        assertThat(response.getBody().get(0).getName()).isEqualTo(parentCategory.getName());
     }
 
     @Test
@@ -202,11 +196,11 @@ class CategoryControllerIT {
         CategoryRequest categoryRequest = new CategoryRequest(1, "Updated category", null);
 
         ResponseEntity<CategoryResponse> response =
-                restTemplate.exchange("/api/categories/" + testParentCategory.getId(), HttpMethod.PUT, new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+                restTemplate.exchange("/api/categories/" + parentCategory.getId(), HttpMethod.PUT, new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getId()).isEqualTo(testParentCategory.getId());
+        assertThat(response.getBody().getId()).isEqualTo(parentCategory.getId());
         assertThat(response.getBody().getName()).isEqualTo(categoryRequest.getName());
         assertThat(response.getBody().getParentId()).isNull();
     }
@@ -224,7 +218,7 @@ class CategoryControllerIT {
     @Test
     public void shouldDeleteCategory() {
         ResponseEntity<CategoryResponse> response =
-                restTemplate.exchange("/api/categories/" + testChildCategory.getId(), HttpMethod.DELETE, new HttpEntity<>(headers), CategoryResponse.class);
+                restTemplate.exchange("/api/categories/" + childCategory.getId(), HttpMethod.DELETE, new HttpEntity<>(headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     }
