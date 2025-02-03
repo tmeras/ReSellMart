@@ -2,10 +2,14 @@ package com.tmeras.resellmart.category;
 
 import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
+import com.tmeras.resellmart.user.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,7 +49,7 @@ public class CategoryController {
         return new ResponseEntity<>(foundCategories, HttpStatus.OK);
     }
 
-    @GetMapping("/parent/{parent-id}")
+    @GetMapping("/parents/{parent-id}")
     public ResponseEntity<PageResponse<CategoryResponse>> findAllByParentId(
             @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,

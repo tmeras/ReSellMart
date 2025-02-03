@@ -10,6 +10,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -24,7 +25,7 @@ public class MainApplication {
 	}
 
 	// TODO: Disable during testing
-	@Bean
+/*	@Bean
 	public CommandLineRunner runner(
 			RoleRepository roleRepository,
 			CategoryRepository categoryRepository,
@@ -64,12 +65,13 @@ public class MainApplication {
 								.enabled(true)
 								.password(passwordEncoder.encode("Bacon12!"))
 								.build()
-				);				categoryRepository.save(
+				);
+				categoryRepository.save(
 						Category.builder()
 								.name("First category")
 								.build()
 				);
 			}
 		};
-	}
+	}*/
 }
