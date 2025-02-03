@@ -24,8 +24,8 @@ public class MainApplication {
 		SpringApplication.run(MainApplication.class, args);
 	}
 
-	/*// TODO: Disable during testing
-	@Bean
+	// TODO: Disable during testing
+/*	@Bean
 	public CommandLineRunner runner(
 			RoleRepository roleRepository,
 			CategoryRepository categoryRepository,

@@ -68,25 +68,27 @@ class CategoryControllerIT {
         userRepository.deleteAll();
         roleRepository.deleteAll();
 
-        // Save required entities and an admin user
-        this.testParentCategory = categoryRepository.save(TestDataUtils.createCategoryA());
-        this.testChildCategory = TestDataUtils.createCategoryB();
-        this.testChildCategory.setParentCategory(testParentCategory);
-        categoryRepository.save(testChildCategory);
-        Role savedAdminRole = roleRepository.save(Role.builder().name("ADMIN").build());
-        User savedAdminUser = userRepository.save(
-                User.builder()
-                        .name("Test admin user")
-                        .password(passwordEncoder.encode("password"))
-                        .email("test@test.com")
-                        .roles(Set.of(savedAdminRole))
-                        .build()
-        );
+        // Save required entities and an admin user (need to set IDs to null before inserting to avoid
+        // errors related to MySQL's AUTO_INCREMENT counter not resetting between test)
+        testParentCategory = TestDataUtils.createCategoryA();
+        testParentCategory.setId(null);
+        testParentCategory = categoryRepository.save(testParentCategory);
+
+        testChildCategory = TestDataUtils.createCategoryB();
+        testChildCategory.setId(null);
+        testChildCategory.setParentCategory(testParentCategory);
+        testChildCategory = categoryRepository.save(testChildCategory);
+
+        Role adminRole = roleRepository.save(Role.builder().name("ADMIN").build());
+        User user = TestDataUtils.createUserA(Set.of(adminRole));
+        user.setId(null);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user = userRepository.save(user);
 
         // Generate test JWT with admin user details to include in each authenticated request
-        String testJwt = jwtService.generateAccessToken(new HashMap<>(), savedAdminUser);
-        this.headers = new HttpHeaders();
-        this.headers.set("Authorization", "Bearer " + testJwt);
+        String testJwt = jwtService.generateAccessToken(new HashMap<>(), user);
+        headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + testJwt);
     }
 
     @Test
