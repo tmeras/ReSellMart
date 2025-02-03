@@ -53,6 +53,7 @@ public class CategoryControllerTests {
 
     @BeforeEach
     public void setUp() {
+        // Initialise test objects
         parentCategoryRequest = TestDataUtils.createCategoryRequestA();
         childCategoryRequest = TestDataUtils.createCategoryRequestB();
         childCategoryRequest.setParentId(parentCategoryRequest.getId());
@@ -109,7 +110,7 @@ public class CategoryControllerTests {
     public void shouldFindAllCategories() throws Exception {
         PageResponse<CategoryResponse> pageResponse = new PageResponse<>(
                 List.of(parentCategoryResponse, childCategoryResponse),
-                0, 5,
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                 2, 1,
                 true, true
         );
@@ -131,7 +132,7 @@ public class CategoryControllerTests {
     public void shouldFindAllCategoriesByParentId() throws Exception {
         PageResponse<CategoryResponse> pageResponse = new PageResponse<>(
                 List.of(childCategoryResponse),
-                0, 5,
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                 1, 1,
                 true, true
         );
