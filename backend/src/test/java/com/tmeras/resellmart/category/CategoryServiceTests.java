@@ -1,6 +1,8 @@
 package com.tmeras.resellmart.category;
 
 import com.tmeras.resellmart.TestDataUtils;
+import com.tmeras.resellmart.common.AppConstants;
+import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.APIException;
 import com.tmeras.resellmart.exception.ResourceAlreadyExistsException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
@@ -10,7 +12,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -107,10 +111,59 @@ public class CategoryServiceTests {
     }
 
     @Test
-    public void shouldThrowNotFoundWhenInvalidCategoryId() {
+    public void shouldNotFindCategoryWhenInvalidCategoryId() {
         when(categoryRepository.findById(99)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> categoryService.findById(99))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    public void shouldFindAllCategories() {
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_CATEGORIES_BY).ascending() : Sort.by(AppConstants.SORT_CATEGORIES_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
+        Page<Category> page = new PageImpl<>(List.of(categoryA, categoryB));
+
+        when(categoryRepository.findAll(pageable)).thenReturn(page);
+        when(categoryMapper.toCategoryResponse(categoryA)).thenReturn(categoryResponseA);
+        when(categoryMapper.toCategoryResponse(categoryB)).thenReturn(categoryResponseB);
+
+        PageResponse<CategoryResponse> pageResponse =
+                categoryService.findAll(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR);
+
+        assertThat(pageResponse.getContent().size()).isEqualTo(2);
+        assertThat(pageResponse.getContent().get(0)).isEqualTo(categoryResponseA);
+        assertThat(pageResponse.getContent().get(1)).isEqualTo(categoryResponseB);
+    }
+
+    @Test
+    public void shouldFindAllCategoriesByParentId() {
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_CATEGORIES_BY).ascending() : Sort.by(AppConstants.SORT_CATEGORIES_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
+        Page<Category> page = new PageImpl<>(List.of(categoryB));
+
+        when(categoryRepository.findAllByParentId(pageable, categoryB.getParentCategory().getId())).thenReturn(page);
+        when(categoryMapper.toCategoryResponse(categoryB)).thenReturn(categoryResponseB);
+
+        PageResponse<CategoryResponse> pageResponse =
+                categoryService.findAllByParentId(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR, categoryB.getParentCategory().getId());
+
+        assertThat(pageResponse.getContent().size()).isEqualTo(1);
+        assertThat(pageResponse.getContent().get(0)).isEqualTo(categoryResponseB);
+    }
+
+    @Test
+    public void shouldFindAllParentCategories() {
+        when(categoryRepository.findAllParents()).thenReturn(List.of(categoryA));
+        when(categoryMapper.toCategoryResponse(categoryA)).thenReturn(categoryResponseA);
+
+        List<CategoryResponse> categoryResponses = categoryService.findAllParents();
+
+        assertThat(categoryResponses.size()).isEqualTo(1);
+        assertThat(categoryResponses.get(0)).isEqualTo(categoryResponseA);
     }
 }
