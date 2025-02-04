@@ -44,6 +44,8 @@ class CategoryControllerIT {
     private Category parentCategory;
     private Category childCategory;
 
+    // TODO: Add category request fields
+
     // Used to add include JWT in requests
     private HttpHeaders headers;
 
@@ -64,9 +66,9 @@ class CategoryControllerIT {
     @BeforeEach
     public void setUp() {
         // Empty relevant database tables
-        categoryRepository.deleteAll();
         userRepository.deleteAll();
         roleRepository.deleteAll();
+        categoryRepository.deleteAll();
 
         // Save required entities and an admin user (need to set IDs to null before inserting to avoid
         // errors related to MySQL's AUTO_INCREMENT counter not resetting between tests)
@@ -136,7 +138,8 @@ class CategoryControllerIT {
         CategoryRequest categoryRequest = CategoryRequest.builder().build();
 
         ResponseEntity<CategoryResponse> response =
-                restTemplate.exchange("/api/categories", HttpMethod.POST, new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+                restTemplate.exchange("/api/categories", HttpMethod.POST,
+                        new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
@@ -144,7 +147,8 @@ class CategoryControllerIT {
     @Test
     public void shouldFindCategoryWhenValidCategoryId() {
         ResponseEntity<CategoryResponse> response =
-                restTemplate.exchange("/api/categories/" + parentCategory.getId(), HttpMethod.GET, new HttpEntity<>(headers), CategoryResponse.class);
+                restTemplate.exchange("/api/categories/" + parentCategory.getId(),
+                        HttpMethod.GET, new HttpEntity<>(headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -154,7 +158,8 @@ class CategoryControllerIT {
     @Test
     public void shouldNotFindCategoryWhenInvalidCategoryId() {
         ResponseEntity<CategoryResponse> response =
-                restTemplate.exchange("/api/categories/99", HttpMethod.GET, new HttpEntity<>(headers), CategoryResponse.class);
+                restTemplate.exchange("/api/categories/99", HttpMethod.GET,
+                        new HttpEntity<>(headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -162,7 +167,8 @@ class CategoryControllerIT {
     @Test
     public void shouldFindAllCategories() {
         ResponseEntity<PageResponse<CategoryResponse>> response =
-                restTemplate.exchange("/api/categories", HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
+                restTemplate.exchange("/api/categories", HttpMethod.GET,
+                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -172,7 +178,8 @@ class CategoryControllerIT {
     @Test
     public void shouldFindAllCategoriesByParentId() {
         ResponseEntity<PageResponse<CategoryResponse>> response =
-                restTemplate.exchange("/api/categories/parents/" + parentCategory.getId(), HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
+                restTemplate.exchange("/api/categories/parents/" + parentCategory.getId(), HttpMethod.GET,
+                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -183,7 +190,8 @@ class CategoryControllerIT {
     @Test
     public void shouldFindAllParentCategories() {
         ResponseEntity<List<CategoryResponse>> response =
-                restTemplate.exchange("/api/categories/parents", HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
+                restTemplate.exchange("/api/categories/parents", HttpMethod.GET,
+                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -196,7 +204,8 @@ class CategoryControllerIT {
         CategoryRequest categoryRequest = new CategoryRequest(1, "Updated category", null);
 
         ResponseEntity<CategoryResponse> response =
-                restTemplate.exchange("/api/categories/" + parentCategory.getId(), HttpMethod.PUT, new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+                restTemplate.exchange("/api/categories/" + parentCategory.getId(), HttpMethod.PUT,
+                        new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -210,7 +219,8 @@ class CategoryControllerIT {
         CategoryRequest categoryRequest = new CategoryRequest(1, "Updated category", null);
 
         ResponseEntity<CategoryResponse> response =
-                restTemplate.exchange("/api/categories/99", HttpMethod.PUT, new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+                restTemplate.exchange("/api/categories/99", HttpMethod.PUT,
+                        new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -218,7 +228,8 @@ class CategoryControllerIT {
     @Test
     public void shouldDeleteCategory() {
         ResponseEntity<CategoryResponse> response =
-                restTemplate.exchange("/api/categories/" + childCategory.getId(), HttpMethod.DELETE, new HttpEntity<>(headers), CategoryResponse.class);
+                restTemplate.exchange("/api/categories/" + childCategory.getId(), HttpMethod.DELETE,
+                        new HttpEntity<>(headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     }
