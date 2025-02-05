@@ -4,6 +4,7 @@ import com.tmeras.resellmart.TestDataUtils;
 import com.tmeras.resellmart.category.Category;
 import com.tmeras.resellmart.category.CategoryRepository;
 import com.tmeras.resellmart.common.PageResponse;
+import com.tmeras.resellmart.exception.ExceptionResponse;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.token.JwtService;
@@ -256,6 +257,65 @@ public class ProductControllerIT {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getContent().size()).isEqualTo(1);
         assertThat(response.getBody().getContent().get(0).getName()).isEqualTo(productB.getName());
+    }
+
+    @Test
+    public void shouldUpdateProductWhenValidProduct() {
+        productRequestA.setName("Updated product A");
+        productRequestA.setDescription("Updated description A");
+
+        ResponseEntity<ProductResponse> response =
+                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.PUT,
+                        new HttpEntity<>(productRequestA, headers), ProductResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getName()).isEqualTo(productRequestA.getName());
+        assertThat(response.getBody().getDescription()).isEqualTo(productRequestA.getDescription());
+    }
+
+    @Test
+    public void shouldNotUpdateProductWhenInvalidCategoryId() {
+        productRequestA.setCategoryId(99);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.PUT,
+                        new HttpEntity<>(productRequestA, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("No category found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotUpdateProductWhenInvalidProductId() {
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/products/99", HttpMethod.PUT,
+                        new HttpEntity<>(productRequestA, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("No product found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotUpdateProductWhenSellerIsNotLoggedIn() {
+        ResponseEntity<ProductResponse> response =
+                restTemplate.exchange("/api/products/" + productB.getId(), HttpMethod.PUT,
+                        new HttpEntity<>(productRequestA, headers), ProductResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    public void shouldNotUpdateProductWhenInvalidPrice() {
+        productRequestA.setPrice(productRequestA.getDiscountedPrice() - 1);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.PUT,
+                        new HttpEntity<>(productRequestA, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
 

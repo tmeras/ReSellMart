@@ -180,6 +180,9 @@ public class ProductService {
         if (!Objects.equals(existingproduct.getSeller().getId(), currentUser.getId()))
             throw new OperationNotPermittedException("You do not have permission to update this product");
 
+        if (productRequest.getPrice() < productRequest.getDiscountedPrice())
+            throw new APIException("Discounted price cannot be higher than regular price");
+
         existingproduct.setName(productRequest.getName());
         existingproduct.setDescription(productRequest.getDescription());
         existingproduct.setPrice(productRequest.getPrice());
