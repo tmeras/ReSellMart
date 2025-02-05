@@ -3,6 +3,7 @@ package com.tmeras.resellmart.product;
 import com.tmeras.resellmart.TestDataUtils;
 import com.tmeras.resellmart.category.Category;
 import com.tmeras.resellmart.category.CategoryRepository;
+import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.token.JwtService;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testcontainers.containers.MySQLContainer;
@@ -90,6 +92,7 @@ public class ProductControllerIT {
         category.setId(null);
         category = categoryRepository.save(category);
 
+        // Each product should have a different seller to test the different findAll endpoints
         productA = TestDataUtils.createProductA(category, userA);
         productA.setId(null);
         productA = productRepository.save(productA);
@@ -114,7 +117,8 @@ public class ProductControllerIT {
                         true, productRequestA.getCategoryId());
 
         ResponseEntity<ProductResponse> response =
-                restTemplate.exchange("/api/products", HttpMethod.POST, new HttpEntity<>(productRequest, headers), ProductResponse.class);
+                restTemplate.exchange("/api/products", HttpMethod.POST,
+                        new HttpEntity<>(productRequest, headers), ProductResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isNotNull();
@@ -135,7 +139,8 @@ public class ProductControllerIT {
                         true, productRequestA.getCategoryId());
 
         ResponseEntity<ProductResponse> response =
-                restTemplate.exchange("/api/products", HttpMethod.POST, new HttpEntity<>(productRequest, headers), ProductResponse.class);
+                restTemplate.exchange("/api/products", HttpMethod.POST,
+                        new HttpEntity<>(productRequest, headers), ProductResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
@@ -148,7 +153,8 @@ public class ProductControllerIT {
                         true, 99);
 
         ResponseEntity<ProductResponse> response =
-                restTemplate.exchange("/api/products", HttpMethod.POST, new HttpEntity<>(productRequest, headers), ProductResponse.class);
+                restTemplate.exchange("/api/products", HttpMethod.POST,
+                        new HttpEntity<>(productRequest, headers), ProductResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -158,10 +164,11 @@ public class ProductControllerIT {
         ProductRequest productRequest =
                 new ProductRequest(3, "Test Product C", "Description C",
                         20.0, 25.0,  ProductCondition.FAIR, 1,
-                        true, productRequestA.getCategoryId());
+                        true, productA.getCategory().getId());
 
         ResponseEntity<ProductResponse> response =
-                restTemplate.exchange("/api/products", HttpMethod.POST, new HttpEntity<>(productRequest, headers), ProductResponse.class);
+                restTemplate.exchange("/api/products", HttpMethod.POST,
+                        new HttpEntity<>(productRequest, headers), ProductResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
@@ -190,6 +197,65 @@ public class ProductControllerIT {
                         new HttpEntity<>(headers), ProductResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    public void shouldFindAllProducts() {
+        ResponseEntity<PageResponse<ProductResponse>> response =
+                restTemplate.exchange("/api/products", HttpMethod.GET,
+                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getContent().size()).isEqualTo(2);
+    }
+
+    @Test
+    public void shouldFindAllProductsExceptSeller() {
+        ResponseEntity<PageResponse<ProductResponse>> response =
+                restTemplate.exchange("/api/products/others", HttpMethod.GET,
+                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getContent().size()).isEqualTo(1);
+        assertThat(response.getBody().getContent().get(0).getName()).isEqualTo(productB.getName());
+    }
+
+    @Test
+    public void shouldFindAllProductsBySellerId() {
+        ResponseEntity<PageResponse<ProductResponse>> response =
+                restTemplate.exchange("/api/products/user/" + productA.getSeller().getId(), HttpMethod.GET,
+                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getContent().size()).isEqualTo(1);
+        assertThat(response.getBody().getContent().get(0).getName()).isEqualTo(productA.getName());
+    }
+
+    @Test
+    public void shouldFindAllProductsByCategoryId() {
+        ResponseEntity<PageResponse<ProductResponse>> response =
+                restTemplate.exchange("/api/products/category/" + productA.getCategory().getId(), HttpMethod.GET,
+                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getContent().size()).isEqualTo(1);
+        assertThat(response.getBody().getContent().get(0).getName()).isEqualTo(productB.getName());
+    }
+
+    @Test
+    public void shouldFindAllProductsByKeyword() {
+        ResponseEntity<PageResponse<ProductResponse>> response =
+                restTemplate.exchange("/api/products/search?keyword=Test Product", HttpMethod.GET,
+                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getContent().size()).isEqualTo(1);
+        assertThat(response.getBody().getContent().get(0).getName()).isEqualTo(productB.getName());
     }
 
 

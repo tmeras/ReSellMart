@@ -98,7 +98,8 @@ class CategoryControllerIT {
         CategoryRequest categoryRequest = CategoryRequest.builder().name("New category").build();
 
         ResponseEntity<CategoryResponse> response =
-                restTemplate.exchange("/api/categories", HttpMethod.POST, new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+                restTemplate.exchange("/api/categories", HttpMethod.POST,
+                        new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isNotNull();
@@ -120,7 +121,8 @@ class CategoryControllerIT {
         CategoryRequest categoryRequest = CategoryRequest.builder().name("Test category A").build();
 
         ResponseEntity<CategoryResponse> response =
-                restTemplate.exchange("/api/categories", HttpMethod.POST, new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+                restTemplate.exchange("/api/categories", HttpMethod.POST,
+                        new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
     }
@@ -130,7 +132,8 @@ class CategoryControllerIT {
         CategoryRequest categoryRequest = CategoryRequest.builder().name("New category").parentId(99).build();
 
         ResponseEntity<CategoryResponse> response =
-                restTemplate.exchange("/api/categories", HttpMethod.POST, new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+                restTemplate.exchange("/api/categories", HttpMethod.POST,
+                        new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -140,15 +143,16 @@ class CategoryControllerIT {
         CategoryRequest categoryRequest = CategoryRequest.builder().name("New category").parentId(childCategory.getId()).build();
 
         ResponseEntity<CategoryResponse> response =
-                restTemplate.exchange("/api/categories", HttpMethod.POST, new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+                restTemplate.exchange("/api/categories", HttpMethod.POST,
+                        new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);    }
 
     @Test
     public void shouldFindCategoryWhenValidCategoryId() {
         ResponseEntity<CategoryResponse> response =
-                restTemplate.exchange("/api/categories/" + parentCategory.getId(),
-                        HttpMethod.GET, new HttpEntity<>(headers), CategoryResponse.class);
+                restTemplate.exchange("/api/categories/" + parentCategory.getId(), HttpMethod.GET,
+                        new HttpEntity<>(headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();

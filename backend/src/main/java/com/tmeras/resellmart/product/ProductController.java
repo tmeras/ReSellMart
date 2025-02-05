@@ -50,7 +50,7 @@ public class ProductController {
     }
 
     @GetMapping("/others")
-    public ResponseEntity<PageResponse<ProductResponse>> findAllExceptSeller(
+    public ResponseEntity<PageResponse<ProductResponse>> findAllExceptSellerProducts(
             @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_PRODUCTS_BY, required = false) String sortBy,
@@ -59,7 +59,7 @@ public class ProductController {
     ) {
         // Get all products excluding those sold by the logged-in user
         PageResponse<ProductResponse> foundProducts =
-                productService.findAllExceptSeller(pageNumber, pageSize, sortBy, sortDirection, authentication);
+                productService.findAllExceptSellerProducts(pageNumber, pageSize, sortBy, sortDirection, authentication);
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
     }
 

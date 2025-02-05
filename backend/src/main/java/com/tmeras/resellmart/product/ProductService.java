@@ -79,7 +79,7 @@ public class ProductService {
         );
     }
 
-    public PageResponse<ProductResponse> findAllExceptSeller(
+    public PageResponse<ProductResponse> findAllExceptSellerProducts(
             Integer pageNumber, Integer pageSize, String sortBy, String sortDirection, Authentication authentication
     ) {
         User currentUser = (User) authentication.getPrincipal();
