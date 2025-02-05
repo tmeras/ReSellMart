@@ -70,7 +70,7 @@ public class CategoryControllerTests {
     }
 
     @Test
-    public void shouldCreateCategoryWhenValidCategory() throws Exception {
+    public void shouldSaveCategoryWhenValidCategory() throws Exception {
         when(categoryService.save(any(CategoryRequest.class))).thenReturn(parentCategoryResponse);
 
         MvcResult mvcResult = mockMvc.perform(post("/api/categories")
@@ -83,7 +83,7 @@ public class CategoryControllerTests {
     }
 
     @Test
-    public void shouldNotCreateCategoryWhenInvalidCategory() throws Exception {
+    public void shouldNotSaveCategoryWhenInvalidCategory() throws Exception {
         parentCategoryRequest.setName(null);
 
         mockMvc.perform(post("/api/categories")

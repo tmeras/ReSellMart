@@ -3,7 +3,6 @@ package com.tmeras.resellmart.product;
 import com.tmeras.resellmart.TestDataUtils;
 import com.tmeras.resellmart.category.Category;
 import com.tmeras.resellmart.category.CategoryRepository;
-import com.tmeras.resellmart.category.CategoryResponse;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.token.JwtService;
@@ -42,9 +41,10 @@ public class ProductControllerIT {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
 
-    // TODO: Only one product and product request defined globally?
-    private Product product;
-    private ProductRequest productRequest;
+    private Product productA;
+    private ProductRequest productRequestA;
+    private Product productB;
+    private ProductRequest productRequestB;
 
     // Used to add include JWT in requests
     private HttpHeaders headers;
@@ -76,41 +76,111 @@ public class ProductControllerIT {
         // Save required entities and an admin user (need to set IDs to null before inserting to avoid
         // errors related to MySQL's AUTO_INCREMENT counter not resetting between tests)
         Role adminRole = roleRepository.save(Role.builder().name("ADMIN").build());
-        User user = TestDataUtils.createUserA(Set.of(adminRole));
-        user.setId(null);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user = userRepository.save(user);
+        User userA = TestDataUtils.createUserA(Set.of(adminRole));
+        userA.setId(null);
+        userA.setPassword(passwordEncoder.encode(userA.getPassword()));
+        userA = userRepository.save(userA);
+
+        User userB = TestDataUtils.createUserB(Set.of(adminRole));
+        userB.setId(null);
+        userB.setPassword(passwordEncoder.encode(userB.getPassword()));
+        userB = userRepository.save(userB);
 
         Category category = TestDataUtils.createCategoryA();
         category.setId(null);
         category = categoryRepository.save(category);
 
-        product = TestDataUtils.createProductA(category, user);
-        product.setId(null);
-        product = productRepository.save(product);
-        productRequest = TestDataUtils.createProductRequestA(category.getId());
+        productA = TestDataUtils.createProductA(category, userA);
+        productA.setId(null);
+        productA = productRepository.save(productA);
+        productRequestA = TestDataUtils.createProductRequestA(category.getId());
+
+        productB = TestDataUtils.createProductB(category, userB);
+        productB.setId(null);
+        productB = productRepository.save(productB);
+        productRequestB = TestDataUtils.createProductRequestB(category.getId());
 
         // Generate test JWT with admin user details to include in each authenticated request
-        String testJwt = jwtService.generateAccessToken(new HashMap<>(), user);
+        String testJwt = jwtService.generateAccessToken(new HashMap<>(), userA);
         headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + testJwt);
     }
 
     @Test
+    public void shouldSaveProductWhenValidProduct() {
+        ProductRequest productRequest =
+                new ProductRequest(3, "Test Product C", "Description C",
+                        50.0, 25.0,  ProductCondition.FAIR, 1,
+                        true, productRequestA.getCategoryId());
+
+        ResponseEntity<ProductResponse> response =
+                restTemplate.exchange("/api/products", HttpMethod.POST, new HttpEntity<>(productRequest, headers), ProductResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getName()).isEqualTo(productRequest.getName());
+        assertThat(response.getBody().getDescription()).isEqualTo(productRequest.getDescription());
+        assertThat(response.getBody().getPrice()).isEqualTo(productRequest.getPrice());
+        assertThat(response.getBody().getDiscountedPrice()).isEqualTo(productRequest.getDiscountedPrice());
+        assertThat(response.getBody().getProductCondition()).isEqualTo(productRequest.getProductCondition());
+        assertThat(response.getBody().getCategory().getName()).isEqualTo(productA.getCategory().getName());
+        assertThat(response.getBody().getSeller().getEmail()).isEqualTo(productA.getSeller().getEmail());
+    }
+
+    @Test
+    public void shouldNotSaveProductWhenInvalidProduct() {
+        ProductRequest productRequest =
+                new ProductRequest(3, null, "Description C",
+                        50.0, 25.0,  ProductCondition.FAIR, 1,
+                        true, productRequestA.getCategoryId());
+
+        ResponseEntity<ProductResponse> response =
+                restTemplate.exchange("/api/products", HttpMethod.POST, new HttpEntity<>(productRequest, headers), ProductResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void shouldNotSaveProductWhenInvalidCategoryId() {
+        ProductRequest productRequest =
+                new ProductRequest(3, "Test Product C", "Description C",
+                        50.0, 25.0,  ProductCondition.FAIR, 1,
+                        true, 99);
+
+        ResponseEntity<ProductResponse> response =
+                restTemplate.exchange("/api/products", HttpMethod.POST, new HttpEntity<>(productRequest, headers), ProductResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    public void shouldNotSaveProductWhenInvalidPrice() {
+        ProductRequest productRequest =
+                new ProductRequest(3, "Test Product C", "Description C",
+                        20.0, 25.0,  ProductCondition.FAIR, 1,
+                        true, productRequestA.getCategoryId());
+
+        ResponseEntity<ProductResponse> response =
+                restTemplate.exchange("/api/products", HttpMethod.POST, new HttpEntity<>(productRequest, headers), ProductResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
     public void shouldFindProductWhenValidProductId() {
         ResponseEntity<ProductResponse> response =
-                restTemplate.exchange("/api/products/" + product.getId(), HttpMethod.GET,
+                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.GET,
                         new HttpEntity<>(headers), ProductResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getName()).isEqualTo(product.getName());
-        assertThat(response.getBody().getDescription()).isEqualTo(product.getDescription());
-        assertThat(response.getBody().getPrice()).isEqualTo(product.getPrice());
-        assertThat(response.getBody().getDiscountedPrice()).isEqualTo(product.getDiscountedPrice());
-        assertThat(response.getBody().getProductCondition()).isEqualTo(product.getProductCondition());
-        assertThat(response.getBody().getCategory().getName()).isEqualTo(product.getCategory().getName());
-        assertThat(response.getBody().getSeller().getEmail()).isEqualTo(product.getSeller().getEmail());
+        assertThat(response.getBody().getName()).isEqualTo(productA.getName());
+        assertThat(response.getBody().getDescription()).isEqualTo(productA.getDescription());
+        assertThat(response.getBody().getPrice()).isEqualTo(productA.getPrice());
+        assertThat(response.getBody().getDiscountedPrice()).isEqualTo(productA.getDiscountedPrice());
+        assertThat(response.getBody().getProductCondition()).isEqualTo(productA.getProductCondition());
+        assertThat(response.getBody().getCategory().getName()).isEqualTo(productA.getCategory().getName());
+        assertThat(response.getBody().getSeller().getEmail()).isEqualTo(productA.getSeller().getEmail());
     }
 
     @Test

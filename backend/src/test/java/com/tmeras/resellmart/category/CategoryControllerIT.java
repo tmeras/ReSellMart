@@ -94,7 +94,7 @@ class CategoryControllerIT {
     }
 
     @Test
-    public void shouldCreateCategoryWhenValidCategory() {
+    public void shouldSaveCategoryWhenValidCategory() {
         CategoryRequest categoryRequest = CategoryRequest.builder().name("New category").build();
 
         ResponseEntity<CategoryResponse> response =
@@ -105,7 +105,18 @@ class CategoryControllerIT {
     }
 
     @Test
-    public void shouldNotCreateCategoryWhenDuplicateCategoryName() {
+    public void shouldNotSaveCategoryWhenInvalidCategory() {
+        CategoryRequest categoryRequest = CategoryRequest.builder().build();
+
+        ResponseEntity<CategoryResponse> response =
+                restTemplate.exchange("/api/categories", HttpMethod.POST,
+                        new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void shouldNotSaveCategoryWhenDuplicateCategoryName() {
         CategoryRequest categoryRequest = CategoryRequest.builder().name("Test category A").build();
 
         ResponseEntity<CategoryResponse> response =
@@ -115,7 +126,7 @@ class CategoryControllerIT {
     }
 
     @Test
-    public void shouldNotCreateCategoryWhenInvalidParentId() {
+    public void shouldNotSaveCategoryWhenInvalidParentId() {
         CategoryRequest categoryRequest = CategoryRequest.builder().name("New category").parentId(99).build();
 
         ResponseEntity<CategoryResponse> response =
@@ -125,24 +136,13 @@ class CategoryControllerIT {
     }
 
     @Test
-    public void shouldNotCreateCategoryWhenInvalidParent() {
+    public void shouldNotSaveCategoryWhenInvalidParent() {
         CategoryRequest categoryRequest = CategoryRequest.builder().name("New category").parentId(childCategory.getId()).build();
 
         ResponseEntity<CategoryResponse> response =
                 restTemplate.exchange("/api/categories", HttpMethod.POST, new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);    }
-
-    @Test
-    public void shouldNotCreateCategoryWhenInvalidCategory() {
-        CategoryRequest categoryRequest = CategoryRequest.builder().build();
-
-        ResponseEntity<CategoryResponse> response =
-                restTemplate.exchange("/api/categories", HttpMethod.POST,
-                        new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    }
 
     @Test
     public void shouldFindCategoryWhenValidCategoryId() {

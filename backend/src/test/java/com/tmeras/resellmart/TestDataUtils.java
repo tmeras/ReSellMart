@@ -35,6 +35,17 @@ public final class TestDataUtils {
                 .build();
     }
 
+    public static User createUserB(Set<Role> roles) {
+        return User.builder()
+                .id(2)
+                .name("Test user B")
+                .password("password")
+                .email("testB@test.com")
+                .enabled(true)
+                .roles(roles)
+                .build();
+    }
+
     public static CategoryRequest createCategoryRequestA() {
         return CategoryRequest.builder()
                 .id(1)
