@@ -27,6 +27,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -124,6 +125,96 @@ public class ProductControllerTests {
 
         assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(pageResponse));
     }
+
+    @Test
+    public void shouldFindAllProductsExceptSellerProducts() throws Exception {
+        PageResponse<ProductResponse> pageResponse = new PageResponse<>(
+                List.of(productResponseB),
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                1, 1,
+                true, true
+        );
+        when(productService.findAllExceptSellerProducts(
+                eq(AppConstants.PAGE_NUMBER_INT), eq(AppConstants.PAGE_SIZE_INT),
+                eq(AppConstants.SORT_PRODUCTS_BY), eq(AppConstants.SORT_DIR),
+                any(Authentication.class)
+        )).thenReturn(pageResponse);
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/products/others"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(pageResponse));
+    }
+
+    @Test
+    public void shouldFindAllProductsBySellerId() throws Exception {
+        PageResponse<ProductResponse> pageResponse = new PageResponse<>(
+                List.of(productResponseA),
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                2, 1,
+                true, true
+        );
+        when(productService.findAllBySellerId(
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR,
+                productResponseA.getSeller().getId()
+        )).thenReturn(pageResponse);
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/products/user/" + productResponseA.getSeller().getId()))
+                .andExpect(status().isOk())
+                .andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(pageResponse));
+    }
+
+    @Test
+    public void shouldFindAllProductsByCategoryId() throws Exception {
+        PageResponse<ProductResponse> pageResponse = new PageResponse<>(
+                List.of(productResponseA, productResponseB),
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                2, 1,
+                true, true
+        );
+        when(productService.findAllByCategoryId(
+                eq(AppConstants.PAGE_NUMBER_INT), eq(AppConstants.PAGE_SIZE_INT),
+                eq(AppConstants.SORT_PRODUCTS_BY), eq(AppConstants.SORT_DIR),
+                eq(productRequestA.getCategoryId()), any(Authentication.class)
+        )).thenReturn(pageResponse);
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/products/category/" + productRequestA.getCategoryId()))
+                .andExpect(status().isOk())
+                .andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(pageResponse));
+    }
+
+    @Test
+    public void shouldFindAllProductsByKeyword() throws Exception {
+        PageResponse<ProductResponse> pageResponse = new PageResponse<>(
+                List.of(productResponseA, productResponseB),
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                2, 1,
+                true, true
+        );
+        when(productService.findAllByKeyword(
+                eq(AppConstants.PAGE_NUMBER_INT), eq(AppConstants.PAGE_SIZE_INT),
+                eq(AppConstants.SORT_PRODUCTS_BY), eq(AppConstants.SORT_DIR),
+                eq("Test product"), any(Authentication.class)
+        )).thenReturn(pageResponse);
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/products/search?keyword=Test product"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(pageResponse));
+    }
+
+
 
 
 }
