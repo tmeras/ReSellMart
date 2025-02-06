@@ -11,6 +11,7 @@ import com.tmeras.resellmart.token.JwtService;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.hibernate.type.descriptor.jdbc.ObjectJdbcType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,7 +64,6 @@ public class ProductControllerIT {
     private Product productA;
     private ProductRequest productRequestA;
     private Product productB;
-    private ProductRequest productRequestB;
 
     // Used to add include JWT in requests
     private HttpHeaders headers;
@@ -100,7 +100,8 @@ public class ProductControllerIT {
         userA.setPassword(passwordEncoder.encode(userA.getPassword()));
         userA = userRepository.save(userA);
 
-        User userB = TestDataUtils.createUserB(Set.of(adminRole));
+        Role userRole = roleRepository.save(Role.builder().name("USER").build());
+        User userB = TestDataUtils.createUserB(Set.of(userRole));
         userB.setId(null);
         userB.setPassword(passwordEncoder.encode(userB.getPassword()));
         userB = userRepository.save(userB);
@@ -118,7 +119,6 @@ public class ProductControllerIT {
         productB = TestDataUtils.createProductB(category, userB);
         productB.setId(null);
         productB = productRepository.save(productB);
-        productRequestB = TestDataUtils.createProductRequestB(category.getId());
 
         // Generate test JWT with admin user details to include in each authenticated request
         String testJwt = jwtService.generateAccessToken(new HashMap<>(), userA);
@@ -139,7 +139,7 @@ public class ProductControllerIT {
         ProductRequest productRequest =
                 new ProductRequest(3, "Test Product C", "Description C",
                         50.0, 25.0,  ProductCondition.FAIR, 1,
-                        true, productRequestA.getCategoryId());
+                        true, productA.getCategory().getId());
 
         ResponseEntity<ProductResponse> response =
                 restTemplate.exchange("/api/products", HttpMethod.POST,
@@ -161,7 +161,7 @@ public class ProductControllerIT {
         ProductRequest productRequest =
                 new ProductRequest(3, null, "Description C",
                         50.0, 25.0,  ProductCondition.FAIR, 1,
-                        true, productRequestA.getCategoryId());
+                        true, productA.getCategory().getId());
 
         ResponseEntity<ProductResponse> response =
                 restTemplate.exchange("/api/products", HttpMethod.POST,
@@ -233,6 +233,19 @@ public class ProductControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getContent().size()).isEqualTo(2);
+    }
+
+    @Test
+    public void shouldNotFindAllProductsWhenNonAdminUser() {
+        // Generate JWT with non-admin user details
+        String testJwt = jwtService.generateAccessToken(new HashMap<>(), productB.getSeller());
+        headers.set("Authorization", "Bearer " + testJwt);
+
+        ResponseEntity<?> response =
+                restTemplate.exchange("/api/products", HttpMethod.GET,
+                        new HttpEntity<>(headers), Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -551,8 +564,21 @@ public class ProductControllerIT {
     public void shouldDeleteProduct() {
         ResponseEntity<?> response =
                 restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.DELETE,
-                        new HttpEntity<>(headers), ProductResponse.class);
+                        new HttpEntity<>(headers), Object.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    }
+
+    @Test
+    public void shouldNotDeleteProductWhenNonAdminUser() {
+        // Generate JWT with non-admin user details
+        String testJwt = jwtService.generateAccessToken(new HashMap<>(), productB.getSeller());
+        headers.set("Authorization", "Bearer " + testJwt);
+
+        ResponseEntity<?> response =
+                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.DELETE,
+                        new HttpEntity<>(headers), Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 }
