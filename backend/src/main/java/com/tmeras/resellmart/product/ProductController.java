@@ -126,7 +126,7 @@ public class ProductController {
         return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
     }
 
-    @PatchMapping("{product-id}/images/{image-id}/set-display")
+    @PatchMapping("/{product-id}/images/{image-id}/set-display")
     public ResponseEntity<ProductResponse> displayImage(
             @PathVariable(name = "product-id") Integer productId,
             @PathVariable(name = "image-id") Integer imageId,

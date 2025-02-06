@@ -16,21 +16,24 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(
@@ -94,7 +97,7 @@ public class ProductControllerTests {
     }
 
     @Test
-    public void shouldFindProductById() throws Exception {
+    public void shouldFindProductByIdWhenValidProductId() throws Exception {
         when(productService.findById(productRequestA.getId())).thenReturn(productResponseA);
 
         MvcResult result = mockMvc.perform(get("/api/products/" + productRequestA.getId()))
@@ -214,7 +217,84 @@ public class ProductControllerTests {
         assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(pageResponse));
     }
 
+    @Test
+    public void shouldUpdateProductWhenValidRequest() throws Exception {
+        productRequestA.setName("Updated product name");
+        productResponseA.setName("Updated product name");
+        when(productService.update(
+                any(ProductRequest.class), eq(productRequestA.getId()), any(Authentication.class))
+        ).thenReturn(productResponseA);
 
+        MvcResult mvcResult = mockMvc.perform(put("/api/products/" + productRequestA.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(productRequestA))
+        ).andExpect(status().isOk()).andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
 
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(productResponseA));
+    }
 
+    @Test
+    public void shouldUploadProductImagesWhenValidRequest() throws Exception {
+        MockMultipartFile image1 = new MockMultipartFile(
+                "images", "test_image_1.jpeg",
+                "image/jpeg", Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+        );
+        MockMultipartFile image2 = new MockMultipartFile(
+        "images", "test_image_2.jpeg",
+                "image/jpeg", Files.readAllBytes(Paths.get("src/test/resources/test_image_2.jpeg"))
+        );
+        productResponseA.setProductImages(List.of(
+                new ProductImageResponse(
+                        1,
+                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg")),
+                        false
+                ),
+                new ProductImageResponse(
+                        1,
+                        Files.readAllBytes(Paths.get("src/test/resources/test_image_2.jpeg")),
+                        false
+                )
+        ));
+        when(productService.uploadProductImages(anyList(), eq(productRequestA.getId()), any(Authentication.class)))
+                .thenReturn(productResponseA);
+
+        MvcResult result = mockMvc.perform(multipart("/api/products/" + productRequestA.getId() + "/images")
+                .file(image1)
+                .file(image2)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .with(request -> { request.setMethod("PUT"); return request; })
+        ).andExpect(status().isOk()).andReturn();
+        String jsonResponse = result.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(productResponseA));
+    }
+
+    @Test
+    public void shouldDisplayImageWhenValidRequest() throws Exception {
+        productResponseA.setProductImages(List.of(
+                new ProductImageResponse(
+                        1,
+                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg")),
+                        true
+                )
+        ));
+        when(productService.displayImage(eq(productRequestA.getId()), eq(1), any(Authentication.class)))
+                .thenReturn(productResponseA);
+
+        MvcResult mvcResult = mockMvc.perform(
+                patch("/api/products/{product-id}/images/{image-id}/set-display", productRequestA.getId(), 1)
+        ).andExpect(status().isOk()).andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(productResponseA));
+    }
+
+    @Test
+    public void shouldDeleteProduct() throws Exception {
+        mockMvc.perform(delete("/api/products/" + productRequestA.getId()))
+                .andExpect(status().isNoContent());
+
+        verify(productService, times(1)).delete(productRequestA.getId());
+    }
 }
