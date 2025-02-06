@@ -11,7 +11,6 @@ import com.tmeras.resellmart.token.JwtService;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
-import org.hibernate.type.descriptor.jdbc.ObjectJdbcType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -135,7 +133,7 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void shouldSaveProductWhenValidProduct() {
+    public void shouldSaveProductWhenValidRequest() {
         ProductRequest productRequest =
                 new ProductRequest(3, "Test Product C", "Description C",
                         50.0, 25.0,  ProductCondition.FAIR, 1,
@@ -157,7 +155,7 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void shouldNotSaveProductWhenInvalidProduct() {
+    public void shouldNotSaveProductWhenInvalidRequest() {
         ProductRequest productRequest =
                 new ProductRequest(3, null, "Description C",
                         50.0, 25.0,  ProductCondition.FAIR, 1,
@@ -297,7 +295,7 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void shouldUpdateProductWhenValidProduct() {
+    public void shouldUpdateProductWhenValidRequest() {
         productRequestA.setName("Updated product A");
         productRequestA.setDescription("Updated description A");
 

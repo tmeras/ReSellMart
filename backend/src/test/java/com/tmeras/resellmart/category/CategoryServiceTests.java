@@ -57,7 +57,7 @@ public class CategoryServiceTests {
     }
 
     @Test
-    public void shouldSaveCategoryWhenValidCategory() {
+    public void shouldSaveCategoryWhenValidRequest() {
         when(categoryRepository.findByName(categoryRequestA.getName())).thenReturn(Optional.empty());
         when(categoryMapper.toCategory(categoryRequestA)).thenReturn(categoryA);
         when(categoryRepository.save(categoryA)).thenReturn(categoryA);
@@ -168,7 +168,7 @@ public class CategoryServiceTests {
     }
 
     @Test
-    public void shouldUpdateCategoryWhenValidCategoryId() {
+    public void shouldUpdateCategoryWhenValidRequest() {
         categoryRequestA.setName("Updated test category A");
         categoryResponseA.setName("Updated test category A");
         Category updatedCategoryA = new Category(1, "Updated test category A", null);

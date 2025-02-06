@@ -94,7 +94,7 @@ class CategoryControllerIT {
     }
 
     @Test
-    public void shouldSaveCategoryWhenValidCategory() {
+    public void shouldSaveCategoryWhenValidRequest() {
         CategoryRequest categoryRequest = CategoryRequest.builder().name("New category").build();
 
         ResponseEntity<CategoryResponse> response =
@@ -106,7 +106,7 @@ class CategoryControllerIT {
     }
 
     @Test
-    public void shouldNotSaveCategoryWhenInvalidCategory() {
+    public void shouldNotSaveCategoryWhenInvalidRequest() {
         CategoryRequest categoryRequest = CategoryRequest.builder().build();
 
         ResponseEntity<CategoryResponse> response =
@@ -204,7 +204,7 @@ class CategoryControllerIT {
     }
 
     @Test
-    public void shouldUpdateCategoryWhenValidCategoryId() {
+    public void shouldUpdateCategoryWhenValidRequest() {
         CategoryRequest categoryRequest = new CategoryRequest(1, "Updated category", null);
 
         ResponseEntity<CategoryResponse> response =

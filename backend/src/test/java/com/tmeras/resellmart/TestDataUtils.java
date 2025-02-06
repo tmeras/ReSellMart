@@ -35,6 +35,16 @@ public final class TestDataUtils {
                 .build();
     }
 
+    public static UserResponse createUserResponseA(Set<Role> roles) {
+        return UserResponse.builder()
+                .id(1)
+                .name("Test user A")
+                .email("testA@test.com")
+                .mfaEnabled(false)
+                .roles(roles)
+                .build();
+    }
+
     public static User createUserB(Set<Role> roles) {
         return User.builder()
                 .id(2)
@@ -42,6 +52,16 @@ public final class TestDataUtils {
                 .password("password")
                 .email("testB@test.com")
                 .enabled(true)
+                .roles(roles)
+                .build();
+    }
+
+    public static UserResponse createUserResponseB(Set<Role> roles) {
+        return UserResponse.builder()
+                .id(2)
+                .name("Test user B")
+                .email("testB@test.com")
+                .mfaEnabled(false)
                 .roles(roles)
                 .build();
     }

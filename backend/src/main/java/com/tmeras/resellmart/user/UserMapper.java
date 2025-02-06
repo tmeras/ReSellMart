@@ -21,6 +21,7 @@ public class UserMapper {
                 null : FileUtilities.readFileFromPath(user.getImagePath());
 
         return UserResponse.builder()
+                .id(user.getId())
                 .name(user.getRealName())
                 .email(user.getEmail())
                 .homeCountry(user.getHomeCountry())
