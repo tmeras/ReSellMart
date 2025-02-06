@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class FileUtils {
+public class FileUtilities {
 
     public static byte[] readFileFromPath(String filePath) {
         if (filePath.isBlank())

@@ -1,7 +1,7 @@
 package com.tmeras.resellmart.product;
 
 import com.tmeras.resellmart.category.CategoryMapper;
-import com.tmeras.resellmart.file.FileUtils;
+import com.tmeras.resellmart.file.FileUtilities;
 import com.tmeras.resellmart.user.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -53,7 +53,7 @@ public class ProductMapper {
     private ProductImageResponse toProductImageResponse(ProductImage productImage) {
         return ProductImageResponse.builder()
                 .id(productImage.getId())
-                .image(FileUtils.readFileFromPath(productImage.getFilePath()))
+                .image(FileUtilities.readFileFromPath(productImage.getFilePath()))
                 .displayed(productImage.isDisplayed())
                 .build();
     }

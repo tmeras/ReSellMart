@@ -52,12 +52,9 @@ public class FileService {
             @NonNull MultipartFile file, @NonNull String fileUploadPath, @NonNull String fileUploadSubPath, @NonNull Integer fileId
     ) throws IOException{
         final String finalUploadPath = fileUploadPath + File.separator + fileUploadSubPath;
-        File targetFolder = new File(finalUploadPath);
-        if (!targetFolder.exists()) {
-            boolean folderCreated = targetFolder.mkdirs();
-            if (!folderCreated)
-                throw new IOException("Failed to create target folder");
-        }
+        Path targetFolder =  Path.of(finalUploadPath);
+        if (!Files.exists(targetFolder))
+            Files.createDirectories(targetFolder);
 
         final String fileExtension = getFileExtension(file.getOriginalFilename());
         String targetFilePath = finalUploadPath + File.separator + System.currentTimeMillis() + "F" + fileId + "." + fileExtension;
@@ -80,7 +77,7 @@ public class FileService {
 
     public void deleteFile(String filePath) throws IOException {
         Path path = Path.of(filePath);
-        Files.deleteIfExists(path);
-        System.out.println("Deleted file: " + filePath);
+        if (Files.deleteIfExists(path))
+            System.out.println("Deleted file: " + filePath);
     }
 }

@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -196,7 +197,7 @@ public class ProductService {
         return productMapper.toProductResponse(updatedProduct);
     }
 
-    public void uploadProductImages(List<MultipartFile> images, Integer productId, Authentication authentication) throws IOException {
+    public ProductResponse uploadProductImages(List<MultipartFile> images, Integer productId, Authentication authentication) throws IOException {
         User currentUser = (User) authentication.getPrincipal();
         Product existingproduct = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
@@ -230,10 +231,12 @@ public class ProductService {
             existingproduct.getImages().add(productImage);
         }
         existingproduct.getImages().get(0).setDisplayed(true);
-        productRepository.save(existingproduct);
+
+        Product updatedProduct = productRepository.save(existingproduct);
+        return productMapper.toProductResponse(updatedProduct);
     }
 
-    public void displayImage(Integer productId, Integer imageId, Authentication authentication) {
+    public ProductResponse displayImage(Integer productId, Integer imageId, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
         Product existingproduct = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
@@ -253,11 +256,17 @@ public class ProductService {
         int imageIndex = existingproduct.getImages().indexOf(existingImage);
         existingproduct.getImages().get(imageIndex).setDisplayed(true);
 
-        productRepository.save(existingproduct);
+        Product updatedProduct = productRepository.save(existingproduct);
+        return productMapper.toProductResponse(updatedProduct);
     }
 
     @PreAuthorize("hasRole('ADMIN')") // Deletion possible by admins only, users can only mark products as unavailable
-    public void delete(Integer productId) {
+    public void delete(Integer productId) throws IOException {
+        Optional<Product> existingProduct = productRepository.findById(productId);
+        if (existingProduct.isPresent())
+            for (ProductImage productImage: existingProduct.get().getImages())
+                fileService.deleteFile(productImage.getFilePath());
+
         productRepository.deleteById(productId);
     }
 }
