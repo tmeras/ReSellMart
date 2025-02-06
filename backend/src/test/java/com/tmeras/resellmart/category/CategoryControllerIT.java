@@ -149,7 +149,7 @@ class CategoryControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);    }
 
     @Test
-    public void shouldFindCategoryWhenValidCategoryId() {
+    public void shouldFindCategoryByIdWhenValidCategoryId() {
         ResponseEntity<CategoryResponse> response =
                 restTemplate.exchange("/api/categories/" + parentCategory.getId(), HttpMethod.GET,
                         new HttpEntity<>(headers), CategoryResponse.class);
@@ -160,7 +160,7 @@ class CategoryControllerIT {
     }
 
     @Test
-    public void shouldNotFindCategoryWhenInvalidCategoryId() {
+    public void shouldNotFindCategoryByIdWhenInvalidCategoryId() {
         ResponseEntity<CategoryResponse> response =
                 restTemplate.exchange("/api/categories/99", HttpMethod.GET,
                         new HttpEntity<>(headers), CategoryResponse.class);

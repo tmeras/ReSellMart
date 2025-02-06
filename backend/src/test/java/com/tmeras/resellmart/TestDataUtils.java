@@ -66,15 +66,15 @@ public final class TestDataUtils {
                 .build();
     }
 
-    public static CategoryRequest createCategoryRequestA() {
-        return CategoryRequest.builder()
+    public static Category createCategoryA() {
+        return Category.builder()
                 .id(1)
                 .name("Test category A")
                 .build();
     }
 
-    public static Category createCategoryA() {
-        return Category.builder()
+    public static CategoryRequest createCategoryRequestA() {
+        return CategoryRequest.builder()
                 .id(1)
                 .name("Test category A")
                 .build();
@@ -87,16 +87,15 @@ public final class TestDataUtils {
                 .build();
     }
 
-
-    public static CategoryRequest createCategoryRequestB() {
-        return CategoryRequest.builder()
+    public static Category createCategoryB() {
+        return Category.builder()
                 .id(2)
                 .name("Test category B")
                 .build();
     }
 
-    public static Category createCategoryB() {
-        return Category.builder()
+    public static CategoryRequest createCategoryRequestB() {
+        return CategoryRequest.builder()
                 .id(2)
                 .name("Test category B")
                 .build();
@@ -106,20 +105,6 @@ public final class TestDataUtils {
         return CategoryResponse.builder()
                 .id(2)
                 .name("Test category B")
-                .build();
-    }
-
-    public static ProductRequest createProductRequestA(Integer categoryId) {
-        return ProductRequest.builder()
-                .id(1)
-                .name("Test product A")
-                .description("Description A")
-                .price(10.0)
-                .discountedPrice(5.0)
-                .productCondition(ProductCondition.NEW)
-                .availableQuantity(2)
-                .available(true)
-                .categoryId(categoryId)
                 .build();
     }
 
@@ -138,6 +123,20 @@ public final class TestDataUtils {
                 .build();
     }
 
+    public static ProductRequest createProductRequestA(Integer categoryId) {
+        return ProductRequest.builder()
+                .id(1)
+                .name("Test product A")
+                .description("Description A")
+                .price(10.0)
+                .discountedPrice(5.0)
+                .productCondition(ProductCondition.NEW)
+                .availableQuantity(2)
+                .available(true)
+                .categoryId(categoryId)
+                .build();
+    }
+
     public static ProductResponse createProductResponseA(CategoryResponse categoryResponse, UserResponse userResponse) {
         return ProductResponse.builder()
                 .id(1)
@@ -153,20 +152,6 @@ public final class TestDataUtils {
                 .build();
     }
 
-    public static ProductRequest createProductRequestB(Integer categoryId) {
-        return ProductRequest.builder()
-                .id(1)
-                .name("Test product B")
-                .description("Description B")
-                .price(20.0)
-                .discountedPrice(10.0)
-                .productCondition(ProductCondition.LIKE_NEW)
-                .availableQuantity(1)
-                .available(true)
-                .categoryId(categoryId)
-                .build();
-    }
-
     public static Product createProductB(Category category, User seller) {
         return Product.builder()
                 .id(1)
@@ -179,6 +164,20 @@ public final class TestDataUtils {
                 .available(true)
                 .category(category)
                 .seller(seller)
+                .build();
+    }
+
+    public static ProductRequest createProductRequestB(Integer categoryId) {
+        return ProductRequest.builder()
+                .id(1)
+                .name("Test product B")
+                .description("Description B")
+                .price(20.0)
+                .discountedPrice(10.0)
+                .productCondition(ProductCondition.LIKE_NEW)
+                .availableQuantity(1)
+                .available(true)
+                .categoryId(categoryId)
                 .build();
     }
 

@@ -197,7 +197,7 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void shouldFindProductWhenValidProductId() {
+    public void shouldFindProductByIdWhenValidProductId() {
         ResponseEntity<ProductResponse> response =
                 restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.GET,
                         new HttpEntity<>(headers), ProductResponse.class);
@@ -214,7 +214,7 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void shouldNotFindProductWhenInvalidProductId() {
+    public void shouldNotFindProductByIdWhenInvalidProductId() {
         ResponseEntity<ProductResponse> response =
                 restTemplate.exchange("/api/products/99", HttpMethod.GET,
                         new HttpEntity<>(headers), ProductResponse.class);

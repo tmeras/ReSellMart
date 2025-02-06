@@ -101,7 +101,7 @@ public class CategoryServiceTests {
     }
 
     @Test
-    public void shouldFindCategoryWhenValidCategoryId() {
+    public void shouldFindCategoryByIdWhenValidCategoryId() {
         when(categoryRepository.findById(categoryA.getId())).thenReturn(Optional.of(categoryA));
         when(categoryMapper.toCategoryResponse(categoryA)).thenReturn(categoryResponseA);
 
@@ -111,7 +111,7 @@ public class CategoryServiceTests {
     }
 
     @Test
-    public void shouldNotFindCategoryWhenInvalidCategoryId() {
+    public void shouldNotFindCategoryByIdWhenInvalidCategoryId() {
         when(categoryRepository.findById(99)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> categoryService.findById(99))

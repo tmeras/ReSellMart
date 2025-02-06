@@ -89,7 +89,7 @@ public class CategoryControllerTests {
     }
 
     @Test
-    public void shouldFindCategoryByIdWhenValidCategoryId() throws Exception {
+    public void shouldFindCategoryById() throws Exception {
         when(categoryService.findById(parentCategoryResponse.getId())).thenReturn(parentCategoryResponse);
 
         MvcResult mvcResult = mockMvc.perform(get("/api/categories/" + parentCategoryResponse.getId()))

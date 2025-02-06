@@ -23,7 +23,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -97,7 +96,7 @@ public class ProductControllerTests {
     }
 
     @Test
-    public void shouldFindProductByIdWhenValidProductId() throws Exception {
+    public void shouldFindProductById() throws Exception {
         when(productService.findById(productRequestA.getId())).thenReturn(productResponseA);
 
         MvcResult result = mockMvc.perform(get("/api/products/" + productRequestA.getId()))
