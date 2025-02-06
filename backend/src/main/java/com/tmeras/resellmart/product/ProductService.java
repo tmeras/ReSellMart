@@ -263,7 +263,7 @@ public class ProductService {
     @PreAuthorize("hasRole('ADMIN')") // Deletion possible by admins only, users can only mark products as unavailable
     public void delete(Integer productId) throws IOException {
         Optional<Product> existingProduct = productRepository.findById(productId);
-        if (existingProduct.isPresent())
+        if (existingProduct.isPresent() && existingProduct.get().getImages() != null)
             for (ProductImage productImage: existingProduct.get().getImages())
                 fileService.deleteFile(productImage.getFilePath());
 

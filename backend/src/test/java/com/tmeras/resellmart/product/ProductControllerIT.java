@@ -547,5 +547,12 @@ public class ProductControllerIT {
         assertThat(secondResponse.getBody().getMessage()).isEqualTo("You do not have permission to manage images for this product");
     }
 
+    @Test
+    public void shouldDeleteProduct() {
+        ResponseEntity<?> response =
+                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.DELETE,
+                        new HttpEntity<>(headers), ProductResponse.class);
 
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    }
 }
