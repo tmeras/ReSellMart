@@ -4,6 +4,8 @@ import com.tmeras.resellmart.TestDataUtils;
 import com.tmeras.resellmart.category.Category;
 import com.tmeras.resellmart.category.CategoryRepository;
 import com.tmeras.resellmart.category.CategoryResponse;
+import com.tmeras.resellmart.common.AppConstants;
+import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.file.FileService;
 import com.tmeras.resellmart.role.Role;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
@@ -24,6 +27,8 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -128,5 +133,98 @@ public class ProductServiceTests {
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
+    @Test
+    public void shouldFindAllProducts() {
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
+        Page<Product> page = new PageImpl<>(List.of(productA, productB));
 
+        when(productRepository.findAll(pageable)).thenReturn(page);
+        when(productMapper.toProductResponse(productA)).thenReturn(productResponseA);
+        when(productMapper.toProductResponse(productB)).thenReturn(productResponseB);
+
+        PageResponse<ProductResponse> pageResponse =
+                productService.findAll(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR);
+
+        assertThat(pageResponse.getContent().size()).isEqualTo(2);
+        assertThat(pageResponse.getContent().get(0)).isEqualTo(productResponseA);
+        assertThat(pageResponse.getContent().get(1)).isEqualTo(productResponseB);
+    }
+
+    @Test
+    public void shouldFindAllProductsExceptSellerProducts() {
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
+        Page<Product> page = new PageImpl<>(List.of(productB));
+
+        when(productRepository.findAllBySellerIdNot(pageable, productA.getSeller().getId())).thenReturn(page);
+        when(productMapper.toProductResponse(productB)).thenReturn(productResponseB);
+
+        PageResponse<ProductResponse> pageResponse =
+                productService.findAllExceptSellerProducts(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR, authentication);
+
+        assertThat(pageResponse.getContent().size()).isEqualTo(1);
+        assertThat(pageResponse.getContent().get(0)).isEqualTo(productResponseB);
+    }
+
+    @Test
+    public void shouldFindAllProductsBySellerId() {
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
+        Page<Product> page = new PageImpl<>(List.of(productA));
+
+        when(productRepository.findAllBySellerId(pageable, productA.getSeller().getId())).thenReturn(page);
+        when(productMapper.toProductResponse(productA)).thenReturn(productResponseA);
+
+        PageResponse<ProductResponse> pageResponse =
+                productService.findAllBySellerId(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR, productA.getSeller().getId());
+
+        assertThat(pageResponse.getContent().size()).isEqualTo(1);
+        assertThat(pageResponse.getContent().get(0)).isEqualTo(productResponseA);
+    }
+
+    @Test
+    public void shouldFindAllProductsByCategoryId() {
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
+        Page<Product> page = new PageImpl<>(List.of(productB));
+
+        when(productRepository.findAllByCategoryId(pageable, productA.getCategory().getId(), productA.getSeller().getId())).thenReturn(page);
+        when(productMapper.toProductResponse(productB)).thenReturn(productResponseB);
+
+        PageResponse<ProductResponse> pageResponse =
+                productService.findAllByCategoryId(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR, productA.getCategory().getId(), authentication);
+
+        assertThat(pageResponse.getContent().size()).isEqualTo(1);
+        assertThat(pageResponse.getContent().get(0)).isEqualTo(productResponseB);
+    }
+
+    @Test
+    public void shouldFindAllProductsByKeyword() {
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
+        Page<Product> page = new PageImpl<>(List.of(productB));
+
+        when(productRepository.findAllByKeyword(pageable, "Test product", productA.getSeller().getId())).thenReturn(page);
+        when(productMapper.toProductResponse(productB)).thenReturn(productResponseB);
+
+        PageResponse<ProductResponse> pageResponse =
+                productService.findAllByKeyword(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR, "Test product", authentication);
+
+        assertThat(pageResponse.getContent().size()).isEqualTo(1);
+        assertThat(pageResponse.getContent().get(0)).isEqualTo(productResponseB);
+    }
+
+
+    
 }

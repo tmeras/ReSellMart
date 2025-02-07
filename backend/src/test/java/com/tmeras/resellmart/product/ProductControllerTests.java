@@ -136,6 +136,7 @@ public class ProductControllerTests {
                 1, 1,
                 true, true
         );
+
         when(productService.findAllExceptSellerProducts(
                 eq(AppConstants.PAGE_NUMBER_INT), eq(AppConstants.PAGE_SIZE_INT),
                 eq(AppConstants.SORT_PRODUCTS_BY), eq(AppConstants.SORT_DIR),
@@ -158,6 +159,7 @@ public class ProductControllerTests {
                 2, 1,
                 true, true
         );
+
         when(productService.findAllBySellerId(
                 AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                 AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR,
@@ -180,6 +182,7 @@ public class ProductControllerTests {
                 2, 1,
                 true, true
         );
+
         when(productService.findAllByCategoryId(
                 eq(AppConstants.PAGE_NUMBER_INT), eq(AppConstants.PAGE_SIZE_INT),
                 eq(AppConstants.SORT_PRODUCTS_BY), eq(AppConstants.SORT_DIR),
@@ -202,6 +205,7 @@ public class ProductControllerTests {
                 2, 1,
                 true, true
         );
+
         when(productService.findAllByKeyword(
                 eq(AppConstants.PAGE_NUMBER_INT), eq(AppConstants.PAGE_SIZE_INT),
                 eq(AppConstants.SORT_PRODUCTS_BY), eq(AppConstants.SORT_DIR),
@@ -220,6 +224,7 @@ public class ProductControllerTests {
     public void shouldUpdateProductWhenValidRequest() throws Exception {
         productRequestA.setName("Updated product name");
         productResponseA.setName("Updated product name");
+
         when(productService.update(
                 any(ProductRequest.class), eq(productRequestA.getId()), any(Authentication.class))
         ).thenReturn(productResponseA);
@@ -255,6 +260,7 @@ public class ProductControllerTests {
                         false
                 )
         ));
+
         when(productService.uploadProductImages(anyList(), eq(productRequestA.getId()), any(Authentication.class)))
                 .thenReturn(productResponseA);
 
@@ -278,6 +284,7 @@ public class ProductControllerTests {
                         true
                 )
         ));
+
         when(productService.displayImage(eq(productRequestA.getId()), eq(1), any(Authentication.class)))
                 .thenReturn(productResponseA);
 

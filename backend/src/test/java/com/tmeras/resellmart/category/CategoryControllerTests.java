@@ -108,6 +108,7 @@ public class CategoryControllerTests {
                 2, 1,
                 true, true
         );
+
         when(categoryService.findAll(
                 AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                 AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR)
@@ -129,6 +130,7 @@ public class CategoryControllerTests {
                 1, 1,
                 true, true
         );
+
         when(categoryService.findAllByParentId(
                 AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                 AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR,
@@ -160,6 +162,7 @@ public class CategoryControllerTests {
     public void shouldUpdateCategory() throws Exception {
         parentCategoryRequest.setName("Updated category name");
         parentCategoryResponse.setName("Updated category name");
+
         when(categoryService.update(any(CategoryRequest.class), eq(parentCategoryRequest.getId()))).thenReturn(parentCategoryResponse);
 
         MvcResult mvcResult = mockMvc.perform(put("/api/categories/" + parentCategoryRequest.getId())

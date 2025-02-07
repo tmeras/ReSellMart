@@ -247,7 +247,7 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void shouldFindAllProductsExceptSeller() {
+    public void shouldFindAllProductsExceptSellerProducts() {
         ResponseEntity<PageResponse<ProductResponse>> response =
                 restTemplate.exchange("/api/products/others", HttpMethod.GET,
                         new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
