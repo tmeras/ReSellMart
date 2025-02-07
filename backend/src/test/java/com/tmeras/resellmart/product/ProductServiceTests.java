@@ -6,6 +6,8 @@ import com.tmeras.resellmart.category.CategoryRepository;
 import com.tmeras.resellmart.category.CategoryResponse;
 import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
+import com.tmeras.resellmart.exception.APIException;
+import com.tmeras.resellmart.exception.OperationNotPermittedException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.file.FileService;
 import com.tmeras.resellmart.role.Role;
@@ -224,6 +226,81 @@ public class ProductServiceTests {
         assertThat(pageResponse.getContent().size()).isEqualTo(1);
         assertThat(pageResponse.getContent().get(0)).isEqualTo(productResponseB);
     }
+
+    @Test
+    public void shouldUpdateProductWhenValidRequest() {
+        productRequestA.setName("Updated product name");
+        productRequestA.setDescription("Updated product description");
+        productResponseA.setName("Updated product name");
+        productResponseA.setDescription("Updated product description");
+        Product updatedProduct = TestDataUtils.createProductA(productA.getCategory(), productA.getSeller());
+        updatedProduct.setName("Updated Product Name");
+        updatedProduct.setDescription("Updated product description");
+
+        when(categoryRepository.findById(productRequestA.getCategoryId()))
+                .thenReturn(Optional.ofNullable(productA.getCategory()));
+        when(productRepository.findById(productRequestA.getId())).thenReturn(Optional.ofNullable(productA));
+        when(productRepository.save(productA)).thenReturn(updatedProduct);
+        when(productMapper.toProductResponse(updatedProduct)).thenReturn(productResponseA);
+
+        ProductResponse productResponse = productService.update(productRequestA, productRequestA.getId(), authentication);
+
+        assertThat(productResponse.getName()).isEqualTo("Updated product name");
+        assertThat(productResponse.getDescription()).isEqualTo("Updated product description");
+    }
+
+    @Test
+    public void shouldNotUpdateProductWhenInvalidCategoryId() {
+        productRequestA.setCategoryId(99);
+        when(categoryRepository.findById(99)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> productService.update(productRequestA, productRequestA.getId(), authentication))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No category found with ID: 99");
+    }
+
+
+    @Test
+    public void shouldNotUpdateProductWhenInvalidProductId() {
+        when(categoryRepository.findById(productRequestA.getCategoryId()))
+                .thenReturn(Optional.ofNullable(productA.getCategory()));
+        when(productRepository.findById(99)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> productService.update(productRequestA, 99, authentication))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No product found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotUpdateProductWhenSellerIsNotLoggedIn() {
+        authentication = new UsernamePasswordAuthenticationToken(
+                productB.getSeller(),
+                productB.getSeller().getPassword(),
+                productB.getSeller().getAuthorities()
+        );
+
+        when(categoryRepository.findById(productRequestA.getCategoryId()))
+                .thenReturn(Optional.ofNullable(productA.getCategory()));
+        when(productRepository.findById(productRequestA.getId())).thenReturn(Optional.ofNullable(productA));
+
+        assertThatThrownBy(() -> productService.update(productRequestA, productRequestA.getId(), authentication))
+                .isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to update this product");
+    }
+
+    @Test
+    public void shouldNotUpdateProductWhenInvalidPrice() {
+        productRequestA.setPrice(productRequestA.getDiscountedPrice() - 1);
+
+        when(categoryRepository.findById(productRequestA.getCategoryId()))
+                .thenReturn(Optional.ofNullable(productA.getCategory()));
+        when(productRepository.findById(productRequestA.getId())).thenReturn(Optional.ofNullable(productA));
+
+        assertThatThrownBy(() -> productService.update(productRequestA, productRequestA.getId(), authentication))
+                .isInstanceOf(APIException.class)
+                .hasMessage("Discounted price cannot be higher than regular price");
+    }
+
 
 
     
