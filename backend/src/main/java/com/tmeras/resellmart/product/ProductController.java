@@ -50,7 +50,7 @@ public class ProductController {
     }
 
     @GetMapping("/others")
-    public ResponseEntity<PageResponse<ProductResponse>> findAllExceptSeller(
+    public ResponseEntity<PageResponse<ProductResponse>> findAllExceptSellerProducts(
             @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_PRODUCTS_BY, required = false) String sortBy,
@@ -59,7 +59,7 @@ public class ProductController {
     ) {
         // Get all products excluding those sold by the logged-in user
         PageResponse<ProductResponse> foundProducts =
-                productService.findAllExceptSeller(pageNumber, pageSize, sortBy, sortDirection, authentication);
+                productService.findAllExceptSellerProducts(pageNumber, pageSize, sortBy, sortDirection, authentication);
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
     }
 
@@ -117,31 +117,31 @@ public class ProductController {
     }
 
     @PutMapping(value = "/{product-id}/images", consumes = "multipart/form-data")
-    public ResponseEntity<?> uploadProductImages(
+    public ResponseEntity<ProductResponse> uploadProductImages(
             @PathVariable(name = "product-id") Integer productId,
             @RequestPart("images") List<MultipartFile> images,
             Authentication authentication
     ) throws IOException {
-        productService.uploadProductImages(images, productId, authentication);
-        return new ResponseEntity<>(HttpStatus.OK);
+        ProductResponse updatedProduct = productService.uploadProductImages(images, productId, authentication);
+        return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
     }
 
-    @PatchMapping("{product-id}/images/{image-id}/set-display")
-    public ResponseEntity<?> displayImage(
+    @PatchMapping("/{product-id}/images/{image-id}/set-display")
+    public ResponseEntity<ProductResponse> displayImage(
             @PathVariable(name = "product-id") Integer productId,
             @PathVariable(name = "image-id") Integer imageId,
             Authentication authentication
     ) {
         // Mark a particular as the main one (i.e. should be displayed first)
         // for a particular product
-        productService.displayImage(productId, imageId, authentication);
-        return new ResponseEntity<>(HttpStatus.OK);
+        ProductResponse updatedProduct = productService.displayImage(productId, imageId, authentication);
+        return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
     }
 
     @DeleteMapping("/{product-id}")
     public ResponseEntity<?> delete(
             @PathVariable(name = "product-id") Integer productId
-    ) {
+    ) throws IOException {
         productService.delete(productId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

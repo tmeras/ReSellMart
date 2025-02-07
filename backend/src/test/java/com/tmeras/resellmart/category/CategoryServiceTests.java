@@ -57,7 +57,7 @@ public class CategoryServiceTests {
     }
 
     @Test
-    public void shouldSaveCategoryWhenValidCategory() {
+    public void shouldSaveCategoryWhenValidRequest() {
         when(categoryRepository.findByName(categoryRequestA.getName())).thenReturn(Optional.empty());
         when(categoryMapper.toCategory(categoryRequestA)).thenReturn(categoryA);
         when(categoryRepository.save(categoryA)).thenReturn(categoryA);
@@ -101,7 +101,7 @@ public class CategoryServiceTests {
     }
 
     @Test
-    public void shouldFindCategoryWhenValidCategoryId() {
+    public void shouldFindCategoryByIdWhenValidCategoryId() {
         when(categoryRepository.findById(categoryA.getId())).thenReturn(Optional.of(categoryA));
         when(categoryMapper.toCategoryResponse(categoryA)).thenReturn(categoryResponseA);
 
@@ -111,7 +111,7 @@ public class CategoryServiceTests {
     }
 
     @Test
-    public void shouldNotFindCategoryWhenInvalidCategoryId() {
+    public void shouldNotFindCategoryByIdWhenInvalidCategoryId() {
         when(categoryRepository.findById(99)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> categoryService.findById(99))
@@ -168,19 +168,18 @@ public class CategoryServiceTests {
     }
 
     @Test
-    public void shouldUpdateCategoryWhenValidCategoryId() {
+    public void shouldUpdateCategoryWhenValidRequest() {
         categoryRequestA.setName("Updated test category A");
         categoryResponseA.setName("Updated test category A");
-        Category updatedCategoryA = new Category(1, "Updated test category A", null);
 
         when(categoryRepository.findById(categoryA.getId())).thenReturn(Optional.of(categoryA));
-        when(categoryRepository.save(categoryA)).thenReturn(updatedCategoryA);
-        when(categoryMapper.toCategoryResponse(updatedCategoryA)).thenReturn(categoryResponseA);
+        when(categoryRepository.save(categoryA)).thenReturn(categoryA);
+        when(categoryMapper.toCategoryResponse(categoryA)).thenReturn(categoryResponseA);
 
         CategoryResponse categoryResponse = categoryService.update(categoryRequestA, categoryA.getId());
 
-        assertThat(categoryResponse.getId()).isEqualTo(categoryResponseA.getId());
-        assertThat(categoryResponse.getName()).isEqualTo(categoryResponseA.getName());
+        assertThat(categoryResponse).isEqualTo(categoryResponseA);
+        assertThat(categoryA.getName()).isEqualTo("Updated test category A");
     }
 
     @Test

@@ -1,6 +1,6 @@
 package com.tmeras.resellmart.user;
 
-import com.tmeras.resellmart.file.FileUtils;
+import com.tmeras.resellmart.file.FileUtilities;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,9 +18,10 @@ public class UserMapper {
 
     public UserResponse toUserResponse(User user) {
         byte[] profileImage = (user.getImagePath() == null) ?
-                null : FileUtils.readFileFromPath(user.getImagePath());
+                null : FileUtilities.readFileFromPath(user.getImagePath());
 
         return UserResponse.builder()
+                .id(user.getId())
                 .name(user.getRealName())
                 .email(user.getEmail())
                 .homeCountry(user.getHomeCountry())

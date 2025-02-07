@@ -45,7 +45,6 @@ public class CategoryControllerTests {
     private CategoryService categoryService;
 
     private CategoryRequest parentCategoryRequest;
-    private CategoryRequest childCategoryRequest;
     private CategoryResponse parentCategoryResponse;
     private CategoryResponse childCategoryResponse;
 
@@ -53,9 +52,6 @@ public class CategoryControllerTests {
     public void setUp() {
         // Initialise test objects
         parentCategoryRequest = TestDataUtils.createCategoryRequestA();
-        childCategoryRequest = TestDataUtils.createCategoryRequestB();
-        childCategoryRequest.setParentId(parentCategoryRequest.getId());
-
         parentCategoryResponse = TestDataUtils.createCategoryResponseA();
         childCategoryResponse = TestDataUtils.createCategoryResponseB();
         childCategoryResponse.setParentId(parentCategoryResponse.getId());
@@ -70,7 +66,7 @@ public class CategoryControllerTests {
     }
 
     @Test
-    public void shouldCreateCategoryWhenValidCategory() throws Exception {
+    public void shouldSaveCategoryWhenValidRequest() throws Exception {
         when(categoryService.save(any(CategoryRequest.class))).thenReturn(parentCategoryResponse);
 
         MvcResult mvcResult = mockMvc.perform(post("/api/categories")
@@ -83,7 +79,7 @@ public class CategoryControllerTests {
     }
 
     @Test
-    public void shouldNotCreateCategoryWhenInvalidCategory() throws Exception {
+    public void shouldNotSaveCategoryWhenInvalidRequest() throws Exception {
         parentCategoryRequest.setName(null);
 
         mockMvc.perform(post("/api/categories")
@@ -138,10 +134,10 @@ public class CategoryControllerTests {
         when(categoryService.findAllByParentId(
                 AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                 AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR,
-                childCategoryRequest.getParentId())
+                parentCategoryRequest.getId())
         ).thenReturn(pageResponse);
 
-        MvcResult mvcResult = mockMvc.perform(get("/api/categories/parents/" + childCategoryRequest.getParentId()))
+        MvcResult mvcResult = mockMvc.perform(get("/api/categories/parents/" + parentCategoryRequest.getId()))
                 .andExpect(status().isOk())
                 .andReturn();
         String jsonResponse = mvcResult.getResponse().getContentAsString();
@@ -152,7 +148,6 @@ public class CategoryControllerTests {
     @Test
     public void shouldFindAllParentCategories() throws Exception {
         List<CategoryResponse> categoryResponses = List.of(parentCategoryResponse);
-
         when(categoryService.findAllParents()).thenReturn(categoryResponses);
 
         MvcResult mvcResult = mockMvc.perform(get("/api/categories/parents"))

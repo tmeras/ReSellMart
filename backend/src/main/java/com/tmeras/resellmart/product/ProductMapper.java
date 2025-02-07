@@ -1,7 +1,7 @@
 package com.tmeras.resellmart.product;
 
 import com.tmeras.resellmart.category.CategoryMapper;
-import com.tmeras.resellmart.file.FileUtils;
+import com.tmeras.resellmart.file.FileUtilities;
 import com.tmeras.resellmart.user.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,8 +32,9 @@ public class ProductMapper {
 
     public ProductResponse toProductResponse(Product product) {
         List<ProductImageResponse> productImageResponses = new ArrayList<>();
-        for (ProductImage productImage : product.getImages())
-            productImageResponses.add(toProductImageResponse(productImage));
+        if (product.getImages() != null)
+            for (ProductImage productImage : product.getImages())
+                productImageResponses.add(toProductImageResponse(productImage));
 
         return ProductResponse.builder()
                 .id(product.getId())
@@ -44,7 +45,7 @@ public class ProductMapper {
                 .productCondition(product.getProductCondition())
                 .availableQuantity(product.getAvailableQuantity())
                 .available(product.isAvailable())
-                .productImages(productImageResponses)
+                .images(productImageResponses)
                 .category(categoryMapper.toCategoryResponse(product.getCategory()))
                 .seller(userMapper.toUserResponse(product.getSeller()))
                 .build();
@@ -53,7 +54,7 @@ public class ProductMapper {
     private ProductImageResponse toProductImageResponse(ProductImage productImage) {
         return ProductImageResponse.builder()
                 .id(productImage.getId())
-                .image(FileUtils.readFileFromPath(productImage.getFilePath()))
+                .image(FileUtilities.readFileFromPath(productImage.getFilePath()))
                 .displayed(productImage.isDisplayed())
                 .build();
     }

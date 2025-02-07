@@ -31,7 +31,7 @@ public class ProductResponse {
 
     private boolean available;
 
-    private List<ProductImageResponse> productImages;
+    private List<ProductImageResponse> images;
 
     private CategoryResponse category;
 
