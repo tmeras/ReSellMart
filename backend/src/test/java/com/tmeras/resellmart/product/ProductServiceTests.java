@@ -65,7 +65,6 @@ public class ProductServiceTests {
     private Product productA;
     private Product productB;
     private ProductRequest productRequestA;
-    private ProductRequest productRequestB;
     private ProductResponse productResponseA;
     private ProductResponse productResponseB;
     private Authentication authentication;
@@ -82,7 +81,6 @@ public class ProductServiceTests {
         productB = TestDataUtils.createProductB(category, userB);
 
         productRequestA = TestDataUtils.createProductRequestA(category.getId());
-        productRequestB = TestDataUtils.createProductRequestB(category.getId());
 
         CategoryResponse categoryResponse = TestDataUtils.createCategoryResponseA();
         UserResponse userResponseA = TestDataUtils.createUserResponseA(Set.of(adminRole));
@@ -485,7 +483,7 @@ public class ProductServiceTests {
         when(productRepository.findById(productRequestA.getId())).thenReturn(Optional.of(productA));
         when(productImageRepository.findById(productImageA.getId())).thenReturn(Optional.of(productImageA));
 
-        assertThatThrownBy(() -> productService.displayImage(productRequestB.getId(), productImageA.getId(), authentication))
+        assertThatThrownBy(() -> productService.displayImage(productB.getId(), productImageA.getId(), authentication))
                 .isInstanceOf(APIException.class)
                 .hasMessage("The image is related to a different product");
     }
