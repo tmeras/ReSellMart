@@ -12,8 +12,7 @@ import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserResponse;
 
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.ArrayList;
 import java.util.Set;
 
 public final class TestDataUtils {
@@ -120,6 +119,7 @@ public final class TestDataUtils {
                 .available(true)
                 .category(category)
                 .seller(seller)
+                .images(new ArrayList<>())
                 .build();
     }
 
@@ -149,6 +149,7 @@ public final class TestDataUtils {
                 .available(true)
                 .category(categoryResponse)
                 .seller(userResponse)
+                .images(new ArrayList<>())
                 .build();
     }
 
@@ -164,6 +165,7 @@ public final class TestDataUtils {
                 .available(true)
                 .category(category)
                 .seller(seller)
+                .images(new ArrayList<>())
                 .build();
     }
 
@@ -193,6 +195,7 @@ public final class TestDataUtils {
                 .available(true)
                 .category(categoryResponse)
                 .seller(userResponse)
+                .images(new ArrayList<>())
                 .build();
     }
 

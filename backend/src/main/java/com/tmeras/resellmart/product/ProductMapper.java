@@ -32,8 +32,9 @@ public class ProductMapper {
 
     public ProductResponse toProductResponse(Product product) {
         List<ProductImageResponse> productImageResponses = new ArrayList<>();
-        for (ProductImage productImage : product.getImages())
-            productImageResponses.add(toProductImageResponse(productImage));
+        if (product.getImages() != null)
+            for (ProductImage productImage : product.getImages())
+                productImageResponses.add(toProductImageResponse(productImage));
 
         return ProductResponse.builder()
                 .id(product.getId())
@@ -44,7 +45,7 @@ public class ProductMapper {
                 .productCondition(product.getProductCondition())
                 .availableQuantity(product.getAvailableQuantity())
                 .available(product.isAvailable())
-                .productImages(productImageResponses)
+                .images(productImageResponses)
                 .category(categoryMapper.toCategoryResponse(product.getCategory()))
                 .seller(userMapper.toUserResponse(product.getSeller()))
                 .build();

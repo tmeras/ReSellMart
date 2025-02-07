@@ -245,10 +245,10 @@ public class ProductControllerTests {
                 "image/jpeg", Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
         );
         MockMultipartFile image2 = new MockMultipartFile(
-        "images", "test_image_2.jpeg",
+                "images", "test_image_2.jpeg",
                 "image/jpeg", Files.readAllBytes(Paths.get("src/test/resources/test_image_2.jpeg"))
         );
-        productResponseA.setProductImages(List.of(
+        productResponseA.setImages(List.of(
                 new ProductImageResponse(
                         1,
                         Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg")),
@@ -277,7 +277,7 @@ public class ProductControllerTests {
 
     @Test
     public void shouldDisplayImageWhenValidRequest() throws Exception {
-        productResponseA.setProductImages(List.of(
+        productResponseA.setImages(List.of(
                 new ProductImageResponse(
                         1,
                         Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg")),

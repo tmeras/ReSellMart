@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface ProductRepository extends JpaRepository<Product, Integer> {
 
+    // TODO: Quantity edge case -> Add quantity>0 condition on this and other queries
     @Query("""
             SELECT p FROM Product p
             WHERE p.available = true AND p.seller.id <> :sellerId

@@ -366,7 +366,7 @@ public class ProductControllerIT {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getProductImages().size()).isEqualTo(2);
+        assertThat(response.getBody().getImages().size()).isEqualTo(2);
     }
 
     @Test
@@ -446,11 +446,11 @@ public class ProductControllerIT {
 
         assertThat(firstResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(firstResponse.getBody()).isNotNull();
-        assertThat(firstResponse.getBody().getProductImages().size()).isEqualTo(2);
+        assertThat(firstResponse.getBody().getImages().size()).isEqualTo(2);
 
 
         // Then mark the first image for display
-        List<ProductImageResponse> productImages = firstResponse.getBody().getProductImages();
+        List<ProductImageResponse> productImages = firstResponse.getBody().getImages();
         Integer imageId = productImages.get(0).getId();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -460,9 +460,9 @@ public class ProductControllerIT {
 
         assertThat(secondResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(secondResponse.getBody()).isNotNull();
-        assertThat(secondResponse.getBody().getProductImages().size()).isEqualTo(2);
+        assertThat(secondResponse.getBody().getImages().size()).isEqualTo(2);
 
-        productImages = secondResponse.getBody().getProductImages();
+        productImages = secondResponse.getBody().getImages();
         Optional<ProductImageResponse> imageResponse =
                 productImages.stream().filter(it -> it.getId().equals(imageId)).findFirst();
         assertThat(imageResponse.isPresent()).isTrue();
@@ -507,11 +507,11 @@ public class ProductControllerIT {
 
         assertThat(firstResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(firstResponse.getBody()).isNotNull();
-        assertThat(firstResponse.getBody().getProductImages().size()).isEqualTo(2);
+        assertThat(firstResponse.getBody().getImages().size()).isEqualTo(2);
 
         // Then request one of those images to be displayed
         // as another user and for a different product
-        List<ProductImageResponse> productImages = firstResponse.getBody().getProductImages();
+        List<ProductImageResponse> productImages = firstResponse.getBody().getImages();
         Integer imageId = productImages.get(0).getId();
         headers.setContentType(MediaType.APPLICATION_JSON);
         testJwt = jwtService.generateAccessToken(new HashMap<>(), productA.getSeller());
@@ -541,9 +541,9 @@ public class ProductControllerIT {
 
         assertThat(firstResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(firstResponse.getBody()).isNotNull();
-        assertThat(firstResponse.getBody().getProductImages().size()).isEqualTo(2);
+        assertThat(firstResponse.getBody().getImages().size()).isEqualTo(2);
 
-        List<ProductImageResponse> productImages = firstResponse.getBody().getProductImages();
+        List<ProductImageResponse> productImages = firstResponse.getBody().getImages();
         Integer imageId = productImages.get(0).getId();
         headers.setContentType(MediaType.APPLICATION_JSON);
         testJwt = jwtService.generateAccessToken(new HashMap<>(), productA.getSeller());
