@@ -20,25 +20,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.MimeType;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -117,6 +112,7 @@ public class ProductServiceTests {
     @Test
     public void shouldNotSaveProductWhenInvalidPrice() {
         productRequestA.setPrice(productRequestA.getDiscountedPrice() - 1);
+
         when(categoryRepository.findById(productRequestA.getCategoryId()))
                 .thenReturn(Optional.of(productA.getCategory()));
 
@@ -256,6 +252,7 @@ public class ProductServiceTests {
     @Test
     public void shouldNotUpdateProductWhenInvalidCategoryId() {
         productRequestA.setCategoryId(99);
+
         when(categoryRepository.findById(99)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> productService.update(productRequestA, productRequestA.getId(), authentication))
