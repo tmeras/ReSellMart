@@ -2,6 +2,9 @@ package com.tmeras.resellmart;
 
 import com.tmeras.resellmart.category.Category;
 import com.tmeras.resellmart.category.CategoryRepository;
+import com.tmeras.resellmart.product.Product;
+import com.tmeras.resellmart.product.ProductCondition;
+import com.tmeras.resellmart.product.ProductRepository;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.user.User;
@@ -14,6 +17,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 @SpringBootApplication
@@ -24,11 +28,11 @@ public class MainApplication {
 		SpringApplication.run(MainApplication.class, args);
 	}
 
-	// TODO: Disable during testing
-/*	@Bean
+	@Bean
 	public CommandLineRunner runner(
 			RoleRepository roleRepository,
 			CategoryRepository categoryRepository,
+			ProductRepository productRepository,
 			UserRepository userRepository,
 			PasswordEncoder passwordEncoder
 	) {
@@ -44,7 +48,7 @@ public class MainApplication {
 								.name("ADMIN")
 								.build()
 				);
-				userRepository.save(
+				User user = userRepository.save(
 						User.builder()
 								.email("test@test.com")
 								.name("test user")
@@ -55,7 +59,7 @@ public class MainApplication {
 								.password(passwordEncoder.encode("Bacon12!"))
 								.build()
 				);
-				userRepository.save(
+				User adminUser = userRepository.save(
 						User.builder()
 								.email("admin@test.com")
 								.name("test admin user")
@@ -66,12 +70,55 @@ public class MainApplication {
 								.password(passwordEncoder.encode("Bacon12!"))
 								.build()
 				);
-				categoryRepository.save(
+				Category category = categoryRepository.save(
 						Category.builder()
 								.name("First category")
 								.build()
 				);
+				Product productA = productRepository.save(
+					Product.builder()
+							.name("Product A")
+							.description("Description A")
+							.price(10.0)
+							.discountedPrice(5.0)
+							.productCondition(ProductCondition.NEW)
+							.availableQuantity(2)
+							.available(true)
+							.category(category)
+							.seller(adminUser)
+							.images(new ArrayList<>())
+							.build()
+				);
+				Product productB = productRepository.save(
+						Product.builder()
+								.name("Product B")
+								.description("Description B")
+								.price(20.0)
+								.discountedPrice(10.0)
+								.productCondition(ProductCondition.FAIR)
+								.availableQuantity(1)
+								.available(true)
+								.category(category)
+								.seller(adminUser)
+								.images(new ArrayList<>())
+								.build()
+				);
+				Product productC = productRepository.save(
+						Product.builder()
+								.name("Product C")
+								.description("Description C")
+								.price(30.0)
+								.discountedPrice(15.0)
+								.productCondition(ProductCondition.LIKE_NEW)
+								.availableQuantity(5)
+								.available(true)
+								.category(category)
+								.seller(user)
+								.images(new ArrayList<>())
+								.build()
+				);
+
 			}
 		};
-	}*/
+	}
 }

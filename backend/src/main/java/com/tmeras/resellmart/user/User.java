@@ -1,5 +1,6 @@
 package com.tmeras.resellmart.user;
 
+import com.tmeras.resellmart.cart.CartItem;
 import com.tmeras.resellmart.role.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,7 +22,6 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ToString
 public class User implements UserDetails, Principal {
 
     @Id
@@ -46,6 +46,13 @@ public class User implements UserDetails, Principal {
 
     // Secret used for MFA
     private String secret;
+
+    @OneToMany(
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<CartItem> cartItems;
 
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;

@@ -46,6 +46,7 @@ public class UserController {
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
+    // TODO: Return user response
     @PutMapping("/{user-id}/image")
     public ResponseEntity<?> uploadUserImage(
             @PathVariable(name = "user-id") Integer userId,
@@ -56,5 +57,8 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    // TODO: User deletion endpoint (mind related entities)
+    
+    
+
+    // TODO: User deletion endpoint (soft delete with marking products as unavailable)
 }

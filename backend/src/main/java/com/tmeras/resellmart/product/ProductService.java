@@ -207,6 +207,7 @@ public class ProductService {
         if (!Objects.equals(existingproduct.getSeller().getId(), currentUser.getId()))
             throw new OperationNotPermittedException("You do not have permission to upload images for this product");
 
+        // TODO: Move max image number to AppConstants
         if (images.size() > 5)
             throw new APIException("Maximum 5 images can be uploaded");
 
