@@ -152,7 +152,7 @@ public class UserService {
         if (!Objects.equals(currentUser.getId(), userId))
             throw new OperationNotPermittedException("You do not have permission to view this user's cart");
 
-        List<CartItem> cartItems = cartItemRepository.findAllWithAssociationsByUserId(userId);
+        List<CartItem> cartItems = cartItemRepository.findAllWithProductDetailsByUserId(userId);
 
         return cartItems.stream()
                 .map(cartItemMapper::toCartItemResponse)
@@ -167,7 +167,7 @@ public class UserService {
         if (!Objects.equals(currentUser.getId(), userId))
             throw new OperationNotPermittedException("You do not have permission to modify this user's cart");
 
-        CartItem existingCartItem = cartItemRepository.findWithAssociationsByUserIdAndProductId(userId, productId)
+        CartItem existingCartItem = cartItemRepository.findWithProductDetailsByUserIdAndProductId(userId, productId)
                 .orElseThrow(() -> new ResourceNotFoundException("The specified product does not exist in your cart"));
 
         if (existingCartItem.getProduct().getAvailableQuantity() < cartItemRequest.getQuantity())
@@ -187,7 +187,6 @@ public class UserService {
 
         cartItemRepository.deleteByUserIdAndProductId(userId, productId);
     }
-
 
     public WishListItemResponse saveWishListItem(
             WishListItemRequest wishListItemRequest, Integer userId, Authentication authentication
@@ -218,6 +217,19 @@ public class UserService {
 
         WishListItem savedWishListItem = wishListItemRepository.save(wishListItem);
         return wishListItemMapper.toWishListItemResponse(savedWishListItem);
+    }
 
+
+    public List<WishListItemResponse> findAllWishListItemsByUserId(Integer userId, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+
+        if (!Objects.equals(currentUser.getId(), userId))
+            throw new OperationNotPermittedException("You do not have permission to view this user's wishlist");
+
+        List<WishListItem> wishListItems = wishListItemRepository.findAllWithProductDetailsByUserId(userId);
+
+        return wishListItems.stream()
+                .map(wishListItemMapper::toWishListItemResponse)
+                .toList();
     }
 }

@@ -10,11 +10,11 @@ public interface CartItemRepository extends JpaRepository<CartItem, Integer> {
 
     boolean existsByUserIdAndProductId(Integer userId, Integer productId);
 
-    @EntityGraph(attributePaths = {"product.category.parentCategory", "product.seller", "product.seller.roles", "product.images"})
-    Optional<CartItem> findWithAssociationsByUserIdAndProductId(Integer userId, Integer productId);
+    @EntityGraph(attributePaths = {"product.category.parentCategory", "product.seller.roles", "product.images"})
+    Optional<CartItem> findWithProductDetailsByUserIdAndProductId(Integer userId, Integer productId);
 
     @EntityGraph(attributePaths = {"product.category.parentCategory", "product.seller.roles", "product.images"})
-    List<CartItem> findAllWithAssociationsByUserId(Integer userId);
+    List<CartItem> findAllWithProductDetailsByUserId(Integer userId);
 
     void deleteByUserIdAndProductId(Integer userId, Integer productId);
 }

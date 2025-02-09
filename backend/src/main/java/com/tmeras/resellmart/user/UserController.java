@@ -115,5 +115,14 @@ public class UserController {
         return new ResponseEntity<>(savedWishListItem, HttpStatus.CREATED);
     }
 
+    @GetMapping("/{user-id}/wishlist/products")
+    public ResponseEntity<List<WishListItemResponse>> findAllWishListItemsByUserId(
+            @PathVariable(name = "user-id") Integer userId,
+            Authentication authentication
+    ) {
+        List<WishListItemResponse> foundWishListItems = userService.findAllWishListItemsByUserId(userId, authentication);
+        return new ResponseEntity<>(foundWishListItems, HttpStatus.OK);
+    }
+
     // TODO: User deletion endpoint (soft delete with marking products as unavailable)
 }
