@@ -31,7 +31,7 @@ public class CartItem {
     @JoinColumn(nullable = false)
     private User user;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime addedAt;
 
     @Override
     public final boolean equals(Object o) {

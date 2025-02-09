@@ -9,11 +9,9 @@ import com.tmeras.resellmart.file.FileService;
 import com.tmeras.resellmart.mfa.MfaService;
 import com.tmeras.resellmart.product.Product;
 import com.tmeras.resellmart.product.ProductRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.validation.Valid;
+import com.tmeras.resellmart.wishlist.WishListItemMapper;
+import com.tmeras.resellmart.wishlist.WishListItemRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,8 +36,10 @@ public class UserService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CartItemRepository cartItemRepository;
+    private final WishListItemRepository wishListItemRepository;
     private final UserMapper userMapper;
     private final CartItemMapper cartItemMapper;
+    private final WishListItemMapper wishListItemMapper;
     private final FileService fileService;
     private final MfaService mfaService;
 
@@ -141,7 +141,7 @@ public class UserService {
         CartItem cartItem = cartItemMapper.toCartItem(cartItemRequest);
         cartItem.setProduct(existingProduct);
         cartItem.setUser(currentUser);
-        cartItem.setCreatedAt(LocalDateTime.now());
+        cartItem.setAddedAt(LocalDateTime.now());
 
         CartItem savedCartItem = cartItemRepository.save(cartItem);
         return cartItemMapper.toCartItemResponse(savedCartItem);
