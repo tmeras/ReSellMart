@@ -20,5 +20,5 @@ public class CartItemResponse {
 
     private Integer quantity;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime addedAt;
 }

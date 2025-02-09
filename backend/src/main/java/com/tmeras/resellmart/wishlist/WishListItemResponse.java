@@ -1,0 +1,20 @@
+package com.tmeras.resellmart.wishlist;
+
+import com.tmeras.resellmart.product.ProductResponse;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class WishListItemResponse {
+
+        private Integer id;
+
+        private LocalDateTime addedAt;
+
+        private ProductResponse product;
+}

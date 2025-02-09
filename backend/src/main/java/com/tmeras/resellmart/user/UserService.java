@@ -9,11 +9,8 @@ import com.tmeras.resellmart.file.FileService;
 import com.tmeras.resellmart.mfa.MfaService;
 import com.tmeras.resellmart.product.Product;
 import com.tmeras.resellmart.product.ProductRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.validation.Valid;
+import com.tmeras.resellmart.wishlist.*;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,8 +35,10 @@ public class UserService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CartItemRepository cartItemRepository;
+    private final WishListItemRepository wishListItemRepository;
     private final UserMapper userMapper;
     private final CartItemMapper cartItemMapper;
+    private final WishListItemMapper wishListItemMapper;
     private final FileService fileService;
     private final MfaService mfaService;
 
@@ -126,7 +125,7 @@ public class UserService {
 
         // User is logged in, so already exists => just call .get() on optional to retrieve Hibernate-managed entity
         currentUser = userRepository.findById(userId).get();
-        Product existingProduct = productRepository.findWithDetailsById(cartItemRequest.getProductId())
+        Product existingProduct = productRepository.findWithAssociationsById(cartItemRequest.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + cartItemRequest.getProductId()));
 
         if(Objects.equals(existingProduct.getSeller().getId(), currentUser.getId()))
@@ -141,7 +140,7 @@ public class UserService {
         CartItem cartItem = cartItemMapper.toCartItem(cartItemRequest);
         cartItem.setProduct(existingProduct);
         cartItem.setUser(currentUser);
-        cartItem.setCreatedAt(LocalDateTime.now());
+        cartItem.setAddedAt(LocalDateTime.now());
 
         CartItem savedCartItem = cartItemRepository.save(cartItem);
         return cartItemMapper.toCartItemResponse(savedCartItem);
@@ -153,7 +152,7 @@ public class UserService {
         if (!Objects.equals(currentUser.getId(), userId))
             throw new OperationNotPermittedException("You do not have permission to view this user's cart");
 
-        List<CartItem> cartItems = cartItemRepository.findAllWithDetailsByUserId(userId);
+        List<CartItem> cartItems = cartItemRepository.findAllWithProductDetailsByUserId(userId);
 
         return cartItems.stream()
                 .map(cartItemMapper::toCartItemResponse)
@@ -168,7 +167,7 @@ public class UserService {
         if (!Objects.equals(currentUser.getId(), userId))
             throw new OperationNotPermittedException("You do not have permission to modify this user's cart");
 
-        CartItem existingCartItem = cartItemRepository.findWithDetailsByUserIdAndProductId(userId, productId)
+        CartItem existingCartItem = cartItemRepository.findWithProductDetailsByUserIdAndProductId(userId, productId)
                 .orElseThrow(() -> new ResourceNotFoundException("The specified product does not exist in your cart"));
 
         if (existingCartItem.getProduct().getAvailableQuantity() < cartItemRequest.getQuantity())
@@ -187,5 +186,58 @@ public class UserService {
             throw new OperationNotPermittedException("You do not have permission to modify this user's cart");
 
         cartItemRepository.deleteByUserIdAndProductId(userId, productId);
+    }
+
+    public WishListItemResponse saveWishListItem(
+            WishListItemRequest wishListItemRequest, Integer userId, Authentication authentication
+    ) {
+        User currentUser = (User) authentication.getPrincipal();
+
+        if (!Objects.equals(currentUser.getId(), userId))
+            throw new OperationNotPermittedException("You do not have permission to add items to this user's wishlist");
+
+        if (wishListItemRepository.existsByUserIdAndProductId(userId, wishListItemRequest.getProductId()))
+            throw new APIException("This product is already in your wishlist");
+
+        // User is logged in, so already exists => just call .get() on optional to retrieve Hibernate-managed entity
+        currentUser = userRepository.findById(userId).get();
+        Product existingProduct = productRepository.findWithAssociationsById(wishListItemRequest.getProductId())
+                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + wishListItemRequest.getProductId()));
+
+        if(Objects.equals(existingProduct.getSeller().getId(), currentUser.getId()))
+            throw new APIException("You cannot add your own items to your wishlist");
+
+        if(!existingProduct.isAvailable())
+            throw new APIException("Unavailable products cannot be added to the wishlist");
+
+        WishListItem wishListItem = new WishListItem();
+        wishListItem.setProduct(existingProduct);
+        wishListItem.setUser(currentUser);
+        wishListItem.setAddedAt(LocalDateTime.now());
+
+        WishListItem savedWishListItem = wishListItemRepository.save(wishListItem);
+        return wishListItemMapper.toWishListItemResponse(savedWishListItem);
+    }
+
+    public List<WishListItemResponse> findAllWishListItemsByUserId(Integer userId, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+
+        if (!Objects.equals(currentUser.getId(), userId))
+            throw new OperationNotPermittedException("You do not have permission to view this user's wishlist");
+
+        List<WishListItem> wishListItems = wishListItemRepository.findAllWithProductDetailsByUserId(userId);
+
+        return wishListItems.stream()
+                .map(wishListItemMapper::toWishListItemResponse)
+                .toList();
+    }
+
+    public void deleteWishListItem(Integer userId, Integer productId, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+
+        if (!Objects.equals(currentUser.getId(), userId))
+            throw new OperationNotPermittedException("You do not have permission to modify this user's wishlist");
+
+        wishListItemRepository.deleteByUserIdAndProductId(userId, productId);
     }
 }

@@ -70,9 +70,15 @@ public class MainApplication {
 								.password(passwordEncoder.encode("Bacon12!"))
 								.build()
 				);
-				Category category = categoryRepository.save(
+				Category categoryA = categoryRepository.save(
 						Category.builder()
 								.name("First category")
+								.build()
+				);
+				Category categoryB = categoryRepository.save(
+						Category.builder()
+								.name("Second category")
+								.parentCategory(categoryA)
 								.build()
 				);
 				Product productA = productRepository.save(
@@ -84,7 +90,7 @@ public class MainApplication {
 							.productCondition(ProductCondition.NEW)
 							.availableQuantity(2)
 							.available(true)
-							.category(category)
+							.category(categoryA)
 							.seller(adminUser)
 							.images(new ArrayList<>())
 							.build()
@@ -98,7 +104,7 @@ public class MainApplication {
 								.productCondition(ProductCondition.FAIR)
 								.availableQuantity(1)
 								.available(true)
-								.category(category)
+								.category(categoryB)
 								.seller(adminUser)
 								.images(new ArrayList<>())
 								.build()
@@ -112,12 +118,11 @@ public class MainApplication {
 								.productCondition(ProductCondition.LIKE_NEW)
 								.availableQuantity(5)
 								.available(true)
-								.category(category)
+								.category(categoryB)
 								.seller(user)
 								.images(new ArrayList<>())
 								.build()
 				);
-
 			}
 		};
 	}

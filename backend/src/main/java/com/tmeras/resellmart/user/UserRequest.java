@@ -12,10 +12,10 @@ import lombok.*;
 @Builder
 public class UserRequest {
 
-    @NotBlank(message = "Name should not be empty")
+    @NotBlank(message = "Name must not be empty")
     private String name;
 
-    @NotNull(message = "Home country should not be empty")
+    @NotNull(message = "Home country must not be empty")
     private String homeCountry;
 
     @NotNull(message = "MFA preference must be specified")

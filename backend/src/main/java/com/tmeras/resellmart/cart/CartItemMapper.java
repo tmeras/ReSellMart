@@ -21,7 +21,7 @@ public class CartItemMapper {
                 .id(cartItem.getId())
                 .product(productMapper.toProductResponse(cartItem.getProduct()))
                 .quantity(cartItem.getQuantity())
-                .createdAt(cartItem.getCreatedAt())
+                .addedAt(cartItem.getAddedAt())
                 .build();
     }
 }
