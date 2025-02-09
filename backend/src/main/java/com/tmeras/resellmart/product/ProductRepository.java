@@ -38,5 +38,5 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     Page<Product> findAllByKeyword(Pageable pageable, String keyword, Integer sellerId);
 
     @EntityGraph(attributePaths = {"category.parentCategory", "seller.roles", "images"})
-    Optional<Product> findWithDetailsById(Integer id);
+    Optional<Product> findWithAssociationsById(Integer id);
 }

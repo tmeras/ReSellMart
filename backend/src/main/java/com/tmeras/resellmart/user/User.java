@@ -44,8 +44,7 @@ public class User implements UserDetails, Principal {
     // Secret used for MFA
     private String secret;
 
-    // TODO: Make lazy?
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     private Set<Role> roles;
 
     public String getRealName() {

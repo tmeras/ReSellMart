@@ -4,6 +4,8 @@ import com.tmeras.resellmart.cart.CartItemRequest;
 import com.tmeras.resellmart.cart.CartItemResponse;
 import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
+import com.tmeras.resellmart.wishlist.WishListItemRequest;
+import com.tmeras.resellmart.wishlist.WishListItemResponse;
 import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -102,7 +104,16 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-
+    @PostMapping("/{user-id}/wishlist/products")
+    public ResponseEntity<WishListItemResponse> saveWishListItem(
+        @Valid @RequestBody WishListItemRequest wishListItemRequest,
+        @PathVariable(name = "user-id") Integer userId,
+        Authentication authentication
+    ) {
+        WishListItemResponse savedWishListItem =
+                userService.saveWishListItem(wishListItemRequest, userId, authentication);
+        return new ResponseEntity<>(savedWishListItem, HttpStatus.CREATED);
+    }
 
     // TODO: User deletion endpoint (soft delete with marking products as unavailable)
 }

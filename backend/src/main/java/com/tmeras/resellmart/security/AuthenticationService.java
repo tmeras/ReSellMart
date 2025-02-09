@@ -186,7 +186,7 @@ public class AuthenticationService {
         refreshToken = authHeader.substring(7);
         userEmail = jwtService.extractUsername(refreshToken);
         if (userEmail != null) {
-            User user = userRepository.findByEmail(userEmail)
+            User user = userRepository.findWithAssociationsByEmail(userEmail)
                     .orElseThrow(() -> new UsernameNotFoundException("User with the email \"" + userEmail + "\" not found"));
 
             boolean isTokenRevoked = tokenRepository.findByToken(refreshToken)
