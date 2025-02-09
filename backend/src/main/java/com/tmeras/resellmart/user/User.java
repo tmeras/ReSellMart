@@ -11,10 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.security.Principal;
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Getter
@@ -47,13 +44,7 @@ public class User implements UserDetails, Principal {
     // Secret used for MFA
     private String secret;
 
-    @OneToMany(
-            mappedBy = "user",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
-    private List<CartItem> cartItems;
-
+    // TODO: Make lazy?
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;
 

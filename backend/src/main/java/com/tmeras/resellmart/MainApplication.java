@@ -65,7 +65,7 @@ public class MainApplication {
 								.name("test admin user")
 								.roles(Set.of(adminRole))
 								.mfaEnabled(false)
-								.homeCountry("Greece")
+								.homeCountry("USA")
 								.enabled(true)
 								.password(passwordEncoder.encode("Bacon12!"))
 								.build()

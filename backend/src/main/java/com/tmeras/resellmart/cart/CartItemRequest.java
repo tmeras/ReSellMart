@@ -1,5 +1,7 @@
 package com.tmeras.resellmart.cart;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 
 @Getter
@@ -9,10 +11,10 @@ import lombok.*;
 @Builder
 public class CartItemRequest {
 
-    private Integer id;
-
+    @NotNull(message = "Product ID must not be empty")
     private Integer productId;
 
+    @Positive(message = "Product quantity must be a positive value")
     private Integer quantity;
 
     private Integer userId;

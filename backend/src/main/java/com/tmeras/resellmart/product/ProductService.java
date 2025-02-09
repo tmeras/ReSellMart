@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+//TODO: Add @Transactional?
 public class ProductService {
 
     private final ProductRepository productRepository;
@@ -37,6 +39,7 @@ public class ProductService {
     public ProductResponse save(ProductRequest productRequest, Authentication authentication) {
         productRequest.setId(null);
         User currentUser = (User) authentication.getPrincipal();
+        // TODO: Fetch current user here and assign it to the product
         Category category = categoryRepository.findById(productRequest.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("No category found with ID: " + productRequest.getCategoryId()));
 
@@ -53,6 +56,7 @@ public class ProductService {
         return productMapper.toProductResponse(savedProduct);
     }
 
+    @Transactional
     public ProductResponse findById(Integer productId) {
         return productRepository.findById(productId)
                 .map(productMapper::toProductResponse)
@@ -60,6 +64,7 @@ public class ProductService {
     }
 
     @PreAuthorize("hasRole('ADMIN')") //Only admins should be able to view both available and unavailable products
+    @Transactional
     public PageResponse<ProductResponse> findAll(
             Integer pageNumber, Integer pageSize, String sortBy, String sortDirection
     ) {
@@ -105,6 +110,7 @@ public class ProductService {
         );
     }
 
+    @Transactional
     public PageResponse<ProductResponse> findAllBySellerId(
             Integer pageNumber, Integer pageSize, String sortBy, String sortDirection, Integer sellerId
     ) {
