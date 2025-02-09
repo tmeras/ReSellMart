@@ -124,5 +124,15 @@ public class UserController {
         return new ResponseEntity<>(foundWishListItems, HttpStatus.OK);
     }
 
+    @DeleteMapping("/{user-id}/wishlist/products/{product-id}")
+    public ResponseEntity<?> deleteWishListItem(
+            @PathVariable(name = "user-id") Integer userId,
+            @PathVariable(name = "product-id") Integer productId,
+            Authentication authentication
+    ) {
+        userService.deleteWishListItem(userId, productId, authentication);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     // TODO: User deletion endpoint (soft delete with marking products as unavailable)
 }

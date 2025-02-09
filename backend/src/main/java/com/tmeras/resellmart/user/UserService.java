@@ -219,7 +219,6 @@ public class UserService {
         return wishListItemMapper.toWishListItemResponse(savedWishListItem);
     }
 
-
     public List<WishListItemResponse> findAllWishListItemsByUserId(Integer userId, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
 
@@ -231,5 +230,14 @@ public class UserService {
         return wishListItems.stream()
                 .map(wishListItemMapper::toWishListItemResponse)
                 .toList();
+    }
+
+    public void deleteWishListItem(Integer userId, Integer productId, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+
+        if (!Objects.equals(currentUser.getId(), userId))
+            throw new OperationNotPermittedException("You do not have permission to modify this user's wishlist");
+
+        wishListItemRepository.deleteByUserIdAndProductId(userId, productId);
     }
 }

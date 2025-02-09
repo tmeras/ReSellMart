@@ -12,4 +12,6 @@ public interface WishListItemRepository extends JpaRepository<WishListItem, Inte
 
     @EntityGraph(attributePaths = {"product.category.parentCategory", "product.seller.roles", "product.images"})
     List<WishListItem> findAllWithProductDetailsByUserId(Integer userId);
+
+    void deleteByUserIdAndProductId(Integer userId, Integer productId);
 }
