@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.org.checkerframework.checker.units.qual.C;
 
 import java.util.HashMap;
 import java.util.List;
@@ -43,8 +44,7 @@ class CategoryControllerIT {
 
     private Category parentCategory;
     private Category childCategory;
-
-    // TODO: Add category request fields
+    private User user;
 
     // Used to add include JWT in requests
     private HttpHeaders headers;
@@ -70,10 +70,16 @@ class CategoryControllerIT {
         roleRepository.deleteAll();
         categoryRepository.deleteAll();
 
-        // Save required entities and an admin user (need to set IDs to null before inserting to avoid
+        // Save required entities (need to set IDs to null before inserting to avoid
         // errors related to MySQL's AUTO_INCREMENT counter not resetting between tests)
         Role adminRole = roleRepository.save(Role.builder().name("ADMIN").build());
-        User user = TestDataUtils.createUserA(Set.of(adminRole));
+        User adminUser = TestDataUtils.createUserA(Set.of(adminRole));
+        adminUser.setId(null);
+        adminUser.setPassword(passwordEncoder.encode(adminUser.getPassword()));
+        adminUser = userRepository.save(adminUser);
+
+        Role userRole = roleRepository.save(Role.builder().name("USER").build());
+        user = TestDataUtils.createUserB(Set.of(userRole));
         user.setId(null);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user = userRepository.save(user);
@@ -88,7 +94,7 @@ class CategoryControllerIT {
         childCategory = categoryRepository.save(childCategory);
 
         // Generate test JWT with admin user details to include in each authenticated request
-        String testJwt = jwtService.generateAccessToken(new HashMap<>(), user);
+        String testJwt = jwtService.generateAccessToken(new HashMap<>(), adminUser);
         headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + testJwt);
     }
@@ -118,7 +124,7 @@ class CategoryControllerIT {
 
     @Test
     public void shouldNotSaveCategoryWhenDuplicateCategoryName() {
-        CategoryRequest categoryRequest = CategoryRequest.builder().name("Test category A").build();
+        CategoryRequest categoryRequest = new CategoryRequest(3, "Test category A", null);
 
         ResponseEntity<CategoryResponse> response =
                 restTemplate.exchange("/api/categories", HttpMethod.POST,
@@ -129,7 +135,7 @@ class CategoryControllerIT {
 
     @Test
     public void shouldNotSaveCategoryWhenInvalidParentId() {
-        CategoryRequest categoryRequest = CategoryRequest.builder().name("New category").parentId(99).build();
+        CategoryRequest categoryRequest = new CategoryRequest(3, "Test category C", 99);
 
         ResponseEntity<CategoryResponse> response =
                 restTemplate.exchange("/api/categories", HttpMethod.POST,
@@ -140,13 +146,14 @@ class CategoryControllerIT {
 
     @Test
     public void shouldNotSaveCategoryWhenInvalidParent() {
-        CategoryRequest categoryRequest = CategoryRequest.builder().name("New category").parentId(childCategory.getId()).build();
+        CategoryRequest categoryRequest = new CategoryRequest(3, "Test category C", childCategory.getId());
 
         ResponseEntity<CategoryResponse> response =
                 restTemplate.exchange("/api/categories", HttpMethod.POST,
                         new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);    }
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
 
     @Test
     public void shouldFindCategoryByIdWhenValidCategoryId() {
@@ -219,6 +226,19 @@ class CategoryControllerIT {
     }
 
     @Test
+    public void shouldNotUpdateCategoryWhenNonAdminUser() {
+        CategoryRequest categoryRequest = new CategoryRequest(1, "Updated category", null);
+        String testJwt = jwtService.generateAccessToken(new HashMap<>(), user);
+        headers.set("Authorization", "Bearer " + testJwt);
+
+        ResponseEntity<CategoryResponse> response =
+                restTemplate.exchange("/api/categories/" + parentCategory.getId(), HttpMethod.PUT,
+                        new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
     public void shouldNotUpdateCategoryWhenInvalidCategoryId() {
         CategoryRequest categoryRequest = new CategoryRequest(1, "Updated category", null);
 
@@ -236,5 +256,17 @@ class CategoryControllerIT {
                         new HttpEntity<>(headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    }
+
+    @Test
+    public void shouldNotDeleteCategoryWhenNonAdminUser() {
+        String testJwt = jwtService.generateAccessToken(new HashMap<>(), user);
+        headers.set("Authorization", "Bearer " + testJwt);
+
+        ResponseEntity<CategoryResponse> response =
+                restTemplate.exchange("/api/categories/" + childCategory.getId(), HttpMethod.DELETE,
+                        new HttpEntity<>(headers), CategoryResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 }

@@ -90,7 +90,7 @@ public class ProductControllerIT {
         userRepository.deleteAll();
         roleRepository.deleteAll();
 
-        // Save required entities and an admin user (need to set IDs to null before inserting to avoid
+        // Save required entities (need to set IDs to null before inserting to avoid
         // errors related to MySQL's AUTO_INCREMENT counter not resetting between tests)
         Role adminRole = roleRepository.save(Role.builder().name("ADMIN").build());
         User userA = TestDataUtils.createUserA(Set.of(adminRole));
@@ -135,7 +135,7 @@ public class ProductControllerIT {
     @Test
     public void shouldSaveProductWhenValidRequest() {
         ProductRequest productRequest =
-                new ProductRequest(3, "Test Product C", "Description C",
+                new ProductRequest(3, "Test product C", "Description C",
                         50.0, 25.0,  ProductCondition.FAIR, 1,
                         true, productA.getCategory().getId());
 
@@ -171,7 +171,7 @@ public class ProductControllerIT {
     @Test
     public void shouldNotSaveProductWhenInvalidCategoryId() {
         ProductRequest productRequest =
-                new ProductRequest(3, "Test Product C", "Description C",
+                new ProductRequest(3, "Test product C", "Description C",
                         50.0, 25.0,  ProductCondition.FAIR, 1,
                         true, 99);
 
@@ -185,7 +185,7 @@ public class ProductControllerIT {
     @Test
     public void shouldNotSaveProductWhenInvalidPrice() {
         ProductRequest productRequest =
-                new ProductRequest(3, "Test Product C", "Description C",
+                new ProductRequest(3, "Test product C", "Description C",
                         20.0, 25.0,  ProductCondition.FAIR, 1,
                         true, productA.getCategory().getId());
 
