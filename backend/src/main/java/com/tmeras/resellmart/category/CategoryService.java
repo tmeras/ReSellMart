@@ -100,6 +100,7 @@ public class CategoryService {
                 .toList();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public CategoryResponse update(CategoryRequest categoryRequest, Integer categoryId) {
         Category existingCategory = categoryRepository.findById(categoryId)
                 .orElseThrow(() ->new ResourceNotFoundException("No category found with ID:" + categoryId));

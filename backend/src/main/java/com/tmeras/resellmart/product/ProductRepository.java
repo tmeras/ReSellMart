@@ -39,4 +39,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     @EntityGraph(attributePaths = {"category.parentCategory", "seller.roles", "images"})
     Optional<Product> findWithAssociationsById(Integer id);
+
+    @EntityGraph(attributePaths = {"images"})
+    Optional<Product> findWithImagesById(Integer id);
 }
