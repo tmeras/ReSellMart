@@ -2,6 +2,7 @@ package com.tmeras.resellmart.product;
 
 import com.tmeras.resellmart.category.Category;
 import com.tmeras.resellmart.category.CategoryRepository;
+import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.APIException;
 import com.tmeras.resellmart.exception.OperationNotPermittedException;
@@ -233,7 +234,9 @@ public class ProductService {
         return productMapper.toProductResponse(updatedProduct);
     }
 
-    public ProductResponse uploadProductImages(List<MultipartFile> images, Integer productId, Authentication authentication) throws IOException {
+    public ProductResponse uploadProductImages(
+            List<MultipartFile> images, Integer productId, Authentication authentication
+    ) throws IOException {
         User currentUser = (User) authentication.getPrincipal();
         Product existingproduct = productRepository.findWithAssociationsById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
@@ -241,9 +244,8 @@ public class ProductService {
         if (!Objects.equals(existingproduct.getSeller().getId(), currentUser.getId()))
             throw new OperationNotPermittedException("You do not have permission to upload images for this product");
 
-        // TODO: Move max image number to AppConstants
-        if (images.size() > 5)
-            throw new APIException("Maximum 5 images can be uploaded");
+        if (images.size() > AppConstants.MAX_IMAGE_NUMBER)
+            throw new APIException("Maximum" + AppConstants.MAX_IMAGE_NUMBER + "images can be uploaded");
 
         for (MultipartFile image : images) {
             String fileName = image.getOriginalFilename();

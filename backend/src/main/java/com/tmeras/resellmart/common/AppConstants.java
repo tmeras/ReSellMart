@@ -2,7 +2,7 @@ package com.tmeras.resellmart.common;
 
 public class AppConstants {
 
-    // Paging constants
+    // Pagination constants
     public static final String PAGE_NUMBER = "0";
     public static final Integer PAGE_NUMBER_INT = 0;
     public static final String PAGE_SIZE = "10";
@@ -12,6 +12,9 @@ public class AppConstants {
     public static final String SORT_PRODUCTS_BY = "id";
     public static final String SORT_ORDERS_BY = "id";
     public static final String SORT_USERS_BY = "id";
+
+    // Image upload constants
+    public static final Integer MAX_IMAGE_NUMBER = 5;
 
     // Thymeleaf template names
     public static final String USER_ACTIVATION_TEMPLATE = "activate_account";
