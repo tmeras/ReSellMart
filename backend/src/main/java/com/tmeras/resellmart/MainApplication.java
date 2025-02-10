@@ -28,7 +28,7 @@ public class MainApplication {
 		SpringApplication.run(MainApplication.class, args);
 	}
 
-	@Bean
+/*	@Bean
 	public CommandLineRunner runner(
 			RoleRepository roleRepository,
 			CategoryRepository categoryRepository,
@@ -125,5 +125,5 @@ public class MainApplication {
 				);
 			}
 		};
-	}
+	}*/
 }

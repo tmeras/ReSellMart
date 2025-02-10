@@ -245,7 +245,7 @@ public class ProductService {
             throw new OperationNotPermittedException("You do not have permission to upload images for this product");
 
         if (images.size() > AppConstants.MAX_IMAGE_NUMBER)
-            throw new APIException("Maximum" + AppConstants.MAX_IMAGE_NUMBER + "images can be uploaded");
+            throw new APIException("Maximum " + AppConstants.MAX_IMAGE_NUMBER + " images can be uploaded");
 
         for (MultipartFile image : images) {
             String fileName = image.getOriginalFilename();

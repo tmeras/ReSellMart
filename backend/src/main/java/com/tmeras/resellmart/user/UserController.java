@@ -52,15 +52,14 @@ public class UserController {
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
-    // TODO: Return user response
     @PutMapping("/{user-id}/image")
-    public ResponseEntity<?> uploadUserImage(
+    public ResponseEntity<UserResponse> uploadUserImage(
             @PathVariable(name = "user-id") Integer userId,
             @RequestPart("image") MultipartFile image,
             Authentication authentication
     ) throws IOException {
-        userService.uploadUserImage(image, userId, authentication);
-        return new ResponseEntity<>(HttpStatus.OK);
+        UserResponse updatedUser = userService.uploadUserImage(image, userId, authentication);
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
     @PostMapping("/{user-id}/cart/products")

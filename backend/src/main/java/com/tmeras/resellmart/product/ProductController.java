@@ -106,7 +106,6 @@ public class ProductController {
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
     }
 
-    // TODO: Switch to PATCH where appropriate
     @PutMapping("/{product-id}")
     public ResponseEntity<ProductResponse> update(
             @Valid @RequestBody ProductRequest productRequest,

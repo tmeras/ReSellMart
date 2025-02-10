@@ -95,7 +95,7 @@ public class UserService {
         return userResponse;
     }
 
-    public void uploadUserImage(MultipartFile image, Integer userId, Authentication authentication) throws IOException {
+    public UserResponse uploadUserImage(MultipartFile image, Integer userId, Authentication authentication) throws IOException {
         User currentUser = (User) authentication.getPrincipal();
 
         if (!Objects.equals(currentUser.getId(), userId))
@@ -113,7 +113,9 @@ public class UserService {
 
         String filePath = fileService.saveUserImage(image, userId);
         currentUser.setImagePath(filePath);
-        userRepository.save(currentUser);
+
+        currentUser = userRepository.save(currentUser);
+        return userMapper.toUserResponse(currentUser);
     }
 
     public CartItemResponse saveCartItem(CartItemRequest cartItemRequest, Integer userId, Authentication authentication) {

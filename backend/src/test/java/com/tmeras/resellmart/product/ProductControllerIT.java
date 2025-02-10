@@ -416,7 +416,7 @@ public class ProductControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage())
-                .isEqualTo("Maximum" + AppConstants.MAX_IMAGE_NUMBER + "images can be uploaded");
+                .isEqualTo("Maximum " + AppConstants.MAX_IMAGE_NUMBER + " images can be uploaded");
     }
 
     @Test
