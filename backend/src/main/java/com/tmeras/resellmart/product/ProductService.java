@@ -8,7 +8,9 @@ import com.tmeras.resellmart.exception.OperationNotPermittedException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.file.FileService;
 import com.tmeras.resellmart.user.User;
+import com.tmeras.resellmart.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,11 +29,12 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-//TODO: Add @Transactional?
+@Transactional
 public class ProductService {
 
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
+    private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final ProductMapper productMapper;
     private final FileService fileService;
@@ -39,8 +42,10 @@ public class ProductService {
     public ProductResponse save(ProductRequest productRequest, Authentication authentication) {
         productRequest.setId(null);
         User currentUser = (User) authentication.getPrincipal();
-        // TODO: Fetch current user here and assign it to the product
-        Category category = categoryRepository.findById(productRequest.getCategoryId())
+
+        // User is logged in, so already exists => just call .get() on optional to retrieve Hibernate-managed entity
+        currentUser = userRepository.findWithAssociationsById(currentUser.getId()).get();
+        Category category = categoryRepository.findWithAssociationsById(productRequest.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("No category found with ID: " + productRequest.getCategoryId()));
 
         if (productRequest.getPrice() < productRequest.getDiscountedPrice())
@@ -56,15 +61,13 @@ public class ProductService {
         return productMapper.toProductResponse(savedProduct);
     }
 
-    @Transactional
     public ProductResponse findById(Integer productId) {
-        return productRepository.findById(productId)
+        return productRepository.findWithAssociationsById(productId)
                 .map(productMapper::toProductResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
     }
 
     @PreAuthorize("hasRole('ADMIN')") //Only admins should be able to view both available and unavailable products
-    @Transactional
     public PageResponse<ProductResponse> findAll(
             Integer pageNumber, Integer pageSize, String sortBy, String sortDirection
     ) {
@@ -72,6 +75,11 @@ public class ProductService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
         Page<Product> products = productRepository.findAll(pageable);
+        // Initialize lazy associations
+        for(Product product : products) {
+            product.getImages().size();
+            product.getSeller().getRoles().size();
+        }
         List<ProductResponse> productResponses = products.stream()
                 .map(productMapper::toProductResponse)
                 .toList();
@@ -95,6 +103,11 @@ public class ProductService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
         Page<Product> products = productRepository.findAllBySellerIdNot(pageable, currentUser.getId());
+        // Initialize lazy associations
+        for(Product product : products) {
+            product.getImages().size();
+            product.getSeller().getRoles().size();
+        }
         List<ProductResponse> productResponses = products.stream()
                 .map(productMapper::toProductResponse)
                 .toList();
@@ -110,7 +123,7 @@ public class ProductService {
         );
     }
 
-    @Transactional
+
     public PageResponse<ProductResponse> findAllBySellerId(
             Integer pageNumber, Integer pageSize, String sortBy, String sortDirection, Integer sellerId
     ) {
@@ -118,6 +131,11 @@ public class ProductService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
         Page<Product> products = productRepository.findAllBySellerId(pageable, sellerId);
+        // Initialize lazy associations
+        for(Product product : products) {
+            product.getImages().size();
+            product.getSeller().getRoles().size();
+        }
         List<ProductResponse> productResponses = products.stream()
                 .map(productMapper::toProductResponse)
                 .toList();
@@ -141,6 +159,11 @@ public class ProductService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
         Page<Product> products = productRepository.findAllByCategoryId(pageable, categoryId, currentUser.getId());
+        // Initialize lazy associations
+        for(Product product : products) {
+            product.getImages().size();
+            product.getSeller().getRoles().size();
+        }
         List<ProductResponse> productResponses = products.stream()
                 .map(productMapper::toProductResponse)
                 .toList();
@@ -165,6 +188,11 @@ public class ProductService {
 
         //"%" + keyword.toLowerCase() + "%"
         Page<Product> products = productRepository.findAllByKeyword(pageable, keyword, currentUser.getId());
+        // Initialize lazy associations
+        for(Product product : products) {
+            product.getImages().size();
+            product.getSeller().getRoles().size();
+        }
         List<ProductResponse> productResponses = products.stream()
                 .map(productMapper::toProductResponse)
                 .toList();
@@ -181,9 +209,9 @@ public class ProductService {
 
     public ProductResponse update(ProductRequest productRequest, Integer productId, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
-        Category category = categoryRepository.findById(productRequest.getCategoryId())
+        Category category = categoryRepository.findWithAssociationsById(productRequest.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("No category found with ID: " + productRequest.getCategoryId()));
-        Product existingproduct = productRepository.findById(productId)
+        Product existingproduct = productRepository.findWithAssociationsById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
 
         if (!Objects.equals(existingproduct.getSeller().getId(), currentUser.getId()))
@@ -207,7 +235,7 @@ public class ProductService {
 
     public ProductResponse uploadProductImages(List<MultipartFile> images, Integer productId, Authentication authentication) throws IOException {
         User currentUser = (User) authentication.getPrincipal();
-        Product existingproduct = productRepository.findById(productId)
+        Product existingproduct = productRepository.findWithAssociationsById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
 
         if (!Objects.equals(existingproduct.getSeller().getId(), currentUser.getId()))
@@ -247,7 +275,7 @@ public class ProductService {
 
     public ProductResponse displayImage(Integer productId, Integer imageId, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
-        Product existingproduct = productRepository.findById(productId)
+        Product existingproduct = productRepository.findWithAssociationsById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
         ProductImage existingImage = productImageRepository.findById(imageId)
                 .orElseThrow(() -> new ResourceNotFoundException("No product image found with ID: " + imageId));
@@ -271,7 +299,7 @@ public class ProductService {
 
     @PreAuthorize("hasRole('ADMIN')") // Deletion possible by admins only, users can only mark products as unavailable
     public void delete(Integer productId) throws IOException {
-        Optional<Product> existingProduct = productRepository.findById(productId);
+        Optional<Product> existingProduct = productRepository.findWithImagesById(productId);
         if (existingProduct.isPresent() && existingProduct.get().getImages() != null)
             for (ProductImage productImage: existingProduct.get().getImages())
                 fileService.deleteFile(productImage.getFilePath());
