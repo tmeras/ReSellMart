@@ -3,6 +3,7 @@ package com.tmeras.resellmart.security;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class LogoutService implements LogoutHandler {
 
     private final TokenRepository tokenRepository;
@@ -42,7 +44,7 @@ public class LogoutService implements LogoutHandler {
                 return;
             }
 
-            // Invalidate all of the user's refresh tokens
+            // Revoke all of the user's refresh tokens
             try {
                 String userEmail = jwtService.extractUsername(accessToken);
                 List<Token> tokens = tokenRepository.findAllValidRefreshTokensByUserEmail(userEmail);

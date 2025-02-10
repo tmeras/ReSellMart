@@ -9,6 +9,8 @@ import com.tmeras.resellmart.file.FileService;
 import com.tmeras.resellmart.mfa.MfaService;
 import com.tmeras.resellmart.product.Product;
 import com.tmeras.resellmart.product.ProductRepository;
+import com.tmeras.resellmart.token.Token;
+import com.tmeras.resellmart.token.TokenRepository;
 import com.tmeras.resellmart.wishlist.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,6 +35,7 @@ import java.util.Set;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
     private final ProductRepository productRepository;
     private final CartItemRepository cartItemRepository;
     private final WishListItemRepository wishListItemRepository;
@@ -91,7 +94,6 @@ public class UserService {
         userResponse.setQrImageUri(qrImageUri);
         return userResponse;
     }
-
 
     public void uploadUserImage(MultipartFile image, Integer userId, Authentication authentication) throws IOException {
         User currentUser = (User) authentication.getPrincipal();
@@ -239,5 +241,47 @@ public class UserService {
             throw new OperationNotPermittedException("You do not have permission to modify this user's wishlist");
 
         wishListItemRepository.deleteByUserIdAndProductId(userId, productId);
+    }
+
+    public void disable(Integer userId, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        boolean isCurrentUserAdmin = currentUser.getRoles().stream()
+                .anyMatch(role -> role.getName().equals("ADMIN"));
+
+        // Users can disable (soft-delete) their own accounts and admins can disable any non-admin user
+        if (!Objects.equals(currentUser.getId(), userId) && !isCurrentUserAdmin)
+            throw new OperationNotPermittedException("You do not have permission to disable this user");
+
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("No user found with ID: " + userId));
+
+        boolean isExistingUserAdmin = existingUser.getRoles().stream()
+                .anyMatch(role -> role.getName().equals("ADMIN"));
+        if (isExistingUserAdmin)
+            throw new APIException("You cannot disable an admin user");
+
+        // Disable user
+        existingUser.setEnabled(false);
+        userRepository.save(existingUser);
+
+        // Revoke all refresh tokens belonging to the user
+        List<Token> refreshToken = tokenRepository.findAllValidRefreshTokensByUserEmail(existingUser.getEmail());
+        refreshToken.forEach(token -> token.setRevoked(true));
+        tokenRepository.saveAll(refreshToken);
+
+        // Mark all user products as unavailable
+        List<Product> userProducts = productRepository.findAllBySellerId(userId);
+        userProducts.forEach(product -> product.setAvailable(false));
+
+        productRepository.saveAll(userProducts);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public void enable(Integer userId) {
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("No user found with ID: " + userId));
+
+        existingUser.setEnabled(true);
+        userRepository.save(existingUser);
     }
 }
