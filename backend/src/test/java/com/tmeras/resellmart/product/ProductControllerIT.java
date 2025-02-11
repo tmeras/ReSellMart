@@ -3,6 +3,7 @@ package com.tmeras.resellmart.product;
 import com.tmeras.resellmart.TestDataUtils;
 import com.tmeras.resellmart.category.Category;
 import com.tmeras.resellmart.category.CategoryRepository;
+import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.ExceptionResponse;
 import com.tmeras.resellmart.role.Role;
@@ -189,11 +190,31 @@ public class ProductControllerIT {
                         20.0, 25.0,  ProductCondition.FAIR, 1,
                         true, productA.getCategory().getId());
 
-        ResponseEntity<ProductResponse> response =
+        ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/products", HttpMethod.POST,
-                        new HttpEntity<>(productRequest, headers), ProductResponse.class);
+                        new HttpEntity<>(productRequest, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("Discounted price cannot be higher than regular price");
+    }
+
+    @Test
+    public void shouldNotSaveProductWhenInvalidQuantity() {
+        ProductRequest productRequest =
+                new ProductRequest(3, "Test product C", "Description C",
+                        50.0, 25.0,  ProductCondition.FAIR, 0,
+                        true, productA.getCategory().getId());
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/products", HttpMethod.POST,
+                        new HttpEntity<>(productRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("Quantity of newly created product must be greater than be 0");
     }
 
     @Test
@@ -414,7 +435,8 @@ public class ProductControllerIT {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getMessage()).isEqualTo("Maximum 5 images can be uploaded");
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("Maximum " + AppConstants.MAX_IMAGE_NUMBER + " images can be uploaded");
     }
 
     @Test

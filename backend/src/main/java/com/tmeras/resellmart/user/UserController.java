@@ -52,15 +52,14 @@ public class UserController {
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
-    // TODO: Return user response
     @PutMapping("/{user-id}/image")
-    public ResponseEntity<?> uploadUserImage(
+    public ResponseEntity<UserResponse> uploadUserImage(
             @PathVariable(name = "user-id") Integer userId,
             @RequestPart("image") MultipartFile image,
             Authentication authentication
     ) throws IOException {
-        userService.uploadUserImage(image, userId, authentication);
-        return new ResponseEntity<>(HttpStatus.OK);
+        UserResponse updatedUser = userService.uploadUserImage(image, userId, authentication);
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
     @PostMapping("/{user-id}/cart/products")
@@ -134,5 +133,21 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    // TODO: User deletion endpoint (soft delete with marking products as unavailable)
+
+    @PatchMapping("/{user-id}/disable")
+    public ResponseEntity<?> disableUser(
+            @PathVariable(name = "user-id") Integer userId,
+            Authentication authentication
+    ) {
+        userService.disable(userId, authentication);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PatchMapping("/{user-id}/enable")
+    public ResponseEntity<?> enableUser(
+            @PathVariable(name = "user-id") Integer userId
+    ) {
+        userService.enable(userId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

@@ -28,6 +28,7 @@ public class MainApplication {
 		SpringApplication.run(MainApplication.class, args);
 	}
 
+	// TODO: Replace with migration script
 	/*@Bean
 	public CommandLineRunner runner(
 			RoleRepository roleRepository,

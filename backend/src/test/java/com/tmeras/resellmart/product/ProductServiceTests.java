@@ -126,7 +126,23 @@ public class ProductServiceTests {
         when(categoryRepository.findWithAssociationsById(productRequestA.getCategoryId()))
                 .thenReturn(Optional.of(productA.getCategory()));
 
-        assertThatThrownBy(() -> productService.save(productRequestA, authentication));
+        assertThatThrownBy(() -> productService.save(productRequestA, authentication))
+                .isInstanceOf(APIException.class)
+                .hasMessage("Discounted price cannot be higher than regular price");
+    }
+
+    @Test
+    public void shouldNotSaveProductWhenInvalidQuantity() {
+        productRequestA.setAvailableQuantity(0);
+
+        when(userRepository.findWithAssociationsById(productRequestA.getId()))
+                .thenReturn(Optional.of(productA.getSeller()));
+        when(categoryRepository.findWithAssociationsById(productRequestA.getCategoryId()))
+                .thenReturn(Optional.of(productA.getCategory()));
+
+        assertThatThrownBy(() -> productService.save(productRequestA, authentication))
+                .isInstanceOf(APIException.class)
+                .hasMessage("Quantity of newly created product must be greater than be 0");
     }
 
     @Test

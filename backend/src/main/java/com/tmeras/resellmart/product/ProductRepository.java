@@ -6,14 +6,14 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Integer> {
 
-    // TODO: Quantity edge case -> Add quantity>0 condition on this and other queries
     @Query("""
-            SELECT p FROM Product p
-            WHERE p.available = true AND p.seller.id <> :sellerId
+            SELECT p FROM Product p WHERE p.availableQuantity > 0 AND
+            p.available = true AND p.seller.id <> :sellerId
     """)
     Page<Product> findAllBySellerIdNot(Pageable pageable, Integer sellerId);
 
@@ -42,4 +42,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     @EntityGraph(attributePaths = {"images"})
     Optional<Product> findWithImagesById(Integer id);
+
+    List<Product> findAllBySellerId(Integer sellerId);
 }
