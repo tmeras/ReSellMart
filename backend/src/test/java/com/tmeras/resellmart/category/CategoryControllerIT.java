@@ -42,12 +42,12 @@ class CategoryControllerIT {
     private final JwtService jwtService;
     private final CategoryRepository categoryRepository;
 
+    // Used to add JWT in requests
+    private HttpHeaders headers;
+
     private Category parentCategory;
     private Category childCategory;
     private User user;
-
-    // Used to add include JWT in requests
-    private HttpHeaders headers;
 
     @Autowired
     public CategoryControllerIT(

@@ -10,6 +10,7 @@ import com.tmeras.resellmart.product.ProductRequest;
 import com.tmeras.resellmart.product.ProductResponse;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.user.User;
+import com.tmeras.resellmart.user.UserRequest;
 import com.tmeras.resellmart.user.UserResponse;
 
 import java.util.ArrayList;
@@ -29,8 +30,17 @@ public final class TestDataUtils {
                 .name("Test user A")
                 .password("password")
                 .email("testA@test.com")
+                .homeCountry("UK")
                 .enabled(true)
                 .roles(roles)
+                .build();
+    }
+
+    public static UserRequest createUserRequestA() {
+        return UserRequest.builder()
+                .name("Test User A")
+                .homeCountry("UK")
+                .mfaEnabled(false)
                 .build();
     }
 

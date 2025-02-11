@@ -46,7 +46,7 @@ public class UserService {
     private final MfaService mfaService;
 
     public UserResponse findById(Integer userId) {
-        return userRepository.findById(userId)
+        return userRepository.findWithAssociationsById(userId)
                 .map(userMapper::toUserResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("No user found with ID " + userId));
     }
@@ -57,6 +57,9 @@ public class UserService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
         Page<User> users = userRepository.findAll(pageable);
+        // Initialize lazy associations
+        for(User user : users)
+            user.getRoles().size();
         List<UserResponse> userResponses = users.stream()
                 .map(userMapper::toUserResponse)
                 .toList();

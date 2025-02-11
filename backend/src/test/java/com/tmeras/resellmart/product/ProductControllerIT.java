@@ -60,12 +60,12 @@ public class ProductControllerIT {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
 
-    private Product productA;
-    private ProductRequest productRequestA;
-    private Product productB;
-
-    // Used to add include JWT in requests
+    // Used to add JWT in requests
     private HttpHeaders headers;
+
+    private Product productA;
+    private Product productB;
+    private ProductRequest productRequestA;
 
     @Autowired
     public ProductControllerIT(
@@ -252,6 +252,8 @@ public class ProductControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getContent().size()).isEqualTo(2);
+        assertThat(response.getBody().getContent().get(0).getName()).isEqualTo(productA.getName());
+        assertThat(response.getBody().getContent().get(1).getName()).isEqualTo(productB.getName());
     }
 
     @Test
