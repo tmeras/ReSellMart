@@ -11,10 +11,9 @@ import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Integer> {
 
-    // TODO: Quantity edge case -> Add quantity>0 condition on this and other queries
     @Query("""
-            SELECT p FROM Product p
-            WHERE p.available = true AND p.seller.id <> :sellerId
+            SELECT p FROM Product p WHERE p.availableQuantity > 0 AND
+            p.available = true AND p.seller.id <> :sellerId
     """)
     Page<Product> findAllBySellerIdNot(Pageable pageable, Integer sellerId);
 

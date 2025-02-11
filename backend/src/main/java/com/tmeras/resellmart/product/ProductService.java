@@ -52,7 +52,8 @@ public class ProductService {
         if (productRequest.getPrice() < productRequest.getDiscountedPrice())
             throw new APIException("Discounted price cannot be higher than regular price");
 
-        // TODO: Quantity edge case -> Ensure quantity>0 on newly created items
+        if(productRequest.getAvailableQuantity() == 0)
+            throw new APIException("Quantity of newly created product must be greater than be 0");
 
         Product product = productMapper.toProduct(productRequest);
         product.setSeller(currentUser);
