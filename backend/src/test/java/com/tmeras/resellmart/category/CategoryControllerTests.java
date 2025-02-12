@@ -18,7 +18,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -81,11 +83,16 @@ public class CategoryControllerTests {
     @Test
     public void shouldNotSaveCategoryWhenInvalidRequest() throws Exception {
         parentCategoryRequest.setName(null);
+        Map<String, String> expectedErrors = new HashMap<>();
+        expectedErrors.put("name", "Name must not be empty");
 
-        mockMvc.perform(post("/api/categories")
+        MvcResult mvcResult = mockMvc.perform(post("/api/categories")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(parentCategoryRequest))
-        ).andExpect(status().isBadRequest());
+        ).andExpect(status().isBadRequest()).andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(expectedErrors));
     }
 
     @Test

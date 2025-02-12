@@ -26,7 +26,9 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -88,12 +90,16 @@ public class ProductControllerTests {
     @Test
     public void shouldNotSaveProductWhenInvalidRequest() throws Exception {
         productRequestA.setName(null);
-        // TODO: Add expected errors
+        Map<String, String> expectedErrors = new HashMap<>();
+        expectedErrors.put("name", "Name must not be empty");
 
-        mockMvc.perform(post("/api/products")
+        MvcResult mvcResult = mockMvc.perform(post("/api/products")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(productRequestA))
-        ).andExpect(status().isBadRequest());
+        ).andExpect(status().isBadRequest()).andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(expectedErrors));
     }
 
     @Test

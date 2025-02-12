@@ -108,13 +108,16 @@ public class ProductServiceTests {
 
     @Test
     public void shouldNotSaveProductWhenInvalidCategoryId() {
+        productRequestA.setCategoryId(99);
+
         when(userRepository.findWithAssociationsById(productRequestA.getId()))
                 .thenReturn(Optional.of(productA.getSeller()));
         when(categoryRepository.findWithAssociationsById(productRequestA.getCategoryId()))
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> productService.save(productRequestA, authentication))
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No category found with ID: 99");
     }
 
     @Test
@@ -160,7 +163,8 @@ public class ProductServiceTests {
         when(productRepository.findWithAssociationsById(99)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> productService.findById(99))
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No product found with ID: 99");
     }
 
     @Test
@@ -371,7 +375,8 @@ public class ProductServiceTests {
         when(productRepository.findWithAssociationsById(99)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> productService.uploadProductImages(images, 99, authentication))
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No product found with ID: 99");
     }
 
     @Test
@@ -392,7 +397,8 @@ public class ProductServiceTests {
         when(productRepository.findWithAssociationsById(productRequestA.getId())).thenReturn(Optional.of(productA));
 
         assertThatThrownBy(() -> productService.uploadProductImages(images, productRequestA.getId(), authentication))
-                .isInstanceOf(OperationNotPermittedException.class);
+                .isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to upload images for this product");
     }
 
     @Test
@@ -527,7 +533,8 @@ public class ProductServiceTests {
         when(productImageRepository.findById(productImageA.getId())).thenReturn(Optional.of(productImageA));
 
         assertThatThrownBy(() -> productService.displayImage(productRequestA.getId(), productImageA.getId(), authentication))
-                .isInstanceOf(OperationNotPermittedException.class);
+                .isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to manage images for this product");
     }
 
     @Test

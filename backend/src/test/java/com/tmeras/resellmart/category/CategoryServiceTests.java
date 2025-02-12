@@ -73,16 +73,19 @@ public class CategoryServiceTests {
         when(categoryRepository.findByName(categoryRequestA.getName())).thenReturn(Optional.of(categoryA));
 
         assertThatThrownBy(() -> categoryService.save(categoryRequestA))
-                .isInstanceOf(ResourceAlreadyExistsException.class);
+                .isInstanceOf(ResourceAlreadyExistsException.class)
+                .hasMessage("A category with the name: '" + categoryRequestA.getName() + "' already exists");
     }
 
     @Test
     public void shouldNotSaveCategoryWhenInvalidParentId() {
+        categoryRequestB.setParentId(99);
         when(categoryRepository.findByName(categoryRequestB.getName())).thenReturn(Optional.empty());
-        when(categoryRepository.findById(categoryRequestA.getId())).thenReturn(Optional.empty());
+        when(categoryRepository.findById(99)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> categoryService.save(categoryRequestB))
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No parent category found with ID: 99");
     }
 
     @Test
@@ -90,8 +93,6 @@ public class CategoryServiceTests {
         Category categoryC = new Category(3, "Test category A", null);
         categoryA.setParentCategory(categoryC);
 
-        // Evaluate that an expression is thrown if the parent category
-        // of the category being saved also has a parent
         when(categoryRepository.findByName(categoryRequestB.getName())).thenReturn(Optional.empty());
         when(categoryRepository.findById(categoryRequestA.getId())).thenReturn(Optional.of(categoryA));
 
@@ -115,7 +116,8 @@ public class CategoryServiceTests {
         when(categoryRepository.findById(99)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> categoryService.findById(99))
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No category found with ID: 99");
     }
 
     @Test
@@ -187,7 +189,8 @@ public class CategoryServiceTests {
         when(categoryRepository.findById(99)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> categoryService.update(categoryRequestA, 99))
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No category found with ID: 99");
     }
 
     @Test
