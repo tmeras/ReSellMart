@@ -4,6 +4,7 @@ import com.tmeras.resellmart.TestDataUtils;
 import com.tmeras.resellmart.category.Category;
 import com.tmeras.resellmart.category.CategoryRepository;
 import com.tmeras.resellmart.common.PageResponse;
+import com.tmeras.resellmart.exception.ExceptionResponse;
 import com.tmeras.resellmart.product.Product;
 import com.tmeras.resellmart.product.ProductRepository;
 import com.tmeras.resellmart.role.Role;
@@ -23,6 +24,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -158,6 +160,49 @@ public class UserControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
+    @Test
+    public void shouldUpdateUserWhenValidRequest() {
+        userRequestA.setName("Updated user A");
+        userRequestA.setHomeCountry("Updated home country");
+        userRequestA.setMfaEnabled(true);
 
+        ResponseEntity<UserResponse> response =
+                restTemplate.exchange("/api/users/" + userA.getId(), HttpMethod.PUT,
+                        new HttpEntity<>(userRequestA, headers), UserResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getName()).isEqualTo(userRequestA.getName());
+        assertThat(response.getBody().getHomeCountry()).isEqualTo(userRequestA.getHomeCountry());
+        assertThat(response.getBody().isMfaEnabled()).isEqualTo(userRequestA.isMfaEnabled());
+        assertThat(response.getBody().getQrImageUri()).isNotNull();
+    }
+
+    @Test
+    public void shouldNotUpdateUserWhenInvalidRequest() {
+        userRequestA.setName(null);
+        Map<String, String> expectedErrors = new HashMap<>();
+        expectedErrors.put("name", "Name must not be empty");
+
+        ResponseEntity<Map<String, String>> response =
+                restTemplate.exchange("/api/users/" + userA.getId(), HttpMethod.PUT,
+                        new HttpEntity<>(userRequestA, headers), new ParameterizedTypeReference<>() {});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).isEqualTo(expectedErrors);
+    }
+
+    @Test
+    public void shouldNotUpdateUserWheUserIsNotLoggedIn() {
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + userB.getId(), HttpMethod.PUT,
+                        new HttpEntity<>(userRequestA, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("You do not have permission to update the details of this user");
+    }
 
 }

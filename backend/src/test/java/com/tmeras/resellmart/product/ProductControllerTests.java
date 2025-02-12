@@ -88,6 +88,7 @@ public class ProductControllerTests {
     @Test
     public void shouldNotSaveProductWhenInvalidRequest() throws Exception {
         productRequestA.setName(null);
+        // TODO: Add expected errors
 
         mockMvc.perform(post("/api/products")
                 .contentType("application/json")
