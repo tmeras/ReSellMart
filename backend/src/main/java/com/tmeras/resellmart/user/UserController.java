@@ -134,20 +134,18 @@ public class UserController {
     }
 
 
-    @PatchMapping("/{user-id}/disable")
-    public ResponseEntity<?> disableUser(
+    @PatchMapping("/{user-id}/enabled")
+    public ResponseEntity<?> enableOrDisableUser(
+            @Valid @RequestBody UserEnableRequest userEnableRequest,
             @PathVariable(name = "user-id") Integer userId,
             Authentication authentication
     ) {
-        userService.disable(userId, authentication);
+        if (userEnableRequest.isEnabled())
+            userService.enable(userId);
+        else
+            userService.disable(userId, authentication);
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PatchMapping("/{user-id}/enable")
-    public ResponseEntity<?> enableUser(
-            @PathVariable(name = "user-id") Integer userId
-    ) {
-        userService.enable(userId);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
 }
