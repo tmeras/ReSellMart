@@ -1,6 +1,10 @@
 package com.tmeras.resellmart.user;
 
 import com.tmeras.resellmart.TestDataUtils;
+import com.tmeras.resellmart.cart.CartItem;
+import com.tmeras.resellmart.cart.CartItemRepository;
+import com.tmeras.resellmart.cart.CartItemRequest;
+import com.tmeras.resellmart.cart.CartItemResponse;
 import com.tmeras.resellmart.category.Category;
 import com.tmeras.resellmart.category.CategoryRepository;
 import com.tmeras.resellmart.common.PageResponse;
@@ -10,6 +14,7 @@ import com.tmeras.resellmart.product.ProductRepository;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.token.JwtService;
+import com.tmeras.resellmart.wishlist.WishListItemRepository;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +38,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -57,6 +64,8 @@ public class UserControllerIT {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
+    private final CartItemRepository cartItemRepository;
+    private final WishListItemRepository wishListItemRepository;
 
     // Used to add JWT in requests
     private HttpHeaders headers;
@@ -72,7 +81,8 @@ public class UserControllerIT {
             TestRestTemplate restTemplate, PasswordEncoder passwordEncoder,
             JwtService jwtService, RoleRepository roleRepository,
             UserRepository userRepository, CategoryRepository categoryRepository,
-            ProductRepository productRepository
+            ProductRepository productRepository, CartItemRepository cartItemRepository,
+            WishListItemRepository wishListItemRepository
     ) {
         this.restTemplate = restTemplate;
         this.passwordEncoder = passwordEncoder;
@@ -81,11 +91,15 @@ public class UserControllerIT {
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
+        this.cartItemRepository = cartItemRepository;
+        this.wishListItemRepository = wishListItemRepository;
     }
 
     @BeforeEach
     public void setUp() {
         // Empty relevant database tables
+        wishListItemRepository.deleteAll();
+        cartItemRepository.deleteAll();
         productRepository.deleteAll();
         categoryRepository.deleteAll();
         userRepository.deleteAll();
@@ -270,6 +284,226 @@ public class UserControllerIT {
         assertThat(response.getBody().getMessage()).contains("Only images can be uploaded");
     }
 
+    @Test
+    public void shouldSaveCartItemWhenValidRequest() {
+        CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 1, userA.getId());
 
+        ResponseEntity<CartItemResponse> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/cart/products", HttpMethod.POST,
+                        new HttpEntity<>(cartItemRequest, headers), CartItemResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getId()).isNotNull();
+        assertThat(response.getBody().getProduct().getId()).isEqualTo(productB.getId());
+        assertThat(response.getBody().getQuantity()).isEqualTo(cartItemRequest.getQuantity());
+        assertThat(response.getBody().getAddedAt()).isNotNull();
+    }
+
+    @Test
+    public void shouldNotSaveCartItemWhenInvalidRequest() {
+        CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 0, userA.getId());
+        Map<String, String> expectedErrors = new HashMap<>();
+        expectedErrors.put("quantity", "Quantity must be a positive value");
+
+        ResponseEntity<Map<String, String>> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/cart/products", HttpMethod.POST,
+                        new HttpEntity<>(cartItemRequest, headers), new ParameterizedTypeReference<Map<String, String>>() {});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).isEqualTo(expectedErrors);
+    }
+
+    @Test
+    public void shouldNotSaveCartItemWhenCartOwnerIsNotLoggedIn() {
+        CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 1, userA.getId());
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + userB.getId() + "/cart/products", HttpMethod.POST,
+                        new HttpEntity<>(cartItemRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("You do not have permission to add items to this user's cart");
+    }
+
+    @Test
+    public void shouldNotSaveCartItemWhenDuplicateCartItem() {
+        CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 1, userA.getId());
+        cartItemRepository.save(new CartItem(null, productB, 1, userA, LocalDateTime.now()));
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/cart/products", HttpMethod.POST,
+                        new HttpEntity<>(cartItemRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("This product is already in your cart");
+    }
+
+    @Test
+    public void shouldNotSaveCartItemWhenInvalidProductId() {
+        CartItemRequest cartItemRequest = new CartItemRequest(99, 1, userA.getId());
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/cart/products", HttpMethod.POST,
+                        new HttpEntity<>(cartItemRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).contains("No product found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotSaveCartItemWhenSellerIsLoggedIn() {
+        CartItemRequest cartItemRequest = new CartItemRequest(productA.getId(), 1, userA.getId());
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/cart/products", HttpMethod.POST,
+                        new HttpEntity<>(cartItemRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("You cannot add your own items to your cart");
+    }
+
+    @Test
+    public void shouldNotSaveCartItemWhenProductIsUnavailable() {
+        CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 1, userA.getId());
+        productB.setAvailable(false);
+        productRepository.save(productB);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/cart/products", HttpMethod.POST,
+                        new HttpEntity<>(cartItemRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("Unavailable products cannot be added to the cart");
+    }
+
+    @Test
+    public void shouldNotSaveCartItemWhenInvalidQuantity() {
+        CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 99, userA.getId());
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/cart/products", HttpMethod.POST,
+                        new HttpEntity<>(cartItemRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("Requested product quantity cannot be higher than available quantity");
+    }
+
+    @Test
+    public void shouldFindAllCartItemsByUserId() {
+        cartItemRepository.save(new CartItem(null, productB, 1, userA, LocalDateTime.now()));
+
+        ResponseEntity<List<CartItemResponse>> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/cart/products", HttpMethod.GET,
+                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().size()).isEqualTo(1);
+        assertThat(response.getBody().get(0).getProduct().getName()).isEqualTo(productB.getName());
+    }
+
+    @Test
+    public void shouldNotFindAllCartItemsByUserIdWhenInvalidUserId() {
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + 99 + "/cart/products", HttpMethod.GET,
+                        new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("You do not have permission to view this user's cart");
+    }
+
+    @Test
+    public void shouldUpdateCartItemQuantityWhenValidRequest() {
+        cartItemRepository.save(new CartItem(null, productB, 1, userA, LocalDateTime.now()));
+        CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 2, userA.getId());
+
+        ResponseEntity<CartItemResponse> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/cart/products/" + productB.getId(),
+                        HttpMethod.PATCH, new HttpEntity<>(cartItemRequest, headers), CartItemResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getQuantity()).isEqualTo(2);
+    }
+
+    @Test
+    public void shouldNotUpdateCartItemQuantityWhenCartOwnerIsNotLoggedIn() {
+        cartItemRepository.save(new CartItem(null, productB, 1, userA, LocalDateTime.now()));
+        CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 2, userA.getId());
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + userB.getId() + "/cart/products/"  + productB.getId(),
+                        HttpMethod.PATCH, new HttpEntity<>(cartItemRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("You do not have permission to modify this user's cart");
+    }
+
+    @Test
+    public void shouldNotUpdateCartItemQuantityWhenCartItemDoesNotExist() {
+        CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 2, userA.getId());
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/cart/products/" + productB.getId(),
+                        HttpMethod.PATCH, new HttpEntity<>(cartItemRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("The specified product does not exist in your cart");
+    }
+
+    @Test
+    public void shouldNotUpdateCartItemQuantityWhenInvalidQuantity() {
+        cartItemRepository.save(new CartItem(null, productB, 1, userA, LocalDateTime.now()));
+        CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 99, userA.getId());
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/cart/products/" + productB.getId(),
+                        HttpMethod.PATCH, new HttpEntity<>(cartItemRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("Requested product quantity cannot be higher than available quantity");
+    }
+
+    @Test
+    public void shouldDeleteCartItemWhenValidRequest() {
+        cartItemRepository.save(new CartItem(null, productB, 1, userA, LocalDateTime.now()));
+
+        ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userA.getId() + "/cart/products/" + productB.getId(),
+                HttpMethod.DELETE, new HttpEntity<>(headers), Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    }
+
+    @Test
+    public void shouldNotDeleteCartItemWhenCartOwnerIsNotLoggedIn() {
+        cartItemRepository.save(new CartItem(null, productB, 1, userA, LocalDateTime.now()));
+
+        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userB.getId() + "/cart/products/" + productB.getId(),
+                HttpMethod.DELETE, new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("You do not have permission to modify this user's cart");
+    }
 
 }

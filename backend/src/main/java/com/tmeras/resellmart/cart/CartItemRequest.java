@@ -14,7 +14,7 @@ public class CartItemRequest {
     @NotNull(message = "Product ID must not be empty")
     private Integer productId;
 
-    @Positive(message = "Product quantity must be a positive value")
+    @Positive(message = "Quantity must be a positive value")
     private Integer quantity;
 
     private Integer userId;
