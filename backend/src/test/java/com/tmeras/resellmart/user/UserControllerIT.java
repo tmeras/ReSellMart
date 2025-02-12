@@ -14,7 +14,10 @@ import com.tmeras.resellmart.product.ProductRepository;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.token.JwtService;
+import com.tmeras.resellmart.wishlist.WishListItem;
 import com.tmeras.resellmart.wishlist.WishListItemRepository;
+import com.tmeras.resellmart.wishlist.WishListItemRequest;
+import com.tmeras.resellmart.wishlist.WishListItemResponse;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,6 +49,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+// TODO: Code coverage
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {"application.file.upload.user-images-path=./test-uploads/user-images"}
@@ -338,7 +342,7 @@ public class UserControllerIT {
                 restTemplate.exchange("/api/users/" + userA.getId() + "/cart/products", HttpMethod.POST,
                         new HttpEntity<>(cartItemRequest, headers), ExceptionResponse.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage()).isEqualTo("This product is already in your cart");
     }
@@ -401,7 +405,7 @@ public class UserControllerIT {
     }
 
     @Test
-    public void shouldFindAllCartItemsByUserId() {
+    public void shouldFindAllCartItemsByUserIdWhenValidUserId() {
         cartItemRepository.save(new CartItem(null, productB, 1, userA, LocalDateTime.now()));
 
         ResponseEntity<List<CartItemResponse>> response =
@@ -491,6 +495,7 @@ public class UserControllerIT {
                 HttpMethod.DELETE, new HttpEntity<>(headers), Object.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(cartItemRepository.count()).isEqualTo(0);
     }
 
     @Test
@@ -505,5 +510,164 @@ public class UserControllerIT {
         assertThat(response.getBody().getMessage())
                 .isEqualTo("You do not have permission to modify this user's cart");
     }
+
+    @Test
+    public void shouldSaveWishListItemWhenValidRequest() {
+        WishListItemRequest wishListItemRequest = new WishListItemRequest(productB.getId(), userA.getId());
+
+        ResponseEntity<WishListItemResponse> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/wishlist/products", HttpMethod.POST,
+                        new HttpEntity<>(wishListItemRequest, headers), WishListItemResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getProduct().getId()).isEqualTo(productB.getId());
+    }
+
+    @Test
+    public void shouldNotSaveWishListItemWhenListOwnerIsNotLoggedIn() {
+        WishListItemRequest wishListItemRequest = new WishListItemRequest(productB.getId(), userA.getId());
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + userB.getId() + "/wishlist/products", HttpMethod.POST,
+                        new HttpEntity<>(wishListItemRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("You do not have permission to add items to this user's wishlist");
+    }
+
+    @Test
+    public void shouldNotSaveWishListItemWhenInvalidRequest() {
+        WishListItemRequest wishListItemRequest = new WishListItemRequest(null, userA.getId());
+        Map<String, String> expectedErrors = new HashMap<>();
+        expectedErrors.put("productId", "Product ID must not be empty");
+
+        ResponseEntity<Map<String, String>> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/wishlist/products", HttpMethod.POST,
+                        new HttpEntity<>(wishListItemRequest, headers), new ParameterizedTypeReference<>() {});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).isEqualTo(expectedErrors);
+    }
+
+    @Test
+    public void shouldNotSaveWishListItemWhenDuplicateWishlistItem() {
+        wishListItemRepository.save(new WishListItem(null, LocalDateTime.now(), productB, userA));
+        WishListItemRequest wishListItemRequest = new WishListItemRequest(productB.getId(), userA.getId());
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/wishlist/products", HttpMethod.POST,
+                        new HttpEntity<>(wishListItemRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("This product is already in your wishlist");
+    }
+
+    @Test
+    public void shouldNotSaveWishListItemWhenInvalidProductId() {
+        WishListItemRequest wishListItemRequest = new WishListItemRequest(99, userA.getId());
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/wishlist/products", HttpMethod.POST,
+                        new HttpEntity<>(wishListItemRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("No product found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotSaveWishListItemWhenSellerIsLoggedIn() {
+        WishListItemRequest wishListItemRequest = new WishListItemRequest(productA.getId(), userA.getId());
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/wishlist/products", HttpMethod.POST,
+                        new HttpEntity<>(wishListItemRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("You cannot add your own items to your wishlist");
+    }
+
+    @Test
+    public void shouldNotSaveWishListItemWhenProductIsUnavailable() {
+        productB.setAvailable(false);
+        productRepository.save(productB);
+        WishListItemRequest wishListItemRequest = new WishListItemRequest(productB.getId(), userA.getId());
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/wishlist/products", HttpMethod.POST,
+                        new HttpEntity<>(wishListItemRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("Unavailable products cannot be added to the wishlist");
+    }
+
+    @Test
+    public void shouldFindAllWishlistItemsByUserIdWhenValidUserId() {
+        wishListItemRepository.save(new WishListItem(null, LocalDateTime.now(), productB, userA));
+
+        ResponseEntity<List<WishListItemResponse>> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/wishlist/products", HttpMethod.GET,
+                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().size()).isEqualTo(1);
+        assertThat(response.getBody().get(0).getProduct().getId()).isEqualTo(productB.getId());
+    }
+
+    @Test
+    public void shouldNotFindAllWishlistItemsByUserIdWhenInvalidUserId() {
+        wishListItemRepository.save(new WishListItem(null, LocalDateTime.now(), productB, userA));
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + 99+ "/wishlist/products", HttpMethod.GET,
+                        new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("You do not have permission to view this user's wishlist");
+    }
+
+    @Test
+    public void shouldDeleteWishListItemWhenValidRequest() {
+        wishListItemRepository.save(new WishListItem(null, LocalDateTime.now(), productB, userA));
+
+        ResponseEntity<?> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/wishlist/products/" + productB.getId(), HttpMethod.DELETE,
+                        new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(wishListItemRepository.count()).isEqualTo(0);
+    }
+
+    @Test
+    public void shouldNotDeleteWishListItemWhenListOwnerIsNotLoggedIn() {
+        wishListItemRepository.save(new WishListItem(null, LocalDateTime.now(), productB, userA));
+        String testJwt = jwtService.generateAccessToken(new HashMap<>(), userB);
+        headers.set("Authorization", "Bearer " + testJwt);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/wishlist/products/" + productB.getId(), HttpMethod.DELETE,
+                        new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("You do not have permission to modify this user's wishlist");
+    }
+
+
 
 }

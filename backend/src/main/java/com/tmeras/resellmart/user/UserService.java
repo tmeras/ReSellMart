@@ -4,6 +4,7 @@ import com.tmeras.resellmart.cart.*;
 import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.APIException;
 import com.tmeras.resellmart.exception.OperationNotPermittedException;
+import com.tmeras.resellmart.exception.ResourceAlreadyExistsException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.file.FileService;
 import com.tmeras.resellmart.mfa.MfaService;
@@ -128,7 +129,7 @@ public class UserService {
             throw new OperationNotPermittedException("You do not have permission to add items to this user's cart");
 
         if (cartItemRepository.existsByUserIdAndProductId(userId, cartItemRequest.getProductId()))
-            throw new APIException("This product is already in your cart");
+            throw new ResourceAlreadyExistsException("This product is already in your cart");
 
         // User is logged in, so already exists => just call .get() on optional to retrieve Hibernate-managed entity
         currentUser = userRepository.findById(userId).get();
@@ -204,7 +205,7 @@ public class UserService {
             throw new OperationNotPermittedException("You do not have permission to add items to this user's wishlist");
 
         if (wishListItemRepository.existsByUserIdAndProductId(userId, wishListItemRequest.getProductId()))
-            throw new APIException("This product is already in your wishlist");
+            throw new ResourceAlreadyExistsException("This product is already in your wishlist");
 
         // User is logged in, so already exists => just call .get() on optional to retrieve Hibernate-managed entity
         currentUser = userRepository.findById(userId).get();
