@@ -10,6 +10,8 @@ import com.tmeras.resellmart.product.ProductRepository;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.token.JwtService;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,19 +19,30 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {"application.file.upload.user-images-path=./test-uploads/user-images"}
+)
 @Testcontainers
 public class UserControllerIT {
 
@@ -110,6 +123,13 @@ public class UserControllerIT {
         String testJwt = jwtService.generateAccessToken(new HashMap<>(), userA);
         headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + testJwt);
+    }
+
+    @AfterEach
+    public void tearDown() throws IOException {
+        File uploadsDirectory = new File("test-uploads");
+        if (uploadsDirectory.exists())
+            FileUtils.deleteDirectory(uploadsDirectory);
     }
 
     @Test
@@ -204,5 +224,52 @@ public class UserControllerIT {
         assertThat(response.getBody().getMessage())
                 .isEqualTo("You do not have permission to update the details of this user");
     }
+
+    @Test
+    public void shouldUploadUserImageWhenValidRequest() {
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
+        requestBody.add("image", new ClassPathResource("test_picture.png"));
+
+        ResponseEntity<UserResponse> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/image", HttpMethod.PUT,
+                        new HttpEntity<>(requestBody, headers), UserResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getProfileImage()).isNotNull();
+    }
+
+    @Test
+    public void shouldNotUploadUserImageWhenUserIsNotLoggedIn() {
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
+        requestBody.add("image", new ClassPathResource("test_picture.png"));
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + userB.getId() + "/image", HttpMethod.PUT,
+                        new HttpEntity<>(requestBody, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("You do not have permission to update this user's profile image");
+    }
+
+    @Test
+    public void shouldNotUploadUserImageWhenInvalidFileExtension() {
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
+        requestBody.add("image", new ClassPathResource("test_file.txt"));
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/image", HttpMethod.PUT,
+                        new HttpEntity<>(requestBody, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).contains("Only images can be uploaded");
+    }
+
+
 
 }

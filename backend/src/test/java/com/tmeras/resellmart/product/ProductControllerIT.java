@@ -37,10 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = {
-                "application.file.upload.product-images-path=./test-uploads/product-images",
-                "application.file.upload.user-images-path=./test-uploads/user-images"
-        }
+        properties = {"application.file.upload.product-images-path=./test-uploads/product-images"}
 )
 @Testcontainers
 public class ProductControllerIT {
@@ -124,7 +121,6 @@ public class ProductControllerIT {
 
     @AfterAll
     public static void tearDown() throws IOException {
-        // Delete test uploads directory, if it exists
         File uploadsDirectory = new File("test-uploads");
         if (uploadsDirectory.exists())
             FileUtils.deleteDirectory(uploadsDirectory);

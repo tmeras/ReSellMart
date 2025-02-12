@@ -30,4 +30,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### File Upload Directories ###
 /uploads/
+/test-uploads/
