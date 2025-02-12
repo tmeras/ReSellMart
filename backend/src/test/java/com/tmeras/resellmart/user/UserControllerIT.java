@@ -645,8 +645,8 @@ public class UserControllerIT {
         wishListItemRepository.save(new WishListItem(null, LocalDateTime.now(), productB, userA));
 
         ResponseEntity<?> response =
-                restTemplate.exchange("/api/users/" + userA.getId() + "/wishlist/products/" + productB.getId(), HttpMethod.DELETE,
-                        new HttpEntity<>(headers), ExceptionResponse.class);
+                restTemplate.exchange("/api/users/" + userA.getId() + "/wishlist/products/" + productB.getId(),
+                        HttpMethod.DELETE, new HttpEntity<>(headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         assertThat(wishListItemRepository.count()).isEqualTo(0);
@@ -659,8 +659,8 @@ public class UserControllerIT {
         headers.set("Authorization", "Bearer " + testJwt);
 
         ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/users/" + userA.getId() + "/wishlist/products/" + productB.getId(), HttpMethod.DELETE,
-                        new HttpEntity<>(headers), ExceptionResponse.class);
+                restTemplate.exchange("/api/users/" + userA.getId() + "/wishlist/products/" + productB.getId(),
+                        HttpMethod.DELETE, new HttpEntity<>(headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         assertThat(response.getBody()).isNotNull();
@@ -668,6 +668,95 @@ public class UserControllerIT {
                 .isEqualTo("You do not have permission to modify this user's wishlist");
     }
 
+    @Test
+    public void shouldDisableUserWhenValidRequest() {
+        UserEnableRequest userEnableRequest = new UserEnableRequest(false);
+        // Downgrade admin user
+        userA.setRoles(Set.of(userB.getRoles().stream().findFirst().get()));
+        userRepository.save(userA);
 
+        ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userA.getId() + "/enabled",
+                HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), Object.class);
 
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(userRepository.findById(userA.getId()).get().isEnabled()).isFalse();
+        assertThat(productRepository.findAllBySellerId(userA.getId()).get(0).isAvailable()).isFalse();
+    }
+
+    @Test
+    public void shouldNotDisableUserWhenUserOrAdminIsNotLoggedIn() {
+        UserEnableRequest userEnableRequest = new UserEnableRequest(false);
+        // Downgrade admin user
+        userA.setRoles(Set.of(userB.getRoles().stream().findFirst().get()));
+        userRepository.save(userA);
+
+        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userB.getId() + "/enabled",
+                HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("You do not have permission to disable this user");
+    }
+
+    @Test
+    public void shouldNotDisableUserWhenInvalidUserId() {
+        UserEnableRequest userEnableRequest = new UserEnableRequest(false);
+
+        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + 99 + "/enabled",
+                HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("No user found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotDisableAdminUser() {
+        UserEnableRequest userEnableRequest = new UserEnableRequest(false);
+
+        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userA.getId() + "/enabled",
+                HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("You cannot disable an admin user");
+    }
+
+    @Test
+    public void shouldEnableUserWhenValidRequest() {
+        UserEnableRequest userEnableRequest = new UserEnableRequest(true);
+        userB.setEnabled(false);
+        userRepository.save(userB);
+
+        ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userB.getId() + "/enabled",
+                HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(userRepository.findById(userB.getId()).get().isEnabled()).isTrue();
+    }
+
+    @Test
+    public void shouldNotEnableUserWhenNonAdminUserIsLoggedIn() {
+        UserEnableRequest userEnableRequest = new UserEnableRequest(true);
+        String testJwt = jwtService.generateAccessToken(new HashMap<>(), userB);
+        headers.set("Authorization", "Bearer " + testJwt);
+
+        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userA.getId() + "/enabled",
+                HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    public void shouldNotEnableUserWhenInvalidUserId() {
+        UserEnableRequest userEnableRequest = new UserEnableRequest(true);
+
+        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + 99 + "/enabled",
+                HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("No user found with ID: 99");
+    }
 }
