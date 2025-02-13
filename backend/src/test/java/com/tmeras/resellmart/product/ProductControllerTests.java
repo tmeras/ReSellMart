@@ -252,7 +252,6 @@ public class ProductControllerTests {
 
     @Test
     public void shouldUploadProductImages() throws Exception {
-
         MockMultipartFile image1 = new MockMultipartFile(
                 "images", "test_image_1.jpeg",
                 "image/jpeg", Files.readAllBytes(TEST_IMAGE_PATH_1)
