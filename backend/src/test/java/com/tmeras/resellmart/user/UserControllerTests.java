@@ -12,6 +12,8 @@ import com.tmeras.resellmart.product.Product;
 import com.tmeras.resellmart.product.ProductResponse;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.token.JwtFilter;
+import com.tmeras.resellmart.wishlist.WishListItemRequest;
+import com.tmeras.resellmart.wishlist.WishListItemResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -258,13 +260,72 @@ public class UserControllerTests {
     }
 
     @Test
-    public void shouldDeleteCartItem() throws  Exception {
+    public void shouldDeleteCartItem() throws Exception {
         mockMvc.perform(
                 delete("/api/users/" + userA.getId() + "/cart/products/" + productResponseA.getId())
         ).andExpect(status().isNoContent());
 
         verify(userService, times(1))
                 .deleteCartItem(eq(userA.getId()), eq(productResponseA.getId()), any(Authentication.class));
+    }
+
+    @Test
+    public void shouldSaveWishListItemWhenValidRequest() throws Exception {
+        WishListItemRequest wishListItemRequest = new WishListItemRequest(productResponseA.getId(), userA.getId());
+        WishListItemResponse wishListItemResponse = new WishListItemResponse(1, LocalDateTime.now(), productResponseA);
+
+        when(userService.saveWishListItem(any(WishListItemRequest.class), eq(userA.getId()), any(Authentication.class)))
+                .thenReturn(wishListItemResponse);
+
+        MvcResult mvcResult = mockMvc.perform(post("/api/users/" + userA.getId() + "/wishlist/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(wishListItemRequest))
+        ).andExpect(status().isCreated()).andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(wishListItemResponse));
+    }
+
+    @Test
+    public void shouldNotSaveWishListItemWhenInvalidRequest() throws Exception {
+        WishListItemRequest wishListItemRequest = new WishListItemRequest(null, userA.getId());
+        Map<String, String> expectedErrors = new HashMap<>();
+        expectedErrors.put("productId", "Product ID must not be empty");
+
+        MvcResult mvcResult = mockMvc.perform(post("/api/users/" + userA.getId() + "/wishlist/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(wishListItemRequest))
+        ).andExpect(status().isBadRequest()).andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(expectedErrors));
+    }
+
+    @Test
+    public void shouldFindALLWishListItemsByUserId() throws Exception {
+        List<WishListItemResponse> wishListItemResponses = List.of(
+                new WishListItemResponse(1, LocalDateTime.now(), productResponseA)
+        );
+
+        when(userService.findAllWishListItemsByUserId(eq(userA.getId()), any(Authentication.class)))
+                .thenReturn(wishListItemResponses);
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/users/" + userA.getId() + "/wishlist/products"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(wishListItemResponses));
+    }
+
+    @Test
+    public void shouldDeleteWishListItem() throws Exception {
+        mockMvc.perform(
+                delete("/api/users/" + userA.getId() + "/wishlist/products/" + productResponseA.getId())
+        ).andExpect(status().isNoContent());
+
+        verify(userService, times(1))
+                .deleteWishListItem(eq(userA.getId()), eq(productResponseA.getId()), any(Authentication.class));
     }
 
 }
