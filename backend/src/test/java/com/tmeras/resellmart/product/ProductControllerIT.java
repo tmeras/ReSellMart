@@ -42,6 +42,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 public class ProductControllerIT {
 
+    private static final ClassPathResource TEST_IMAGE_1 = new ClassPathResource("test_image_1.jpeg");
+    private static final ClassPathResource TEST_IMAGE_2 = new ClassPathResource("test_image_2.jpeg");
+
     @Container
     @ServiceConnection
     private static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:9.2.0");
@@ -385,8 +388,8 @@ public class ProductControllerIT {
     public void shouldUploadProductImagesWhenValidRequest() {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("images", new ClassPathResource("test_image_1.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
+        requestBody.add("images", TEST_IMAGE_1);
+        requestBody.add("images", TEST_IMAGE_2);
 
         ResponseEntity<ProductResponse> response =
                 restTemplate.exchange("/api/products/" + productA.getId() + "/images", HttpMethod.PUT,
@@ -401,8 +404,8 @@ public class ProductControllerIT {
     public void shouldNotUploadProductImagesWhenInvalidProductId() {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("images", new ClassPathResource("test_image_1.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
+        requestBody.add("images",TEST_IMAGE_1);
+        requestBody.add("images", TEST_IMAGE_2);
 
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/products/99/images", HttpMethod.PUT,
@@ -417,8 +420,8 @@ public class ProductControllerIT {
     public void shouldNotUploadProductImagesWhenSellerIsNotLoggedIn() {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("images", new ClassPathResource("test_image_1.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
+        requestBody.add("images", TEST_IMAGE_1);
+        requestBody.add("images", TEST_IMAGE_2);
 
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/products/" + productB.getId() + "/images", HttpMethod.PUT,
@@ -433,12 +436,9 @@ public class ProductControllerIT {
     public void shouldNotUploadProductImagesWhenImageLimitExceeded() {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("images", new ClassPathResource("test_image_1.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
+        requestBody.add("images", TEST_IMAGE_1);
+        for (int i = 0; i < AppConstants.MAX_IMAGE_NUMBER; i++)
+            requestBody.add("images", TEST_IMAGE_2);
 
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/products/" + productA.getId() + "/images", HttpMethod.PUT,
@@ -470,8 +470,8 @@ public class ProductControllerIT {
         // First upload images
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("images", new ClassPathResource("test_image_1.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
+        requestBody.add("images", TEST_IMAGE_1);
+        requestBody.add("images",TEST_IMAGE_2);
 
         ResponseEntity<ProductResponse> firstResponse =
                 restTemplate.exchange("/api/products/" + productA.getId() + "/images", HttpMethod.PUT,
@@ -531,8 +531,8 @@ public class ProductControllerIT {
         headers.set("Authorization", "Bearer " + testJwt);
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("images", new ClassPathResource("test_image_1.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
+        requestBody.add("images", TEST_IMAGE_1);
+        requestBody.add("images", TEST_IMAGE_2);
 
         ResponseEntity<ProductResponse> firstResponse =
                 restTemplate.exchange("/api/products/" + productB.getId() + "/images", HttpMethod.PUT,
@@ -565,8 +565,8 @@ public class ProductControllerIT {
         headers.set("Authorization", "Bearer " + testJwt);
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("images", new ClassPathResource("test_image_1.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
+        requestBody.add("images", TEST_IMAGE_1);
+        requestBody.add("images", TEST_IMAGE_2);
 
         ResponseEntity<ProductResponse> firstResponse =
                 restTemplate.exchange("/api/products/" + productB.getId() + "/images", HttpMethod.PUT,

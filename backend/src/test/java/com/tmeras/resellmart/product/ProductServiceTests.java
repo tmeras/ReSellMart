@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +40,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductServiceTests {
+
+    public static final Path TEST_IMAGE_PATH_1 = Paths.get("src/test/resources/test_image_1.jpeg");
+    public static final Path TEST_IMAGE_PATH_2 = Paths.get("src/test/resources/test_image_2.jpeg");
 
     @Mock
     private ProductRepository productRepository;
@@ -338,13 +342,13 @@ public class ProductServiceTests {
         List<MultipartFile> images = List.of(
                 new MockMultipartFile(
                         "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+                        Files.readAllBytes(TEST_IMAGE_PATH_1)
                 )
         );
         productResponseA.setImages(List.of(
                 new ProductImageResponse(
                         1,
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg")),
+                        Files.readAllBytes(TEST_IMAGE_PATH_1),
                         false
                 )
         ));
@@ -368,7 +372,7 @@ public class ProductServiceTests {
         List<MultipartFile> images = List.of(
                 new MockMultipartFile(
                         "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+                        Files.readAllBytes(TEST_IMAGE_PATH_1)
                 )
         );
 
@@ -384,7 +388,7 @@ public class ProductServiceTests {
         List<MultipartFile> images = List.of(
                 new MockMultipartFile(
                         "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+                        Files.readAllBytes(TEST_IMAGE_PATH_1)
                 )
         );
 
@@ -406,27 +410,27 @@ public class ProductServiceTests {
         List<MultipartFile> images = List.of(
                 new MockMultipartFile(
                         "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+                        Files.readAllBytes(TEST_IMAGE_PATH_1)
                 ),
                 new MockMultipartFile(
                         "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+                        Files.readAllBytes(TEST_IMAGE_PATH_1)
                 ),
                 new MockMultipartFile(
                         "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+                        Files.readAllBytes(TEST_IMAGE_PATH_1)
                 ),
                 new MockMultipartFile(
                         "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+                        Files.readAllBytes(TEST_IMAGE_PATH_1)
                 ),
                 new MockMultipartFile(
                         "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+                        Files.readAllBytes(TEST_IMAGE_PATH_1)
                 ),
                 new MockMultipartFile(
                         "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+                        Files.readAllBytes(TEST_IMAGE_PATH_1)
                 )
         );
 
@@ -459,12 +463,12 @@ public class ProductServiceTests {
         productResponseA.setImages(List.of(
                 new ProductImageResponse(
                         1,
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg")),
+                        Files.readAllBytes(TEST_IMAGE_PATH_1),
                         true
                 ),
                 new ProductImageResponse(
                         2,
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_2.jpeg")),
+                        Files.readAllBytes(TEST_IMAGE_PATH_2),
                         false
                 )
         ));
