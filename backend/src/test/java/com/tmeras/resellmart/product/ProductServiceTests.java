@@ -295,7 +295,6 @@ public class ProductServiceTests {
                 .hasMessage("No category found with ID: 99");
     }
 
-
     @Test
     public void shouldNotUpdateProductWhenInvalidProductId() {
         when(categoryRepository.findWithAssociationsById(productRequestA.getCategoryId()))

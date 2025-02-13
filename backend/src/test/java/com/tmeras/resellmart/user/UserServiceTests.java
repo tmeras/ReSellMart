@@ -1,13 +1,14 @@
 package com.tmeras.resellmart.user;
 
 import com.tmeras.resellmart.TestDataUtils;
-import com.tmeras.resellmart.cart.CartItemMapper;
-import com.tmeras.resellmart.cart.CartItemRepository;
+import com.tmeras.resellmart.cart.*;
 import com.tmeras.resellmart.category.Category;
 import com.tmeras.resellmart.category.CategoryResponse;
 import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
+import com.tmeras.resellmart.exception.APIException;
 import com.tmeras.resellmart.exception.OperationNotPermittedException;
+import com.tmeras.resellmart.exception.ResourceAlreadyExistsException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.file.FileService;
 import com.tmeras.resellmart.mfa.MfaService;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -40,7 +42,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTests {
@@ -215,6 +217,202 @@ public class UserServiceTests {
         assertThatThrownBy(() -> userService.uploadUserImage(image, userB.getId(), authentication))
                 .isInstanceOf(OperationNotPermittedException.class)
                 .hasMessage("You do not have permission to update this user's profile image");
+    }
+
+    @Test
+    public void shouldNotUploadUserImageWhenInvalidFileExtension() throws IOException {
+        MockMultipartFile image = new MockMultipartFile(
+                "image", "test_file.txt",
+                "plain/text", Files.readAllBytes(Path.of("src/test/resources/test_file.txt"))
+        );
+
+        when(userRepository.findWithAssociationsById(userA.getId())).thenReturn(Optional.of(userA));
+        when(fileService.getFileExtension(image.getOriginalFilename())).thenReturn("txt");
+
+        assertThatThrownBy(() -> userService.uploadUserImage(image, userA.getId(), authentication))
+                .isInstanceOf(APIException.class)
+                .hasMessage("Only images can be uploaded");
+    }
+
+    @Test
+    public void shouldSaveCartItemWhenValidRequest() {
+        CartItem cartItem = new CartItem(1, productB, 1, userA, LocalDateTime.now());
+        CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 1, userA.getId());
+        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseB, 1, LocalDateTime.now());
+
+        when(cartItemRepository.existsByUserIdAndProductId(userA.getId(), productB.getId())).thenReturn(false);
+        when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
+        when(productRepository.findWithAssociationsById(productB.getId())).thenReturn(Optional.of(productB));
+        when(cartItemMapper.toCartItem(cartItemRequest)).thenReturn(cartItem);
+        when(cartItemRepository.save(cartItem)).thenReturn(cartItem);
+        when(cartItemMapper.toCartItemResponse(cartItem)).thenReturn(cartItemResponse);
+
+        CartItemResponse response = userService.saveCartItem(cartItemRequest, userA.getId(), authentication);
+
+        assertThat(response).isEqualTo(cartItemResponse);
+        assertThat(cartItem.getProduct()).isEqualTo(productB);
+        assertThat(cartItem.getUser()).isEqualTo(userA);
+    }
+
+    @Test
+    public void shouldNotSaveCartItemWhenCartOwnerIsNotLoggedIn() {
+        CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 1, userB.getId());
+
+        assertThatThrownBy(() -> userService.saveCartItem(cartItemRequest, userB.getId(), authentication))
+                .isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to add items to this user's cart");
+    }
+
+    @Test
+    public void shouldNotSaveCartItemWhenDuplicateCartItem() {
+        CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 1, userA.getId());
+
+        when(cartItemRepository.existsByUserIdAndProductId(userA.getId(), productB.getId())).thenReturn(true);
+
+        assertThatThrownBy(() -> userService.saveCartItem(cartItemRequest, userA.getId(), authentication))
+                .isInstanceOf(ResourceAlreadyExistsException.class)
+                .hasMessage("This product is already in your cart");
+    }
+
+    @Test
+    public void shouldNotSaveCartItemWhenInvalidProductId() {
+        CartItemRequest cartItemRequest = new CartItemRequest(1000, 1, userA.getId());
+
+        when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
+        when(productRepository.findWithAssociationsById(1000)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.saveCartItem(cartItemRequest, userA.getId(), authentication))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No product found with ID: 1000");
+    }
+
+    @Test
+    public void shouldNotSaveCartItemWhenSellerIsLoggedIn() {
+        CartItemRequest cartItemRequest = new CartItemRequest(productA.getId(), 1, userA.getId());
+
+        when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
+        when(productRepository.findWithAssociationsById(productA.getId())).thenReturn(Optional.of(productA));
+
+        assertThatThrownBy(() -> userService.saveCartItem(cartItemRequest, userA.getId(), authentication))
+                .isInstanceOf(APIException.class)
+                .hasMessage("You cannot add your own items to your cart");
+    }
+
+    @Test
+    public void shouldNotSaveCartItemWhenProductIsUnavailable() {
+        productB.setAvailable(false);
+        CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 5, userA.getId());
+
+        when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
+        when(productRepository.findWithAssociationsById(productB.getId())).thenReturn(Optional.of(productB));
+
+        assertThatThrownBy(() -> userService.saveCartItem(cartItemRequest, userA.getId(), authentication))
+                .isInstanceOf(APIException.class)
+                .hasMessage("Unavailable products cannot be added to the cart");
+    }
+
+    @Test
+    public void shouldNotSaveCartItemWhenInvalidQuantity() {
+        CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 99, userA.getId());
+
+        when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
+        when(productRepository.findWithAssociationsById(productB.getId())).thenReturn(Optional.of(productB));
+
+        assertThatThrownBy(() -> userService.saveCartItem(cartItemRequest, userA.getId(), authentication))
+                .isInstanceOf(APIException.class)
+                .hasMessage("Requested product quantity cannot be higher than available quantity");
+    }
+
+    @Test
+    public void shouldFindAllCartItemsByUserIdWhenValidRequest() {
+        CartItem cartItem = new CartItem(1, productB, 1, userA, LocalDateTime.now());
+        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseB, 1, LocalDateTime.now());
+
+        when(cartItemRepository.findAllWithProductDetailsByUserId(userA.getId()))
+                .thenReturn(List.of(cartItem));
+        when(cartItemMapper.toCartItemResponse(cartItem)).thenReturn(cartItemResponse);
+
+        List<CartItemResponse> cartItemResponses = userService.findAllCartItemsByUserId(userA.getId(), authentication);
+
+        assertThat(cartItemResponses).hasSize(1);
+        assertThat(cartItemResponses.get(0)).isEqualTo(cartItemResponse);
+    }
+
+    @Test
+    public void shouldNotFindAllCartItemsByUserIdWhenUserIsNotLoggedIn() {
+        assertThatThrownBy(() -> userService.findAllCartItemsByUserId(userB.getId(), authentication))
+                .isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to view this user's cart");
+    }
+
+    @Test
+    public void shouldUpdateCartItemQuantityWhenValidRequest() {
+        CartItem cartItem = new CartItem(1, productB, 1, userA, LocalDateTime.now());
+        CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 2, userA.getId());
+        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseB, 2, LocalDateTime.now());
+
+        when(cartItemRepository.findWithProductDetailsByUserIdAndProductId(userA.getId(), productB.getId()))
+                .thenReturn(Optional.of(cartItem));
+        when(cartItemRepository.save(cartItem)).thenReturn(cartItem);
+        when(cartItemMapper.toCartItemResponse(cartItem)).thenReturn(cartItemResponse);
+
+        CartItemResponse response =
+                userService.updateCartItemQuantity(cartItemRequest, userA.getId(), productB.getId(), authentication);
+
+        assertThat(response).isEqualTo(cartItemResponse);
+        assertThat(cartItem.getQuantity()).isEqualTo(cartItemRequest.getQuantity());
+    }
+
+    @Test
+    public void shouldNotUpdateCartItemQuantityWhenUserIsNotLoggedIn() {
+        CartItemRequest cartItemRequest = new CartItemRequest(productA.getId(), 2, userB.getId());
+
+        assertThatThrownBy(() ->
+                userService.updateCartItemQuantity(cartItemRequest, userB.getId(), productA.getId(), authentication)
+        ).isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to modify this user's cart");
+    }
+
+    @Test
+    public void shouldNotUpdateCartItemQuantityWhenCartItemDoesntExist() {
+        CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 2, userA.getId());
+
+        when(cartItemRepository.findWithProductDetailsByUserIdAndProductId(userA.getId(), productB.getId()))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() ->
+                userService.updateCartItemQuantity(cartItemRequest, userA.getId(), productB.getId(), authentication)
+        ).isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("The specified product does not exist in your cart");
+    }
+
+    @Test
+    public void shouldNotUpdateCartItemQuantityWhenInvalidQuantity() {
+        CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 99, userA.getId());
+        CartItem cartItem = new CartItem(1, productB, 5, userA, LocalDateTime.now());
+
+        when(cartItemRepository.findWithProductDetailsByUserIdAndProductId(userA.getId(), productB.getId()))
+                .thenReturn(Optional.of(cartItem));
+
+        assertThatThrownBy(() ->
+                userService.updateCartItemQuantity(cartItemRequest, userA.getId(), productB.getId(), authentication)
+        ).isInstanceOf(APIException.class)
+                .hasMessage("Requested product quantity cannot be higher than available quantity");
+    }
+
+    @Test
+    public void shouldDeleteCartItemWhenValidRequest() {
+        userService.deleteCartItem(userA.getId(), productB.getId(), authentication);
+
+        verify(cartItemRepository, times(1))
+                .deleteByUserIdAndProductId(userA.getId(), productB.getId());
+    }
+
+    @Test
+    public void shouldNotDeleteCartItemWhenCartOwnerIsNotLoggedIn() {
+        assertThatThrownBy(() -> userService.deleteCartItem(userB.getId(), productA.getId(), authentication))
+                .isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to modify this user's cart");
     }
 
 
