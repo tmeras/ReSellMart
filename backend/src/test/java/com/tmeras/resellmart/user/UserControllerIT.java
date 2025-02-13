@@ -14,6 +14,9 @@ import com.tmeras.resellmart.product.ProductRepository;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.token.JwtService;
+import com.tmeras.resellmart.token.Token;
+import com.tmeras.resellmart.token.TokenRepository;
+import com.tmeras.resellmart.token.TokenType;
 import com.tmeras.resellmart.wishlist.WishListItem;
 import com.tmeras.resellmart.wishlist.WishListItemRepository;
 import com.tmeras.resellmart.wishlist.WishListItemRequest;
@@ -70,6 +73,7 @@ public class UserControllerIT {
     private final ProductRepository productRepository;
     private final CartItemRepository cartItemRepository;
     private final WishListItemRepository wishListItemRepository;
+    private final TokenRepository tokenRepository;
 
     // Used to add JWT in requests
     private HttpHeaders headers;
@@ -86,7 +90,7 @@ public class UserControllerIT {
             JwtService jwtService, RoleRepository roleRepository,
             UserRepository userRepository, CategoryRepository categoryRepository,
             ProductRepository productRepository, CartItemRepository cartItemRepository,
-            WishListItemRepository wishListItemRepository
+            WishListItemRepository wishListItemRepository, TokenRepository tokenRepository
     ) {
         this.restTemplate = restTemplate;
         this.passwordEncoder = passwordEncoder;
@@ -97,6 +101,7 @@ public class UserControllerIT {
         this.productRepository = productRepository;
         this.cartItemRepository = cartItemRepository;
         this.wishListItemRepository = wishListItemRepository;
+        this.tokenRepository = tokenRepository;
     }
 
     @BeforeEach
@@ -674,6 +679,10 @@ public class UserControllerIT {
         // Downgrade admin user
         userA.setRoles(Set.of(userB.getRoles().stream().findFirst().get()));
         userRepository.save(userA);
+        // Manually save refresh token for the relevant user
+        Token testToken = new Token(null, "token", TokenType.BEARER, LocalDateTime.now(),
+                LocalDateTime.now().plusMinutes(1), null, false, userA);
+        testToken = tokenRepository.save(testToken);
 
         ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userA.getId() + "/enabled",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), Object.class);
@@ -681,6 +690,7 @@ public class UserControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(userRepository.findById(userA.getId()).get().isEnabled()).isFalse();
         assertThat(productRepository.findAllBySellerId(userA.getId()).get(0).isAvailable()).isFalse();
+        assertThat(tokenRepository.findById(testToken.getId()).get().isRevoked()).isTrue();
     }
 
     @Test
