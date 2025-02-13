@@ -73,7 +73,7 @@ public class ProductServiceTests {
     private Authentication authentication;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         // Initialise test objects
         Category category = TestDataUtils.createCategoryA();
         Role adminRole = new Role(1, "ADMIN");

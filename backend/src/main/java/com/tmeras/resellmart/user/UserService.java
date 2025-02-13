@@ -49,7 +49,7 @@ public class UserService {
     public UserResponse findById(Integer userId) {
         return userRepository.findWithAssociationsById(userId)
                 .map(userMapper::toUserResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("No user found with ID " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("No user found with ID: " + userId));
     }
 
     @PreAuthorize("hasRole('ADMIN')") // Only admins should be able to view all users
@@ -82,6 +82,9 @@ public class UserService {
         if (!Objects.equals(currentUser.getId(), userId))
             throw new OperationNotPermittedException("You do not have permission to update the details of this user");
 
+        // User is logged in, so already exists => just call .get() on optional to retrieve Hibernate-managed entity
+        currentUser = userRepository.findWithAssociationsById(userId).get();
+
         // If enabling MFA, generate QR image
         String qrImageUri = null;
         if (!currentUser.isMfaEnabled() && userRequest.isMfaEnabled()) {
@@ -104,6 +107,9 @@ public class UserService {
 
         if (!Objects.equals(currentUser.getId(), userId))
             throw new OperationNotPermittedException("You do not have permission to update this user's profile image");
+
+        // User is logged in, so already exists => just call .get() on optional to retrieve Hibernate-managed entity
+        currentUser = userRepository.findWithAssociationsById(userId).get();
 
         // Delete previous user image, if it exists
         if (currentUser.getImagePath() != null)
