@@ -328,4 +328,27 @@ public class UserControllerTests {
                 .deleteWishListItem(eq(userA.getId()), eq(productResponseA.getId()), any(Authentication.class));
     }
 
+    @Test
+    public void shouldEnableUserWhenValidRequest() throws Exception {
+        UserEnableRequest userEnableRequest = new UserEnableRequest(true);
+
+        mockMvc.perform(patch("/api/users/" + userA.getId() + "/enabled")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userEnableRequest))
+        ).andExpect(status().isOk());
+
+        verify(userService, times(1)).enable(userA.getId());
+    }
+
+    @Test
+    public void shouldDisableUserWhenValidRequest() throws Exception {
+        UserEnableRequest userEnableRequest = new UserEnableRequest(false);
+
+        mockMvc.perform(patch("/api/users/" + userA.getId() + "/enabled")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userEnableRequest))
+        ).andExpect(status().isOk());
+
+        verify(userService, times(1)).disable(eq(userA.getId()), any(Authentication.class));
+    }
 }
