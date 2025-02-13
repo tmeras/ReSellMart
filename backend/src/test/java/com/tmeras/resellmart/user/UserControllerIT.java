@@ -419,7 +419,7 @@ public class UserControllerIT {
     }
 
     @Test
-    public void shouldNotFindAllCartItemsByUserIdWhenInvalidUserId() {
+    public void shouldNotFindAllCartItemsByUserIdWhenCartOwnerIsNotLoggedIn() {
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/users/" + 99 + "/cart/products", HttpMethod.GET,
                         new HttpEntity<>(headers), ExceptionResponse.class);
@@ -627,7 +627,7 @@ public class UserControllerIT {
     }
 
     @Test
-    public void shouldNotFindAllWishlistItemsByUserIdWhenInvalidUserId() {
+    public void shouldNotFindAllWishlistItemsByUserIdWhenListOwnerIsNotLoggedIn() {
         wishListItemRepository.save(new WishListItem(null, LocalDateTime.now(), productB, userA));
 
         ResponseEntity<ExceptionResponse> response =

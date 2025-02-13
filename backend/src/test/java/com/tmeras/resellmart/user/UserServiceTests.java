@@ -17,8 +17,7 @@ import com.tmeras.resellmart.product.ProductRepository;
 import com.tmeras.resellmart.product.ProductResponse;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.token.TokenRepository;
-import com.tmeras.resellmart.wishlist.WishListItemMapper;
-import com.tmeras.resellmart.wishlist.WishListItemRepository;
+import com.tmeras.resellmart.wishlist.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -339,7 +338,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void shouldNotFindAllCartItemsByUserIdWhenUserIsNotLoggedIn() {
+    public void shouldNotFindAllCartItemsByUserIdWhenCartOwnerIsNotLoggedIn() {
         assertThatThrownBy(() -> userService.findAllCartItemsByUserId(userB.getId(), authentication))
                 .isInstanceOf(OperationNotPermittedException.class)
                 .hasMessage("You do not have permission to view this user's cart");
@@ -413,6 +412,121 @@ public class UserServiceTests {
         assertThatThrownBy(() -> userService.deleteCartItem(userB.getId(), productA.getId(), authentication))
                 .isInstanceOf(OperationNotPermittedException.class)
                 .hasMessage("You do not have permission to modify this user's cart");
+    }
+
+    @Test
+    public void shouldSaveWishListItemWhenValidRequest() {
+        WishListItem wishListItem = new WishListItem(1, LocalDateTime.now(), productB, userA);
+        WishListItemRequest wishListItemRequest = new WishListItemRequest(productB.getId(), userA.getId());
+        WishListItemResponse wishListItemResponse = new WishListItemResponse(1, LocalDateTime.now(), productResponseB);
+
+        when(wishListItemRepository.existsByUserIdAndProductId(userA.getId(), productB.getId())).thenReturn(false);
+        when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
+        when(productRepository.findWithAssociationsById(productB.getId())).thenReturn(Optional.of(productB));
+        when(wishListItemRepository.save(any(WishListItem.class))).thenReturn(wishListItem);
+        when(wishListItemMapper.toWishListItemResponse(wishListItem)).thenReturn(wishListItemResponse);
+
+        WishListItemResponse response = userService.saveWishListItem(wishListItemRequest, userA.getId(), authentication);
+
+        assertThat(response).isEqualTo(wishListItemResponse);
+    }
+
+    @Test
+    public void shouldNotSaveWishListItemWhenListOwnerIsNotLoggedIn() {
+        WishListItemRequest wishListItemRequest = new WishListItemRequest(productB.getId(), userA.getId());
+
+        assertThatThrownBy(() -> userService.saveWishListItem(wishListItemRequest, userB.getId(), authentication))
+                .isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to add items to this user's wishlist");
+    }
+
+    @Test
+    public void shouldNotSaveWisListItemWhenDuplicateWishListItem() {
+        WishListItemRequest wishListItemRequest = new WishListItemRequest(productB.getId(), userA.getId());
+
+        when(wishListItemRepository.existsByUserIdAndProductId(userA.getId(), productB.getId())).thenReturn(true);
+
+        assertThatThrownBy(() -> userService.saveWishListItem(wishListItemRequest, userA.getId(), authentication))
+                .isInstanceOf(ResourceAlreadyExistsException.class)
+                .hasMessage("This product is already in your wishlist");
+    }
+
+    @Test
+    public void shouldNotSaveWishListItemWhenInvalidProductId() {
+        WishListItemRequest wishListItemRequest = new WishListItemRequest(99, userA.getId());
+
+        when(wishListItemRepository.existsByUserIdAndProductId(userA.getId(), 99)).thenReturn(false);
+        when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
+        when(productRepository.findWithAssociationsById(99)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.saveWishListItem(wishListItemRequest, userA.getId(), authentication))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No product found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotSaveWishListItemWhenSellerIsLoggedIn() {
+        WishListItemRequest wishListItemRequest = new WishListItemRequest(productA.getId(), userA.getId());
+
+        when(wishListItemRepository.existsByUserIdAndProductId(userA.getId(), productA.getId())).thenReturn(false);
+        when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
+        when(productRepository.findWithAssociationsById(productA.getId())).thenReturn(Optional.of(productA));
+
+        assertThatThrownBy(() -> userService.saveWishListItem(wishListItemRequest, userA.getId(), authentication))
+                .isInstanceOf(APIException.class)
+                .hasMessage("You cannot add your own items to your wishlist");
+    }
+
+    @Test
+    public void shouldNotSaveWishListItemWhenProductIsUnavailable() {
+        productB.setAvailable(false);
+        WishListItemRequest wishListItemRequest = new WishListItemRequest(productB.getId(), userA.getId());
+
+        when(wishListItemRepository.existsByUserIdAndProductId(userA.getId(), productB.getId())).thenReturn(false);
+        when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
+        when(productRepository.findWithAssociationsById(productB.getId())).thenReturn(Optional.of(productB));
+
+
+        assertThatThrownBy(() -> userService.saveWishListItem(wishListItemRequest, userA.getId(), authentication))
+                .isInstanceOf(APIException.class)
+                .hasMessage("Unavailable products cannot be added to the wishlist");
+    }
+
+    @Test
+    public void shouldFindAllWishListItemsByUserIdWhenValidRequest() {
+        WishListItem wishListItem = new WishListItem(1, LocalDateTime.now(), productB, userA);
+        WishListItemResponse wishListItemResponse = new WishListItemResponse(1, LocalDateTime.now(), productResponseB);
+
+        when(wishListItemRepository.findAllWithProductDetailsByUserId(userA.getId()))
+                .thenReturn(List.of(wishListItem));
+        when(wishListItemMapper.toWishListItemResponse(wishListItem)).thenReturn(wishListItemResponse);
+
+        List<WishListItemResponse> wishListItemResponses = userService.findAllWishListItemsByUserId(userA.getId(), authentication);
+
+        assertThat(wishListItemResponses).hasSize(1);
+        assertThat(wishListItemResponses.get(0)).isEqualTo(wishListItemResponse);
+    }
+
+    @Test
+    public void shouldNotFindAllWishListItemsByUserIdWhenListOwnerIsNotLoggedIn() {
+        assertThatThrownBy(() -> userService.findAllWishListItemsByUserId(userB.getId(), authentication))
+                .isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to view this user's wishlist");
+    }
+
+    @Test
+    public void shouldDeleteWishListItemWhenValidRequest() {
+        userService.deleteWishListItem(userA.getId(), productB.getId(), authentication);
+
+        verify(wishListItemRepository, times(1))
+                .deleteByUserIdAndProductId(userA.getId(), productB.getId());
+    }
+
+    @Test
+    public void shouldNotDeleteWishListItemWhenListOwnerIsNotLoggedIn() {
+        assertThatThrownBy(() -> userService.deleteWishListItem(userB.getId(), productA.getId(), authentication))
+                .isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to modify this user's wishlist");
     }
 
 
