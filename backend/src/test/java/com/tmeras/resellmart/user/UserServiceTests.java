@@ -25,9 +25,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -177,16 +180,43 @@ public class UserServiceTests {
 
     @Test
     public void shouldNotUpdateUserWhenUserIsNotLoggedIn() {
-        authentication = new UsernamePasswordAuthenticationToken(
-                userB,
-                userB.getPassword(),
-                userB.getAuthorities()
-        );
-
-        assertThatThrownBy(() -> userService.update(userRequestA, userA.getId(), authentication))
+        assertThatThrownBy(() -> userService.update(userRequestA, userB.getId(), authentication))
                 .isInstanceOf(OperationNotPermittedException.class)
                 .hasMessage("You do not have permission to update the details of this user");
     }
+
+    @Test
+    public void shouldUploadUserImageWhenValidRequest() throws IOException {
+        MockMultipartFile image = new MockMultipartFile(
+                "image", "test_picture.png",
+                "image/png", Files.readAllBytes(TEST_PICTURE_PATH)
+        );
+        userResponseA.setProfileImage(Files.readAllBytes(TEST_PICTURE_PATH));
+
+        when(userRepository.findWithAssociationsById(userA.getId())).thenReturn(Optional.of(userA));
+        when(fileService.getFileExtension(image.getOriginalFilename())).thenReturn("png");
+        when(fileService.saveUserImage(image, userA.getId())).thenReturn("/uploads/test_picture.png");
+        when(userRepository.save(userA)).thenReturn(userA);
+        when(userMapper.toUserResponse(userA)).thenReturn(userResponseA);
+
+        UserResponse userResponse = userService.uploadUserImage(image, userA.getId(), authentication);
+
+        assertThat(userResponse).isEqualTo(userResponseA);
+        assertThat(userA.getImagePath()).isEqualTo("/uploads/test_picture.png");
+    }
+
+    @Test
+    public void shouldNotUploadUserImageWhenUserIsNotLoggedIn() throws IOException {
+        MockMultipartFile image = new MockMultipartFile(
+                "image", "test_picture.png",
+                "image/png", Files.readAllBytes(TEST_PICTURE_PATH)
+        );
+
+        assertThatThrownBy(() -> userService.uploadUserImage(image, userB.getId(), authentication))
+                .isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to update this user's profile image");
+    }
+
 
 
 }
