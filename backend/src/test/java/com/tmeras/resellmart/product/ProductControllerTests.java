@@ -59,7 +59,7 @@ public class ProductControllerTests {
     private ProductResponse productResponseB;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         //Initialise test objects
         UserResponse adminUserResponse = TestDataUtils.createUserResponseA(
                 Set.of(new Role(1, "ADMIN"))
@@ -122,6 +122,7 @@ public class ProductControllerTests {
                 2, 1,
                 true, true
         );
+
         when(productService.findAll(
                 AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                 AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR
