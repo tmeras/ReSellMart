@@ -47,8 +47,4 @@ public class MfaService {
         CodeVerifier codeVerifier = new DefaultCodeVerifier(codeGenerator, timeProvider);
         return codeVerifier.isValidCode(secret, otp);
     }
-
-    public boolean isOtpNotValid(String secret, String otp) {
-        return !isOtpValid(secret, otp);
-    }
 }

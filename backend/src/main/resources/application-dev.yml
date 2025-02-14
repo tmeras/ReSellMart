@@ -43,7 +43,7 @@ application:
         #expiration: 120000 # 2 minutes
   mailing:
     frontend:
-      activation-url: "TODO"
+      activation-url: "TODO" # TODO: Add activation url
   file:
     upload:
       product-images-path: ./uploads/product-images
