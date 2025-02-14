@@ -4,11 +4,12 @@ import com.tmeras.resellmart.TestDataUtils;
 import com.tmeras.resellmart.exception.ExceptionResponse;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
+import com.tmeras.resellmart.token.JwtService;
 import com.tmeras.resellmart.token.Token;
 import com.tmeras.resellmart.token.TokenRepository;
+import com.tmeras.resellmart.token.TokenType;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
-import com.tmeras.resellmart.user.UserRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -42,20 +44,23 @@ public class AuthenticationControllerIT {
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     private User userA;
+    private String userPassword;
 
     @Autowired
     public AuthenticationControllerIT(
             TestRestTemplate restTemplate, RoleRepository roleRepository,
             UserRepository userRepository, TokenRepository tokenRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder, JwtService jwtService
     ) {
         this.restTemplate = restTemplate;
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @BeforeEach
@@ -69,7 +74,9 @@ public class AuthenticationControllerIT {
         // errors related to MySQL's AUTO_INCREMENT counter not resetting between tests)
         Role adminRole = roleRepository.save(Role.builder().name("ADMIN").build());
         roleRepository.save(Role.builder().name("USER").build());
+
         userA = TestDataUtils.createUserA(Set.of(adminRole));
+        userPassword = userA.getPassword();
         userA.setId(null);
         userA.setPassword(passwordEncoder.encode(userA.getPassword()));
         userA = userRepository.save(userA);
@@ -86,7 +93,7 @@ public class AuthenticationControllerIT {
                 .build();
 
         ResponseEntity<AuthenticationResponse> response =
-                restTemplate.exchange("/api/auth/register", HttpMethod.POST,
+                restTemplate.exchange("/api/auth/registration", HttpMethod.POST,
                         new HttpEntity<>(registrationRequest), AuthenticationResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -101,8 +108,8 @@ public class AuthenticationControllerIT {
         assertThat(createdUser.get().getHomeCountry()).isEqualTo(registrationRequest.getHomeCountry());
         assertThat(createdUser.get().getSecret()).isNotNull();
 
-        Optional<Token> generatedActivationCode = tokenRepository.findActivationCodeByUserEmail(registrationRequest.getEmail());
-        assertThat(generatedActivationCode).isNotEmpty();
+        Optional<Token> generatedActivationToken = tokenRepository.findActivationTokenByUserEmail(registrationRequest.getEmail());
+        assertThat(generatedActivationToken).isNotEmpty();
     }
 
     @Test
@@ -118,7 +125,7 @@ public class AuthenticationControllerIT {
         expectedErrors.put("name", "Name must not be empty");
 
         ResponseEntity<Map<String,String>> response =
-                restTemplate.exchange("/api/auth/register", HttpMethod.POST,
+                restTemplate.exchange("/api/auth/registration", HttpMethod.POST,
                         new HttpEntity<>(registrationRequest), new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -140,7 +147,7 @@ public class AuthenticationControllerIT {
                 .build();
 
         ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/auth/register", HttpMethod.POST,
+                restTemplate.exchange("/api/auth/registration", HttpMethod.POST,
                         new HttpEntity<>(registrationRequest), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -159,13 +166,117 @@ public class AuthenticationControllerIT {
                 .build();
 
         ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/auth/register", HttpMethod.POST,
+                restTemplate.exchange("/api/auth/registration", HttpMethod.POST,
                         new HttpEntity<>(registrationRequest), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage())
                 .isEqualTo("A user with the email '" + userA.getEmail() + "' already exists");
+    }
+
+    @Test
+    public void shouldLoginWhenValidRequestWhenValidRequest() {
+        AuthenticationRequest authenticationRequest = new AuthenticationRequest(userA.getEmail(), userPassword);
+
+        ResponseEntity<AuthenticationResponse> response =
+                restTemplate.exchange("/api/auth/login", HttpMethod.POST,
+                        new HttpEntity<>(authenticationRequest), AuthenticationResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getAccessToken()).isNotNull();
+        assertThat(response.getBody().getRefreshToken()).isNotNull();
+        assertThat(tokenRepository.findAllValidRefreshTokensByUserEmail(userA.getEmail()).size()).isEqualTo(1);
+        assertThat(jwtService.isTokenValid(response.getBody().getAccessToken(), userA)).isTrue();
+        assertThat(jwtService.isTokenValid(response.getBody().getRefreshToken(), userA)).isTrue();
+    }
+
+    @Test
+    public void shouldNotLoginWhenInvalidCredentials() {
+        AuthenticationRequest authenticationRequest =
+                new AuthenticationRequest(userA.getEmail(), "wrongPassword");
+
+        ResponseEntity<AuthenticationResponse> response =
+                restTemplate.exchange("/api/auth/login", HttpMethod.POST,
+                        new HttpEntity<>(authenticationRequest), AuthenticationResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    public void shouldNotLoginWhenUserIsDisabled() {
+        userA.setEnabled(false);
+        userRepository.save(userA);
+
+        AuthenticationRequest authenticationRequest = new AuthenticationRequest(userA.getEmail(), userPassword);
+
+        ResponseEntity<AuthenticationResponse> response =
+                restTemplate.exchange("/api/auth/login", HttpMethod.POST,
+                        new HttpEntity<>(authenticationRequest), AuthenticationResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    public void shouldNotLoginWhenMfaIsEnabled() {
+        userA.setMfaEnabled(true);
+        userRepository.save(userA);
+        AuthenticationRequest authenticationRequest = new AuthenticationRequest(userA.getEmail(), userPassword);
+
+        ResponseEntity<AuthenticationResponse> response =
+                restTemplate.exchange("/api/auth/login", HttpMethod.POST,
+                        new HttpEntity<>(authenticationRequest), AuthenticationResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMfaEnabled()).isTrue();
+        assertThat(response.getBody().getAccessToken()).isNull();
+        assertThat(response.getBody().getRefreshToken()).isNull();
+    }
+
+    @Test
+    public void shouldActivateAccountWhenValidRequest() {
+        userA.setEnabled(false);
+        userRepository.save(userA);
+        // Manually save activation code
+        tokenRepository.save(new Token(null, "code", TokenType.ACTIVATION, LocalDateTime.now().minusMinutes(2),
+                LocalDateTime.now().plusMinutes(2), null, false, userA));
+
+        ResponseEntity<?> response =
+                restTemplate.exchange("/api/auth/activation?code=code", HttpMethod.POST,
+                       null, Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(userRepository.findById(userA.getId()).get().isEnabled()).isTrue();
+        assertThat(tokenRepository.findByToken("code").get().getValidatedAt()).isNotNull();
+    }
+
+    @Test
+    public void shouldNotActivateAccountWhenActivationTokenDoesNotExist() {
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/auth/activation?code=code", HttpMethod.POST,
+                        null, ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("Activation token not found");
+    }
+
+    @Test
+    public void shouldNotActivateAccountWhenTokenIsExpired() {
+        // Manually save activation code
+        tokenRepository.save(new Token(null, "code", TokenType.ACTIVATION, LocalDateTime.now().minusMinutes(2),
+                LocalDateTime.now().minusMinutes(1), null, false, userA));
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/auth/activation?code=code", HttpMethod.POST,
+                        null, ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("Activation code has expired. A new email has been sent");
     }
 
 

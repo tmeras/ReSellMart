@@ -14,7 +14,7 @@ public interface TokenRepository extends JpaRepository<Token, Integer> {
             SELECT t FROM Token t WHERE t.tokenType = 'ACTIVATION'
             AND t.user.email = :email
     """)
-    Optional<Token> findActivationCodeByUserEmail(String email);
+    Optional<Token> findActivationTokenByUserEmail(String email);
 
     boolean existsByToken(String token);
 

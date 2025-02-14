@@ -154,7 +154,7 @@ public class AuthenticationService {
     )
     public void activateAccount(String code) throws MessagingException {
         Token savedToken = tokenRepository.findByToken(code)
-                .orElseThrow(() -> new ResourceNotFoundException("Token not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Activation token not found"));
 
         //  Return if token has already been validated
         if (savedToken.getValidatedAt() != null)

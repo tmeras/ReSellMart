@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -32,10 +33,10 @@ public class AuthenticationController {
         return new ResponseEntity<>(authenticationService.login(authenticationRequest), HttpStatus.OK);
     }
 
-    @GetMapping("/activation")
+    @PostMapping("/activation")
     public ResponseEntity<?> activateAccount(
             @RequestParam(name = "code") String code
-    ) throws MessagingException {
+    ) throws MessagingException, AccessDeniedException {
         authenticationService.activateAccount(code);
         return new ResponseEntity<>(HttpStatus.OK);
     }
