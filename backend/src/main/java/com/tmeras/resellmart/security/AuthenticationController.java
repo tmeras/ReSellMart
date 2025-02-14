@@ -23,14 +23,8 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> register(
             @Valid @RequestBody RegistrationRequest registrationRequest
     ) throws MessagingException {
-        return new ResponseEntity<>(authenticationService.register(registrationRequest),HttpStatus.CREATED);
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> login(
-            @Valid @RequestBody AuthenticationRequest authenticationRequest
-    ) {
-        return new ResponseEntity<>(authenticationService.login(authenticationRequest), HttpStatus.OK);
+        AuthenticationResponse authenticationResponse = authenticationService.register(registrationRequest);
+        return new ResponseEntity<>(authenticationResponse,HttpStatus.CREATED);
     }
 
     @PostMapping("/activation")
@@ -39,6 +33,14 @@ public class AuthenticationController {
     ) throws MessagingException {
         authenticationService.activateAccount(code);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthenticationResponse> login(
+            @Valid @RequestBody AuthenticationRequest authenticationRequest
+    ) {
+        AuthenticationResponse authenticationResponse = authenticationService.login(authenticationRequest);
+        return new ResponseEntity<>(authenticationResponse, HttpStatus.OK);
     }
 
     @PostMapping("/refresh")
@@ -53,6 +55,7 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> verifyOtp(
             @Valid @RequestBody VerificationRequest verificationRequest
     ) {
-        return new ResponseEntity<>(authenticationService.verifyOtp(verificationRequest), HttpStatus.OK);
+        AuthenticationResponse authenticationResponse = authenticationService.verifyOtp(verificationRequest);
+        return new ResponseEntity<>(authenticationResponse, HttpStatus.OK);
     }
 }
