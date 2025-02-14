@@ -36,7 +36,7 @@ public class AuthenticationController {
     @PostMapping("/activation")
     public ResponseEntity<?> activateAccount(
             @RequestParam(name = "code") String code
-    ) throws MessagingException, AccessDeniedException {
+    ) throws MessagingException {
         authenticationService.activateAccount(code);
         return new ResponseEntity<>(HttpStatus.OK);
     }

@@ -185,11 +185,11 @@ public class AuthenticationService {
         userEmail = jwtService.extractUsername(refreshToken);
         if (userEmail != null) {
             User user = userRepository.findWithAssociationsByEmail(userEmail)
-                    .orElseThrow(() -> new UsernameNotFoundException("User with the email \"" + userEmail + "\" not found"));
+                    .orElseThrow(() -> new UsernameNotFoundException("User with the email '" + userEmail + "' does not exist"));
 
             boolean isTokenRevoked = tokenRepository.findByToken(refreshToken)
                     .map(Token::isRevoked)
-                    .orElseThrow(() -> new JwtException("Refresh token not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Refresh token was not found"));
 
             if (!isTokenRevoked && jwtService.isTokenValid(refreshToken, user)) {
                 Map<String, Object> claims = new HashMap<>();

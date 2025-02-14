@@ -279,6 +279,87 @@ public class AuthenticationControllerIT {
                 .isEqualTo("Activation code has expired. A new email has been sent");
     }
 
+    @Test
+    public void shouldRefreshTokenWhenValidRequest() {
+        // Manually save refresh token
+        String refreshToken = jwtService.generateRefreshToken(userA);
+        tokenRepository.save(new Token(null, refreshToken, TokenType.BEARER, LocalDateTime.now().minusMinutes(2),
+                LocalDateTime.now().plusMinutes(2), null, false, userA));
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + refreshToken);
 
+        ResponseEntity<AuthenticationResponse> response =
+                restTemplate.exchange("/api/auth/refresh", HttpMethod.POST,
+                        new HttpEntity<>(headers), AuthenticationResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getAccessToken()).isNotNull();
+        assertThat(response.getBody().getRefreshToken()).isNotNull();
+        assertThat(response.getBody().getRefreshToken()).isEqualTo(refreshToken);
+        assertThat(jwtService.isTokenValid(response.getBody().getAccessToken(), userA)).isTrue();
+    }
+
+    @Test
+    public void shouldNotRefreshTokenWhenMissingRefreshToken() {
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/auth/refresh", HttpMethod.POST,
+                        null, ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("No refresh token in Bearer header");
+    }
+
+    @Test
+    public void shouldNotRefreshTokenWhenUserDoesNotExist() {
+        User userB = TestDataUtils.createUserB(userA.getRoles());
+        String refreshToken = jwtService.generateRefreshToken(userB);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + refreshToken);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/auth/refresh", HttpMethod.POST,
+                        new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("User with the email '" + userB.getEmail() + "' does not exist");
+    }
+
+    @Test
+    public void shouldNotRefreshTokenWhenRefreshTokenDoesNotExist() {
+        String refreshToken = jwtService.generateRefreshToken(userA);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + refreshToken);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/auth/refresh", HttpMethod.POST,
+                        new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("Refresh token was not found");
+    }
+
+    @Test
+    public void shouldNotRefreshTokenWhenTokenIsRevoked() {
+        // Manually save refresh token
+        String refreshToken = jwtService.generateRefreshToken(userA);
+        tokenRepository.save(new Token(null, refreshToken, TokenType.BEARER, LocalDateTime.now().minusMinutes(2),
+                LocalDateTime.now().minusMinutes(1), null, true, userA));
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + refreshToken);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/auth/refresh", HttpMethod.POST,
+                        new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("Invalid refresh token");
+    }
 
 }
