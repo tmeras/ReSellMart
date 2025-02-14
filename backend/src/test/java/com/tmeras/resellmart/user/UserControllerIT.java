@@ -111,6 +111,7 @@ public class UserControllerIT {
         cartItemRepository.deleteAll();
         productRepository.deleteAll();
         categoryRepository.deleteAll();
+        tokenRepository.deleteAll();
         userRepository.deleteAll();
         roleRepository.deleteAll();
 
