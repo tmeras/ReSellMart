@@ -266,7 +266,6 @@ public class UserService {
 
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("No user found with ID: " + userId));
-
         boolean isExistingUserAdmin = existingUser.getRoles().stream()
                 .anyMatch(role -> role.getName().equals("ADMIN"));
         if (isExistingUserAdmin)

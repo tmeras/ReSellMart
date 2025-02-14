@@ -16,7 +16,9 @@ import com.tmeras.resellmart.product.Product;
 import com.tmeras.resellmart.product.ProductRepository;
 import com.tmeras.resellmart.product.ProductResponse;
 import com.tmeras.resellmart.role.Role;
+import com.tmeras.resellmart.token.Token;
 import com.tmeras.resellmart.token.TokenRepository;
+import com.tmeras.resellmart.token.TokenType;
 import com.tmeras.resellmart.wishlist.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -529,6 +531,69 @@ public class UserServiceTests {
                 .hasMessage("You do not have permission to modify this user's wishlist");
     }
 
+    @Test
+    public void shouldDisableUserWhenValidRequest() {
+        Token testToken = new Token(1, "token", TokenType.BEARER, LocalDateTime.now(),
+                LocalDateTime.now().plusMinutes(1), null, false, userA);
+        // Downgrade admin user
+        userA.setRoles(Set.of(new Role(1, "USER")));
 
+        when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
+        when(tokenRepository.findAllValidRefreshTokensByUserEmail(userA.getEmail())).thenReturn(List.of(testToken));
+        when(productRepository.findAllBySellerId(userA.getId())).thenReturn(List.of(productA));
 
+        userService.disable(userA.getId(), authentication);
+
+        assertThat(userA.isEnabled()).isFalse();
+        assertThat(testToken.isRevoked()).isTrue();
+        assertThat(productA.isAvailable()).isFalse();
+    }
+
+    @Test
+    public void shouldNotDisableUserWhenUserOrAdminIsNotLoggedIn() {
+        // Downgrade admin user
+        userA.setRoles(Set.of(new Role(1, "USER")));
+
+        assertThatThrownBy(() -> userService.disable(userB.getId(), authentication))
+                .isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to disable this user");
+    }
+
+    @Test
+    public void shouldNotDisableUserWhenInvalidUserId() {
+        when(userRepository.findById(99)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.disable(99, authentication))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No user found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotDisableAdminUser() {
+        when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
+
+        assertThatThrownBy(() -> userService.disable(userA.getId(), authentication))
+                .isInstanceOf(APIException.class)
+                .hasMessage("You cannot disable an admin user");
+    }
+
+    @Test
+    public void shouldEnableUserWhenValidRequest() {
+        userA.setEnabled(false);
+
+        when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
+
+        userService.enable(userA.getId());
+
+        assertThat(userA.isEnabled()).isTrue();
+    }
+
+    @Test
+    public void shouldNotEnableUserWhenInvalidUserId() {
+        when(userRepository.findById(99)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.enable(99))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No user found with ID: 99");
+    }
 }
