@@ -18,7 +18,7 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
-    @PostMapping("/register")
+    @PostMapping("/registration")
     public ResponseEntity<AuthenticationResponse> register(
             @Valid @RequestBody RegistrationRequest registrationRequest
     ) throws MessagingException {
@@ -32,7 +32,7 @@ public class AuthenticationController {
         return new ResponseEntity<>(authenticationService.login(authenticationRequest), HttpStatus.OK);
     }
 
-    @GetMapping("/activate-account")
+    @GetMapping("/activation")
     public ResponseEntity<?> activateAccount(
             @RequestParam(name = "code") String code
     ) throws MessagingException {
@@ -40,7 +40,7 @@ public class AuthenticationController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/refresh-token")
+    @PostMapping("/refresh")
     public void refreshToken(
             HttpServletRequest request,
             HttpServletResponse response
@@ -48,7 +48,7 @@ public class AuthenticationController {
         authenticationService.refreshToken(request, response);
     }
 
-    @PostMapping("/verify")
+    @PostMapping("/verification")
     public ResponseEntity<AuthenticationResponse> verifyOtp(
             @Valid @RequestBody VerificationRequest verificationRequest
     ) {
