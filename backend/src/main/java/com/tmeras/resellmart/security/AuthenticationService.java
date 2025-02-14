@@ -5,7 +5,6 @@ import com.tmeras.resellmart.email.EmailService;
 import com.tmeras.resellmart.exception.APIException;
 import com.tmeras.resellmart.exception.ResourceAlreadyExistsException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
-import com.tmeras.resellmart.mfa.MfaService;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.user.User;

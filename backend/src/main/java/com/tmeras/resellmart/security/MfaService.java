@@ -1,4 +1,4 @@
-package com.tmeras.resellmart.mfa;
+package com.tmeras.resellmart.security;
 
 import com.tmeras.resellmart.exception.InternalServerException;
 import dev.samstevens.totp.code.*;
