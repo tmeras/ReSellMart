@@ -45,7 +45,7 @@ public class CategoryService {
     public CategoryResponse findById(Integer categoryId) {
         return categoryRepository.findById(categoryId)
                 .map(categoryMapper::toCategoryResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("No category found with ID:" + categoryId));
+                .orElseThrow(() -> new ResourceNotFoundException("No category found with ID: " + categoryId));
     }
 
     public PageResponse<CategoryResponse> findAll(
@@ -103,7 +103,7 @@ public class CategoryService {
     @PreAuthorize("hasRole('ADMIN')")
     public CategoryResponse update(CategoryRequest categoryRequest, Integer categoryId) {
         Category existingCategory = categoryRepository.findById(categoryId)
-                .orElseThrow(() ->new ResourceNotFoundException("No category found with ID:" + categoryId));
+                .orElseThrow(() ->new ResourceNotFoundException("No category found with ID: " + categoryId));
 
         // Only allow updates to category name
         existingCategory.setName(categoryRequest.getName());

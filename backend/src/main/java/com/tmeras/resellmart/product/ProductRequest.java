@@ -14,10 +14,10 @@ public class ProductRequest {
 
     private Integer id;
 
-    @NotBlank(message = "Product name must not be empty")
+    @NotBlank(message = "Name must not be empty")
     private String name;
 
-    @NotBlank(message = "Product description must not be empty")
+    @NotBlank(message = "Description must not be empty")
     private String description;
 
     @NotNull(message = "Price must not be empty")

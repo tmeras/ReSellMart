@@ -31,22 +31,19 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = {
-                "application.file.upload.product-images-path=./test-uploads/product-images",
-                "application.file.upload.user-images-path=./test-uploads/user-images"
-        }
+        properties = {"application.file.upload.product-images-path=./test-uploads/product-images"}
 )
 @Testcontainers
 public class ProductControllerIT {
+
+    private static final ClassPathResource TEST_IMAGE_1 = new ClassPathResource("test_image_1.jpeg");
+    private static final ClassPathResource TEST_IMAGE_2 = new ClassPathResource("test_image_2.jpeg");
 
     @Container
     @ServiceConnection
@@ -60,12 +57,12 @@ public class ProductControllerIT {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
 
-    private Product productA;
-    private ProductRequest productRequestA;
-    private Product productB;
-
-    // Used to add include JWT in requests
+    // Used to add JWT in requests
     private HttpHeaders headers;
+
+    private Product productA;
+    private Product productB;
+    private ProductRequest productRequestA;
 
     @Autowired
     public ProductControllerIT(
@@ -127,7 +124,6 @@ public class ProductControllerIT {
 
     @AfterAll
     public static void tearDown() throws IOException {
-        // Delete test uploads directory, if it exists
         File uploadsDirectory = new File("test-uploads");
         if (uploadsDirectory.exists())
             FileUtils.deleteDirectory(uploadsDirectory);
@@ -161,12 +157,16 @@ public class ProductControllerIT {
                 new ProductRequest(3, null, "Description C",
                         50.0, 25.0,  ProductCondition.FAIR, 1,
                         true, productA.getCategory().getId());
+        Map<String, String> expectedErrors = new HashMap<>();
+        expectedErrors.put("name", "Name must not be empty");
 
-        ResponseEntity<ProductResponse> response =
+        ResponseEntity<Map<String, String>> response =
                 restTemplate.exchange("/api/products", HttpMethod.POST,
-                        new HttpEntity<>(productRequest, headers), ProductResponse.class);
+                        new HttpEntity<>(productRequest, headers), new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).isEqualTo(expectedErrors);
     }
 
     @Test
@@ -176,11 +176,13 @@ public class ProductControllerIT {
                         50.0, 25.0,  ProductCondition.FAIR, 1,
                         true, 99);
 
-        ResponseEntity<ProductResponse> response =
+        ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/products", HttpMethod.POST,
-                        new HttpEntity<>(productRequest, headers), ProductResponse.class);
+                        new HttpEntity<>(productRequest, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("No category found with ID: 99");
     }
 
     @Test
@@ -236,11 +238,13 @@ public class ProductControllerIT {
 
     @Test
     public void shouldNotFindProductByIdWhenInvalidProductId() {
-        ResponseEntity<ProductResponse> response =
+        ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/products/99", HttpMethod.GET,
-                        new HttpEntity<>(headers), ProductResponse.class);
+                        new HttpEntity<>(headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("No product found with ID: 99");
     }
 
     @Test
@@ -252,6 +256,8 @@ public class ProductControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getContent().size()).isEqualTo(2);
+        assertThat(response.getBody().getContent().get(0).getName()).isEqualTo(productA.getName());
+        assertThat(response.getBody().getContent().get(1).getName()).isEqualTo(productB.getName());
     }
 
     @Test
@@ -356,11 +362,13 @@ public class ProductControllerIT {
 
     @Test
     public void shouldNotUpdateProductWhenSellerIsNotLoggedIn() {
-        ResponseEntity<ProductResponse> response =
+        ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/products/" + productB.getId(), HttpMethod.PUT,
-                        new HttpEntity<>(productRequestA, headers), ProductResponse.class);
+                        new HttpEntity<>(productRequestA, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("You do not have permission to update this product");
     }
 
     @Test
@@ -372,14 +380,16 @@ public class ProductControllerIT {
                         new HttpEntity<>(productRequestA, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("Discounted price cannot be higher than regular price");
     }
 
     @Test
     public void shouldUploadProductImagesWhenValidRequest() {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("images", new ClassPathResource("test_image_1.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
+        requestBody.add("images", TEST_IMAGE_1);
+        requestBody.add("images", TEST_IMAGE_2);
 
         ResponseEntity<ProductResponse> response =
                 restTemplate.exchange("/api/products/" + productA.getId() + "/images", HttpMethod.PUT,
@@ -394,40 +404,41 @@ public class ProductControllerIT {
     public void shouldNotUploadProductImagesWhenInvalidProductId() {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("images", new ClassPathResource("test_image_1.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
+        requestBody.add("images",TEST_IMAGE_1);
+        requestBody.add("images", TEST_IMAGE_2);
 
-        ResponseEntity<?> response =
+        ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/products/99/images", HttpMethod.PUT,
-                        new HttpEntity<>(requestBody, headers), Object.class);
+                        new HttpEntity<>(requestBody, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("No product found with ID: 99");
     }
 
     @Test
     public void shouldNotUploadProductImagesWhenSellerIsNotLoggedIn() {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("images", new ClassPathResource("test_image_1.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
+        requestBody.add("images", TEST_IMAGE_1);
+        requestBody.add("images", TEST_IMAGE_2);
 
-        ResponseEntity<?> response =
+        ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/products/" + productB.getId() + "/images", HttpMethod.PUT,
-                        new HttpEntity<>(requestBody, headers), Object.class);
+                        new HttpEntity<>(requestBody, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("You do not have permission to upload images for this product");
     }
 
     @Test
     public void shouldNotUploadProductImagesWhenImageLimitExceeded() {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("images", new ClassPathResource("test_image_1.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
+        requestBody.add("images", TEST_IMAGE_1);
+        for (int i = 0; i < AppConstants.MAX_IMAGE_NUMBER; i++)
+            requestBody.add("images", TEST_IMAGE_2);
 
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/products/" + productA.getId() + "/images", HttpMethod.PUT,
@@ -459,8 +470,8 @@ public class ProductControllerIT {
         // First upload images
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("images", new ClassPathResource("test_image_1.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
+        requestBody.add("images", TEST_IMAGE_1);
+        requestBody.add("images",TEST_IMAGE_2);
 
         ResponseEntity<ProductResponse> firstResponse =
                 restTemplate.exchange("/api/products/" + productA.getId() + "/images", HttpMethod.PUT,
@@ -520,8 +531,8 @@ public class ProductControllerIT {
         headers.set("Authorization", "Bearer " + testJwt);
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("images", new ClassPathResource("test_image_1.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
+        requestBody.add("images", TEST_IMAGE_1);
+        requestBody.add("images", TEST_IMAGE_2);
 
         ResponseEntity<ProductResponse> firstResponse =
                 restTemplate.exchange("/api/products/" + productB.getId() + "/images", HttpMethod.PUT,
@@ -554,8 +565,8 @@ public class ProductControllerIT {
         headers.set("Authorization", "Bearer " + testJwt);
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("images", new ClassPathResource("test_image_1.jpeg"));
-        requestBody.add("images", new ClassPathResource("test_image_2.jpeg"));
+        requestBody.add("images", TEST_IMAGE_1);
+        requestBody.add("images", TEST_IMAGE_2);
 
         ResponseEntity<ProductResponse> firstResponse =
                 restTemplate.exchange("/api/products/" + productB.getId() + "/images", HttpMethod.PUT,

@@ -10,6 +10,7 @@ import com.tmeras.resellmart.product.ProductRequest;
 import com.tmeras.resellmart.product.ProductResponse;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.user.User;
+import com.tmeras.resellmart.user.UserRequest;
 import com.tmeras.resellmart.user.UserResponse;
 
 import java.util.ArrayList;
@@ -29,8 +30,17 @@ public final class TestDataUtils {
                 .name("Test user A")
                 .password("password")
                 .email("testA@test.com")
+                .homeCountry("UK")
                 .enabled(true)
                 .roles(roles)
+                .build();
+    }
+
+    public static UserRequest createUserRequestA() {
+        return UserRequest.builder()
+                .name("Test User A")
+                .homeCountry("UK")
+                .mfaEnabled(false)
                 .build();
     }
 
@@ -161,7 +171,7 @@ public final class TestDataUtils {
                 .price(20.0)
                 .discountedPrice(10.0)
                 .productCondition(ProductCondition.LIKE_NEW)
-                .availableQuantity(1)
+                .availableQuantity(3)
                 .available(true)
                 .category(category)
                 .seller(seller)
@@ -177,7 +187,7 @@ public final class TestDataUtils {
                 .price(20.0)
                 .discountedPrice(10.0)
                 .productCondition(ProductCondition.LIKE_NEW)
-                .availableQuantity(1)
+                .availableQuantity(3)
                 .available(true)
                 .categoryId(categoryId)
                 .build();
@@ -191,7 +201,7 @@ public final class TestDataUtils {
                 .price(20.0)
                 .discountedPrice(10.0)
                 .productCondition(ProductCondition.LIKE_NEW)
-                .availableQuantity(1)
+                .availableQuantity(3)
                 .available(true)
                 .category(categoryResponse)
                 .seller(userResponse)

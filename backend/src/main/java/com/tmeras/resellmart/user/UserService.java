@@ -4,6 +4,7 @@ import com.tmeras.resellmart.cart.*;
 import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.APIException;
 import com.tmeras.resellmart.exception.OperationNotPermittedException;
+import com.tmeras.resellmart.exception.ResourceAlreadyExistsException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.file.FileService;
 import com.tmeras.resellmart.mfa.MfaService;
@@ -46,9 +47,9 @@ public class UserService {
     private final MfaService mfaService;
 
     public UserResponse findById(Integer userId) {
-        return userRepository.findById(userId)
+        return userRepository.findWithAssociationsById(userId)
                 .map(userMapper::toUserResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("No user found with ID " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("No user found with ID: " + userId));
     }
 
     @PreAuthorize("hasRole('ADMIN')") // Only admins should be able to view all users
@@ -57,6 +58,9 @@ public class UserService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
         Page<User> users = userRepository.findAll(pageable);
+        // Initialize lazy associations
+        for(User user : users)
+            user.getRoles().size();
         List<UserResponse> userResponses = users.stream()
                 .map(userMapper::toUserResponse)
                 .toList();
@@ -77,6 +81,9 @@ public class UserService {
 
         if (!Objects.equals(currentUser.getId(), userId))
             throw new OperationNotPermittedException("You do not have permission to update the details of this user");
+
+        // User is logged in, so already exists => just call .get() on optional to retrieve Hibernate-managed entity
+        currentUser = userRepository.findWithAssociationsById(userId).get();
 
         // If enabling MFA, generate QR image
         String qrImageUri = null;
@@ -100,6 +107,9 @@ public class UserService {
 
         if (!Objects.equals(currentUser.getId(), userId))
             throw new OperationNotPermittedException("You do not have permission to update this user's profile image");
+
+        // User is logged in, so already exists => just call .get() on optional to retrieve Hibernate-managed entity
+        currentUser = userRepository.findWithAssociationsById(userId).get();
 
         // Delete previous user image, if it exists
         if (currentUser.getImagePath() != null)
@@ -125,7 +135,7 @@ public class UserService {
             throw new OperationNotPermittedException("You do not have permission to add items to this user's cart");
 
         if (cartItemRepository.existsByUserIdAndProductId(userId, cartItemRequest.getProductId()))
-            throw new APIException("This product is already in your cart");
+            throw new ResourceAlreadyExistsException("This product is already in your cart");
 
         // User is logged in, so already exists => just call .get() on optional to retrieve Hibernate-managed entity
         currentUser = userRepository.findById(userId).get();
@@ -201,7 +211,7 @@ public class UserService {
             throw new OperationNotPermittedException("You do not have permission to add items to this user's wishlist");
 
         if (wishListItemRepository.existsByUserIdAndProductId(userId, wishListItemRequest.getProductId()))
-            throw new APIException("This product is already in your wishlist");
+            throw new ResourceAlreadyExistsException("This product is already in your wishlist");
 
         // User is logged in, so already exists => just call .get() on optional to retrieve Hibernate-managed entity
         currentUser = userRepository.findById(userId).get();
@@ -256,7 +266,6 @@ public class UserService {
 
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("No user found with ID: " + userId));
-
         boolean isExistingUserAdmin = existingUser.getRoles().stream()
                 .anyMatch(role -> role.getName().equals("ADMIN"));
         if (isExistingUserAdmin)

@@ -25,8 +25,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,6 +46,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WithMockUser(roles = "ADMIN")
 public class ProductControllerTests {
 
+    public static final Path TEST_IMAGE_PATH_1 = Paths.get("src/test/resources/test_image_1.jpeg");
+    public static final Path TEST_IMAGE_PATH_2 = Paths.get("src/test/resources/test_image_2.jpeg");
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -57,7 +63,7 @@ public class ProductControllerTests {
     private ProductResponse productResponseB;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         //Initialise test objects
         UserResponse adminUserResponse = TestDataUtils.createUserResponseA(
                 Set.of(new Role(1, "ADMIN"))
@@ -88,11 +94,16 @@ public class ProductControllerTests {
     @Test
     public void shouldNotSaveProductWhenInvalidRequest() throws Exception {
         productRequestA.setName(null);
+        Map<String, String> expectedErrors = new HashMap<>();
+        expectedErrors.put("name", "Name must not be empty");
 
-        mockMvc.perform(post("/api/products")
+        MvcResult mvcResult = mockMvc.perform(post("/api/products")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(productRequestA))
-        ).andExpect(status().isBadRequest());
+        ).andExpect(status().isBadRequest()).andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(expectedErrors));
     }
 
     @Test
@@ -115,6 +126,7 @@ public class ProductControllerTests {
                 2, 1,
                 true, true
         );
+
         when(productService.findAll(
                 AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                 AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR
@@ -239,24 +251,24 @@ public class ProductControllerTests {
     }
 
     @Test
-    public void shouldUploadProductImagesWhenValidRequest() throws Exception {
+    public void shouldUploadProductImages() throws Exception {
         MockMultipartFile image1 = new MockMultipartFile(
                 "images", "test_image_1.jpeg",
-                "image/jpeg", Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+                "image/jpeg", Files.readAllBytes(TEST_IMAGE_PATH_1)
         );
         MockMultipartFile image2 = new MockMultipartFile(
                 "images", "test_image_2.jpeg",
-                "image/jpeg", Files.readAllBytes(Paths.get("src/test/resources/test_image_2.jpeg"))
+                "image/jpeg", Files.readAllBytes(TEST_IMAGE_PATH_2)
         );
         productResponseA.setImages(List.of(
                 new ProductImageResponse(
                         1,
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg")),
+                        Files.readAllBytes(TEST_IMAGE_PATH_1),
                         false
                 ),
                 new ProductImageResponse(
                         1,
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_2.jpeg")),
+                        Files.readAllBytes(TEST_IMAGE_PATH_2),
                         false
                 )
         ));
@@ -276,11 +288,11 @@ public class ProductControllerTests {
     }
 
     @Test
-    public void shouldDisplayImageWhenValidRequest() throws Exception {
+    public void shouldDisplayImageWhen() throws Exception {
         productResponseA.setImages(List.of(
                 new ProductImageResponse(
                         1,
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg")),
+                        Files.readAllBytes(TEST_IMAGE_PATH_1),
                         true
                 )
         ));

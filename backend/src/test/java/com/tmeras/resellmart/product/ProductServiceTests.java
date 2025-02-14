@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +40,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductServiceTests {
+
+    public static final Path TEST_IMAGE_PATH_1 = Paths.get("src/test/resources/test_image_1.jpeg");
+    public static final Path TEST_IMAGE_PATH_2 = Paths.get("src/test/resources/test_image_2.jpeg");
 
     @Mock
     private ProductRepository productRepository;
@@ -69,7 +73,7 @@ public class ProductServiceTests {
     private Authentication authentication;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         // Initialise test objects
         Category category = TestDataUtils.createCategoryA();
         Role adminRole = new Role(1, "ADMIN");
@@ -108,13 +112,16 @@ public class ProductServiceTests {
 
     @Test
     public void shouldNotSaveProductWhenInvalidCategoryId() {
+        productRequestA.setCategoryId(99);
+
         when(userRepository.findWithAssociationsById(productRequestA.getId()))
                 .thenReturn(Optional.of(productA.getSeller()));
         when(categoryRepository.findWithAssociationsById(productRequestA.getCategoryId()))
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> productService.save(productRequestA, authentication))
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No category found with ID: 99");
     }
 
     @Test
@@ -160,7 +167,8 @@ public class ProductServiceTests {
         when(productRepository.findWithAssociationsById(99)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> productService.findById(99))
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No product found with ID: 99");
     }
 
     @Test
@@ -287,7 +295,6 @@ public class ProductServiceTests {
                 .hasMessage("No category found with ID: 99");
     }
 
-
     @Test
     public void shouldNotUpdateProductWhenInvalidProductId() {
         when(categoryRepository.findWithAssociationsById(productRequestA.getCategoryId()))
@@ -334,13 +341,13 @@ public class ProductServiceTests {
         List<MultipartFile> images = List.of(
                 new MockMultipartFile(
                         "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+                        Files.readAllBytes(TEST_IMAGE_PATH_1)
                 )
         );
         productResponseA.setImages(List.of(
                 new ProductImageResponse(
                         1,
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg")),
+                        Files.readAllBytes(TEST_IMAGE_PATH_1),
                         false
                 )
         ));
@@ -364,14 +371,15 @@ public class ProductServiceTests {
         List<MultipartFile> images = List.of(
                 new MockMultipartFile(
                         "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+                        Files.readAllBytes(TEST_IMAGE_PATH_1)
                 )
         );
 
         when(productRepository.findWithAssociationsById(99)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> productService.uploadProductImages(images, 99, authentication))
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No product found with ID: 99");
     }
 
     @Test
@@ -379,7 +387,7 @@ public class ProductServiceTests {
         List<MultipartFile> images = List.of(
                 new MockMultipartFile(
                         "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+                        Files.readAllBytes(TEST_IMAGE_PATH_1)
                 )
         );
 
@@ -392,7 +400,8 @@ public class ProductServiceTests {
         when(productRepository.findWithAssociationsById(productRequestA.getId())).thenReturn(Optional.of(productA));
 
         assertThatThrownBy(() -> productService.uploadProductImages(images, productRequestA.getId(), authentication))
-                .isInstanceOf(OperationNotPermittedException.class);
+                .isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to upload images for this product");
     }
 
     @Test
@@ -400,27 +409,27 @@ public class ProductServiceTests {
         List<MultipartFile> images = List.of(
                 new MockMultipartFile(
                         "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+                        Files.readAllBytes(TEST_IMAGE_PATH_1)
                 ),
                 new MockMultipartFile(
                         "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+                        Files.readAllBytes(TEST_IMAGE_PATH_1)
                 ),
                 new MockMultipartFile(
                         "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+                        Files.readAllBytes(TEST_IMAGE_PATH_1)
                 ),
                 new MockMultipartFile(
                         "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+                        Files.readAllBytes(TEST_IMAGE_PATH_1)
                 ),
                 new MockMultipartFile(
                         "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+                        Files.readAllBytes(TEST_IMAGE_PATH_1)
                 ),
                 new MockMultipartFile(
                         "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg"))
+                        Files.readAllBytes(TEST_IMAGE_PATH_1)
                 )
         );
 
@@ -453,12 +462,12 @@ public class ProductServiceTests {
         productResponseA.setImages(List.of(
                 new ProductImageResponse(
                         1,
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_1.jpeg")),
+                        Files.readAllBytes(TEST_IMAGE_PATH_1),
                         true
                 ),
                 new ProductImageResponse(
                         2,
-                        Files.readAllBytes(Paths.get("src/test/resources/test_image_2.jpeg")),
+                        Files.readAllBytes(TEST_IMAGE_PATH_2),
                         false
                 )
         ));
@@ -527,7 +536,8 @@ public class ProductServiceTests {
         when(productImageRepository.findById(productImageA.getId())).thenReturn(Optional.of(productImageA));
 
         assertThatThrownBy(() -> productService.displayImage(productRequestA.getId(), productImageA.getId(), authentication))
-                .isInstanceOf(OperationNotPermittedException.class);
+                .isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to manage images for this product");
     }
 
     @Test

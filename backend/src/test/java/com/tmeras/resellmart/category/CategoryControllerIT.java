@@ -2,6 +2,7 @@ package com.tmeras.resellmart.category;
 
 import com.tmeras.resellmart.TestDataUtils;
 import com.tmeras.resellmart.common.PageResponse;
+import com.tmeras.resellmart.exception.ExceptionResponse;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.token.JwtService;
@@ -23,6 +24,7 @@ import org.testcontainers.shaded.org.checkerframework.checker.units.qual.C;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,12 +44,12 @@ class CategoryControllerIT {
     private final JwtService jwtService;
     private final CategoryRepository categoryRepository;
 
+    // Used to add JWT in requests
+    private HttpHeaders headers;
+
     private Category parentCategory;
     private Category childCategory;
     private User user;
-
-    // Used to add include JWT in requests
-    private HttpHeaders headers;
 
     @Autowired
     public CategoryControllerIT(
@@ -113,46 +115,56 @@ class CategoryControllerIT {
 
     @Test
     public void shouldNotSaveCategoryWhenInvalidRequest() {
-        CategoryRequest categoryRequest = CategoryRequest.builder().build();
+        CategoryRequest categoryRequest = CategoryRequest.builder().name(null).build();
+        Map<String, String> expectedErrors = new HashMap<>();
+        expectedErrors.put("name", "Name must not be empty");
 
-        ResponseEntity<CategoryResponse> response =
+        ResponseEntity<Map<String,String>> response =
                 restTemplate.exchange("/api/categories", HttpMethod.POST,
-                        new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+                        new HttpEntity<>(categoryRequest, headers), new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).isEqualTo(expectedErrors);
     }
 
     @Test
     public void shouldNotSaveCategoryWhenDuplicateCategoryName() {
         CategoryRequest categoryRequest = new CategoryRequest(3, "Test category A", null);
 
-        ResponseEntity<CategoryResponse> response =
+        ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/categories", HttpMethod.POST,
-                        new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+                        new HttpEntity<>(categoryRequest, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("A category with the name: 'Test category A' already exists");
     }
 
     @Test
     public void shouldNotSaveCategoryWhenInvalidParentId() {
         CategoryRequest categoryRequest = new CategoryRequest(3, "Test category C", 99);
 
-        ResponseEntity<CategoryResponse> response =
+        ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/categories", HttpMethod.POST,
-                        new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+                        new HttpEntity<>(categoryRequest, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("No parent category found with ID: 99");
     }
 
     @Test
     public void shouldNotSaveCategoryWhenInvalidParent() {
         CategoryRequest categoryRequest = new CategoryRequest(3, "Test category C", childCategory.getId());
 
-        ResponseEntity<CategoryResponse> response =
+        ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/categories", HttpMethod.POST,
-                        new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+                        new HttpEntity<>(categoryRequest, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("Parent category should not have a parent");
     }
 
     @Test
@@ -168,11 +180,13 @@ class CategoryControllerIT {
 
     @Test
     public void shouldNotFindCategoryByIdWhenInvalidCategoryId() {
-        ResponseEntity<CategoryResponse> response =
+        ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/categories/99", HttpMethod.GET,
-                        new HttpEntity<>(headers), CategoryResponse.class);
+                        new HttpEntity<>(headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("No category found with ID: 99");
     }
 
     @Test
@@ -242,11 +256,13 @@ class CategoryControllerIT {
     public void shouldNotUpdateCategoryWhenInvalidCategoryId() {
         CategoryRequest categoryRequest = new CategoryRequest(1, "Updated category", null);
 
-        ResponseEntity<CategoryResponse> response =
+        ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/categories/99", HttpMethod.PUT,
-                        new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+                        new HttpEntity<>(categoryRequest, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("No category found with ID: 99");
     }
 
     @Test
