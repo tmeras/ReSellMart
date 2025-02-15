@@ -176,7 +176,7 @@ public class AuthenticationControllerIT {
     }
 
     @Test
-    public void shouldLoginWhenValidRequestWhenValidRequest() {
+    public void shouldLoginUserWhenValidRequest() {
         AuthenticationRequest authenticationRequest = new AuthenticationRequest(userA.getEmail(), userPassword);
 
         ResponseEntity<AuthenticationResponse> response =
@@ -193,7 +193,7 @@ public class AuthenticationControllerIT {
     }
 
     @Test
-    public void shouldNotLoginWhenInvalidCredentials() {
+    public void shouldNotLoginUserWhenInvalidCredentials() {
         AuthenticationRequest authenticationRequest =
                 new AuthenticationRequest(userA.getEmail(), "wrongPassword");
 
@@ -205,7 +205,7 @@ public class AuthenticationControllerIT {
     }
 
     @Test
-    public void shouldNotLoginWhenUserIsDisabled() {
+    public void shouldNotLoginUserWhenUserIsDisabled() {
         userA.setEnabled(false);
         userRepository.save(userA);
 
@@ -219,7 +219,7 @@ public class AuthenticationControllerIT {
     }
 
     @Test
-    public void shouldNotLoginWhenMfaIsEnabled() {
+    public void shouldNotLoginUserWhenMfaIsEnabled() {
         userA.setMfaEnabled(true);
         userRepository.save(userA);
         AuthenticationRequest authenticationRequest = new AuthenticationRequest(userA.getEmail(), userPassword);
