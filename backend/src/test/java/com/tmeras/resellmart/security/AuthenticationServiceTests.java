@@ -245,7 +245,7 @@ public class AuthenticationServiceTests {
     public void shouldRefreshTokenWhenValidRequest() throws IOException {
         User user = TestDataUtils.createUserA(Set.of(new Role(1, "USER")));
         Token refreshToken = new Token(null, "refreshToken", TokenType.BEARER, LocalDateTime.now().minusMinutes(2),
-                LocalDateTime.now().minusMinutes(1), null, false, user);
+                LocalDateTime.now().plusMinutes(1), null, false, user);
         AuthenticationResponse expectedResponse = AuthenticationResponse.builder()
                 .accessToken("accessToken")
                 .refreshToken(refreshToken.getToken())
