@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -155,8 +156,8 @@ public class AuthenticationServiceTests {
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(user, "pass", user.getAuthorities());
         AuthenticationRequest authenticationRequest = AuthenticationRequest.builder()
-                .email("test@test.com")
-                .password("pass")
+                .email(user.getEmail())
+                .password(user.getPassword())
                 .build();
         AuthenticationResponse expectedResponse = AuthenticationResponse.builder()
                 .accessToken("accessToken")
@@ -335,5 +336,57 @@ public class AuthenticationServiceTests {
                 .hasMessage("Invalid refresh token");
     }
 
+    @Test
+    public void shouldVerifyOtpWhenValidRequest() {
+        User user = TestDataUtils.createUserA(Set.of(new Role(1, "USER")));
+        user.setSecret("secret");
+        user.setMfaEnabled(true);
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(user, "pass", user.getAuthorities());
+        VerificationRequest verificationRequest = VerificationRequest.builder()
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .otp("otp")
+                .build();
+        AuthenticationResponse expectedResponse = AuthenticationResponse.builder()
+                .accessToken("accessToken")
+                .refreshToken("refreshToken")
+                .mfaEnabled(true)
+                .build();
 
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(authenticationToken);
+        when(mfaService.isOtpValid(user.getSecret(), verificationRequest.getOtp())).thenReturn(true);
+        when(jwtService.generateAccessToken(Map.of("name", user.getRealName()), user))
+                .thenReturn("accessToken");
+        when(jwtService.generateRefreshToken(user)).thenReturn("refreshToken");
+
+        AuthenticationResponse response  = authenticationService.verifyOtp(verificationRequest);
+
+        assertThat(response.getAccessToken()).isEqualTo(expectedResponse.getAccessToken());
+        assertThat(response.getRefreshToken()).isEqualTo(expectedResponse.getRefreshToken());
+        assertThat(response.getMfaEnabled()).isEqualTo(expectedResponse.getMfaEnabled());
+    }
+
+    @Test
+    public void shouldNotVerifyOtpWhenInvalidOtp() {
+        User user = TestDataUtils.createUserA(Set.of(new Role(1, "USER")));
+        user.setSecret("secret");
+        user.setMfaEnabled(true);
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(user, "pass", user.getAuthorities());
+        VerificationRequest verificationRequest = VerificationRequest.builder()
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .otp("otp")
+                .build();
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(authenticationToken);
+        when(mfaService.isOtpValid(user.getSecret(), verificationRequest.getOtp())).thenReturn(false);
+
+        assertThatThrownBy(() -> authenticationService.verifyOtp(verificationRequest))
+                .isInstanceOf(BadCredentialsException.class)
+                .hasMessage("OTP is not valid");
+    }
 }
