@@ -361,7 +361,7 @@ public class AuthenticationControllerIT {
     }
 
     @Test
-    public void shouldNotRefreshTokenWhenTokenIsRevoked() {
+    public void shouldNotRefreshTokenWhenRefreshTokenIsRevoked() {
         // Manually save refresh token
         String refreshToken = jwtService.generateRefreshToken(userA);
         tokenRepository.save(new Token(null, refreshToken, TokenType.BEARER, LocalDateTime.now().minusMinutes(2),

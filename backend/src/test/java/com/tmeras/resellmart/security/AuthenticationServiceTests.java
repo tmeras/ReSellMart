@@ -1,5 +1,6 @@
 package com.tmeras.resellmart.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tmeras.resellmart.TestDataUtils;
 import com.tmeras.resellmart.email.EmailService;
 import com.tmeras.resellmart.exception.APIException;
@@ -13,19 +14,25 @@ import com.tmeras.resellmart.token.TokenRepository;
 import com.tmeras.resellmart.token.TokenType;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
+import io.jsonwebtoken.JwtException;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -236,6 +243,97 @@ public class AuthenticationServiceTests {
         assertThat(user.isEnabled()).isFalse();
     }
 
+    @Test
+    public void shouldRefreshTokenWhenValidRequest() throws IOException {
+        User user = TestDataUtils.createUserA(Set.of(new Role(1, "USER")));
+        Token refreshToken = new Token(null, "refreshToken", TokenType.BEARER, LocalDateTime.now().minusMinutes(2),
+                LocalDateTime.now().minusMinutes(1), null, false, user);
+        AuthenticationResponse expectedResponse = AuthenticationResponse.builder()
+                .accessToken("accessToken")
+                .refreshToken(refreshToken.getToken())
+                .build();
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("Authorization", "Bearer " + refreshToken.getToken());
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        when(jwtService.extractUsername(refreshToken.getToken())).thenReturn(user.getEmail());
+        when(userRepository.findWithAssociationsByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(tokenRepository.findByToken(refreshToken.getToken())).thenReturn(Optional.of(refreshToken));
+        when(jwtService.isTokenValid(refreshToken.getToken(), user)).thenReturn(true);
+        when(jwtService.generateAccessToken(Map.of("name", user.getRealName()), user)).thenReturn("accessToken");
+
+        authenticationService.refreshToken(request, response);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        assertThat(response.getContentAsString()).isEqualTo(objectMapper.writeValueAsString(expectedResponse));
+    }
+
+    @Test
+    public void shouldNotRefreshTokenWhenMissingRefreshToken() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        assertThatThrownBy(() -> authenticationService.refreshToken(request, response))
+                .isInstanceOf(JwtException.class)
+                .hasMessage("No refresh token in Bearer header");
+    }
+
+    @Test
+    public void shouldNotRefreshTokenWhenUserDoesNotExist() {
+        User user = TestDataUtils.createUserA(Set.of(new Role(1, "USER")));
+        Token refreshToken = new Token(null, "refreshToken", TokenType.BEARER, LocalDateTime.now().minusMinutes(2),
+                LocalDateTime.now().minusMinutes(1), null, false, user);
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("Authorization", "Bearer " + refreshToken.getToken());
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        when(jwtService.extractUsername(refreshToken.getToken())).thenReturn(user.getEmail());
+        when(userRepository.findWithAssociationsByEmail(user.getEmail())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authenticationService.refreshToken(request, response))
+                .isInstanceOf(UsernameNotFoundException.class)
+                .hasMessage("User with the email '" + user.getEmail() + "' does not exist");
+    }
+
+    @Test
+    public void shouldNotRefreshTokenWhenRefreshTokenDoesNotExist() {
+        User user = TestDataUtils.createUserA(Set.of(new Role(1, "USER")));
+        Token refreshToken = new Token(null, "refreshToken", TokenType.BEARER, LocalDateTime.now().minusMinutes(2),
+                LocalDateTime.now().minusMinutes(1), null, false, user);
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("Authorization", "Bearer " + refreshToken.getToken());
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        when(jwtService.extractUsername(refreshToken.getToken())).thenReturn(user.getEmail());
+        when(userRepository.findWithAssociationsByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(tokenRepository.findByToken(refreshToken.getToken())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authenticationService.refreshToken(request, response))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Refresh token was not found");
+    }
+
+    @Test
+    public void shouldNotRefreshTokenWhenRefreshTokenIsRevoked() {
+        User user = TestDataUtils.createUserA(Set.of(new Role(1, "USER")));
+        Token refreshToken = new Token(null, "refreshToken", TokenType.BEARER, LocalDateTime.now().minusMinutes(2),
+                LocalDateTime.now().minusMinutes(1), null, true, user);
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("Authorization", "Bearer " + refreshToken.getToken());
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        when(jwtService.extractUsername(refreshToken.getToken())).thenReturn(user.getEmail());
+        when(userRepository.findWithAssociationsByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(tokenRepository.findByToken(refreshToken.getToken())).thenReturn(Optional.of(refreshToken));
+
+        assertThatThrownBy(() -> authenticationService.refreshToken(request, response))
+                .isInstanceOf(JwtException.class)
+                .hasMessage("Invalid refresh token");
+    }
 
 
 }
