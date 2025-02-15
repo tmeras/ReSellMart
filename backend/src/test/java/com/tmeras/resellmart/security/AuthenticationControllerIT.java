@@ -264,6 +264,22 @@ public class AuthenticationControllerIT {
     }
 
     @Test
+    public void shouldNotActivateAccountWhenTokenHasBeenValidated() {
+        userA.setEnabled(false);
+        userRepository.save(userA);
+        // Manually save activation code
+        tokenRepository.save(new Token(null, "code", TokenType.ACTIVATION, LocalDateTime.now().minusMinutes(2),
+                LocalDateTime.now().plusMinutes(2), LocalDateTime.now(), false, userA));
+
+        ResponseEntity<?> response =
+                restTemplate.exchange("/api/auth/activation?code=code", HttpMethod.POST,
+                        null, Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(userRepository.findById(userA.getId()).get().isEnabled()).isFalse();
+    }
+
+    @Test
     public void shouldNotActivateAccountWhenTokenIsExpired() {
         // Manually save activation code
         tokenRepository.save(new Token(null, "code", TokenType.ACTIVATION, LocalDateTime.now().minusMinutes(2),
