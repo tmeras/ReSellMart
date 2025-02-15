@@ -6,7 +6,6 @@ import com.tmeras.resellmart.configuration.TestConfig;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.token.JwtFilter;
 import com.tmeras.resellmart.user.User;
-import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Map;
 import java.util.Set;
@@ -142,4 +139,46 @@ public class AuthenticationControllerTests {
         assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(expectedErrors));
     }
 
+    @Test
+    public void shouldVerifyOtpWhenValidRequest() throws Exception{
+        VerificationRequest verificationRequest = VerificationRequest.builder()
+                .email("test@test.com")
+                .password("pass")
+                .otp("123456")
+                .build();
+        AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
+                .refreshToken("refreshToken")
+                .accessToken("accessToken")
+                .mfaEnabled(false)
+                .build();
+
+        when(authenticationService.verifyOtp(any(VerificationRequest.class))).thenReturn(authenticationResponse);
+
+        MvcResult mvcResult = mockMvc.perform(post("/api/auth/verification")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(verificationRequest))
+        ).andExpect(status().isOk()).andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(authenticationResponse));
+    }
+
+    @Test
+    public void shouldNotVerifyOtpWhenInvalidRequest() throws Exception{
+        VerificationRequest verificationRequest = VerificationRequest.builder()
+                .email("test@test.com")
+                .password("pass")
+                .otp(null)
+                .build();
+        Map<String, String> expectedErrors = new java.util.HashMap<>();
+        expectedErrors.put("otp", "OTP must not be empty");
+
+        MvcResult mvcResult = mockMvc.perform(post("/api/auth/verification")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(verificationRequest))
+        ).andExpect(status().isBadRequest()).andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(expectedErrors));
+    }
 }
