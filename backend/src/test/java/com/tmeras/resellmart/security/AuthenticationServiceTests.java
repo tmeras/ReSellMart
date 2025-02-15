@@ -2,6 +2,7 @@ package com.tmeras.resellmart.security;
 
 import com.tmeras.resellmart.TestDataUtils;
 import com.tmeras.resellmart.email.EmailService;
+import com.tmeras.resellmart.exception.APIException;
 import com.tmeras.resellmart.exception.ResourceAlreadyExistsException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.role.Role;
@@ -9,6 +10,7 @@ import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.token.JwtService;
 import com.tmeras.resellmart.token.Token;
 import com.tmeras.resellmart.token.TokenRepository;
+import com.tmeras.resellmart.token.TokenType;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
 import jakarta.mail.MessagingException;
@@ -24,6 +26,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -187,6 +190,50 @@ public class AuthenticationServiceTests {
         assertThat(response.getAccessToken()).isNull();
         assertThat(response.getRefreshToken()).isNull();
         assertThat(response.getMfaEnabled()).isTrue();
+    }
+
+    @Test
+    public void shouldActivateAccountWhenValidRequest() throws MessagingException {
+        User user = TestDataUtils.createUserA(Set.of(new Role(1, "USER")));
+        user.setEnabled(false);
+        Token token = new Token(null, "code", TokenType.ACTIVATION, LocalDateTime.now().minusMinutes(2),
+                LocalDateTime.now().plusMinutes(2), null, false, user);
+
+        when(tokenRepository.findByToken("code")).thenReturn(Optional.of(token));
+
+        authenticationService.activateAccount("code");
+
+        assertThat(user.isEnabled()).isTrue();
+        assertThat(token.getValidatedAt()).isNotNull();
+    }
+
+    @Test
+    public void shouldNotActivateAccountWhenTokenHasBeenValidated() throws MessagingException {
+        User user = TestDataUtils.createUserA(Set.of(new Role(1, "USER")));
+        user.setEnabled(false);
+        Token token = new Token(null, "code", TokenType.ACTIVATION, LocalDateTime.now().minusMinutes(2),
+                LocalDateTime.now().plusMinutes(2), LocalDateTime.now(), false, user);
+
+        when(tokenRepository.findByToken("code")).thenReturn(Optional.of(token));
+
+        authenticationService.activateAccount("code");
+
+        assertThat(user.isEnabled()).isFalse();
+    }
+
+    @Test
+    public void shouldNotActivateAccountWhenTokenHasExpired() {
+        User user = TestDataUtils.createUserA(Set.of(new Role(1, "USER")));
+        user.setEnabled(false);
+        Token token = new Token(null, "code", TokenType.ACTIVATION, LocalDateTime.now().minusMinutes(2),
+                LocalDateTime.now().minusMinutes(1), null, false, user);
+
+        when(tokenRepository.findByToken("code")).thenReturn(Optional.of(token));
+
+        assertThatThrownBy(() -> authenticationService.activateAccount("code"))
+                .isInstanceOf(APIException.class)
+                .hasMessage("Activation code has expired. A new email has been sent");
+        assertThat(user.isEnabled()).isFalse();
     }
 
 
