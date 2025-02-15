@@ -43,15 +43,6 @@ public class AuthenticationControllerTests {
     @MockitoBean
     private AuthenticationService authenticationService;
 
-    private User userA;
-
-    @BeforeEach
-    public void setUp() {
-        // Initialise test objects
-        Role adminRole = new Role(1, "ADMIN");
-        userA = TestDataUtils.createUserA(Set.of(adminRole));
-    }
-
     @Test
     public void shouldRegisterUserWhenValidRequest() throws Exception {
         RegistrationRequest registrationRequest = RegistrationRequest.builder()
