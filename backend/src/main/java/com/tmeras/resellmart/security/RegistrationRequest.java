@@ -20,11 +20,11 @@ public class RegistrationRequest {
     private String email;
 
     @NotBlank(message = "Password must not be empty")
-    @Size(min = 8, message = "Password should be at least 8 characters long")
+    @Size(min = 8, message = "Password must be at least 8 characters long")
     @Pattern(
             regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).*$",
             message = "Password must contain at least one uppercase letter, one lowercase letter, and one special character."
-    )
+    ) //TODO: Evaluate correctness of regex
     private String password;
 
     @NotBlank(message = "Home country must not be empty")

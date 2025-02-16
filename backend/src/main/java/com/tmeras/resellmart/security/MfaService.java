@@ -1,4 +1,4 @@
-package com.tmeras.resellmart.mfa;
+package com.tmeras.resellmart.security;
 
 import com.tmeras.resellmart.exception.InternalServerException;
 import dev.samstevens.totp.code.*;
@@ -46,9 +46,5 @@ public class MfaService {
         CodeGenerator codeGenerator = new DefaultCodeGenerator();
         CodeVerifier codeVerifier = new DefaultCodeVerifier(codeGenerator, timeProvider);
         return codeVerifier.isValidCode(secret, otp);
-    }
-
-    public boolean isOtpNotValid(String secret, String otp) {
-        return !isOtpValid(secret, otp);
     }
 }

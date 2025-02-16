@@ -13,6 +13,12 @@ public interface TokenRepository extends JpaRepository<Token, Integer> {
     boolean existsByToken(String token);
 
     @Query("""
+            SELECT t FROM Token t WHERE t.tokenType = 'ACTIVATION'
+            AND t.user.email = :email
+    """)
+    Optional<Token> findActivationTokenByUserEmail(String email);
+
+    @Query("""
             SELECT t FROM Token t WHERE t.revoked = false
             AND t.tokenType = 'BEARER' AND t.user.email = :email
     """)

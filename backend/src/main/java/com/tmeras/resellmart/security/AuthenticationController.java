@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -18,21 +19,15 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
-    @PostMapping("/register")
+    @PostMapping("/registration")
     public ResponseEntity<AuthenticationResponse> register(
             @Valid @RequestBody RegistrationRequest registrationRequest
     ) throws MessagingException {
-        return new ResponseEntity<>(authenticationService.register(registrationRequest),HttpStatus.CREATED);
+        AuthenticationResponse authenticationResponse = authenticationService.register(registrationRequest);
+        return new ResponseEntity<>(authenticationResponse,HttpStatus.CREATED);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> login(
-            @Valid @RequestBody AuthenticationRequest authenticationRequest
-    ) {
-        return new ResponseEntity<>(authenticationService.login(authenticationRequest), HttpStatus.OK);
-    }
-
-    @GetMapping("/activate-account")
+    @PostMapping("/activation")
     public ResponseEntity<?> activateAccount(
             @RequestParam(name = "code") String code
     ) throws MessagingException {
@@ -40,7 +35,15 @@ public class AuthenticationController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/refresh-token")
+    @PostMapping("/login")
+    public ResponseEntity<AuthenticationResponse> login(
+            @Valid @RequestBody AuthenticationRequest authenticationRequest
+    ) {
+        AuthenticationResponse authenticationResponse = authenticationService.login(authenticationRequest);
+        return new ResponseEntity<>(authenticationResponse, HttpStatus.OK);
+    }
+
+    @PostMapping("/refresh")
     public void refreshToken(
             HttpServletRequest request,
             HttpServletResponse response
@@ -48,10 +51,11 @@ public class AuthenticationController {
         authenticationService.refreshToken(request, response);
     }
 
-    @PostMapping("/verify")
+    @PostMapping("/verification")
     public ResponseEntity<AuthenticationResponse> verifyOtp(
             @Valid @RequestBody VerificationRequest verificationRequest
     ) {
-        return new ResponseEntity<>(authenticationService.verifyOtp(verificationRequest), HttpStatus.OK);
+        AuthenticationResponse authenticationResponse = authenticationService.verifyOtp(verificationRequest);
+        return new ResponseEntity<>(authenticationResponse, HttpStatus.OK);
     }
 }

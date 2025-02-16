@@ -5,7 +5,6 @@ import com.tmeras.resellmart.email.EmailService;
 import com.tmeras.resellmart.exception.APIException;
 import com.tmeras.resellmart.exception.ResourceAlreadyExistsException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
-import com.tmeras.resellmart.mfa.MfaService;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.user.User;
@@ -61,10 +60,9 @@ public class AuthenticationService {
     public AuthenticationResponse register(RegistrationRequest registrationRequest) throws MessagingException {
         Role userRole = roleRepository.findByName("USER")
                 .orElseThrow(() -> new ResourceNotFoundException("USER role was not found"));
-
         if (userRepository.existsByEmail(registrationRequest.getEmail()))
             throw new ResourceAlreadyExistsException(
-                    "A user with the email \"" + registrationRequest.getEmail() + "\" already exists"
+                    "A user with the email '" + registrationRequest.getEmail() + "' already exists"
             );
 
         User user = User.builder()
@@ -156,7 +154,7 @@ public class AuthenticationService {
     )
     public void activateAccount(String code) throws MessagingException {
         Token savedToken = tokenRepository.findByToken(code)
-                .orElseThrow(() -> new ResourceNotFoundException("Token not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Activation token not found"));
 
         //  Return if token has already been validated
         if (savedToken.getValidatedAt() != null)
@@ -187,11 +185,11 @@ public class AuthenticationService {
         userEmail = jwtService.extractUsername(refreshToken);
         if (userEmail != null) {
             User user = userRepository.findWithAssociationsByEmail(userEmail)
-                    .orElseThrow(() -> new UsernameNotFoundException("User with the email \"" + userEmail + "\" not found"));
+                    .orElseThrow(() -> new UsernameNotFoundException("User with the email '" + userEmail + "' does not exist"));
 
             boolean isTokenRevoked = tokenRepository.findByToken(refreshToken)
                     .map(Token::isRevoked)
-                    .orElseThrow(() -> new JwtException("Refresh token not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Refresh token was not found"));
 
             if (!isTokenRevoked && jwtService.isTokenValid(refreshToken, user)) {
                 Map<String, Object> claims = new HashMap<>();
@@ -221,7 +219,7 @@ public class AuthenticationService {
         );
         User user = (User) authentication.getPrincipal();
 
-        if (mfaService.isOtpNotValid(user.getSecret(), verificationRequest.getOtp()))
+        if (!mfaService.isOtpValid(user.getSecret(), verificationRequest.getOtp()))
             throw new BadCredentialsException("OTP is not valid");
 
         return generateTokens(user);
