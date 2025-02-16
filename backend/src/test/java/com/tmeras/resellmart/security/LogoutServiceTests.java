@@ -122,5 +122,4 @@ public class LogoutServiceTests {
         assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_UNAUTHORIZED);
         assertThat(response.getContentAsString()).isEqualTo(expectedResponse);
     }
-
 }
