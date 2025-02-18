@@ -1,19 +1,14 @@
 package com.tmeras.resellmart.address;
 
-import com.tmeras.resellmart.user.User;
-import jakarta.persistence.*;
 import lombok.*;
 
-@Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Address {
+public class AddressResponse {
 
-    @Id
-    @GeneratedValue
     private Integer id;
 
     private String country;
@@ -28,10 +23,5 @@ public class Address {
 
     private boolean primary;
 
-    @Enumerated(EnumType.STRING)
     private AddressType addressType;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    private User user;
 }
