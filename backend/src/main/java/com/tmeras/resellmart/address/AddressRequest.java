@@ -29,7 +29,7 @@ public class AddressRequest {
 
     private boolean main;
 
-    private boolean active;
+    private boolean deleted;
 
     @NotNull(message = "Address type must not be null")
     @Pattern(

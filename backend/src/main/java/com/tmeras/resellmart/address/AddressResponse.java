@@ -25,7 +25,7 @@ public class AddressResponse {
 
     private boolean main;
 
-    private boolean active;
+    private boolean deleted;
 
     private AddressType addressType;
 

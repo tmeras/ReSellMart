@@ -33,6 +33,7 @@ public class Product {
 
     private Integer availableQuantity;
 
+    // TODO: Consider renaming to deleted;
     private boolean available;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -28,7 +28,7 @@ public class Address {
 
     private boolean main;
 
-    private boolean active;
+    private boolean deleted;
 
     @Enumerated(EnumType.STRING)
     private AddressType addressType;
