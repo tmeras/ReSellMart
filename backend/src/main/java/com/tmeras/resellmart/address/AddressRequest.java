@@ -12,26 +12,26 @@ import lombok.*;
 @Builder
 public class AddressRequest {
 
-    @NotBlank(message = "Country must not be null")
+    @NotBlank(message = "Country must not be empty")
     private String country;
 
-    @NotBlank(message = "Street must not be null")
+    @NotBlank(message = "Street must not be empty")
     private String street;
 
-    @NotBlank(message = "State must not be null")
+    @NotBlank(message = "State must not be empty")
     private String state;
 
-    @NotBlank(message = "City must not be null")
+    @NotBlank(message = "City must not be empty")
     private String city;
 
-    @NotBlank(message = "Postal code must not be null")
+    @NotBlank(message = "Postal code must not be empty")
     private String postalCode;
 
     private boolean main;
 
     private boolean deleted;
 
-    @NotNull(message = "Address type must not be null")
+    @NotNull(message = "Address type must not be empty")
     @Pattern(
             regexp = "HOME|WORK|BILLING|SHIPPING",
             message = "Invalid address type"

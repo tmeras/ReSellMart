@@ -1,5 +1,9 @@
 package com.tmeras.resellmart;
 
+import com.tmeras.resellmart.address.Address;
+import com.tmeras.resellmart.address.AddressRequest;
+import com.tmeras.resellmart.address.AddressResponse;
+import com.tmeras.resellmart.address.AddressType;
 import com.tmeras.resellmart.category.Category;
 import com.tmeras.resellmart.category.CategoryMapper;
 import com.tmeras.resellmart.category.CategoryRequest;
@@ -206,6 +210,79 @@ public final class TestDataUtils {
                 .category(categoryResponse)
                 .seller(userResponse)
                 .images(new ArrayList<>())
+                .build();
+    }
+
+    public static Address createAddressA(User user) {
+        return Address.builder()
+                .id(1)
+                .country("UK")
+                .street("Mappin Street")
+                .state("South Yorkshire")
+                .city("Sheffield")
+                .postalCode("S1 4DT")
+                .main(false)
+                .deleted(false)
+                .addressType(AddressType.HOME)
+                .user(user)
+                .build();
+    }
+
+    public static AddressRequest createAddressRequestA() {
+        return AddressRequest.builder()
+                .country("UK")
+                .street("Mappin Street")
+                .state("South Yorkshire")
+                .city("Sheffield")
+                .postalCode("S1 4DT")
+                .main(false)
+                .deleted(false)
+                .addressType("HOME")
+                .build();
+    }
+
+    public static AddressResponse createAddressResponseA(Integer userId) {
+        return AddressResponse.builder()
+                .id(1)
+                .country("UK")
+                .street("Mappin Street")
+                .state("South Yorkshire")
+                .city("Sheffield")
+                .postalCode("S1 4DT")
+                .main(false)
+                .deleted(false)
+                .addressType(AddressType.HOME)
+                .userId(userId)
+                .build();
+    }
+
+    public static Address createAddressB(User user) {
+        return Address.builder()
+                .id(2)
+                .country("Greece")
+                .street("Ermou Street")
+                .state("Attica")
+                .city("Athens")
+                .postalCode("10563")
+                .main(false)
+                .deleted(false)
+                .addressType(AddressType.WORK)
+                .user(user)
+                .build();
+    }
+
+    public static AddressResponse createAddressResponseB(Integer userId) {
+        return AddressResponse.builder()
+                .id(2)
+                .country("Greece")
+                .street("Ermou Street")
+                .state("Attica")
+                .city("Athens")
+                .postalCode("10563")
+                .main(false)
+                .deleted(false)
+                .addressType(AddressType.HOME)
+                .userId(userId)
                 .build();
     }
 
