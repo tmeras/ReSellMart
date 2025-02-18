@@ -39,7 +39,7 @@ public class AddressController {
         return new ResponseEntity<>(foundAddresses, HttpStatus.OK);
     }
 
-    @GetMapping("/user/{user-id}")
+    @GetMapping("/users/{user-id}")
     public ResponseEntity<List<AddressResponse>> findAllByUserId(
             @PathVariable(name = "user-id") Integer userId,
             Authentication authentication
@@ -57,7 +57,7 @@ public class AddressController {
         return new ResponseEntity<>(foundAddresses, HttpStatus.OK);
     }
 
-    @PatchMapping("/{address-id}/user/{user-id}/main")
+    @PatchMapping("/{address-id}/users/{user-id}/main")
     public ResponseEntity<AddressResponse> makeMain(
             @PathVariable(name = "address-id") Integer addressId,
             @PathVariable(name = "user-id") Integer userId,
