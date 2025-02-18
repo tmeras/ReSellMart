@@ -57,14 +57,13 @@ public class AddressController {
         return new ResponseEntity<>(foundAddresses, HttpStatus.OK);
     }
 
-    @PatchMapping("/{address-id}/users/{user-id}/main")
+    @PatchMapping("/{address-id}/main")
     public ResponseEntity<AddressResponse> makeMain(
             @PathVariable(name = "address-id") Integer addressId,
-            @PathVariable(name = "user-id") Integer userId,
             Authentication authentication
     ) {
         // Make the specified address the main address of this user
-        AddressResponse updatedAddress = addressService.makeMain(addressId, userId, authentication);
+        AddressResponse updatedAddress = addressService.makeMain(addressId, authentication);
         return new ResponseEntity<>(updatedAddress, HttpStatus.OK);
     }
 

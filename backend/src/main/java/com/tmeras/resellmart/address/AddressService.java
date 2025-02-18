@@ -94,23 +94,20 @@ public class AddressService {
                 .toList();
     }
 
-    public AddressResponse makeMain(Integer addressId, Integer userId, Authentication authentication) {
+    public AddressResponse makeMain(Integer addressId, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
 
-        if(!currentUser.getId().equals(userId))
-            throw new OperationNotPermittedException("You do not have permission to update the address of this user");
-
-        List<Address> addresses = addressRepository.findAllWithAssociationsByUserId(userId);
-        for (Address address : addresses)
+        List<Address> currentUserAddresses = addressRepository.findAllWithAssociationsByUserId(currentUser.getId());
+        for (Address address : currentUserAddresses)
             address.setMain(false);
 
-        Address specifiedAddress = addresses.stream()
+        Address specifiedAddress = currentUserAddresses.stream()
                 .filter(address -> address.getId().equals(addressId))
                 .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("No address found with ID: " + addressId));
+                .orElseThrow(() -> new OperationNotPermittedException("The specified address is not related to the current user"));
         specifiedAddress.setMain(true);
 
-        addressRepository.saveAll(addresses);
+        addressRepository.saveAll(currentUserAddresses);
         return addressMapper.toAddressResponse(specifiedAddress);
     }
 
