@@ -12,6 +12,8 @@ public class AppConstants {
     public static final String SORT_PRODUCTS_BY = "id";
     public static final String SORT_ORDERS_BY = "id";
     public static final String SORT_USERS_BY = "id";
+    public static final String SORT_ADDRESSES_BY = "id";
+
 
     // Image upload constants
     public static final Integer MAX_IMAGE_NUMBER = 5;
