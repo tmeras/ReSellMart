@@ -57,7 +57,7 @@ public class AddressController {
         return new ResponseEntity<>(foundAddresses, HttpStatus.OK);
     }
 
-    @PostMapping("/{address-id}/user/{user-id}/main")
+    @PatchMapping("/{address-id}/user/{user-id}/main")
     public ResponseEntity<AddressResponse> makeMain(
             @PathVariable(name = "address-id") Integer addressId,
             @PathVariable(name = "user-id") Integer userId,
