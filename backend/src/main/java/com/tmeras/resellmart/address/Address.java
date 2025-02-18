@@ -28,6 +28,8 @@ public class Address {
 
     private boolean main;
 
+    private boolean active;
+
     @Enumerated(EnumType.STRING)
     private AddressType addressType;
 

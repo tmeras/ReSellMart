@@ -2,6 +2,7 @@ package com.tmeras.resellmart.address;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
 @Getter
@@ -26,9 +27,14 @@ public class AddressRequest {
     @NotBlank(message = "Postal code must not be null")
     private String postalCode;
 
-    @NotNull(message = "Main flag must be specified")
     private boolean main;
 
-    @NotBlank(message = "Address type must be specified")
-    private AddressType addressType;
+    private boolean active;
+
+    @NotNull(message = "Address type must not be null")
+    @Pattern(
+            regexp = "HOME|WORK|BILLING|SHIPPING",
+            message = "Invalid address type"
+    )
+    private String addressType;
 }

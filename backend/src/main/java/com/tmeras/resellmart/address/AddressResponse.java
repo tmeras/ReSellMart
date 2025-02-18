@@ -25,6 +25,8 @@ public class AddressResponse {
 
     private boolean main;
 
+    private boolean active;
+
     private AddressType addressType;
 
     private Integer userId;

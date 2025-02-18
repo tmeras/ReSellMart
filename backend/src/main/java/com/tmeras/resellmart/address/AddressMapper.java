@@ -15,7 +15,8 @@ public class AddressMapper {
                 .city(addressRequest.getCity())
                 .postalCode(addressRequest.getPostalCode())
                 .main(addressRequest.isMain())
-                .addressType(addressRequest.getAddressType())
+                .active(addressRequest.isActive())
+                .addressType(AddressType.valueOf(addressRequest.getAddressType()))
                 .build();
     }
 
@@ -28,6 +29,7 @@ public class AddressMapper {
                 .city(address.getCity())
                 .postalCode(address.getPostalCode())
                 .main(address.isMain())
+                .active(address.isActive())
                 .addressType(address.getAddressType())
                 .userId(address.getUser().getId())
                 .build();
