@@ -26,8 +26,8 @@ public class AddressRequest {
     @NotBlank(message = "Postal code must not be null")
     private String postalCode;
 
-    @NotNull(message = "Primary flag must be specified")
-    private boolean primary;
+    @NotNull(message = "Main flag must be specified")
+    private boolean main;
 
     @NotBlank(message = "Address type must be specified")
     private AddressType addressType;

@@ -1,5 +1,6 @@
 package com.tmeras.resellmart.address;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 @Getter
@@ -7,6 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AddressResponse {
 
     private Integer id;
@@ -21,7 +23,9 @@ public class AddressResponse {
 
     private String postalCode;
 
-    private boolean primary;
+    private boolean main;
 
     private AddressType addressType;
+
+    private Integer userId;
 }

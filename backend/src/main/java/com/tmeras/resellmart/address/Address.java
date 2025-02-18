@@ -26,7 +26,7 @@ public class Address {
 
     private String postalCode;
 
-    private boolean primary;
+    private boolean main;
 
     @Enumerated(EnumType.STRING)
     private AddressType addressType;
