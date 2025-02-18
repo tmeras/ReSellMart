@@ -5,6 +5,7 @@ import com.tmeras.resellmart.exception.OperationNotPermittedException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,7 +34,13 @@ public class AddressService {
         Address address = addressMapper.toAddress(addressRequest);
         address.setUser(currentUser);
         address.setDeleted(false);
-        // TODO: Handle setting first address as main
+
+        // Mark the address as main if it is the user's first address or
+        // if it is the only non-deleted address of the user
+        List<Address> existingAddresses =
+                addressRepository.findAllNonDeletedWithAssociationsByUserId(currentUser.getId());
+        if (existingAddresses.isEmpty())
+            address.setMain(true);
 
         Address savedAddress = addressRepository.save(address);
         return addressMapper.toAddressResponse(savedAddress);
@@ -67,6 +74,19 @@ public class AddressService {
             throw new OperationNotPermittedException("You do not have permission to view the addresses of this user");
 
         List<Address> addresses = addressRepository.findAllWithAssociationsByUserId(userId);
+
+        return addresses.stream()
+                .map(addressMapper::toAddressResponse)
+                .toList();
+    }
+
+    public List<AddressResponse> findAllNonDeletedByUserId(Integer userId, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+
+        if (!currentUser.getId().equals(userId))
+            throw new OperationNotPermittedException("You do not have permission to view the addresses of this user");
+
+        List<Address> addresses = addressRepository.findAllNonDeletedWithAssociationsByUserId(userId);
 
         return addresses.stream()
                 .map(addressMapper::toAddressResponse)
