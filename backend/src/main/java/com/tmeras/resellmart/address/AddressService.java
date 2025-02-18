@@ -1,6 +1,8 @@
 package com.tmeras.resellmart.address;
 
 import com.tmeras.resellmart.common.PageResponse;
+import com.tmeras.resellmart.exception.OperationNotPermittedException;
+import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -55,5 +57,38 @@ public class AddressService {
                 addresses.isFirst(),
                 addresses.isLast()
         );
+    }
+
+    public List<AddressResponse> findAllByUserId(Integer userId, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+
+        if (!currentUser.getId().equals(userId))
+            throw new OperationNotPermittedException("You do not have permission to view the addresses of this user");
+
+        List<Address> addresses = addressRepository.findAllWithAssociationsByUserId(userId);
+
+        return addresses.stream()
+                .map(addressMapper::toAddressResponse)
+                .toList();
+    }
+
+    public AddressResponse makeMain(Integer addressId, Integer userId, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+
+        if(!currentUser.getId().equals(userId))
+            throw new OperationNotPermittedException("You do not have permission to update the address of this user");
+
+        List<Address> addresses = addressRepository.findAllWithAssociationsByUserId(userId);
+        for (Address address : addresses)
+            address.setMain(false);
+
+        Address specifiedAddress = addresses.stream()
+                .filter(address -> address.getId().equals(addressId))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("No address found with ID: " + addressId));
+        specifiedAddress.setMain(true);
+
+        addressRepository.saveAll(addresses);
+        return addressMapper.toAddressResponse(specifiedAddress);
     }
 }

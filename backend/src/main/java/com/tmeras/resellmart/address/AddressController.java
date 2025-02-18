@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/addresses")
@@ -38,6 +39,24 @@ public class AddressController {
         return new ResponseEntity<>(foundAddresses, HttpStatus.OK);
     }
 
+    @GetMapping("/user/{user-id}")
+    public ResponseEntity<List<AddressResponse>> findAllByUserId(
+            @PathVariable(name = "user-id") Integer userId,
+            Authentication authentication
+    ) {
+        List<AddressResponse> foundAddresses = addressService.findAllByUserId(userId, authentication);
+        return new ResponseEntity<>(foundAddresses, HttpStatus.OK);
+    }
 
+    @PostMapping("/{address-id}/user/{user-id}/main")
+    public ResponseEntity<AddressResponse> makeMain(
+            @PathVariable(name = "address-id") Integer addressId,
+            @PathVariable(name = "user-id") Integer userId,
+            Authentication authentication
+    ) {
+        // Make the specified address the main address of this user
+        AddressResponse updatedAddress = addressService.makeMain(addressId, userId, authentication);
+        return new ResponseEntity<>(updatedAddress, HttpStatus.OK);
+    }
 
 }
