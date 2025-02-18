@@ -33,12 +33,13 @@ public class AddressService {
         Address address = addressMapper.toAddress(addressRequest);
         address.setUser(currentUser);
         address.setDeleted(false);
+        // TODO: Handle setting first address as main
 
         Address savedAddress = addressRepository.save(address);
         return addressMapper.toAddressResponse(savedAddress);
     }
 
-    @PreAuthorize("hasRole('ADMIN')") // Only admins should be able to view both active and inactive addresses
+    @PreAuthorize("hasRole('ADMIN')")
     public PageResponse<AddressResponse> findAll(Integer pageNumber, Integer pageSize, String sortBy, String sortDirection) {
         Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
@@ -90,5 +91,46 @@ public class AddressService {
 
         addressRepository.saveAll(addresses);
         return addressMapper.toAddressResponse(specifiedAddress);
+    }
+
+
+    public AddressResponse update(AddressRequest addressRequest, Integer addressId, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+
+        boolean isCurrentUserAdmin = currentUser.getRoles().stream()
+                .anyMatch(role -> role.getName().equals("ADMIN"));
+
+        Address existingAddress = addressRepository.findWithAssociationsById(addressId)
+                .orElseThrow(() -> new ResourceNotFoundException("No address found with ID: " + addressId));
+
+        if (!isCurrentUserAdmin && !existingAddress.getUser().getId().equals(currentUser.getId()))
+            throw new OperationNotPermittedException("You do not have permission to update the address of this user");
+
+        existingAddress.setCountry(addressRequest.getCountry());
+        existingAddress.setStreet(addressRequest.getStreet());
+        existingAddress.setCity(addressRequest.getCity());
+        existingAddress.setState(addressRequest.getState());
+        existingAddress.setPostalCode(addressRequest.getPostalCode());
+        existingAddress.setAddressType(AddressType.valueOf(addressRequest.getAddressType()));
+
+        Address updatedAddress = addressRepository.save(existingAddress);
+        return addressMapper.toAddressResponse(updatedAddress);
+    }
+
+    public void delete(Integer addressId, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+
+        boolean isCurrentUserAdmin = currentUser.getRoles().stream()
+                .anyMatch(role -> role.getName().equals("ADMIN"));
+
+        Address existingAddress = addressRepository.findWithAssociationsById(addressId)
+                .orElseThrow(() -> new ResourceNotFoundException("No address found with ID: " + addressId));
+
+        if (!isCurrentUserAdmin && !existingAddress.getUser().getId().equals(currentUser.getId()))
+            throw new OperationNotPermittedException("You do not have permission to update the address of this user");
+
+        // Soft delete only
+        existingAddress.setDeleted(true);
+        addressRepository.save(existingAddress);
     }
 }

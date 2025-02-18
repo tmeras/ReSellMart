@@ -59,4 +59,22 @@ public class AddressController {
         return new ResponseEntity<>(updatedAddress, HttpStatus.OK);
     }
 
+    @PutMapping("/{address-id}")
+    public ResponseEntity<AddressResponse> update(
+            @Valid @RequestBody AddressRequest addressRequest,
+            @PathVariable(name = "address-id") Integer addressId,
+            Authentication authentication
+    ) {
+        AddressResponse updatedAddress = addressService.update(addressRequest, addressId, authentication);
+        return new ResponseEntity<>(updatedAddress, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{address-id}")
+    public ResponseEntity<?> delete(
+            @PathVariable(name = "address-id") Integer addressId,
+            Authentication authentication
+    ) {
+        addressService.delete(addressId, authentication);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
