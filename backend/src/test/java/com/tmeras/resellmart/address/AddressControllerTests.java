@@ -27,10 +27,8 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(
@@ -144,6 +142,63 @@ public class AddressControllerTests {
         assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(addressResponses));
     }
 
+    @Test
+    public void shouldMakeAddressMain() throws Exception {
+        addressResponseA.setMain(true);
 
+        when(addressService.makeMain(eq(addressResponseA.getId()), any(Authentication.class)))
+                .thenReturn(addressResponseA);
+
+        MvcResult mvcResult = mockMvc.perform(patch("/api/addresses/" + addressResponseA.getId() + "/main"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(addressResponseA));
+    }
+
+    @Test
+    public void shouldUpdateAddressWhenValidRequest() throws Exception {
+        addressRequestA.setCountry("Updated country");
+        addressRequestA.setCity("Updated city");
+        addressResponseA.setCountry("Updated country");
+        addressResponseA.setCity("Updated city");
+
+        when(addressService.update(any(AddressRequest.class), eq(addressResponseA.getId()), any(Authentication.class)))
+                .thenReturn(addressResponseA);
+
+        MvcResult mvcResult = mockMvc.perform(put("/api/addresses/" + addressResponseA.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(addressRequestA))
+        ).andExpect(status().isOk()).andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(addressResponseA));
+    }
+
+    @Test
+    public void shouldNotUpdateAddressWhenInvalidRequest() throws Exception {
+        addressRequestA.setCountry(null);
+        addressRequestA.setCity(null);
+        Map<String, String> expectedErrors = new HashMap<>();
+        expectedErrors.put("country", "Country must not be empty");
+        expectedErrors.put("city", "City must not be empty");
+
+        MvcResult mvcResult = mockMvc.perform(put("/api/addresses/" + addressResponseA.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(addressRequestA))
+        ).andExpect(status().isBadRequest()).andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(expectedErrors));
+    }
+
+    @Test
+    public void shouldDeleteAddress() throws Exception {
+        mockMvc.perform(delete("/api/addresses/" + addressResponseA.getId()))
+                .andExpect(status().isNoContent());
+
+        verify(addressService, times(1)).delete(eq(addressResponseA.getId()), any(Authentication.class));
+    }
 
 }
