@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/addresses")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class AddressController {
 
     private final AddressService addressService;
 
-    @PostMapping
+    @PostMapping("/addresses")
     public ResponseEntity<AddressResponse> save(
             @Valid @RequestBody AddressRequest addressRequest,
             Authentication authentication
@@ -27,7 +27,7 @@ public class AddressController {
         return new ResponseEntity<>(savedAddress, HttpStatus.CREATED);
     }
 
-    @GetMapping
+    @GetMapping("/addresses")
     public ResponseEntity<PageResponse<AddressResponse>> findAll(
             @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
@@ -39,7 +39,7 @@ public class AddressController {
         return new ResponseEntity<>(foundAddresses, HttpStatus.OK);
     }
 
-    @GetMapping("/users/{user-id}")
+    @GetMapping("/users/{user-id}/addresses")
     public ResponseEntity<List<AddressResponse>> findAllByUserId(
             @PathVariable(name = "user-id") Integer userId,
             Authentication authentication
@@ -48,7 +48,7 @@ public class AddressController {
         return new ResponseEntity<>(foundAddresses, HttpStatus.OK);
     }
 
-    @GetMapping("/users/{user-id}/non-deleted")
+    @GetMapping("/users/{user-id}/addresses/non-deleted")
     public ResponseEntity<List<AddressResponse>> findAllNonDeletedByUserId(
             @PathVariable(name = "user-id") Integer userId,
             Authentication authentication
@@ -57,7 +57,7 @@ public class AddressController {
         return new ResponseEntity<>(foundAddresses, HttpStatus.OK);
     }
 
-    @PatchMapping("/{address-id}/main")
+    @PatchMapping("/addresses/{address-id}/main")
     public ResponseEntity<AddressResponse> makeMain(
             @PathVariable(name = "address-id") Integer addressId,
             Authentication authentication
@@ -67,7 +67,7 @@ public class AddressController {
         return new ResponseEntity<>(updatedAddress, HttpStatus.OK);
     }
 
-    @PutMapping("/{address-id}")
+    @PutMapping("/addresses/{address-id}")
     public ResponseEntity<AddressResponse> update(
             @Valid @RequestBody AddressRequest addressRequest,
             @PathVariable(name = "address-id") Integer addressId,
@@ -77,7 +77,7 @@ public class AddressController {
         return new ResponseEntity<>(updatedAddress, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{address-id}")
+    @DeleteMapping("/addresses/{address-id}")
     public ResponseEntity<?> delete(
             @PathVariable(name = "address-id") Integer addressId,
             Authentication authentication

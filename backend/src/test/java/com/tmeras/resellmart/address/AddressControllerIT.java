@@ -178,7 +178,7 @@ public class AddressControllerIT {
     @Test
     public void shouldFindAllAddressesByUserId() {
         ResponseEntity<List<AddressResponse>> response =
-                restTemplate.exchange("/api/addresses/users/" + addressA.getUser().getId(), HttpMethod.GET,
+                restTemplate.exchange("/api/users/" + addressA.getUser().getId() + "/addresses", HttpMethod.GET,
                         new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -190,7 +190,7 @@ public class AddressControllerIT {
     @Test
     public void shouldNotFindAllAddressesByUserIdWhenUserIsNotLoggedIn() {
         ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/addresses/users/" + addressB.getUser().getId(), HttpMethod.GET,
+                restTemplate.exchange("/api/users/" + addressB.getUser().getId() + "/addresses", HttpMethod.GET,
                         new HttpEntity<>(headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
@@ -209,7 +209,7 @@ public class AddressControllerIT {
         addressRepository.save(deletedAddress);
 
         ResponseEntity<List<AddressResponse>> response =
-                restTemplate.exchange("/api/addresses/users/" + addressA.getUser().getId() + "/non-deleted",
+                restTemplate.exchange("/api/users/" + addressA.getUser().getId() + "/addresses/non-deleted",
                         HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -221,7 +221,7 @@ public class AddressControllerIT {
     @Test
     public void shouldNotFindAllNonDeletedAddressesByUserIdWhenAddressOwnerIsNotLoggedIn() {
         ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/addresses/users/" + addressB.getUser().getId() + "/non-deleted",
+                restTemplate.exchange("/api/users/" + addressB.getUser().getId() + "/addresses/non-deleted",
                         HttpMethod.GET, new HttpEntity<>(headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
