@@ -273,4 +273,98 @@ public class AddressControllerIT {
                 .isEqualTo("The specified address is related to another user");
     }
 
+    @Test
+    public void shouldUpdateAddressWhenValidRequest() {
+        addressRequestA.setCity("Updated city");
+        addressRequestA.setCountry("Updated country");
+
+        ResponseEntity<AddressResponse> response =
+                restTemplate.exchange("/api/addresses/" + addressA.getId(), HttpMethod.PUT,
+                        new HttpEntity<>(addressRequestA, headers), AddressResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getStreet()).isEqualTo(addressRequestA.getStreet());
+        assertThat(response.getBody().getCity()).isEqualTo(addressRequestA.getCity());
+    }
+
+    @Test
+    public void shouldNotUpdateAddressWhenInvalidRequest() {
+        addressRequestA.setCountry(null);
+        Map<String, String> expectedErrors = new HashMap<>();
+        expectedErrors.put("country", "Country must not be empty");
+
+        ResponseEntity<Map<String, String>> response =
+                restTemplate.exchange("/api/addresses/" + addressA.getId(), HttpMethod.PUT,
+                    new HttpEntity<>(addressRequestA, headers), new ParameterizedTypeReference<>() {});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).isEqualTo(expectedErrors);
+    }
+
+    @Test
+    public void shouldNotUpdateAddressWhenInvalidAddressId() {
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/addresses/" + 99, HttpMethod.PUT,
+                        new HttpEntity<>(addressRequestA, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("No address found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotUpdateAddressWhenNotAdminAndAddressOwnerIsNotLoggedIn() {
+        String testJwt = jwtService.generateAccessToken(new HashMap<>(), addressB.getUser());
+        headers.set("Authorization", "Bearer " + testJwt);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/addresses/" + addressA.getId(), HttpMethod.PUT,
+                        new HttpEntity<>(addressRequestA, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("You do not have permission to update the address of this user");
+    }
+
+    @Test
+    public void shouldDeleteAddressWhenValidRequest() {
+        ResponseEntity<?> response =
+                restTemplate.exchange("/api/addresses/" + addressA.getId(), HttpMethod.DELETE,
+                        new HttpEntity<>(headers), Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(addressRepository.findById(addressA.getId()).get().isDeleted()).isTrue();
+    }
+
+    @Test
+    public void shouldNotDeleteAddressWhenInvalidAddressId() {
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/addresses/" + 99, HttpMethod.DELETE,
+                        new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("No address found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotDeleteAddressWhenNotAdminAndAddressOwnerIsNotLoggedIn() {
+        String testJwt = jwtService.generateAccessToken(new HashMap<>(), addressB.getUser());
+        headers.set("Authorization", "Bearer " + testJwt);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/addresses/" + addressA.getId(), HttpMethod.DELETE,
+                        new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("You do not have permission to delete the address of this user");
+    }
+
 }

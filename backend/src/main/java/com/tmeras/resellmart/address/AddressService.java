@@ -148,7 +148,7 @@ public class AddressService {
                 .orElseThrow(() -> new ResourceNotFoundException("No address found with ID: " + addressId));
 
         if (!isCurrentUserAdmin && !existingAddress.getUser().getId().equals(currentUser.getId()))
-            throw new OperationNotPermittedException("You do not have permission to update the address of this user");
+            throw new OperationNotPermittedException("You do not have permission to delete the address of this user");
 
         // Soft delete only
         existingAddress.setDeleted(true);
