@@ -366,5 +366,4 @@ public class AddressControllerIT {
         assertThat(response.getBody().getMessage())
                 .isEqualTo("You do not have permission to delete the address of this user");
     }
-
 }
