@@ -97,6 +97,9 @@ public class AddressService {
     public AddressResponse makeMain(Integer addressId, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
 
+        if (!addressRepository.existsById(addressId))
+            throw new ResourceNotFoundException("No address found with ID: " + addressId);
+
         List<Address> currentUserAddresses = addressRepository.findAllWithAssociationsByUserId(currentUser.getId());
         for (Address address : currentUserAddresses)
             address.setMain(false);
@@ -104,7 +107,7 @@ public class AddressService {
         Address specifiedAddress = currentUserAddresses.stream()
                 .filter(address -> address.getId().equals(addressId))
                 .findFirst()
-                .orElseThrow(() -> new OperationNotPermittedException("The specified address is not related to the current user"));
+                .orElseThrow(() -> new OperationNotPermittedException("The specified address is related to another user"));
         specifiedAddress.setMain(true);
 
         addressRepository.saveAll(currentUserAddresses);

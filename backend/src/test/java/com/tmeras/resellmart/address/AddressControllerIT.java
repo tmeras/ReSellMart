@@ -87,6 +87,7 @@ public class AddressControllerIT {
 
         addressA = TestDataUtils.createAddressA(userA);
         addressA.setId(null);
+        addressA.setMain(true);
         addressA = addressRepository.save(addressA);
         addressRequestA = TestDataUtils.createAddressRequestA();
 
@@ -177,7 +178,7 @@ public class AddressControllerIT {
     @Test
     public void shouldFindAllAddressesByUserId() {
         ResponseEntity<List<AddressResponse>> response =
-                restTemplate.exchange("/api/addresses/user/" + addressA.getUser().getId(), HttpMethod.GET,
+                restTemplate.exchange("/api/addresses/users/" + addressA.getUser().getId(), HttpMethod.GET,
                         new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -189,7 +190,7 @@ public class AddressControllerIT {
     @Test
     public void shouldNotFindAllAddressesByUserIdWhenUserIsNotLoggedIn() {
         ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/addresses/user/" + addressB.getUser().getId(), HttpMethod.GET,
+                restTemplate.exchange("/api/addresses/users/" + addressB.getUser().getId(), HttpMethod.GET,
                         new HttpEntity<>(headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
@@ -200,26 +201,27 @@ public class AddressControllerIT {
 
     @Test
     public void shouldFindAllNonDeletedAddressesByUserId() {
-        // Save a deleted address
+        // Save a deleted address for user A
         Address deletedAddress = TestDataUtils.createAddressA(addressA.getUser());
         deletedAddress.setId(null);
         deletedAddress.setDeleted(true);
+        deletedAddress.setStreet("Deleted street");
         addressRepository.save(deletedAddress);
 
         ResponseEntity<List<AddressResponse>> response =
-                restTemplate.exchange("/api/addresses/user/" + addressA.getUser().getId() + "/non-deleted",
+                restTemplate.exchange("/api/addresses/users/" + addressA.getUser().getId() + "/non-deleted",
                         HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody()).hasSize(1);
-        assertThat(response.getBody().get(0).getId()).isEqualTo(addressA.getId());
+        assertThat(response.getBody().get(0).getStreet()).isEqualTo(addressA.getStreet());
     }
 
     @Test
-    public void shouldNotFindAllNonDeletedAddressesByUserIdWhenUserIsNotLoggedIn() {
+    public void shouldNotFindAllNonDeletedAddressesByUserIdWhenAddressOwnerIsNotLoggedIn() {
         ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/addresses/user/" + addressB.getUser().getId() + "/non-deleted",
+                restTemplate.exchange("/api/addresses/users/" + addressB.getUser().getId() + "/non-deleted",
                         HttpMethod.GET, new HttpEntity<>(headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
@@ -228,6 +230,47 @@ public class AddressControllerIT {
                 .isEqualTo("You do not have permission to view the addresses of this user");
     }
 
-    
+    @Test
+    public void shouldMakeAddressMainWhenValidRequest() {
+        // Save a second address for user A
+        Address newAddress = TestDataUtils.createAddressA(addressA.getUser());
+        newAddress.setId(null);
+        newAddress.setStreet("New street");
+        newAddress = addressRepository.save(newAddress);
+
+        ResponseEntity<AddressResponse> response =
+                restTemplate.exchange("/api/addresses/" + newAddress.getId() + "/main",
+                        HttpMethod.PATCH, new HttpEntity<>(headers), AddressResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getStreet()).isEqualTo(newAddress.getStreet());
+        assertThat(addressRepository.findById(addressA.getId()).get().isMain()).isFalse();
+        assertThat(addressRepository.findById(newAddress.getId()).get().isMain()).isTrue();
+    }
+
+    @Test
+    public void shouldNotMakeAddressMainWhenInvalidAddressId() {
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/addresses/" + 99 + "/main",
+                        HttpMethod.PATCH, new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("No address found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotMakeAddressMainWhenAddressOwnerIsNotLoggedIn() {
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/addresses/" + addressB.getId() + "/main",
+                        HttpMethod.PATCH, new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("The specified address is related to another user");
+    }
 
 }

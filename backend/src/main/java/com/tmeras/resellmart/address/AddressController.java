@@ -48,7 +48,7 @@ public class AddressController {
         return new ResponseEntity<>(foundAddresses, HttpStatus.OK);
     }
 
-    @GetMapping("/user/{user-id}/non-deleted")
+    @GetMapping("/users/{user-id}/non-deleted")
     public ResponseEntity<List<AddressResponse>> findAllNonDeletedByUserId(
             @PathVariable(name = "user-id") Integer userId,
             Authentication authentication
