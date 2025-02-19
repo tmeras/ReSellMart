@@ -75,18 +75,18 @@ public class ProductServiceTests {
     @BeforeEach
     public void setUp() {
         // Initialise test objects
-        Category category = TestDataUtils.createCategoryA();
         Role adminRole = new Role(1, "ADMIN");
         Role userRole = new Role(2, "USER");
         User userA = TestDataUtils.createUserA(Set.of(adminRole));
         User userB = TestDataUtils.createUserB(Set.of(userRole));
+        UserResponse userResponseA = TestDataUtils.createUserResponseA(Set.of(adminRole));
+        UserResponse userResponseB = TestDataUtils.createUserResponseB(Set.of(userRole));
+
+        Category category = TestDataUtils.createCategoryA();
         productA = TestDataUtils.createProductA(category, userA);
         productB = TestDataUtils.createProductB(category, userB);
         productRequestA = TestDataUtils.createProductRequestA(category.getId());
-
         CategoryResponse categoryResponse = TestDataUtils.createCategoryResponseA();
-        UserResponse userResponseA = TestDataUtils.createUserResponseA(Set.of(adminRole));
-        UserResponse userResponseB = TestDataUtils.createUserResponseB(Set.of(userRole));
         productResponseA = TestDataUtils.createProductResponseA(categoryResponse, userResponseA);
         productResponseB = TestDataUtils.createProductResponseB(categoryResponse, userResponseB);
 

@@ -200,5 +200,4 @@ public class AddressControllerTests {
 
         verify(addressService, times(1)).delete(eq(addressResponseA.getId()), any(Authentication.class));
     }
-
 }
