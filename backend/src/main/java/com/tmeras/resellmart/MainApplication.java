@@ -29,7 +29,7 @@ public class MainApplication {
 	}
 
 	// TODO: Replace with migration script
-	/*@Bean
+/*	@Bean
 	public CommandLineRunner runner(
 			RoleRepository roleRepository,
 			CategoryRepository categoryRepository,

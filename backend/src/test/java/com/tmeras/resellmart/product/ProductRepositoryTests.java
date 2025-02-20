@@ -56,6 +56,7 @@ public class ProductRepositoryTests {
 
     @BeforeEach
     public void setUp() {
+        // TODO: Remove unnecessary .deleteAll() calls as @DataJpaTest rollbacks anyway
         // Empty relevant database tables
         userRepository.deleteAll();
         productRepository.deleteAll();
