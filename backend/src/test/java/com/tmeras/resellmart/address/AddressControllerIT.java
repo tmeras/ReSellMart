@@ -188,7 +188,7 @@ public class AddressControllerIT {
     }
 
     @Test
-    public void shouldNotFindAllAddressesByUserIdWhenUserIsNotLoggedIn() {
+    public void shouldNotFindAllAddressesByUserIdWhenAddressOwnerIsNotLoggedIn() {
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/users/" + addressB.getUser().getId() + "/addresses", HttpMethod.GET,
                         new HttpEntity<>(headers), ExceptionResponse.class);
