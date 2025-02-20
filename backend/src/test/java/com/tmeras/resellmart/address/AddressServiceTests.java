@@ -4,6 +4,7 @@ import com.tmeras.resellmart.TestDataUtils;
 import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.OperationNotPermittedException;
+import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
@@ -24,7 +25,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AddressServiceTests {
@@ -144,6 +145,133 @@ public class AddressServiceTests {
                 .hasMessage("You do not have permission to view the addresses of this user");
     }
 
+    @Test
+    public void shouldMakeAddressMainWhenValidRequest() {
+        // Define a second address belonging to user A
+        Address addressC = Address.builder()
+                .id(3)
+                .country("United Kingdom")
+                .street("Oxford Street")
+                .state("England")
+                .city("London")
+                .postalCode("W1D 1BS")
+                .main(false)
+                .deleted(false)
+                .addressType(AddressType.WORK)
+                .user(addressA.getUser())
+                .build();
+        AddressResponse addressResponseC = AddressResponse.builder()
+                .id(3)
+                .country("United Kingdom")
+                .street("Oxford Street")
+                .state("England")
+                .city("London")
+                .postalCode("W1D 1BS")
+                .main(true)
+                .deleted(false)
+                .addressType(AddressType.WORK)
+                .userId(addressA.getUser().getId())
+                .build();
+        addressA.setMain(true);
 
+        when(addressRepository.existsById(addressC.getId())).thenReturn(true);
+        when(addressRepository.findAllWithAssociationsByUserId(addressA.getUser().getId()))
+                .thenReturn(List.of(addressA, addressC));
+        when(addressMapper.toAddressResponse(addressC)).thenReturn(addressResponseC);
 
+        AddressResponse addressResponse = addressService.makeMain(addressC.getId(), authentication);
+
+        assertThat(addressResponse).isEqualTo(addressResponseC);
+        assertThat(addressA.isMain()).isFalse();
+        assertThat(addressC.isMain()).isTrue();
+    }
+
+    @Test
+    public void shouldNotMakeAddressMainWhenInvalidAddressId() {
+        when(addressRepository.existsById(99)).thenReturn(false);
+
+        assertThatThrownBy(() -> addressService.makeMain(99, authentication))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No address found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotMakeAddressMainWhenAddressOwnerIsNotLoggedIn() {
+        when(addressRepository.existsById(addressB.getId())).thenReturn(true);
+        when(addressRepository.findAllWithAssociationsByUserId(addressA.getUser().getId()))
+                .thenReturn(List.of(addressA));
+
+        assertThatThrownBy(() -> addressService.makeMain(addressB.getId(), authentication))
+                .isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("The specified address is related to another user");
+    }
+
+    @Test
+    public void shouldUpdateUserWhenValidRequest() {
+        addressRequestA.setCountry("Updated country");
+        addressRequestA.setStreet("Updated street");
+        addressResponseA.setCountry("Updated country");
+        addressResponseA.setStreet("Updated street");
+
+        when(addressRepository.findWithAssociationsById(addressA.getId())).thenReturn(Optional.of(addressA));
+        when(addressRepository.save(addressA)).thenReturn(addressA);
+        when(addressMapper.toAddressResponse(addressA)).thenReturn(addressResponseA);
+
+        AddressResponse addressResponse = addressService.update(addressRequestA, addressA.getId(), authentication);
+
+        assertThat(addressResponse).isEqualTo(addressResponseA);
+        assertThat(addressA.getCountry()).isEqualTo("Updated country");
+        assertThat(addressA.getStreet()).isEqualTo("Updated street");
+    }
+
+    @Test
+    public void shouldNotUpdateUserWhenInvalidAddressId() {
+        when(addressRepository.findWithAssociationsById(99)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> addressService.update(addressRequestA, 99, authentication));
+    }
+
+    @Test
+    public void shouldNotUpdateUserWhenNotAdminAndAddressOwnerIsNotLoggedIn() {
+        authentication = new UsernamePasswordAuthenticationToken(
+                addressB.getUser(),addressB.getUser().getPassword(), addressB.getUser().getAuthorities()
+        );
+
+        when(addressRepository.findWithAssociationsById(addressA.getId())).thenReturn(Optional.of(addressA));
+
+        assertThatThrownBy(() -> addressService.update(addressRequestA, addressA.getId(), authentication))
+                .isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to update the address of this user");
+    }
+
+    @Test
+    public void shouldDeleteAddressWhenValidRequest() {
+        when(addressRepository.findWithAssociationsById(addressA.getId())).thenReturn(Optional.of(addressA));
+
+        addressService.delete(addressA.getId(), authentication);
+
+        assertThat(addressA.isDeleted()).isTrue();
+    }
+
+    @Test
+    public void shouldNotDeleteAddressWhenInvalidAddressId() {
+        when(addressRepository.findWithAssociationsById(99)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> addressService.delete(99, authentication))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No address found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotDeleteAddressWhenNotAdminAndAddressOwnerIsNotLoggedIn() {
+        authentication = new UsernamePasswordAuthenticationToken(
+                addressB.getUser(),addressB.getUser().getPassword(), addressB.getUser().getAuthorities()
+        );
+
+        when(addressRepository.findWithAssociationsById(addressA.getId())).thenReturn(Optional.of(addressA));
+
+        assertThatThrownBy(() -> addressService.delete(addressA.getId(), authentication))
+                .isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to delete the address of this user");
+    }
 }

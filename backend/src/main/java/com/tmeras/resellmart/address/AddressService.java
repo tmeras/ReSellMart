@@ -114,7 +114,6 @@ public class AddressService {
         return addressMapper.toAddressResponse(specifiedAddress);
     }
 
-
     public AddressResponse update(AddressRequest addressRequest, Integer addressId, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
 
