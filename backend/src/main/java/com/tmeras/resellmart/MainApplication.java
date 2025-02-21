@@ -1,5 +1,8 @@
 package com.tmeras.resellmart;
 
+import com.tmeras.resellmart.address.Address;
+import com.tmeras.resellmart.address.AddressRepository;
+import com.tmeras.resellmart.address.AddressType;
 import com.tmeras.resellmart.category.Category;
 import com.tmeras.resellmart.category.CategoryRepository;
 import com.tmeras.resellmart.product.Product;
@@ -29,13 +32,14 @@ public class MainApplication {
 	}
 
 	// TODO: Replace with migration script
-/*	@Bean
+	@Bean
 	public CommandLineRunner runner(
 			RoleRepository roleRepository,
 			CategoryRepository categoryRepository,
 			ProductRepository productRepository,
 			UserRepository userRepository,
-			PasswordEncoder passwordEncoder
+			PasswordEncoder passwordEncoder,
+			AddressRepository addressRepository
 	) {
 		return args -> {
 			if (roleRepository.findByName("USER").isEmpty()) {
@@ -66,7 +70,7 @@ public class MainApplication {
 								.name("test admin user")
 								.roles(Set.of(adminRole))
 								.mfaEnabled(false)
-								.homeCountry("USA")
+								.homeCountry("UK")
 								.enabled(true)
 								.password(passwordEncoder.encode("Bacon12!"))
 								.build()
@@ -124,7 +128,33 @@ public class MainApplication {
 								.images(new ArrayList<>())
 								.build()
 				);
+				Address addressA = addressRepository.save(
+						Address.builder()
+								.country("Greece")
+								.street("Ermou Street")
+								.state("Attica")
+								.city("Athens")
+								.postalCode("10563")
+								.main(true)
+								.deleted(false)
+								.addressType(AddressType.HOME)
+								.user(user)
+								.build()
+				);
+				Address addressB = addressRepository.save(
+						Address.builder()
+								.country("UK")
+								.street("Mappin Street")
+								.state("South Yorkshire")
+								.city("Sheffield")
+								.postalCode("S1 4DT")
+								.main(true)
+								.deleted(false)
+								.addressType(AddressType.WORK)
+								.user(adminUser)
+								.build()
+				);
 			}
 		};
-	}*/
+	}
 }

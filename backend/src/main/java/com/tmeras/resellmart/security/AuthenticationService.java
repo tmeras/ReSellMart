@@ -156,6 +156,8 @@ public class AuthenticationService {
         Token savedToken = tokenRepository.findByToken(code)
                 .orElseThrow(() -> new ResourceNotFoundException("Activation token not found"));
 
+        // TODO: Verify that token is of ACTIVATION type
+
         //  Return if token has already been validated
         if (savedToken.getValidatedAt() != null)
             return;
