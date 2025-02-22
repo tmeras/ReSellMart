@@ -188,7 +188,6 @@ public class ProductService {
         Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
-        //"%" + keyword.toLowerCase() + "%"
         Page<Product> products = productRepository.findAllByKeyword(pageable, keyword, currentUser.getId());
         // Initialize lazy associations
         for(Product product : products) {
