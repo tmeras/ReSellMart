@@ -26,6 +26,7 @@ public class Product {
 
     private Double price;
 
+    // TODO: Consider renaming to previousPrice
     private Double discountedPrice;
 
     @Enumerated(EnumType.STRING)
@@ -34,7 +35,7 @@ public class Product {
     private Integer availableQuantity;
 
     // TODO: Consider renaming to deleted;
-    private boolean available;
+    private Boolean isAvailable;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)

@@ -130,7 +130,7 @@ public final class TestDataUtils {
                 .discountedPrice(5.0)
                 .productCondition(ProductCondition.NEW)
                 .availableQuantity(2)
-                .available(true)
+                .isAvailable(true)
                 .category(category)
                 .seller(seller)
                 .images(new ArrayList<>())
@@ -146,7 +146,7 @@ public final class TestDataUtils {
                 .discountedPrice(5.0)
                 .productCondition(ProductCondition.NEW)
                 .availableQuantity(2)
-                .available(true)
+                .isAvailable(true)
                 .categoryId(categoryId)
                 .build();
     }
@@ -160,7 +160,7 @@ public final class TestDataUtils {
                 .discountedPrice(5.0)
                 .productCondition(ProductCondition.NEW)
                 .availableQuantity(2)
-                .available(true)
+                .isAvailable(true)
                 .category(categoryResponse)
                 .seller(userResponse)
                 .images(new ArrayList<>())
@@ -176,7 +176,7 @@ public final class TestDataUtils {
                 .discountedPrice(10.0)
                 .productCondition(ProductCondition.LIKE_NEW)
                 .availableQuantity(3)
-                .available(true)
+                .isAvailable(true)
                 .category(category)
                 .seller(seller)
                 .images(new ArrayList<>())
@@ -192,7 +192,7 @@ public final class TestDataUtils {
                 .discountedPrice(10.0)
                 .productCondition(ProductCondition.LIKE_NEW)
                 .availableQuantity(3)
-                .available(true)
+                .isAvailable(true)
                 .categoryId(categoryId)
                 .build();
     }
@@ -206,7 +206,7 @@ public final class TestDataUtils {
                 .discountedPrice(10.0)
                 .productCondition(ProductCondition.LIKE_NEW)
                 .availableQuantity(3)
-                .available(true)
+                .isAvailable(true)
                 .category(categoryResponse)
                 .seller(userResponse)
                 .images(new ArrayList<>())

@@ -11,7 +11,6 @@ import com.tmeras.resellmart.file.FileService;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -227,7 +226,7 @@ public class ProductService {
         existingproduct.setDiscountedPrice(productRequest.getDiscountedPrice());
         existingproduct.setProductCondition(productRequest.getProductCondition());
         existingproduct.setAvailableQuantity(productRequest.getAvailableQuantity());
-        existingproduct.setAvailable(productRequest.isAvailable());
+        existingproduct.setIsAvailable(productRequest.getIsAvailable());
         existingproduct.setCategory(category);
 
         Product updatedProduct = productRepository.save(existingproduct);

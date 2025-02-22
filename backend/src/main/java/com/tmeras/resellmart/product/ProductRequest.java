@@ -36,7 +36,7 @@ public class ProductRequest {
     private Integer availableQuantity;
 
     @NotNull(message = "Product availability must be specified")
-    private boolean available;
+    private Boolean isAvailable;
 
     @NotNull(message = "Category ID must not be empty")
     private Integer categoryId;

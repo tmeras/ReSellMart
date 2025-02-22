@@ -33,7 +33,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.testcontainers.containers.MySQLContainer;
@@ -42,8 +41,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -383,7 +380,7 @@ public class UserControllerIT {
     @Test
     public void shouldNotSaveCartItemWhenProductIsUnavailable() {
         CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 1, userA.getId());
-        productB.setAvailable(false);
+        productB.setIsAvailable(false);
         productRepository.save(productB);
 
         ResponseEntity<ExceptionResponse> response =
@@ -604,7 +601,7 @@ public class UserControllerIT {
 
     @Test
     public void shouldNotSaveWishListItemWhenProductIsUnavailable() {
-        productB.setAvailable(false);
+        productB.setIsAvailable(false);
         productRepository.save(productB);
         WishListItemRequest wishListItemRequest = new WishListItemRequest(productB.getId(), userA.getId());
 
@@ -690,7 +687,7 @@ public class UserControllerIT {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(userRepository.findById(userA.getId()).get().isEnabled()).isFalse();
-        assertThat(productRepository.findAllBySellerId(userA.getId()).get(0).isAvailable()).isFalse();
+        assertThat(productRepository.findAllBySellerId(userA.getId()).get(0).getIsAvailable()).isFalse();
         assertThat(tokenRepository.findById(testToken.getId()).get().isRevoked()).isTrue();
     }
 

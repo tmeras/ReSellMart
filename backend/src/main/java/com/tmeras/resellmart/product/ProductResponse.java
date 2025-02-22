@@ -29,7 +29,7 @@ public class ProductResponse {
 
     private Integer availableQuantity;
 
-    private boolean available;
+    private Boolean isAvailable;
 
     private List<ProductImageResponse> images;
 
