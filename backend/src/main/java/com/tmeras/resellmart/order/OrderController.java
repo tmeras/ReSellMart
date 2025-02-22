@@ -2,6 +2,7 @@ package com.tmeras.resellmart.order;
 
 import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ public class OrderController {
     public ResponseEntity<OrderResponse> save(
             @Valid @RequestBody OrderRequest orderRequest,
             Authentication authentication
-    ) {
+    ) throws MessagingException {
         OrderResponse orderResponse = orderService.save(orderRequest, authentication);
         return new ResponseEntity<>(orderResponse, HttpStatus.CREATED);
     }

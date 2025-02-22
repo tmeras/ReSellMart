@@ -44,4 +44,13 @@ public class Order {
     )
     @JoinColumn(name = "orderId", nullable = false)
     private List<OrderItem> orderItems;
+
+    public Double getTotalPrice() {
+        Double totalPrice = 0.0;
+
+        for (OrderItem orderItem : orderItems)
+            totalPrice += orderItem.getProduct().getPrice();
+
+        return totalPrice;
+    }
 }

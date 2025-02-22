@@ -114,6 +114,7 @@ public class CategoryService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public void delete(Integer categoryId) {
+        // TODO: Ensure that no products refer to this category
         categoryRepository.deleteById(categoryId);
     }
 }

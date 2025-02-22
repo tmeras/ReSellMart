@@ -305,6 +305,8 @@ public class ProductService {
             for (ProductImage productImage: existingProduct.get().getImages())
                 fileService.deleteFile(productImage.getFilePath());
 
+        // TODO: Ensure that no order refers to this product
+
         productRepository.deleteById(productId);
     }
 }

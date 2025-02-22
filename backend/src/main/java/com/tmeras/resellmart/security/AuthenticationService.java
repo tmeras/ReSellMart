@@ -96,7 +96,6 @@ public class AuthenticationService {
 
         emailService.sendActivationEmail(
                 user.getEmail(),
-                "ReSellMart Account Activation",
                 user.getRealName(),
                 activationUrl,
                 activationCode

@@ -5,6 +5,7 @@ import com.tmeras.resellmart.address.AddressRepository;
 import com.tmeras.resellmart.cart.CartItem;
 import com.tmeras.resellmart.cart.CartItemRepository;
 import com.tmeras.resellmart.common.PageResponse;
+import com.tmeras.resellmart.email.EmailService;
 import com.tmeras.resellmart.exception.APIException;
 import com.tmeras.resellmart.exception.OperationNotPermittedException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
@@ -12,6 +13,7 @@ import com.tmeras.resellmart.product.Product;
 import com.tmeras.resellmart.product.ProductRepository;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,8 +39,9 @@ public class OrderService {
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
     private final OrderMapper orderMapper;
+    private final EmailService emailService;
 
-    public OrderResponse save(OrderRequest orderRequest, Authentication authentication) {
+    public OrderResponse save(OrderRequest orderRequest, Authentication authentication) throws MessagingException {
         User currentUser = (User) authentication.getPrincipal();
 
         // User is logged in, so already exists => just call .get() on optional to retrieve Hibernate-managed entity
@@ -88,7 +91,9 @@ public class OrderService {
         // Save order
         order.setOrderItems(orderItems);
         order = orderRepository.save(order);
-        // TODO: Send order confirmation email
+
+        // Send order confirmation mail
+        emailService.sendOrderConfirmationEmail(currentUser.getEmail(), order);
 
         return orderMapper.toOrderResponse(order);
     }
