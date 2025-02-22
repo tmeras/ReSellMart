@@ -4,13 +4,20 @@ import com.tmeras.resellmart.address.Address;
 import com.tmeras.resellmart.address.AddressRepository;
 import com.tmeras.resellmart.cart.CartItem;
 import com.tmeras.resellmart.cart.CartItemRepository;
+import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.APIException;
+import com.tmeras.resellmart.exception.OperationNotPermittedException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.product.Product;
 import com.tmeras.resellmart.product.ProductRepository;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,7 +81,7 @@ public class OrderService {
             orderItems.add(orderItem);
         }
 
-        // Empty user's cart and updated product quantities
+        // Empty user's cart and update available quantity of products
         cartItemRepository.deleteAll(cartItems);
         productRepository.saveAll(cartProducts);
 
@@ -84,5 +91,72 @@ public class OrderService {
         // TODO: Send order confirmation email
 
         return orderMapper.toOrderResponse(order);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public PageResponse<OrderResponse> findAll(
+            Integer pageNumber, Integer pageSize, String sortBy, String sortDirection
+    ) {
+        Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        Page<Order> orders = orderRepository.findAll(pageable);
+        // Initialise lazy associations
+        for (Order order : orders) {
+            order.getOrderItems().size();
+            for (OrderItem orderItem : order.getOrderItems()) {
+                // TODO: Investigate if any initialisations can be avoided
+                orderItem.getProduct().getSeller().getRoles().size();
+                orderItem.getProduct().getImages().size();
+            }
+        }
+        List<OrderResponse> orderResponses = orders.stream()
+                .map(orderMapper::toOrderResponse)
+                .toList();
+
+        return new PageResponse<>(
+                orderResponses,
+                orders.getNumber(),
+                orders.getSize(),
+                orders.getTotalElements(),
+                orders.getTotalPages(),
+                orders.isFirst(),
+                orders.isLast()
+        );
+    }
+
+    public PageResponse<OrderResponse> findAllByBuyerId(
+            Integer pageNumber, Integer pageSize, String sortBy,
+            String sortDirection, Integer userId, Authentication authentication
+    ) {
+        User currentUser = (User) authentication.getPrincipal();
+        if (!currentUser.getId().equals(userId))
+            throw new OperationNotPermittedException("You do not have permission to view the orders of this user");
+
+        Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        Page<Order> orders = orderRepository.findAllByBuyerId(pageable);
+        // Initialise lazy associations
+        for (Order order : orders) {
+            order.getOrderItems().size();
+            for (OrderItem orderItem : order.getOrderItems()) {
+                orderItem.getProduct().getSeller().getRoles().size();
+                orderItem.getProduct().getImages().size();
+            }
+        }
+        List<OrderResponse> orderResponses = orders.stream()
+                .map(orderMapper::toOrderResponse)
+                .toList();
+
+        return new PageResponse<>(
+                orderResponses,
+                orders.getNumber(),
+                orders.getSize(),
+                orders.getTotalElements(),
+                orders.getTotalPages(),
+                orders.isFirst(),
+                orders.isLast()
+        );
     }
 }

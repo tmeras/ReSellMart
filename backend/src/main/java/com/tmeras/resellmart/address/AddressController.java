@@ -77,6 +77,7 @@ public class AddressController {
         return new ResponseEntity<>(updatedAddress, HttpStatus.OK);
     }
 
+    // TODO: Change to patch mapping
     @DeleteMapping("/addresses/{address-id}")
     public ResponseEntity<?> delete(
             @PathVariable(name = "address-id") Integer addressId,
