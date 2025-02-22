@@ -23,7 +23,4 @@ public class OrderRequest {
 
     @NotNull(message = "Delivery address ID must not be empty")
     private Integer deliveryAddressId;
-
-    @NotNull(message = "Buyer ID must not be empty")
-    private Integer buyerId;
 }

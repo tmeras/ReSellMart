@@ -13,11 +13,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderMapper {
 
-    private ProductMapper productMapper;
-    private AddressMapper addressMapper;
-    private UserMapper userMapper;
+    private final ProductMapper productMapper;
+    private final AddressMapper addressMapper;
+    private final UserMapper userMapper;
 
-    private OrderResponse toOrderResponse(Order order) {
+    public OrderResponse toOrderResponse(Order order) {
         List<OrderItemResponse> orderItemResponses = new ArrayList<>();
         for (OrderItem orderItem : order.getOrderItems()) {
             orderItemResponses.add(OrderItemResponse.builder()

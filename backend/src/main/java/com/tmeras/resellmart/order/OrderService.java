@@ -1,25 +1,88 @@
 package com.tmeras.resellmart.order;
 
+import com.tmeras.resellmart.address.Address;
+import com.tmeras.resellmart.address.AddressRepository;
+import com.tmeras.resellmart.cart.CartItem;
+import com.tmeras.resellmart.cart.CartItemRepository;
+import com.tmeras.resellmart.exception.APIException;
+import com.tmeras.resellmart.exception.ResourceNotFoundException;
+import com.tmeras.resellmart.product.Product;
+import com.tmeras.resellmart.product.ProductRepository;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final AddressRepository addressRepository;
+    private final CartItemRepository cartItemRepository;
+    private final ProductRepository productRepository;
     private final OrderMapper orderMapper;
 
     public OrderResponse save(OrderRequest orderRequest, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
 
         // User is logged in, so already exists => just call .get() on optional to retrieve Hibernate-managed entity
-        currentUser = userRepository.findById(currentUser.getId()).get();
+        currentUser = userRepository.findWithAssociationsById(currentUser.getId()).get();
 
-        return null;
+        Address billingAddress = addressRepository.findWithAssociationsById(orderRequest.getBillingAddressId())
+                .orElseThrow(() -> new ResourceNotFoundException("No billing address found with ID: " + orderRequest.getBillingAddressId()));
+        Address deliveryAddress = addressRepository.findWithAssociationsById(orderRequest.getDeliveryAddressId())
+                .orElseThrow(() -> new ResourceNotFoundException("No delivery address found with ID: " + orderRequest.getDeliveryAddressId()));
+        if (!billingAddress.getUser().getId().equals(currentUser.getId()) ||
+                !deliveryAddress.getUser().getId().equals(currentUser.getId()))
+            throw new APIException("One or both of the specified addresses are related to another user");
+
+        Order order = new Order();
+        order.setPlacedAt(LocalDateTime.now());
+        order.setPaymentMethod(PaymentMethod.valueOf(orderRequest.getPaymentMethod()));
+        order.setBuyer(currentUser);
+        order.setBillingAddress(billingAddress);
+        order.setDeliveryAddress(deliveryAddress);
+
+        // Fetch the user's cart items and create corresponding order items
+        List<CartItem> cartItems = cartItemRepository.findAllWithProductDetailsByUserId(currentUser.getId());
+        List<Product> cartProducts = new ArrayList<>();
+        List<OrderItem> orderItems = new ArrayList<>();
+        if (cartItems.isEmpty())
+            throw new APIException("You do not have any items in your cart");
+
+        for (CartItem cartItem : cartItems) {
+            // Reduce products available quantity by the requested quantity
+            Product cartProduct = cartItem.getProduct();
+            if (cartProduct.getAvailableQuantity() < cartItem.getQuantity())
+                throw new APIException("Requested quantity of product with ID " + cartProduct.getId() + " cannot be larger than available quantity");
+            cartProduct.setAvailableQuantity(cartProduct.getAvailableQuantity() - cartItem.getQuantity());
+            cartProducts.add(cartProduct);
+
+            // Create order item
+            OrderItem orderItem = new OrderItem();
+            orderItem.setProduct(cartProduct);
+            orderItem.setProductQuantity(cartItem.getQuantity());
+            orderItems.add(orderItem);
+        }
+
+        // Empty user's cart and updated product quantities
+        cartItemRepository.deleteAll(cartItems);
+        productRepository.saveAll(cartProducts);
+
+        // Save order
+        order.setOrderItems(orderItems);
+        order = orderRepository.save(order);
+        // TODO: Send order confirmation email
+
+        return orderMapper.toOrderResponse(order);
     }
 }
