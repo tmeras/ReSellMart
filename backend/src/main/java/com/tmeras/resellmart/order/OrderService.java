@@ -104,6 +104,7 @@ public class OrderService {
         // Initialise lazy associations
         for (Order order : orders) {
             order.getOrderItems().size();
+            order.getBuyer().getRoles().size();
             for (OrderItem orderItem : order.getOrderItems()) {
                 // TODO: Investigate if any initialisations can be avoided
                 orderItem.getProduct().getSeller().getRoles().size();
@@ -127,19 +128,20 @@ public class OrderService {
 
     public PageResponse<OrderResponse> findAllByBuyerId(
             Integer pageNumber, Integer pageSize, String sortBy,
-            String sortDirection, Integer userId, Authentication authentication
+            String sortDirection, Integer buyerId, Authentication authentication
     ) {
         User currentUser = (User) authentication.getPrincipal();
-        if (!currentUser.getId().equals(userId))
+        if (!currentUser.getId().equals(buyerId))
             throw new OperationNotPermittedException("You do not have permission to view the orders of this user");
 
         Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
-        Page<Order> orders = orderRepository.findAllByBuyerId(pageable);
+        Page<Order> orders = orderRepository.findAllByBuyerId(pageable, buyerId);
         // Initialise lazy associations
         for (Order order : orders) {
             order.getOrderItems().size();
+            order.getBuyer().getRoles().size();
             for (OrderItem orderItem : order.getOrderItems()) {
                 orderItem.getProduct().getSeller().getRoles().size();
                 orderItem.getProduct().getImages().size();
@@ -158,5 +160,10 @@ public class OrderService {
                 orders.isFirst(),
                 orders.isLast()
         );
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public void delete(Integer orderId) {
+        orderRepository.deleteById(orderId);
     }
 }

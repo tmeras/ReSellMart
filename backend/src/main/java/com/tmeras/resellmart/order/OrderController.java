@@ -42,14 +42,17 @@ public class OrderController {
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_ORDERS_BY, required = false) String sortBy,
             @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection,
-            @PathVariable(name = "user-id") Integer userId,
+            @PathVariable(name = "user-id") Integer buyerId,
             Authentication authentication
     ) {
         PageResponse<OrderResponse> foundOrders =
-                orderService.findAllByBuyerId(pageNumber, pageSize, sortBy, sortDirection, userId, authentication);
+                orderService.findAllByBuyerId(pageNumber, pageSize, sortBy, sortDirection, buyerId, authentication);
         return new ResponseEntity<>(foundOrders, HttpStatus.OK);
     }
 
-
-
+    @DeleteMapping("/orders/{order-id}")
+    public ResponseEntity<OrderResponse> delete(@PathVariable(name = "order-id") Integer orderId) {
+        orderService.delete(orderId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
