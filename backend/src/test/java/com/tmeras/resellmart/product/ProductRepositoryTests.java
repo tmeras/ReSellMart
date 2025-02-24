@@ -56,12 +56,6 @@ public class ProductRepositoryTests {
 
     @BeforeEach
     public void setUp() {
-        // TODO: Remove unnecessary .deleteAll() calls as @DataJpaTest rollbacks anyway
-        // Empty relevant database tables
-        userRepository.deleteAll();
-        productRepository.deleteAll();
-        categoryRepository.deleteAll();
-
         // Save required entities (need to set IDs to null before inserting to avoid
         // errors related to MySQL's AUTO_INCREMENT counter not resetting between tests)
         Category category = TestDataUtils.createCategoryA();
