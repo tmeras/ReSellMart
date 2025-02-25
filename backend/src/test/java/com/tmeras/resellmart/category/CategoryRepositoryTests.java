@@ -42,9 +42,6 @@ public class CategoryRepositoryTests {
 
     @BeforeEach
     public void setUp() {
-        // Empty relevant database tables
-        categoryRepository.deleteAll();
-
         // Save required entities (need to set IDs to null before inserting to avoid
         // errors related to MySQL's AUTO_INCREMENT counter not resetting between tests)
         parentCategory = TestDataUtils.createCategoryA();

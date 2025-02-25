@@ -11,7 +11,6 @@ import com.tmeras.resellmart.file.FileService;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -188,7 +187,6 @@ public class ProductService {
         Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
-        //"%" + keyword.toLowerCase() + "%"
         Page<Product> products = productRepository.findAllByKeyword(pageable, keyword, currentUser.getId());
         // Initialize lazy associations
         for(Product product : products) {
@@ -228,7 +226,7 @@ public class ProductService {
         existingproduct.setDiscountedPrice(productRequest.getDiscountedPrice());
         existingproduct.setProductCondition(productRequest.getProductCondition());
         existingproduct.setAvailableQuantity(productRequest.getAvailableQuantity());
-        existingproduct.setAvailable(productRequest.isAvailable());
+        existingproduct.setIsAvailable(productRequest.getIsAvailable());
         existingproduct.setCategory(category);
 
         Product updatedProduct = productRepository.save(existingproduct);
@@ -306,6 +304,8 @@ public class ProductService {
         if (existingProduct.isPresent() && existingProduct.get().getImages() != null)
             for (ProductImage productImage: existingProduct.get().getImages())
                 fileService.deleteFile(productImage.getFilePath());
+
+        // TODO: Ensure that no order refers to this product
 
         productRepository.deleteById(productId);
     }

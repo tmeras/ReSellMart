@@ -301,7 +301,7 @@ public class UserServiceTests {
 
     @Test
     public void shouldNotSaveCartItemWhenProductIsUnavailable() {
-        productB.setAvailable(false);
+        productB.setIsAvailable(false);
         CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 5, userA.getId());
 
         when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
@@ -481,7 +481,7 @@ public class UserServiceTests {
 
     @Test
     public void shouldNotSaveWishListItemWhenProductIsUnavailable() {
-        productB.setAvailable(false);
+        productB.setIsAvailable(false);
         WishListItemRequest wishListItemRequest = new WishListItemRequest(productB.getId(), userA.getId());
 
         when(wishListItemRepository.existsByUserIdAndProductId(userA.getId(), productB.getId())).thenReturn(false);
@@ -546,7 +546,7 @@ public class UserServiceTests {
 
         assertThat(userA.isEnabled()).isFalse();
         assertThat(testToken.isRevoked()).isTrue();
-        assertThat(productA.isAvailable()).isFalse();
+        assertThat(productA.getIsAvailable()).isFalse();
     }
 
     @Test

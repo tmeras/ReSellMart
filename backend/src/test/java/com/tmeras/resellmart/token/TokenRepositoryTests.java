@@ -52,11 +52,6 @@ public class TokenRepositoryTests {
 
     @BeforeEach
     public void setUp() {
-        // Empty relevant database tables
-        userRepository.deleteAll();
-        roleRepository.deleteAll();
-        tokenRepository.deleteAll();
-
         // Save required entities (need to set IDs to null before inserting to avoid
         // errors related to MySQL's AUTO_INCREMENT counter not resetting between tests)
         Role adminRole = new Role(null, "ADMIN");

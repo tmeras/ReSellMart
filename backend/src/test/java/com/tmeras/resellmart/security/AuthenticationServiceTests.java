@@ -106,8 +106,8 @@ public class AuthenticationServiceTests {
         assertThat(response.getQrImageUri()).isEqualTo(expectedResponse.getQrImageUri());
         assertThat(response.getMfaEnabled()).isEqualTo(expectedResponse.getMfaEnabled());
         verify(emailService, times(1)).sendActivationEmail(
-                eq(registrationRequest.getEmail()), eq("ReSellMart Account Activation"),
-                eq(registrationRequest.getName()), eq(ACTIVATION_URL), any(String.class)
+                eq(registrationRequest.getEmail()), eq(registrationRequest.getName()),
+                eq(ACTIVATION_URL), any(String.class)
         );
         verify(tokenRepository, times(1)).save(any(Token.class));
     }

@@ -19,5 +19,6 @@ public class AppConstants {
     public static final Integer MAX_IMAGE_NUMBER = 5;
 
     // Thymeleaf template names
-    public static final String USER_ACTIVATION_TEMPLATE = "activate_account";
+    public static final String USER_ACTIVATION_TEMPLATE = "account_activation";
+    public static final String ORDER_CONFIRMATION_TEMPLATE = "order_confirmation";
 }

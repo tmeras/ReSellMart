@@ -25,7 +25,7 @@ public class ProductMapper {
                 .discountedPrice(productRequest.getDiscountedPrice())
                 .productCondition(productRequest.getProductCondition())
                 .availableQuantity(productRequest.getAvailableQuantity())
-                .available(productRequest.isAvailable())
+                .isAvailable(productRequest.getIsAvailable())
                 .images(new ArrayList<>())
                 .build();
     }
@@ -44,7 +44,7 @@ public class ProductMapper {
                 .discountedPrice(product.getDiscountedPrice())
                 .productCondition(product.getProductCondition())
                 .availableQuantity(product.getAvailableQuantity())
-                .available(product.isAvailable())
+                .isAvailable(product.getIsAvailable())
                 .images(productImageResponses)
                 .category(categoryMapper.toCategoryResponse(product.getCategory()))
                 .seller(userMapper.toUserResponse(product.getSeller()))

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f9f9f9;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #2c3e50;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8f8f8;
+        }
+
+        footer {
+            margin-top: 25px;
+            font-size: 0.8em;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Order Confirmation</h2>
+    <p>Thank you for your order, <span th:text="${order.buyer.realName}"></span>!</p>
+
+    <h3>Order Details</h3>
+    <p><strong>Order ID:</strong> <span th:text="${order.id}"></span></p>
+    <p><strong>Placed At:</strong> <span th:text="${#temporals.format(order.placedAt, 'yyyy-MM-dd HH:mm')}"></span></p>     <!-- TODO: Specify time zone-->
+    <p><strong>Payment Method:</strong> <span th:text="${order.paymentMethod}"></span></p>
+
+    <h3>Billing Address</h3>
+    <p>
+        <span th:text="${order.billingAddress.street}"></span>,
+        <span th:text="${order.billingAddress.city}"></span>,
+        <span th:text="${order.billingAddress.state}"></span>,
+        <span th:text="${order.billingAddress.postalCode}"></span>
+    </p>
+
+    <h3>Delivery Address</h3>
+    <p>
+        <span th:text="${order.deliveryAddress.street}"></span>,
+        <span th:text="${order.deliveryAddress.city}"></span>,
+        <span th:text="${order.deliveryAddress.state}"></span>,
+        <span th:text="${order.deliveryAddress.postalCode}"></span>
+    </p>
+
+    <h3>Order Items</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price (£)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${order.orderItems}">
+            <td th:text="${item.product.name}"></td>
+            <td th:text="${item.productQuantity}"></td>
+            <td th:text="${item.product.price}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p><strong>Total Price:</strong> <span th:text="'£' + ${order.getTotalPrice()}"></span></p>
+
+    <footer>
+        <p>Best regards,<br>
+            The ReSellMart team</p>
+    </footer>
+</div>
+</body>
+</html>

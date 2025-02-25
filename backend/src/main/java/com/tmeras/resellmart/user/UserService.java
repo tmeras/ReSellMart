@@ -145,7 +145,7 @@ public class UserService {
         if(Objects.equals(existingProduct.getSeller().getId(), currentUser.getId()))
             throw new APIException("You cannot add your own items to your cart");
 
-        if(!existingProduct.isAvailable())
+        if(!existingProduct.getIsAvailable())
             throw new APIException("Unavailable products cannot be added to the cart");
 
         if (existingProduct.getAvailableQuantity() < cartItemRequest.getQuantity())
@@ -221,7 +221,7 @@ public class UserService {
         if(Objects.equals(existingProduct.getSeller().getId(), currentUser.getId()))
             throw new APIException("You cannot add your own items to your wishlist");
 
-        if(!existingProduct.isAvailable())
+        if(!existingProduct.getIsAvailable())
             throw new APIException("Unavailable products cannot be added to the wishlist");
 
         WishListItem wishListItem = new WishListItem();
@@ -282,7 +282,7 @@ public class UserService {
 
         // Mark all user products as unavailable
         List<Product> userProducts = productRepository.findAllBySellerId(userId);
-        userProducts.forEach(product -> product.setAvailable(false));
+        userProducts.forEach(product -> product.setIsAvailable(false));
 
         productRepository.saveAll(userProducts);
     }

@@ -1,5 +1,8 @@
 package com.tmeras.resellmart;
 
+import com.tmeras.resellmart.address.Address;
+import com.tmeras.resellmart.address.AddressRepository;
+import com.tmeras.resellmart.address.AddressType;
 import com.tmeras.resellmart.category.Category;
 import com.tmeras.resellmart.category.CategoryRepository;
 import com.tmeras.resellmart.product.Product;
@@ -13,7 +16,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -29,13 +31,14 @@ public class MainApplication {
 	}
 
 	// TODO: Replace with migration script
-/*	@Bean
+	/*@Bean
 	public CommandLineRunner runner(
 			RoleRepository roleRepository,
 			CategoryRepository categoryRepository,
 			ProductRepository productRepository,
 			UserRepository userRepository,
-			PasswordEncoder passwordEncoder
+			PasswordEncoder passwordEncoder,
+			AddressRepository addressRepository
 	) {
 		return args -> {
 			if (roleRepository.findByName("USER").isEmpty()) {
@@ -49,7 +52,7 @@ public class MainApplication {
 								.name("ADMIN")
 								.build()
 				);
-				User user = userRepository.save(
+				User userA = userRepository.save(
 						User.builder()
 								.email("test@test.com")
 								.name("test user")
@@ -60,13 +63,24 @@ public class MainApplication {
 								.password(passwordEncoder.encode("Bacon12!"))
 								.build()
 				);
-				User adminUser = userRepository.save(
+				User userB = userRepository.save(
 						User.builder()
 								.email("admin@test.com")
 								.name("test admin user")
 								.roles(Set.of(adminRole))
 								.mfaEnabled(false)
-								.homeCountry("USA")
+								.homeCountry("UK")
+								.enabled(true)
+								.password(passwordEncoder.encode("Bacon12!"))
+								.build()
+				);
+				User userC = userRepository.save(
+						User.builder()
+								.email("test2@test.com")
+								.name("test user 3")
+								.roles(Set.of(userRole))
+								.mfaEnabled(false)
+								.homeCountry("UK")
 								.enabled(true)
 								.password(passwordEncoder.encode("Bacon12!"))
 								.build()
@@ -90,9 +104,9 @@ public class MainApplication {
 							.discountedPrice(5.0)
 							.productCondition(ProductCondition.NEW)
 							.availableQuantity(2)
-							.available(true)
+							.isAvailable(true)
 							.category(categoryA)
-							.seller(adminUser)
+							.seller(userA)
 							.images(new ArrayList<>())
 							.build()
 				);
@@ -104,9 +118,9 @@ public class MainApplication {
 								.discountedPrice(10.0)
 								.productCondition(ProductCondition.FAIR)
 								.availableQuantity(1)
-								.available(true)
+								.isAvailable(true)
 								.category(categoryB)
-								.seller(adminUser)
+								.seller(userB)
 								.images(new ArrayList<>())
 								.build()
 				);
@@ -118,10 +132,63 @@ public class MainApplication {
 								.discountedPrice(15.0)
 								.productCondition(ProductCondition.LIKE_NEW)
 								.availableQuantity(5)
-								.available(true)
+								.isAvailable(true)
 								.category(categoryB)
-								.seller(user)
+								.seller(userC)
 								.images(new ArrayList<>())
+								.build()
+				);
+				Product productD = productRepository.save(
+						Product.builder()
+								.name("Product D")
+								.description("Description D")
+								.price(40.0)
+								.discountedPrice(null)
+								.productCondition(ProductCondition.LIKE_NEW)
+								.availableQuantity(3)
+								.isAvailable(true)
+								.category(categoryB)
+								.seller(userC)
+								.images(new ArrayList<>())
+								.build()
+				);
+				Address addressA = addressRepository.save(
+						Address.builder()
+								.country("Greece")
+								.street("Ermou Street")
+								.state("Attica")
+								.city("Athens")
+								.postalCode("10563")
+								.main(true)
+								.deleted(false)
+								.addressType(AddressType.HOME)
+								.user(userA)
+								.build()
+				);
+				Address addressB = addressRepository.save(
+						Address.builder()
+								.country("UK")
+								.street("Mappin Street")
+								.state("South Yorkshire")
+								.city("Sheffield")
+								.postalCode("S1 4DT")
+								.main(true)
+								.deleted(false)
+								.addressType(AddressType.WORK)
+								.user(userB)
+								.build()
+				);
+				Address addressC = addressRepository.save(
+						Address.builder()
+								.country("UK")
+								.street("Oxford Road")
+								.state("Greater Manchester")
+								.city("Manchester")
+								.postalCode("M13 9PL")
+								.main(true)
+								.deleted(false)
+								.addressType(AddressType.HOME)
+								.user(userC)
 								.build()
 				);
 			}

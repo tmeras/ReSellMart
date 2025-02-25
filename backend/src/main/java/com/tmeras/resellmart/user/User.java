@@ -34,6 +34,8 @@ public class User implements UserDetails, Principal {
 
     private String homeCountry;
 
+    // TODO: Add registration date field
+
     // Path pointing to the user's profile picture
     private String imagePath;
 
