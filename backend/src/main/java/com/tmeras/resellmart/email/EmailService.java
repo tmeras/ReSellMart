@@ -23,7 +23,6 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
 
-    @Async
     public void sendActivationEmail(
             String to,
             String username,
@@ -53,7 +52,6 @@ public class EmailService {
         mailSender.send(mimeMessage);
     }
 
-    @Async
     public void sendOrderConfirmationEmail(
             String to,
             Order order
