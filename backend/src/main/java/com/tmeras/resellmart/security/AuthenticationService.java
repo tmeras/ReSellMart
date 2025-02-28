@@ -13,10 +13,11 @@ import io.jsonwebtoken.JwtException;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.mail.MailException;
+import org.springframework.mail.MailSendException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,6 +29,7 @@ import com.tmeras.resellmart.token.JwtService;
 import com.tmeras.resellmart.token.Token;
 import com.tmeras.resellmart.token.TokenRepository;
 import com.tmeras.resellmart.token.TokenType;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -56,7 +58,7 @@ public class AuthenticationService {
     @Value("${application.security.jwt.refresh-token.expiration}")
     private long refreshExpirationTime;
 
-    @Transactional(rollbackOn = MessagingException.class)
+    @Transactional(rollbackFor = MessagingException.class)
     public AuthenticationResponse register(RegistrationRequest registrationRequest) throws MessagingException {
         Role userRole = roleRepository.findByName("USER")
                 .orElseThrow(() -> new ResourceNotFoundException("USER role was not found"));
@@ -148,8 +150,8 @@ public class AuthenticationService {
     }
 
     @Transactional(
-            rollbackOn = MessagingException.class,
-            dontRollbackOn = APIException.class
+            rollbackFor = MessagingException.class,
+            noRollbackFor = APIException.class
     )
     public void activateAccount(String code) throws MessagingException {
         Token savedToken = tokenRepository.findByToken(code)
