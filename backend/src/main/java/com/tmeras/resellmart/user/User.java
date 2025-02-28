@@ -1,6 +1,5 @@
 package com.tmeras.resellmart.user;
 
-import com.tmeras.resellmart.cart.CartItem;
 import com.tmeras.resellmart.role.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,8 +9,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.security.Principal;
-import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -22,7 +22,7 @@ import java.util.*;
 public class User implements UserDetails, Principal {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private String name;

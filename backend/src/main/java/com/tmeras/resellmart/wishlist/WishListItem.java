@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class WishListItem {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private LocalDateTime addedAt;

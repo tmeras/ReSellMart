@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "PurchaseOrder") // Order is reserved in MySQL
 @Getter
 @Setter
 @AllArgsConstructor
@@ -18,7 +17,7 @@ import java.util.List;
 public class Order {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private LocalDateTime placedAt;
