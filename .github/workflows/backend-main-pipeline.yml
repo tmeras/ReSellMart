@@ -1,0 +1,34 @@
+name: ReSellMart Main Backend Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - backend/**
+      - .github/workflows/backend-main-pipeline.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - backend/**
+      - .github/workflows/backend-main-pipeline.yml
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Run unit and integration tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+
+      - name: Run unit and integration tests
+        run: |
+          cd backend
+          ./mvnw clean verify
