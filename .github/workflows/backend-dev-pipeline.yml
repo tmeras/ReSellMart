@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - backend/**
-      - backend-main-pipeline.yml
+      - .github/workflows/backend-dev-pipeline.yml
 
 jobs:
   unit-test:
