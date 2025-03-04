@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
+@Table(name = "CustomerOrder")
 @Getter
 @Setter
 @AllArgsConstructor

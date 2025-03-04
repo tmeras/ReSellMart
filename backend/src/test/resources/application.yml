@@ -2,6 +2,14 @@ server:
   port: 8080
 
 spring:
+  application:
+    name: ReSellMart
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 25MB
+
   datasource:
     url: jdbc:mysql://localhost:3306/resellmart_db
     username: user
@@ -9,15 +17,16 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
         format_sql: true
     database: mysql
-  sql:
-    init:
-      mode: always
+    open-in-view: false
+
+  flyway:
+    enabled: false
 
   mail:
     host: localhost
@@ -48,7 +57,7 @@ application:
 
   mailing:
     frontend:
-      activation-url: "TODO" # TODO: Add activation url
+      activation-url: "URL"
 
   file:
     upload:
