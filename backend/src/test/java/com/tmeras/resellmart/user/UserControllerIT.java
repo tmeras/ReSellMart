@@ -682,7 +682,7 @@ public class UserControllerIT {
                 LocalDateTime.now().plusMinutes(1), null, false, userA);
         testToken = tokenRepository.save(testToken);
 
-        ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userA.getId() + "/enabled",
+        ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userA.getId() + "/activation",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), Object.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -698,7 +698,7 @@ public class UserControllerIT {
         userA.setRoles(Set.of(userB.getRoles().stream().findFirst().get()));
         userRepository.save(userA);
 
-        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userB.getId() + "/enabled",
+        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userB.getId() + "/activation",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
@@ -711,7 +711,7 @@ public class UserControllerIT {
     public void shouldNotDisableUserWhenInvalidUserId() {
         UserEnableRequest userEnableRequest = new UserEnableRequest(false);
 
-        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + 99 + "/enabled",
+        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + 99 + "/activation",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -723,7 +723,7 @@ public class UserControllerIT {
     public void shouldNotDisableAdminUser() {
         UserEnableRequest userEnableRequest = new UserEnableRequest(false);
 
-        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userA.getId() + "/enabled",
+        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userA.getId() + "/activation",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -737,7 +737,7 @@ public class UserControllerIT {
         userB.setEnabled(false);
         userRepository.save(userB);
 
-        ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userB.getId() + "/enabled",
+        ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userB.getId() + "/activation",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), Object.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -750,7 +750,7 @@ public class UserControllerIT {
         String testJwt = jwtService.generateAccessToken(new HashMap<>(), userB);
         headers.set("Authorization", "Bearer " + testJwt);
 
-        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userA.getId() + "/enabled",
+        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userA.getId() + "/activation",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
@@ -760,7 +760,7 @@ public class UserControllerIT {
     public void shouldNotEnableUserWhenInvalidUserId() {
         UserEnableRequest userEnableRequest = new UserEnableRequest(true);
 
-        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + 99 + "/enabled",
+        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + 99 + "/activation",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);

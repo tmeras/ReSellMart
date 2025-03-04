@@ -53,7 +53,7 @@ INSERT IGNORE INTO product(id, name, description, price, discounted_price, produ
 VALUES (2, 'MacBook Air 13\'\' M1', 'A brand new MacBook Air with M1 chip. Still sealed.', 1500, 1300,
         'NEW', 1, true, 2, 1);
 INSERT IGNORE INTO product_image(id, file_path, displayed, product_id)
-VALUES (2, './uploads/flyway-product-images/macbook air 13" M1.jpeg', true, 2);
+VALUES (2, './uploads/flyway-product-images/macbook air M1.jpeg', true, 2);
 
 INSERT IGNORE INTO product(id, name, description, price, discounted_price, product_condition,
                            available_quantity, is_available, category_id, seller_id)
