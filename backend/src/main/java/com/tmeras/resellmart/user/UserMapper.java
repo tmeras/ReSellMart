@@ -25,6 +25,7 @@ public class UserMapper {
                 .name(user.getRealName())
                 .email(user.getEmail())
                 .homeCountry(user.getHomeCountry())
+                .registeredAt(user.getRegisteredAt())
                 .mfaEnabled(user.isMfaEnabled())
                 .profileImage(profileImage)
                 .roles(user.getRoles())

@@ -9,6 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
@@ -34,7 +35,7 @@ public class User implements UserDetails, Principal {
 
     private String homeCountry;
 
-    // TODO: Add registration date field
+    private LocalDate registeredAt;
 
     // Path pointing to the user's profile picture
     private String imagePath;

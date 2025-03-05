@@ -17,6 +17,7 @@ import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRequest;
 import com.tmeras.resellmart.user.UserResponse;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -35,6 +36,7 @@ public final class TestDataUtils {
                 .password("password")
                 .email("testA@test.com")
                 .homeCountry("UK")
+                .registeredAt(LocalDate.now())
                 .enabled(true)
                 .roles(roles)
                 .build();
@@ -53,6 +55,8 @@ public final class TestDataUtils {
                 .id(1)
                 .name("Test user A")
                 .email("testA@test.com")
+                .homeCountry("UK")
+                .registeredAt(LocalDate.now())
                 .mfaEnabled(false)
                 .roles(roles)
                 .build();
@@ -64,6 +68,8 @@ public final class TestDataUtils {
                 .name("Test user B")
                 .password("password")
                 .email("testB@test.com")
+                .homeCountry("Greece")
+                .registeredAt(LocalDate.now())
                 .enabled(true)
                 .roles(roles)
                 .build();
@@ -74,6 +80,8 @@ public final class TestDataUtils {
                 .id(2)
                 .name("Test user B")
                 .email("testB@test.com")
+                .homeCountry("Greece")
+                .registeredAt(LocalDate.now())
                 .mfaEnabled(false)
                 .roles(roles)
                 .build();
@@ -127,10 +135,10 @@ public final class TestDataUtils {
                 .name("Test product A")
                 .description("Description A")
                 .price(10.0)
-                .discountedPrice(5.0)
+                .previousPrice(5.0)
                 .productCondition(ProductCondition.NEW)
                 .availableQuantity(2)
-                .isAvailable(true)
+                .isDeleted(false)
                 .category(category)
                 .seller(seller)
                 .images(new ArrayList<>())
@@ -143,10 +151,9 @@ public final class TestDataUtils {
                 .name("Test product A")
                 .description("Description A")
                 .price(10.0)
-                .discountedPrice(5.0)
                 .productCondition(ProductCondition.NEW)
                 .availableQuantity(2)
-                .isAvailable(true)
+                .isDeleted(false)
                 .categoryId(categoryId)
                 .build();
     }
@@ -157,10 +164,10 @@ public final class TestDataUtils {
                 .name("Test product A")
                 .description("Description A")
                 .price(10.0)
-                .discountedPrice(5.0)
+                .previousPrice(5.0)
                 .productCondition(ProductCondition.NEW)
                 .availableQuantity(2)
-                .isAvailable(true)
+                .isDeleted(false)
                 .category(categoryResponse)
                 .seller(userResponse)
                 .images(new ArrayList<>())
@@ -173,27 +180,13 @@ public final class TestDataUtils {
                 .name("Test product B")
                 .description("Description B")
                 .price(20.0)
-                .discountedPrice(10.0)
+                .previousPrice(10.0)
                 .productCondition(ProductCondition.LIKE_NEW)
                 .availableQuantity(3)
-                .isAvailable(true)
+                .isDeleted(false)
                 .category(category)
                 .seller(seller)
                 .images(new ArrayList<>())
-                .build();
-    }
-
-    public static ProductRequest createProductRequestB(Integer categoryId) {
-        return ProductRequest.builder()
-                .id(1)
-                .name("Test product B")
-                .description("Description B")
-                .price(20.0)
-                .discountedPrice(10.0)
-                .productCondition(ProductCondition.LIKE_NEW)
-                .availableQuantity(3)
-                .isAvailable(true)
-                .categoryId(categoryId)
                 .build();
     }
 
@@ -203,10 +196,10 @@ public final class TestDataUtils {
                 .name("Test product B")
                 .description("Description B")
                 .price(20.0)
-                .discountedPrice(10.0)
+                .previousPrice(10.0)
                 .productCondition(ProductCondition.LIKE_NEW)
                 .availableQuantity(3)
-                .isAvailable(true)
+                .isDeleted(false)
                 .category(categoryResponse)
                 .seller(userResponse)
                 .images(new ArrayList<>())
