@@ -23,13 +23,13 @@ public class ProductResponse {
 
     private Double price;
 
-    private Double discountedPrice;
+    private Double previousPrice;
 
     private ProductCondition productCondition;
 
     private Integer availableQuantity;
 
-    private Boolean isAvailable;
+    private Boolean isDeleted;
 
     private List<ProductImageResponse> images;
 

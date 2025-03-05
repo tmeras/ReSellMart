@@ -133,8 +133,8 @@ public class ProductControllerIT {
     public void shouldSaveProductWhenValidRequest() {
         ProductRequest productRequest =
                 new ProductRequest(3, "Test product C", "Description C",
-                        50.0, 25.0,  ProductCondition.FAIR, 1,
-                        true, productA.getCategory().getId());
+                        50.0, ProductCondition.FAIR, 1,
+                        false, productA.getCategory().getId());
 
         ResponseEntity<ProductResponse> response =
                 restTemplate.exchange("/api/products", HttpMethod.POST,
@@ -145,7 +145,6 @@ public class ProductControllerIT {
         assertThat(response.getBody().getName()).isEqualTo(productRequest.getName());
         assertThat(response.getBody().getDescription()).isEqualTo(productRequest.getDescription());
         assertThat(response.getBody().getPrice()).isEqualTo(productRequest.getPrice());
-        assertThat(response.getBody().getDiscountedPrice()).isEqualTo(productRequest.getDiscountedPrice());
         assertThat(response.getBody().getProductCondition()).isEqualTo(productRequest.getProductCondition());
         assertThat(response.getBody().getCategory().getName()).isEqualTo(productA.getCategory().getName());
         assertThat(response.getBody().getSeller().getEmail()).isEqualTo(productA.getSeller().getEmail());
@@ -155,8 +154,7 @@ public class ProductControllerIT {
     public void shouldNotSaveProductWhenInvalidRequest() {
         ProductRequest productRequest =
                 new ProductRequest(3, null, "Description C",
-                        50.0, 25.0,  ProductCondition.FAIR, 1,
-                        true, productA.getCategory().getId());
+                        50.0, ProductCondition.FAIR, 1, false, productA.getCategory().getId());
         Map<String, String> expectedErrors = new HashMap<>();
         expectedErrors.put("name", "Name must not be empty");
 
@@ -173,8 +171,7 @@ public class ProductControllerIT {
     public void shouldNotSaveProductWhenInvalidCategoryId() {
         ProductRequest productRequest =
                 new ProductRequest(3, "Test product C", "Description C",
-                        50.0, 25.0,  ProductCondition.FAIR, 1,
-                        true, 99);
+                        50.0, ProductCondition.FAIR, 1, false, 99);
 
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/products", HttpMethod.POST,
@@ -186,28 +183,10 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void shouldNotSaveProductWhenInvalidPrice() {
-        ProductRequest productRequest =
-                new ProductRequest(3, "Test product C", "Description C",
-                        20.0, 25.0,  ProductCondition.FAIR, 1,
-                        true, productA.getCategory().getId());
-
-        ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/products", HttpMethod.POST,
-                        new HttpEntity<>(productRequest, headers), ExceptionResponse.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getMessage())
-                .isEqualTo("Discounted price cannot be higher than regular price");
-    }
-
-    @Test
     public void shouldNotSaveProductWhenInvalidQuantity() {
         ProductRequest productRequest =
                 new ProductRequest(3, "Test product C", "Description C",
-                        50.0, 25.0,  ProductCondition.FAIR, 0,
-                        true, productA.getCategory().getId());
+                        50.0, ProductCondition.FAIR, 0, false, productA.getCategory().getId());
 
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/products", HttpMethod.POST,
@@ -230,7 +209,7 @@ public class ProductControllerIT {
         assertThat(response.getBody().getName()).isEqualTo(productA.getName());
         assertThat(response.getBody().getDescription()).isEqualTo(productA.getDescription());
         assertThat(response.getBody().getPrice()).isEqualTo(productA.getPrice());
-        assertThat(response.getBody().getDiscountedPrice()).isEqualTo(productA.getDiscountedPrice());
+        assertThat(response.getBody().getPreviousPrice()).isEqualTo(productA.getPreviousPrice());
         assertThat(response.getBody().getProductCondition()).isEqualTo(productA.getProductCondition());
         assertThat(response.getBody().getCategory().getName()).isEqualTo(productA.getCategory().getName());
         assertThat(response.getBody().getSeller().getEmail()).isEqualTo(productA.getSeller().getEmail());
@@ -369,19 +348,6 @@ public class ProductControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage()).isEqualTo("You do not have permission to update this product");
-    }
-
-    @Test
-    public void shouldNotUpdateProductWhenInvalidPrice() {
-        productRequestA.setPrice(productRequestA.getDiscountedPrice() - 1);
-
-        ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.PUT,
-                        new HttpEntity<>(productRequestA, headers), ExceptionResponse.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getMessage()).isEqualTo("Discounted price cannot be higher than regular price");
     }
 
     @Test

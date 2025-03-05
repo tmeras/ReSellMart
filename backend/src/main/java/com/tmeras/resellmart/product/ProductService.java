@@ -48,9 +48,6 @@ public class ProductService {
         Category category = categoryRepository.findWithAssociationsById(productRequest.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("No category found with ID: " + productRequest.getCategoryId()));
 
-        if (productRequest.getPrice() < productRequest.getDiscountedPrice())
-            throw new APIException("Discounted price cannot be higher than regular price");
-
         if(productRequest.getAvailableQuantity() == 0)
             throw new APIException("Quantity of newly created product must be greater than be 0");
 
@@ -217,16 +214,14 @@ public class ProductService {
         if (!Objects.equals(existingproduct.getSeller().getId(), currentUser.getId()))
             throw new OperationNotPermittedException("You do not have permission to update this product");
 
-        if (productRequest.getPrice() < productRequest.getDiscountedPrice())
-            throw new APIException("Discounted price cannot be higher than regular price");
-
         existingproduct.setName(productRequest.getName());
         existingproduct.setDescription(productRequest.getDescription());
+        existingproduct.setPreviousPrice(existingproduct.getPrice());
         existingproduct.setPrice(productRequest.getPrice());
-        existingproduct.setDiscountedPrice(productRequest.getDiscountedPrice());
         existingproduct.setProductCondition(productRequest.getProductCondition());
         existingproduct.setAvailableQuantity(productRequest.getAvailableQuantity());
-        existingproduct.setIsAvailable(productRequest.getIsAvailable());
+        if (productRequest.getIsDeleted() != null)
+            existingproduct.setIsDeleted(productRequest.getIsDeleted());
         existingproduct.setCategory(category);
 
         Product updatedProduct = productRepository.save(existingproduct);

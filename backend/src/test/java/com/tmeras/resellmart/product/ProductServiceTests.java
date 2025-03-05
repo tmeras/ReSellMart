@@ -125,20 +125,6 @@ public class ProductServiceTests {
     }
 
     @Test
-    public void shouldNotSaveProductWhenInvalidPrice() {
-        productRequestA.setPrice(productRequestA.getDiscountedPrice() - 1);
-
-        when(userRepository.findWithAssociationsById(productRequestA.getId()))
-                .thenReturn(Optional.of(productA.getSeller()));
-        when(categoryRepository.findWithAssociationsById(productRequestA.getCategoryId()))
-                .thenReturn(Optional.of(productA.getCategory()));
-
-        assertThatThrownBy(() -> productService.save(productRequestA, authentication))
-                .isInstanceOf(APIException.class)
-                .hasMessage("Discounted price cannot be higher than regular price");
-    }
-
-    @Test
     public void shouldNotSaveProductWhenInvalidQuantity() {
         productRequestA.setAvailableQuantity(0);
 
@@ -321,19 +307,6 @@ public class ProductServiceTests {
         assertThatThrownBy(() -> productService.update(productRequestA, productRequestA.getId(), authentication))
                 .isInstanceOf(OperationNotPermittedException.class)
                 .hasMessage("You do not have permission to update this product");
-    }
-
-    @Test
-    public void shouldNotUpdateProductWhenInvalidPrice() {
-        productRequestA.setPrice(productRequestA.getDiscountedPrice() - 1);
-
-        when(categoryRepository.findWithAssociationsById(productRequestA.getCategoryId()))
-                .thenReturn(Optional.ofNullable(productA.getCategory()));
-        when(productRepository.findWithAssociationsById(productRequestA.getId())).thenReturn(Optional.ofNullable(productA));
-
-        assertThatThrownBy(() -> productService.update(productRequestA, productRequestA.getId(), authentication))
-                .isInstanceOf(APIException.class)
-                .hasMessage("Discounted price cannot be higher than regular price");
     }
 
     @Test

@@ -11,11 +11,11 @@ import com.tmeras.resellmart.exception.OperationNotPermittedException;
 import com.tmeras.resellmart.exception.ResourceAlreadyExistsException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.file.FileService;
-import com.tmeras.resellmart.security.MfaService;
 import com.tmeras.resellmart.product.Product;
 import com.tmeras.resellmart.product.ProductRepository;
 import com.tmeras.resellmart.product.ProductResponse;
 import com.tmeras.resellmart.role.Role;
+import com.tmeras.resellmart.security.MfaService;
 import com.tmeras.resellmart.token.Token;
 import com.tmeras.resellmart.token.TokenRepository;
 import com.tmeras.resellmart.token.TokenType;
@@ -300,8 +300,8 @@ public class UserServiceTests {
     }
 
     @Test
-    public void shouldNotSaveCartItemWhenProductIsUnavailable() {
-        productB.setIsAvailable(false);
+    public void shouldNotSaveCartItemWhenProductIsDeleted() {
+        productB.setIsDeleted(true);
         CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 5, userA.getId());
 
         when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
@@ -309,7 +309,7 @@ public class UserServiceTests {
 
         assertThatThrownBy(() -> userService.saveCartItem(cartItemRequest, userA.getId(), authentication))
                 .isInstanceOf(APIException.class)
-                .hasMessage("Unavailable products cannot be added to the cart");
+                .hasMessage("Deleted products cannot be added to the cart");
     }
 
     @Test
@@ -480,18 +480,17 @@ public class UserServiceTests {
     }
 
     @Test
-    public void shouldNotSaveWishListItemWhenProductIsUnavailable() {
-        productB.setIsAvailable(false);
+    public void shouldNotSaveWishListItemWhenProductIsDeleted() {
+        productB.setIsDeleted(true);
         WishListItemRequest wishListItemRequest = new WishListItemRequest(productB.getId(), userA.getId());
 
         when(wishListItemRepository.existsByUserIdAndProductId(userA.getId(), productB.getId())).thenReturn(false);
         when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
         when(productRepository.findWithAssociationsById(productB.getId())).thenReturn(Optional.of(productB));
 
-
         assertThatThrownBy(() -> userService.saveWishListItem(wishListItemRequest, userA.getId(), authentication))
                 .isInstanceOf(APIException.class)
-                .hasMessage("Unavailable products cannot be added to the wishlist");
+                .hasMessage("Deleted products cannot be added to the wishlist");
     }
 
     @Test
@@ -546,7 +545,7 @@ public class UserServiceTests {
 
         assertThat(userA.isEnabled()).isFalse();
         assertThat(testToken.isRevoked()).isTrue();
-        assertThat(productA.getIsAvailable()).isFalse();
+        assertThat(productA.getIsDeleted()).isFalse();
     }
 
     @Test

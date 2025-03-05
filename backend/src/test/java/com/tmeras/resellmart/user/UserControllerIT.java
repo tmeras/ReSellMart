@@ -378,9 +378,9 @@ public class UserControllerIT {
     }
 
     @Test
-    public void shouldNotSaveCartItemWhenProductIsUnavailable() {
+    public void shouldNotSaveCartItemWhenProductIsDeleted() {
         CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 1, userA.getId());
-        productB.setIsAvailable(false);
+        productB.setIsDeleted(true);
         productRepository.save(productB);
 
         ResponseEntity<ExceptionResponse> response =
@@ -390,7 +390,7 @@ public class UserControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage())
-                .isEqualTo("Unavailable products cannot be added to the cart");
+                .isEqualTo("Deleted products cannot be added to the cart");
     }
 
     @Test
@@ -443,6 +443,7 @@ public class UserControllerIT {
                         HttpMethod.PATCH, new HttpEntity<>(cartItemRequest, headers), CartItemResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getQuantity()).isEqualTo(2);
     }
 
@@ -601,7 +602,7 @@ public class UserControllerIT {
 
     @Test
     public void shouldNotSaveWishListItemWhenProductIsUnavailable() {
-        productB.setIsAvailable(false);
+        productB.setIsDeleted(true);
         productRepository.save(productB);
         WishListItemRequest wishListItemRequest = new WishListItemRequest(productB.getId(), userA.getId());
 
@@ -612,7 +613,7 @@ public class UserControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage())
-                .isEqualTo("Unavailable products cannot be added to the wishlist");
+                .isEqualTo("Deleted products cannot be added to the wishlist");
     }
 
     @Test
@@ -687,7 +688,7 @@ public class UserControllerIT {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(userRepository.findById(userA.getId()).get().isEnabled()).isFalse();
-        assertThat(productRepository.findAllBySellerId(userA.getId()).get(0).getIsAvailable()).isFalse();
+        assertThat(productRepository.findAllBySellerId(userA.getId()).get(0).getIsDeleted()).isFalse();
         assertThat(tokenRepository.findById(testToken.getId()).get().isRevoked()).isTrue();
     }
 
