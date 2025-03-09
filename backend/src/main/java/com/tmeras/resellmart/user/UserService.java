@@ -7,9 +7,9 @@ import com.tmeras.resellmart.exception.OperationNotPermittedException;
 import com.tmeras.resellmart.exception.ResourceAlreadyExistsException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.file.FileService;
-import com.tmeras.resellmart.security.MfaService;
 import com.tmeras.resellmart.product.Product;
 import com.tmeras.resellmart.product.ProductRepository;
+import com.tmeras.resellmart.security.MfaService;
 import com.tmeras.resellmart.token.Token;
 import com.tmeras.resellmart.token.TokenRepository;
 import com.tmeras.resellmart.wishlist.*;
@@ -59,7 +59,7 @@ public class UserService {
 
         Page<User> users = userRepository.findAll(pageable);
         // Initialize lazy associations
-        for(User user : users)
+        for (User user : users)
             user.getRoles().size();
         List<UserResponse> userResponses = users.stream()
                 .map(userMapper::toUserResponse)
@@ -142,11 +142,11 @@ public class UserService {
         Product existingProduct = productRepository.findWithAssociationsById(cartItemRequest.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + cartItemRequest.getProductId()));
 
-        if(Objects.equals(existingProduct.getSeller().getId(), currentUser.getId()))
+        if (Objects.equals(existingProduct.getSeller().getId(), currentUser.getId()))
             throw new APIException("You cannot add your own items to your cart");
 
-        if(!existingProduct.getIsAvailable())
-            throw new APIException("Unavailable products cannot be added to the cart");
+        if (existingProduct.getIsDeleted())
+            throw new APIException("Deleted products cannot be added to the cart");
 
         if (existingProduct.getAvailableQuantity() < cartItemRequest.getQuantity())
             throw new APIException("Requested product quantity cannot be higher than available quantity");
@@ -218,11 +218,11 @@ public class UserService {
         Product existingProduct = productRepository.findWithAssociationsById(wishListItemRequest.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + wishListItemRequest.getProductId()));
 
-        if(Objects.equals(existingProduct.getSeller().getId(), currentUser.getId()))
+        if (Objects.equals(existingProduct.getSeller().getId(), currentUser.getId()))
             throw new APIException("You cannot add your own items to your wishlist");
 
-        if(!existingProduct.getIsAvailable())
-            throw new APIException("Unavailable products cannot be added to the wishlist");
+        if (existingProduct.getIsDeleted())
+            throw new APIException("Deleted products cannot be added to the wishlist");
 
         WishListItem wishListItem = new WishListItem();
         wishListItem.setProduct(existingProduct);
@@ -282,7 +282,7 @@ public class UserService {
 
         // Mark all user products as unavailable
         List<Product> userProducts = productRepository.findAllBySellerId(userId);
-        userProducts.forEach(product -> product.setIsAvailable(false));
+        userProducts.forEach(product -> product.setIsDeleted(false));
 
         productRepository.saveAll(userProducts);
     }

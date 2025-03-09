@@ -8,13 +8,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserMapper {
 
-    public User toUser(UserRequest userRequest) {
-        return User.builder()
-                .name(userRequest.getName())
-                .homeCountry(userRequest.getHomeCountry())
-                .mfaEnabled(userRequest.isMfaEnabled())
-                .build();
-    }
 
     public UserResponse toUserResponse(User user) {
         byte[] profileImage = (user.getImagePath() == null) ?
@@ -25,6 +18,7 @@ public class UserMapper {
                 .name(user.getRealName())
                 .email(user.getEmail())
                 .homeCountry(user.getHomeCountry())
+                .registeredAt(user.getRegisteredAt())
                 .mfaEnabled(user.isMfaEnabled())
                 .profileImage(profileImage)
                 .roles(user.getRoles())

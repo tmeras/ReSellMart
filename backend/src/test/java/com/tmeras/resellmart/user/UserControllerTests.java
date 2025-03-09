@@ -329,7 +329,7 @@ public class UserControllerTests {
     public void shouldEnableUserWhenValidRequest() throws Exception {
         UserEnableRequest userEnableRequest = new UserEnableRequest(true);
 
-        mockMvc.perform(patch("/api/users/" + userA.getId() + "/enabled")
+        mockMvc.perform(patch("/api/users/" + userA.getId() + "/activation")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userEnableRequest))
         ).andExpect(status().isOk());
@@ -341,7 +341,7 @@ public class UserControllerTests {
     public void shouldDisableUserWhenValidRequest() throws Exception {
         UserEnableRequest userEnableRequest = new UserEnableRequest(false);
 
-        mockMvc.perform(patch("/api/users/" + userA.getId() + "/enabled")
+        mockMvc.perform(patch("/api/users/" + userA.getId() + "/activation")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userEnableRequest))
         ).andExpect(status().isOk());

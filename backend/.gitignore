@@ -32,5 +32,6 @@ build/
 .vscode/
 
 ### File Upload Directories ###
-/uploads/
 /test-uploads/
+/uploads/product-images/
+/uploads/user-images/

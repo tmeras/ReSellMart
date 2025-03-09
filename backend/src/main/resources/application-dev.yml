@@ -9,12 +9,16 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: false
     properties:
       hibernate:
         format_sql: true
     database: mysql
+  sql:
+    init:
+      mode: always
+
   mail:
     host: localhost
     port: 1025
@@ -41,9 +45,11 @@ application:
       refresh-token:
         expiration: 604800000 # 1 week
         #expiration: 120000 # 2 minutes
+
   mailing:
     frontend:
       activation-url: "TODO" # TODO: Add activation url
+
   file:
     upload:
       product-images-path: ./uploads/product-images

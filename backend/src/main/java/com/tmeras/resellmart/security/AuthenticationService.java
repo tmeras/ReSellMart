@@ -7,6 +7,10 @@ import com.tmeras.resellmart.exception.ResourceAlreadyExistsException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
+import com.tmeras.resellmart.token.JwtService;
+import com.tmeras.resellmart.token.Token;
+import com.tmeras.resellmart.token.TokenRepository;
+import com.tmeras.resellmart.token.TokenType;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
 import io.jsonwebtoken.JwtException;
@@ -16,8 +20,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
-import org.springframework.mail.MailException;
-import org.springframework.mail.MailSendException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,14 +27,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.tmeras.resellmart.token.JwtService;
-import com.tmeras.resellmart.token.Token;
-import com.tmeras.resellmart.token.TokenRepository;
-import com.tmeras.resellmart.token.TokenType;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
@@ -73,6 +72,7 @@ public class AuthenticationService {
                 .password(passwordEncoder.encode(registrationRequest.getPassword()))
                 .roles(Set.of(userRole))
                 .homeCountry(registrationRequest.getHomeCountry())
+                .registeredAt(LocalDate.now())
                 .enabled(false)
                 .mfaEnabled(registrationRequest.isMfaEnabled())
                 .build();

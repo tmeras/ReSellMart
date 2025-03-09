@@ -378,9 +378,9 @@ public class UserControllerIT {
     }
 
     @Test
-    public void shouldNotSaveCartItemWhenProductIsUnavailable() {
+    public void shouldNotSaveCartItemWhenProductIsDeleted() {
         CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 1, userA.getId());
-        productB.setIsAvailable(false);
+        productB.setIsDeleted(true);
         productRepository.save(productB);
 
         ResponseEntity<ExceptionResponse> response =
@@ -390,7 +390,7 @@ public class UserControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage())
-                .isEqualTo("Unavailable products cannot be added to the cart");
+                .isEqualTo("Deleted products cannot be added to the cart");
     }
 
     @Test
@@ -443,6 +443,7 @@ public class UserControllerIT {
                         HttpMethod.PATCH, new HttpEntity<>(cartItemRequest, headers), CartItemResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getQuantity()).isEqualTo(2);
     }
 
@@ -601,7 +602,7 @@ public class UserControllerIT {
 
     @Test
     public void shouldNotSaveWishListItemWhenProductIsUnavailable() {
-        productB.setIsAvailable(false);
+        productB.setIsDeleted(true);
         productRepository.save(productB);
         WishListItemRequest wishListItemRequest = new WishListItemRequest(productB.getId(), userA.getId());
 
@@ -612,7 +613,7 @@ public class UserControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage())
-                .isEqualTo("Unavailable products cannot be added to the wishlist");
+                .isEqualTo("Deleted products cannot be added to the wishlist");
     }
 
     @Test
@@ -682,12 +683,12 @@ public class UserControllerIT {
                 LocalDateTime.now().plusMinutes(1), null, false, userA);
         testToken = tokenRepository.save(testToken);
 
-        ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userA.getId() + "/enabled",
+        ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userA.getId() + "/activation",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), Object.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(userRepository.findById(userA.getId()).get().isEnabled()).isFalse();
-        assertThat(productRepository.findAllBySellerId(userA.getId()).get(0).getIsAvailable()).isFalse();
+        assertThat(productRepository.findAllBySellerId(userA.getId()).get(0).getIsDeleted()).isFalse();
         assertThat(tokenRepository.findById(testToken.getId()).get().isRevoked()).isTrue();
     }
 
@@ -698,7 +699,7 @@ public class UserControllerIT {
         userA.setRoles(Set.of(userB.getRoles().stream().findFirst().get()));
         userRepository.save(userA);
 
-        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userB.getId() + "/enabled",
+        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userB.getId() + "/activation",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
@@ -711,7 +712,7 @@ public class UserControllerIT {
     public void shouldNotDisableUserWhenInvalidUserId() {
         UserEnableRequest userEnableRequest = new UserEnableRequest(false);
 
-        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + 99 + "/enabled",
+        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + 99 + "/activation",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -723,7 +724,7 @@ public class UserControllerIT {
     public void shouldNotDisableAdminUser() {
         UserEnableRequest userEnableRequest = new UserEnableRequest(false);
 
-        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userA.getId() + "/enabled",
+        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userA.getId() + "/activation",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -737,7 +738,7 @@ public class UserControllerIT {
         userB.setEnabled(false);
         userRepository.save(userB);
 
-        ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userB.getId() + "/enabled",
+        ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userB.getId() + "/activation",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), Object.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -750,7 +751,7 @@ public class UserControllerIT {
         String testJwt = jwtService.generateAccessToken(new HashMap<>(), userB);
         headers.set("Authorization", "Bearer " + testJwt);
 
-        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userA.getId() + "/enabled",
+        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userA.getId() + "/activation",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
@@ -760,7 +761,7 @@ public class UserControllerIT {
     public void shouldNotEnableUserWhenInvalidUserId() {
         UserEnableRequest userEnableRequest = new UserEnableRequest(true);
 
-        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + 99 + "/enabled",
+        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + 99 + "/activation",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);

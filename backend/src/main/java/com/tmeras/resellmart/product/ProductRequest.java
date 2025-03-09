@@ -24,10 +24,6 @@ public class ProductRequest {
     @PositiveOrZero(message = "Price must be a non-negative value")
     private Double price;
 
-    @NotNull(message = "Discounted price must not be empty")
-    @PositiveOrZero(message = "Discounted price must be a non-negative value")
-    private Double discountedPrice;
-
     @NotNull(message = "Product condition must not be empty ")
     private ProductCondition productCondition;
 
@@ -35,8 +31,7 @@ public class ProductRequest {
     @PositiveOrZero(message = "Quantity must be a non-negative value")
     private Integer availableQuantity;
 
-    @NotNull(message = "Product availability must be specified")
-    private Boolean isAvailable;
+    private Boolean isDeleted;
 
     @NotNull(message = "Category ID must not be empty")
     private Integer categoryId;

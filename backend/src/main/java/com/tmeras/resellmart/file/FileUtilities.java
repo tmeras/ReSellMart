@@ -13,6 +13,12 @@ public class FileUtilities {
         if (filePath.isBlank())
             return null;
         try {
+            // Handle OS differences
+            if (File.separatorChar == '/')
+                filePath = filePath.replace('\\', '/');
+            else if (File.separatorChar == '\\')
+                filePath = filePath.replace('/', '\\');
+
             Path path = new File(filePath).toPath();
             return Files.readAllBytes(path);
         } catch (IOException ex) {

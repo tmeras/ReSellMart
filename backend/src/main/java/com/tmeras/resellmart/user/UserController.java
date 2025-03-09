@@ -7,7 +7,6 @@ import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.wishlist.WishListItemRequest;
 import com.tmeras.resellmart.wishlist.WishListItemResponse;
 import jakarta.validation.Valid;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -134,7 +133,7 @@ public class UserController {
     }
 
 
-    @PatchMapping("/{user-id}/enabled")
+    @PatchMapping("/{user-id}/activation")
     public ResponseEntity<?> enableOrDisableUser(
             @Valid @RequestBody UserEnableRequest userEnableRequest,
             @PathVariable(name = "user-id") Integer userId,

@@ -17,7 +17,7 @@ import java.util.List;
 public class Product {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private String name;
@@ -26,16 +26,14 @@ public class Product {
 
     private Double price;
 
-    // TODO: Consider renaming to previousPrice
-    private Double discountedPrice;
+    private Double previousPrice;
 
     @Enumerated(EnumType.STRING)
     private ProductCondition productCondition;
 
     private Integer availableQuantity;
 
-    // TODO: Consider renaming to deleted;
-    private Boolean isAvailable;
+    private Boolean isDeleted;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
