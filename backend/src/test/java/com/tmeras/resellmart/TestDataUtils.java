@@ -5,9 +5,9 @@ import com.tmeras.resellmart.address.AddressRequest;
 import com.tmeras.resellmart.address.AddressResponse;
 import com.tmeras.resellmart.address.AddressType;
 import com.tmeras.resellmart.category.Category;
-import com.tmeras.resellmart.category.CategoryMapper;
 import com.tmeras.resellmart.category.CategoryRequest;
 import com.tmeras.resellmart.category.CategoryResponse;
+import com.tmeras.resellmart.order.*;
 import com.tmeras.resellmart.product.Product;
 import com.tmeras.resellmart.product.ProductCondition;
 import com.tmeras.resellmart.product.ProductRequest;
@@ -18,12 +18,14 @@ import com.tmeras.resellmart.user.UserRequest;
 import com.tmeras.resellmart.user.UserResponse;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public final class TestDataUtils {
 
-    private static CategoryMapper categoryMapper;
+    private static final LocalDateTime CURRENT_TIME = LocalDateTime.now();
 
     private TestDataUtils() {
         throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
@@ -279,4 +281,87 @@ public final class TestDataUtils {
                 .build();
     }
 
+    public static Order createOrderA(User buyer, Address address, Product orderProduct) {
+        OrderItem orderItem = OrderItem.builder()
+                .id(1)
+                .product(orderProduct)
+                .productQuantity(1)
+                .build();
+
+        return Order.builder()
+                .id(1)
+                .placedAt(CURRENT_TIME)
+                .billingAddress(address)
+                .deliveryAddress(address)
+                .paymentMethod(PaymentMethod.CASH)
+                .buyer(buyer)
+                .orderItems(List.of(orderItem))
+                .build();
+    }
+
+    public static OrderRequest createOrderRequestA(Integer addressId) {
+        return OrderRequest.builder()
+                .paymentMethod(String.valueOf(PaymentMethod.CASH))
+                .billingAddressId(addressId)
+                .deliveryAddressId(addressId)
+                .build();
+    }
+
+    public static OrderResponse createOrderResponseA(
+            AddressResponse addressResponse, UserResponse userResponse, ProductResponse productResponse
+    ) {
+        OrderItemResponse orderItemResponse = OrderItemResponse.builder()
+                .id(1)
+                .product(productResponse)
+                .productQuantity(1)
+                .build();
+
+        return OrderResponse.builder()
+                .id(1)
+                .placedAt(CURRENT_TIME)
+                .paymentMethod(PaymentMethod.CASH)
+                .deliveryAddress(addressResponse)
+                .billingAddress(addressResponse)
+                .buyer(userResponse)
+                .orderItems(List.of(orderItemResponse))
+                .build();
+    }
+
+    public static Order createOrderB(User buyer, Address address, Product orderProduct) {
+        OrderItem orderItem = OrderItem.builder()
+                .id(2)
+                .product(orderProduct)
+                .productQuantity(2)
+                .build();
+
+        return Order.builder()
+                .id(2)
+                .placedAt(CURRENT_TIME)
+                .billingAddress(address)
+                .deliveryAddress(address)
+                .paymentMethod(PaymentMethod.CARD)
+                .buyer(buyer)
+                .orderItems(List.of(orderItem))
+                .build();
+    }
+
+    public static OrderResponse createOrderResponseB(
+            AddressResponse addressResponse, UserResponse userResponse, ProductResponse productResponse
+    ) {
+        OrderItemResponse orderItemResponse = OrderItemResponse.builder()
+                .id(2)
+                .product(productResponse)
+                .productQuantity(2)
+                .build();
+
+        return OrderResponse.builder()
+                .id(2)
+                .placedAt(CURRENT_TIME)
+                .paymentMethod(PaymentMethod.CARD)
+                .deliveryAddress(addressResponse)
+                .billingAddress(addressResponse)
+                .buyer(userResponse)
+                .orderItems(List.of(orderItemResponse))
+                .build();
+    }
 }

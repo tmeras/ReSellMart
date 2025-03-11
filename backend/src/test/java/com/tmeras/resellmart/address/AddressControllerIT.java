@@ -126,6 +126,7 @@ public class AddressControllerIT {
         assertThat(response.getBody().getAddressType().toString()).isEqualTo(addressRequest.getAddressType());
         assertThat(response.getBody().isDeleted()).isFalse();
         assertThat(response.getBody().isMain()).isFalse();
+        assertThat(response.getBody().getUserId()).isEqualTo(addressA.getUser().getId());
     }
 
     @Test
