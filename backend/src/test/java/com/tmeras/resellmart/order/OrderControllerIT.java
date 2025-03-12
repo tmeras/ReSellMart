@@ -7,6 +7,7 @@ import com.tmeras.resellmart.cart.CartItem;
 import com.tmeras.resellmart.cart.CartItemRepository;
 import com.tmeras.resellmart.category.Category;
 import com.tmeras.resellmart.category.CategoryRepository;
+import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.ExceptionResponse;
 import com.tmeras.resellmart.product.Product;
 import com.tmeras.resellmart.product.ProductCondition;
@@ -52,14 +53,13 @@ public class OrderControllerIT {
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
-    private OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
 
     // Used to add JWT in requests
     private HttpHeaders headers;
 
     private Order orderA;
     private Order orderB;
-    private OrderRequest orderRequestA;
 
     @Autowired
     public OrderControllerIT(
@@ -289,7 +289,7 @@ public class OrderControllerIT {
                 .quantity(99)
                 .user(orderA.getBuyer())
                 .build();
-        cartItem = cartItemRepository.save(cartItem);
+        cartItemRepository.save(cartItem);
 
         OrderRequest orderRequest = OrderRequest.builder()
                 .paymentMethod("CASH")
@@ -306,5 +306,57 @@ public class OrderControllerIT {
         assertThat(response.getBody().getMessage())
                 .isEqualTo("Requested quantity of product with ID " + orderProduct.getId() +
                         " cannot be larger than available quantity");
+    }
+
+    @Test
+    public void shouldFindAllOrdersWhenValidRequest() {
+        ResponseEntity<PageResponse<OrderResponse>> response =
+                restTemplate.exchange("/api/orders", HttpMethod.GET,
+                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
+                        });
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getContent()).hasSize(2);
+        assertThat(response.getBody().getContent().get(0).getId()).isEqualTo(orderA.getId());
+        assertThat(response.getBody().getContent().get(1).getId()).isEqualTo(orderB.getId());
+    }
+
+    @Test
+    public void shouldNotFindAllOrdersWhenNonAdminUser() {
+        String testJwt = jwtService.generateAccessToken(new HashMap<>(), orderB.getBuyer());
+        headers.set("Authorization", "Bearer " + testJwt);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/orders", HttpMethod.GET,
+                        new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    public void shouldFindAllOrdersByBuyerIdWhenValidRequest() {
+        ResponseEntity<PageResponse<OrderResponse>> response =
+                restTemplate.exchange("/api/users/" + orderA.getBuyer().getId() + "/orders", HttpMethod.GET,
+                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
+                        });
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getContent()).hasSize(1);
+        assertThat(response.getBody().getContent().get(0).getId()).isEqualTo(orderA.getId());
+    }
+
+    @Test
+    public void shouldNotFindAllOrdersByBuyerIdWhenBuyerIsNotLoggedIn() {
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/users/" + orderB.getBuyer().getId() + "/orders", HttpMethod.GET,
+                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
+                        });
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("You do not have permission to view the orders of this user");
     }
 }
