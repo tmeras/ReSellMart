@@ -20,7 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.org.checkerframework.checker.units.qual.C;
 
 import java.util.HashMap;
 import java.util.List;
@@ -272,6 +271,7 @@ class CategoryControllerIT {
                         new HttpEntity<>(headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(categoryRepository.findById(childCategory.getId())).isEmpty();
     }
 
     @Test

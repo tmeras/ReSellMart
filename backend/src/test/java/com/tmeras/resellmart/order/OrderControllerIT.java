@@ -359,4 +359,26 @@ public class OrderControllerIT {
         assertThat(response.getBody().getMessage())
                 .isEqualTo("You do not have permission to view the orders of this user");
     }
+
+    @Test
+    public void shouldDeleteOrderWhenValidRequest() {
+        ResponseEntity<?> response =
+                restTemplate.exchange("/api/orders/" + orderA.getId(), HttpMethod.DELETE,
+                        new HttpEntity<>(headers), Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(orderRepository.findById(orderA.getId())).isEmpty();
+    }
+
+    @Test
+    public void shouldNotDeleteOrderWhenNonAdminUser() {
+        String testJwt = jwtService.generateAccessToken(new HashMap<>(), orderB.getBuyer());
+        headers.set("Authorization", "Bearer " + testJwt);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/orders/" + orderA.getId(), HttpMethod.DELETE,
+                        new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
 }
