@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tmeras.resellmart.TestDataUtils;
 import com.tmeras.resellmart.address.AddressResponse;
 import com.tmeras.resellmart.category.CategoryResponse;
+import com.tmeras.resellmart.common.AppConstants;
+import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.configuration.TestConfig;
 import com.tmeras.resellmart.product.ProductResponse;
 import com.tmeras.resellmart.role.Role;
@@ -24,12 +26,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -108,5 +113,48 @@ public class OrderControllerTests {
         assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(expectedErrors));
     }
 
+    @Test
+    public void shouldFindAllOrders() throws Exception {
+        PageResponse<OrderResponse> pageResponse = new PageResponse<>(
+                List.of(orderResponseA, orderResponseB),
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                2, 1,
+                true, true
+        );
 
+        when(orderService.findAll(
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                AppConstants.SORT_ORDERS_BY, AppConstants.SORT_DIR
+        )).thenReturn(pageResponse);
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/orders"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(pageResponse));
+    }
+
+    @Test
+    public void shouldFindAllOrdersByBuyerId() throws Exception {
+        PageResponse<OrderResponse> pageResponse = new PageResponse<>(
+                List.of(orderResponseA),
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                1, 1,
+                true, true
+        );
+
+        when(orderService.findAllByBuyerId(
+                eq(AppConstants.PAGE_NUMBER_INT), eq(AppConstants.PAGE_SIZE_INT),
+                eq(AppConstants.SORT_ORDERS_BY), eq(AppConstants.SORT_DIR),
+                eq(orderResponseA.getBuyer().getId()), any(Authentication.class)
+        )).thenReturn(pageResponse);
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/users/" + orderResponseA.getBuyer().getId() + "/orders"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(pageResponse));
+    }
 }

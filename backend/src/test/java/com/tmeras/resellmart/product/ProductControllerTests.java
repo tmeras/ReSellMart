@@ -267,7 +267,7 @@ public class ProductControllerTests {
                         false
                 ),
                 new ProductImageResponse(
-                        1,
+                        2,
                         Files.readAllBytes(TEST_IMAGE_PATH_2),
                         false
                 )
@@ -288,7 +288,7 @@ public class ProductControllerTests {
     }
 
     @Test
-    public void shouldDisplayImageWhen() throws Exception {
+    public void shouldDisplayImage() throws Exception {
         productResponseA.setImages(List.of(
                 new ProductImageResponse(
                         1,
