@@ -107,10 +107,10 @@ public class OrderControllerIT {
         userB = userRepository.save(userB);
 
         Category category = categoryRepository.save(Category.builder().name("category").build());
-        Product productA = TestDataUtils.createProductA(category, userA);
+        Product productA = TestDataUtils.createProductA(category, userB);
         productA.setId(null);
         productA = productRepository.save(productA);
-        Product productB = TestDataUtils.createProductB(category, userB);
+        Product productB = TestDataUtils.createProductB(category, userA);
         productB.setId(null);
         productB = productRepository.save(productB);
 
