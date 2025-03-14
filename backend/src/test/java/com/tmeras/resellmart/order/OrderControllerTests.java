@@ -33,9 +33,8 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(
@@ -156,5 +155,13 @@ public class OrderControllerTests {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
 
         assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(pageResponse));
+    }
+
+    @Test
+    public void shouldDeleteOrder() throws Exception {
+        mockMvc.perform(delete("/api/orders/" + orderResponseA.getId()))
+                .andExpect(status().isNoContent());
+
+        verify(orderService, times(1)).delete(orderResponseA.getId());
     }
 }
