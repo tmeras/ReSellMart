@@ -73,7 +73,7 @@ public class OrderService {
             // Reduce product's available quantity by the requested quantity
             Product cartProduct = cartItem.getProduct();
             if (cartProduct.getAvailableQuantity() < cartItem.getQuantity())
-                throw new APIException("Requested quantity of product with ID " + cartProduct.getId() + " cannot be larger than available quantity");
+                throw new APIException("Requested quantity of product with ID '" + cartProduct.getId() + "' cannot be larger than available quantity");
             cartProduct.setAvailableQuantity(cartProduct.getAvailableQuantity() - cartItem.getQuantity());
             cartProducts.add(cartProduct);
 

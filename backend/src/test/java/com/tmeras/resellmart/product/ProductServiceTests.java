@@ -70,6 +70,7 @@ public class ProductServiceTests {
     private ProductRequest productRequestA;
     private ProductResponse productResponseA;
     private ProductResponse productResponseB;
+    private User userA;
     private Authentication authentication;
 
     @BeforeEach
@@ -77,7 +78,7 @@ public class ProductServiceTests {
         // Initialise test objects
         Role adminRole = new Role(1, "ADMIN");
         Role userRole = new Role(2, "USER");
-        User userA = TestDataUtils.createUserA(Set.of(adminRole));
+        userA = TestDataUtils.createUserA(Set.of(adminRole));
         User userB = TestDataUtils.createUserB(Set.of(userRole));
         UserResponse userResponseA = TestDataUtils.createUserResponseA(Set.of(adminRole));
         UserResponse userResponseB = TestDataUtils.createUserResponseB(Set.of(userRole));
@@ -97,8 +98,7 @@ public class ProductServiceTests {
 
     @Test
     public void shouldSaveProductWhenValidRequest() {
-        when(userRepository.findWithAssociationsById(productRequestA.getId()))
-                .thenReturn(Optional.of(productA.getSeller()));
+        when(userRepository.findWithAssociationsById(userA.getId())).thenReturn(Optional.of(userA));
         when(categoryRepository.findWithAssociationsById(productRequestA.getCategoryId()))
                 .thenReturn(Optional.of(productA.getCategory()));
         when(productMapper.toProduct(productRequestA)).thenReturn(productA);
@@ -114,8 +114,7 @@ public class ProductServiceTests {
     public void shouldNotSaveProductWhenInvalidCategoryId() {
         productRequestA.setCategoryId(99);
 
-        when(userRepository.findWithAssociationsById(productRequestA.getId()))
-                .thenReturn(Optional.of(productA.getSeller()));
+        when(userRepository.findWithAssociationsById(userA.getId())).thenReturn(Optional.of(userA));
         when(categoryRepository.findWithAssociationsById(productRequestA.getCategoryId()))
                 .thenReturn(Optional.empty());
 
@@ -128,8 +127,7 @@ public class ProductServiceTests {
     public void shouldNotSaveProductWhenInvalidQuantity() {
         productRequestA.setAvailableQuantity(0);
 
-        when(userRepository.findWithAssociationsById(productRequestA.getId()))
-                .thenReturn(Optional.of(productA.getSeller()));
+        when(userRepository.findWithAssociationsById(userA.getId())).thenReturn(Optional.of(userA));
         when(categoryRepository.findWithAssociationsById(productRequestA.getCategoryId()))
                 .thenReturn(Optional.of(productA.getCategory()));
 
