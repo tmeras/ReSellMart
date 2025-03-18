@@ -304,8 +304,8 @@ public class OrderControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage())
-                .isEqualTo("Requested quantity of product with ID " + orderProduct.getId() +
-                        " cannot be larger than available quantity");
+                .isEqualTo("Requested quantity of product with ID '" + orderProduct.getId() +
+                        "' cannot be larger than available quantity");
     }
 
     @Test

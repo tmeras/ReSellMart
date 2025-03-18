@@ -111,7 +111,6 @@ public class OrderService {
             order.getOrderItems().size();
             order.getBuyer().getRoles().size();
             for (OrderItem orderItem : order.getOrderItems()) {
-                // TODO: Investigate if any initialisations can be avoided
                 orderItem.getProduct().getSeller().getRoles().size();
                 orderItem.getProduct().getImages().size();
             }

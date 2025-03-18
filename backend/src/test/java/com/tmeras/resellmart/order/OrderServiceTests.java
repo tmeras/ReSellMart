@@ -8,8 +8,11 @@ import com.tmeras.resellmart.cart.CartItem;
 import com.tmeras.resellmart.cart.CartItemRepository;
 import com.tmeras.resellmart.category.Category;
 import com.tmeras.resellmart.category.CategoryResponse;
+import com.tmeras.resellmart.common.AppConstants;
+import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.email.EmailService;
 import com.tmeras.resellmart.exception.APIException;
+import com.tmeras.resellmart.exception.OperationNotPermittedException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.product.Product;
 import com.tmeras.resellmart.product.ProductRepository;
@@ -25,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
@@ -206,5 +210,59 @@ public class OrderServiceTests {
                         "' cannot be larger than available quantity");
     }
 
+    @Test
+    public void shouldFindAllOrders() {
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_ORDERS_BY).ascending() : Sort.by(AppConstants.SORT_ORDERS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
+        Page<Order> page = new PageImpl<>(List.of(orderA, orderB));
 
+        when(orderRepository.findAll(pageable)).thenReturn(page);
+        when(orderMapper.toOrderResponse(orderA)).thenReturn(orderResponseA);
+        when(orderMapper.toOrderResponse(orderB)).thenReturn(orderResponseB);
+
+        PageResponse<OrderResponse> pageResponse =
+                orderService.findAll(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_ORDERS_BY, AppConstants.SORT_DIR);
+
+        assertThat(pageResponse.getContent()).isNotNull();
+        assertThat(pageResponse.getTotalElements()).isEqualTo(2);
+        assertThat(pageResponse.getContent().get(0)).isEqualTo(orderResponseA);
+        assertThat(pageResponse.getContent().get(1)).isEqualTo(orderResponseB);
+    }
+
+    @Test
+    public void shouldFindAllOrdersByBuyerIdWhenValidRequest() {
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_ORDERS_BY).ascending() : Sort.by(AppConstants.SORT_ORDERS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
+        Page<Order> page = new PageImpl<>(List.of(orderA));
+
+        when(orderRepository.findAllByBuyerId(pageable, userA.getId())).thenReturn(page);
+        when(orderMapper.toOrderResponse(orderA)).thenReturn(orderResponseA);
+
+        PageResponse<OrderResponse> pageResponse =
+                orderService.findAllByBuyerId(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_ORDERS_BY, AppConstants.SORT_DIR, userA.getId(), authentication);
+
+        assertThat(pageResponse.getContent()).isNotNull();
+        assertThat(pageResponse.getTotalElements()).isEqualTo(1);
+        assertThat(pageResponse.getContent().get(0)).isEqualTo(orderResponseA);
+    }
+
+    @Test
+    public void shouldNotFindAllOrdersByBuyerIdWhenBuyerIsNotLoggedIn() {
+        assertThatThrownBy(
+                () -> orderService.findAllByBuyerId(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_ORDERS_BY, AppConstants.SORT_DIR, orderB.getBuyer().getId(), authentication)
+        ).isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to view the orders of this user");
+    }
+
+    @Test
+    public void shouldDeleteOrder() {
+        orderService.delete(orderA.getId());
+
+        verify(orderRepository, times(1)).deleteById(orderA.getId());
+    }
 }
