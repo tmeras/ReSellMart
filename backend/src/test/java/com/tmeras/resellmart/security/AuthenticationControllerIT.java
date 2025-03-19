@@ -377,5 +377,4 @@ public class AuthenticationControllerIT {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage()).isEqualTo("Invalid refresh token");
     }
-
 }

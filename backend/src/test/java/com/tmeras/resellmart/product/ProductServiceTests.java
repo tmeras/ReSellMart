@@ -70,6 +70,7 @@ public class ProductServiceTests {
     private ProductRequest productRequestA;
     private ProductResponse productResponseA;
     private ProductResponse productResponseB;
+    private User userA;
     private Authentication authentication;
 
     @BeforeEach
@@ -77,7 +78,7 @@ public class ProductServiceTests {
         // Initialise test objects
         Role adminRole = new Role(1, "ADMIN");
         Role userRole = new Role(2, "USER");
-        User userA = TestDataUtils.createUserA(Set.of(adminRole));
+        userA = TestDataUtils.createUserA(Set.of(adminRole));
         User userB = TestDataUtils.createUserB(Set.of(userRole));
         UserResponse userResponseA = TestDataUtils.createUserResponseA(Set.of(adminRole));
         UserResponse userResponseB = TestDataUtils.createUserResponseB(Set.of(userRole));
@@ -97,8 +98,7 @@ public class ProductServiceTests {
 
     @Test
     public void shouldSaveProductWhenValidRequest() {
-        when(userRepository.findWithAssociationsById(productRequestA.getId()))
-                .thenReturn(Optional.of(productA.getSeller()));
+        when(userRepository.findWithAssociationsById(userA.getId())).thenReturn(Optional.of(userA));
         when(categoryRepository.findWithAssociationsById(productRequestA.getCategoryId()))
                 .thenReturn(Optional.of(productA.getCategory()));
         when(productMapper.toProduct(productRequestA)).thenReturn(productA);
@@ -114,8 +114,7 @@ public class ProductServiceTests {
     public void shouldNotSaveProductWhenInvalidCategoryId() {
         productRequestA.setCategoryId(99);
 
-        when(userRepository.findWithAssociationsById(productRequestA.getId()))
-                .thenReturn(Optional.of(productA.getSeller()));
+        when(userRepository.findWithAssociationsById(userA.getId())).thenReturn(Optional.of(userA));
         when(categoryRepository.findWithAssociationsById(productRequestA.getCategoryId()))
                 .thenReturn(Optional.empty());
 
@@ -128,8 +127,7 @@ public class ProductServiceTests {
     public void shouldNotSaveProductWhenInvalidQuantity() {
         productRequestA.setAvailableQuantity(0);
 
-        when(userRepository.findWithAssociationsById(productRequestA.getId()))
-                .thenReturn(Optional.of(productA.getSeller()));
+        when(userRepository.findWithAssociationsById(userA.getId())).thenReturn(Optional.of(userA));
         when(categoryRepository.findWithAssociationsById(productRequestA.getCategoryId()))
                 .thenReturn(Optional.of(productA.getCategory()));
 
@@ -140,7 +138,7 @@ public class ProductServiceTests {
 
     @Test
     public void shouldFindProductByIdWhenValidProductId() {
-        when(productRepository.findWithAssociationsById(productRequestA.getId())).thenReturn(Optional.of(productA));
+        when(productRepository.findWithAssociationsById(productA.getId())).thenReturn(Optional.of(productA));
         when(productMapper.toProductResponse(productA)).thenReturn(productResponseA);
 
         ProductResponse productResponse = productService.findById(productRequestA.getId());
@@ -256,9 +254,9 @@ public class ProductServiceTests {
         productResponseA.setName("Updated product name");
         productResponseA.setDescription("Updated product description");
 
-        when(categoryRepository.findWithAssociationsById(productRequestA.getCategoryId()))
+        when(categoryRepository.findWithAssociationsById(productA.getCategory().getId()))
                 .thenReturn(Optional.ofNullable(productA.getCategory()));
-        when(productRepository.findWithAssociationsById(productRequestA.getId()))
+        when(productRepository.findWithAssociationsById(productA.getId()))
                 .thenReturn(Optional.ofNullable(productA));
         when(productRepository.save(productA)).thenReturn(productA);
         when(productMapper.toProductResponse(productA)).thenReturn(productResponseA);
@@ -283,7 +281,7 @@ public class ProductServiceTests {
 
     @Test
     public void shouldNotUpdateProductWhenInvalidProductId() {
-        when(categoryRepository.findWithAssociationsById(productRequestA.getCategoryId()))
+        when(categoryRepository.findWithAssociationsById(productA.getCategory().getId()))
                 .thenReturn(Optional.ofNullable(productA.getCategory()));
         when(productRepository.findWithAssociationsById(99)).thenReturn(Optional.empty());
 
@@ -300,9 +298,9 @@ public class ProductServiceTests {
                 productB.getSeller().getAuthorities()
         );
 
-        when(categoryRepository.findWithAssociationsById(productRequestA.getCategoryId()))
+        when(categoryRepository.findWithAssociationsById(productA.getCategory().getId()))
                 .thenReturn(Optional.ofNullable(productA.getCategory()));
-        when(productRepository.findWithAssociationsById(productRequestA.getId())).thenReturn(Optional.ofNullable(productA));
+        when(productRepository.findWithAssociationsById(productA.getId())).thenReturn(Optional.ofNullable(productA));
 
         assertThatThrownBy(() -> productService.update(productRequestA, productRequestA.getId(), authentication))
                 .isInstanceOf(OperationNotPermittedException.class)
@@ -325,9 +323,9 @@ public class ProductServiceTests {
                 )
         ));
 
-        when(productRepository.findWithAssociationsById(productRequestA.getId())).thenReturn(Optional.of(productA));
+        when(productRepository.findWithAssociationsById(productA.getId())).thenReturn(Optional.of(productA));
         when(fileService.getFileExtension("test_image_1.jpeg")).thenReturn("jpeg");
-        when(fileService.saveProductImages(images, productRequestA.getId()))
+        when(fileService.saveProductImages(images, productA.getId()))
                 .thenReturn(List.of("/uploads/test_image_1.jpeg"));
         when(productRepository.save(productA)).thenReturn(productA);
         when(productMapper.toProductResponse(productA)).thenReturn(productResponseA);
@@ -370,9 +368,9 @@ public class ProductServiceTests {
                 productB.getSeller().getAuthorities()
         );
 
-        when(productRepository.findWithAssociationsById(productRequestA.getId())).thenReturn(Optional.of(productA));
+        when(productRepository.findWithAssociationsById(productA.getId())).thenReturn(Optional.of(productA));
 
-        assertThatThrownBy(() -> productService.uploadProductImages(images, productRequestA.getId(), authentication))
+        assertThatThrownBy(() -> productService.uploadProductImages(images, productA.getId(), authentication))
                 .isInstanceOf(OperationNotPermittedException.class)
                 .hasMessage("You do not have permission to upload images for this product");
     }
@@ -406,9 +404,9 @@ public class ProductServiceTests {
                 )
         );
 
-        when(productRepository.findWithAssociationsById(productRequestA.getId())).thenReturn(Optional.of(productA));
+        when(productRepository.findWithAssociationsById(productA.getId())).thenReturn(Optional.of(productA));
 
-        assertThatThrownBy(() -> productService.uploadProductImages(images, productRequestA.getId(), authentication))
+        assertThatThrownBy(() -> productService.uploadProductImages(images, productA.getId(), authentication))
                 .isInstanceOf(APIException.class)
                 .hasMessage("Maximum 5 images can be uploaded");
     }
@@ -422,10 +420,10 @@ public class ProductServiceTests {
                 )
         );
 
-        when(productRepository.findWithAssociationsById(productRequestA.getId())).thenReturn(Optional.of(productA));
+        when(productRepository.findWithAssociationsById(productA.getId())).thenReturn(Optional.of(productA));
         when(fileService.getFileExtension("test_file.txt")).thenReturn("txt");
 
-        assertThatThrownBy(() -> productService.uploadProductImages(images, productRequestA.getId(), authentication))
+        assertThatThrownBy(() -> productService.uploadProductImages(images, productA.getId(), authentication))
                 .isInstanceOf(APIException.class)
                 .hasMessage("Only images can be uploaded");
     }
@@ -448,13 +446,13 @@ public class ProductServiceTests {
         ProductImage productImageB = new ProductImage(2, "/uploads/test_image_2.jpeg", true);
         productA.getImages().addAll(List.of(productImageA, productImageB));
 
-        when(productRepository.findWithAssociationsById(productRequestA.getId())).thenReturn(Optional.of(productA));
+        when(productRepository.findWithAssociationsById(productA.getId())).thenReturn(Optional.of(productA));
         when(productImageRepository.findById(productImageA.getId())).thenReturn(Optional.of(productImageA));
         when(productRepository.save(productA)).thenReturn(productA);
         when(productMapper.toProductResponse(productA)).thenReturn(productResponseA);
 
         ProductResponse productResponse =
-                productService.displayImage(productRequestA.getId(), productImageA.getId(), authentication);
+                productService.displayImage(productA.getId(), productImageA.getId(), authentication);
 
         assertThat(productResponse).isEqualTo(productResponseA);
         assertThat(productA.getImages().get(0).isDisplayed()).isTrue();
@@ -472,10 +470,10 @@ public class ProductServiceTests {
 
     @Test
     public void shouldNotDisplayImageWhenInvalidImageId() {
-        when(productRepository.findWithAssociationsById(productRequestA.getId())).thenReturn(Optional.of(productA));
+        when(productRepository.findWithAssociationsById(productA.getId())).thenReturn(Optional.of(productA));
         when(productImageRepository.findById(99)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> productService.displayImage(productRequestA.getId(), 99, authentication))
+        assertThatThrownBy(() -> productService.displayImage(productA.getId(), 99, authentication))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("No product image found with ID: 99");
     }
@@ -486,7 +484,7 @@ public class ProductServiceTests {
         ProductImage productImageB = new ProductImage(2, "/uploads/test_image_2.jpeg", true);
         productB.getImages().addAll(List.of(productImageA, productImageB));
 
-        when(productRepository.findWithAssociationsById(productRequestA.getId())).thenReturn(Optional.of(productA));
+        when(productRepository.findWithAssociationsById(productA.getId())).thenReturn(Optional.of(productA));
         when(productImageRepository.findById(productImageA.getId())).thenReturn(Optional.of(productImageA));
 
         assertThatThrownBy(() -> productService.displayImage(productB.getId(), productImageA.getId(), authentication))
@@ -505,10 +503,10 @@ public class ProductServiceTests {
                 productB.getSeller().getAuthorities()
         );
 
-        when(productRepository.findWithAssociationsById(productRequestA.getId())).thenReturn(Optional.of(productA));
+        when(productRepository.findWithAssociationsById(productA.getId())).thenReturn(Optional.of(productA));
         when(productImageRepository.findById(productImageA.getId())).thenReturn(Optional.of(productImageA));
 
-        assertThatThrownBy(() -> productService.displayImage(productRequestA.getId(), productImageA.getId(), authentication))
+        assertThatThrownBy(() -> productService.displayImage(productA.getId(), productImageA.getId(), authentication))
                 .isInstanceOf(OperationNotPermittedException.class)
                 .hasMessage("You do not have permission to manage images for this product");
     }
@@ -518,11 +516,11 @@ public class ProductServiceTests {
         ProductImage productImageA = new ProductImage(1, "/uploads/test_image_1.jpeg", false);
         productA.getImages().add(productImageA);
 
-        when(productRepository.findWithImagesById(productRequestA.getId())).thenReturn(Optional.of(productA));
+        when(productRepository.findWithImagesById(productA.getId())).thenReturn(Optional.of(productA));
 
-        productService.delete(productRequestA.getId());
+        productService.delete(productA.getId());
 
-        verify(productRepository, times(1)).deleteById(productRequestA.getId());
+        verify(productRepository, times(1)).deleteById(productA.getId());
         verify(fileService, times(1)).deleteFile(productImageA.getFilePath());
     }
 }

@@ -8,7 +8,6 @@ import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
-import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +24,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class AddressServiceTests {
@@ -47,15 +46,15 @@ public class AddressServiceTests {
     private AddressRequest addressRequestA;
     private AddressResponse addressResponseA;
     private AddressResponse addressResponseB;
+    private User userA;
     private Authentication authentication;
-
 
     @BeforeEach
     public void setUp() {
         // Initialise test objects
         Role adminRole = new Role(1, "ADMIN");
         Role userRole = new Role(2, "USER");
-        User userA = TestDataUtils.createUserA(Set.of(adminRole));
+        userA = TestDataUtils.createUserA(Set.of(adminRole));
         User userB = TestDataUtils.createUserB(Set.of(userRole));
 
         addressA = TestDataUtils.createAddressA(userA);
@@ -71,7 +70,7 @@ public class AddressServiceTests {
 
     @Test
     public void shouldSaveAddress() {
-        when(userRepository.findById(addressA.getUser().getId())).thenReturn(Optional.of(addressA.getUser()));
+        when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
         when(addressMapper.toAddress(addressRequestA)).thenReturn(addressA);
         when(addressRepository.findAllNonDeletedWithAssociationsByUserId(addressA.getUser().getId()))
                 .thenReturn(List.of());

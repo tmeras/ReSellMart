@@ -48,6 +48,7 @@ public class Order {
     public Double getTotalPrice() {
         Double totalPrice = 0.0;
 
+        // TODO: Fix by multiplying bu quantity
         for (OrderItem orderItem : orderItems)
             totalPrice += orderItem.getProduct().getPrice();
 

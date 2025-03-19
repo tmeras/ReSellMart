@@ -564,6 +564,7 @@ public class ProductControllerIT {
                         new HttpEntity<>(headers), Object.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(productRepository.findById(productA.getId())).isEmpty();
     }
 
     @Test

@@ -10,9 +10,9 @@ import lombok.*;
 @Builder
 public class OrderItemResponse {
 
-    public Integer id;
+    private Integer id;
 
-    public ProductResponse product;
+    private ProductResponse product;
 
     private Integer productQuantity;
 }
