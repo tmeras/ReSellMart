@@ -4,6 +4,11 @@ export type AuthenticationResponse = {
     qrImageUri?: string;
 }
 
+export type RegistrationResponse = {
+    mfaEnabled: boolean;
+    qrImageUri?: string;
+}
+
 export type Role = {
     id: number;
     name: string;
