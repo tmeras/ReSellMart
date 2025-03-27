@@ -1,5 +1,5 @@
-import { RegisterForm } from "../../features/auth/components/RegisterForm.tsx";
+import { RegistrationForm } from "../../features/auth/components/RegistrationForm.tsx";
 
 export const RegisterPage = () => {
-    return <RegisterForm/>
+    return <RegistrationForm/>
 }

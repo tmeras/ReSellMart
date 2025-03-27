@@ -1,7 +1,6 @@
 export type AuthenticationResponse = {
     accessToken: string;
     mfaEnabled: boolean;
-    qrImageUri?: string;
 }
 
 export type RegistrationResponse = {

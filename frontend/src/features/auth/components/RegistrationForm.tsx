@@ -11,7 +11,7 @@ import { RegistrationResponse } from "../../../types/api.tsx";
 import axios from "axios";
 import { notifications } from "@mantine/notifications";
 
-export const RegisterForm = () => {
+export const RegistrationForm = () => {
     const [password, setPassword] = useState("");
     const [formComplete, setFormComplete] = useState(false);
     const [qrImageUri, setQrImageUri] = useState("");
@@ -60,6 +60,7 @@ export const RegisterForm = () => {
                 setQrImageUri(response.data.qrImageUri!)
 
             setFormComplete(true)
+
         } catch (error) {
             console.log("Registration error", error);
 
@@ -67,10 +68,8 @@ export const RegisterForm = () => {
                 form.setFieldError("email", "An account has already been created using this email")
             } else {
                 notifications.show({
-                    title: "Something went wrong",
-                    message: "Please retry registration",
-                    color: "red",
-                    icon: <IconX/>
+                    title: "Something went wrong", message: "Please retry registration",
+                    color: "red", icon: <IconX/>, withBorder: true
                 })
             }
         }
@@ -118,7 +117,7 @@ export const RegisterForm = () => {
                     </Paper>
                 </Container>
             </Flex>
-        )
+        );
 
     return (
         <Flex justify="center" align="center" h="100vh">
@@ -189,5 +188,5 @@ export const RegisterForm = () => {
                 </Paper>
             </Container>
         </Flex>
-    )
+    );
 }
