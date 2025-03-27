@@ -64,9 +64,8 @@ export function LoginForm() {
                 return;
             }
 
-            console.log("login result", response.data)
-            handleLoginSuccess(response.data)
-
+            console.log("login result", response.data);
+            handleLoginSuccess(response.data);
         } catch (error) {
             console.log("Login error", error);
 
@@ -76,7 +75,7 @@ export function LoginForm() {
                 notifications.show({
                     title: "Bad credentials", message: "Invalid email or password",
                     color: "red", icon: <IconX/>, withBorder: true
-                })
+                });
             } else if (axios.isAxiosError(error) && error.response?.status === 403 &&
                 error.response?.data.message === "User is disabled"
             ) {
@@ -84,12 +83,12 @@ export function LoginForm() {
                     title: "Account disabled",
                     message: "Please access the activation email sent to your address to activate your account",
                     color: "red", icon: <IconX/>, withBorder: true
-                })
+                });
             } else {
                 notifications.show({
                     title: "Something went wrong", message: "Please retry login",
                     color: "red", icon: <IconX/>, withBorder: true
-                })
+                });
             }
         }
     }
@@ -108,7 +107,6 @@ export function LoginForm() {
         try {
             const response = await api.post("api/auth/verification", data);
             handleLoginSuccess(response.data);
-
         } catch (error) {
             console.log("OTP error", error);
 
@@ -119,12 +117,12 @@ export function LoginForm() {
                 notifications.show({
                     title: "Bad credentials", message: "OTP is invalid",
                     color: "red", icon: <IconX/>, withBorder: true
-                })
+                });
             } else {
                 notifications.show({
                     title: "Something went wrong", message: "Please retry login",
                     color: "red", icon: <IconX/>, withBorder: true
-                })
+                });
             }
         }
     }
@@ -159,7 +157,6 @@ export function LoginForm() {
 
 
     // TODO: Remember me....with rememberMe auth context state?
-    // TODO: Activation page
     return (
         <Flex justify="center" align="center" h="100vh">
             <Container size={ 420 }>

@@ -2,6 +2,7 @@ export const paths = {
     auth: {
         login: "/auth/login",
         register: "/auth/register",
+        activation: "/auth/activation",
     },
 
     app: {

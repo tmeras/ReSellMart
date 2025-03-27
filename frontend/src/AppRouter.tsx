@@ -6,7 +6,8 @@ import { ProtectedRoute } from "./components/ProtectedRoute.tsx";
 import { paths } from "./config/paths.ts";
 import { AuthLayout } from "./components/layouts/AuthLayout.tsx";
 import { useMemo } from "react";
-import { RegisterPage } from "./pages/auth/RegistrationPage.tsx";
+import { RegistrationPage } from "./pages/auth/RegistrationPage.tsx";
+import { ActivationPage } from "./pages/auth/ActivationPage.tsx";
 
 const createAppRouter = () =>
     createBrowserRouter([
@@ -19,7 +20,11 @@ const createAppRouter = () =>
                 },
                 {
                     path: paths.auth.register,
-                    element: <RegisterPage/>
+                    element: <RegistrationPage/>
+                },
+                {
+                    path: paths.auth.activation,
+                    element: <ActivationPage/>
                 }
             ]
         },

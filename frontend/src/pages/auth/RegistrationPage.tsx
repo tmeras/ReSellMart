@@ -1,5 +1,6 @@
 import { RegistrationForm } from "../../features/auth/components/RegistrationForm.tsx";
 
-export const RegisterPage = () => {
+export function RegistrationPage() {
+
     return <RegistrationForm/>
 }

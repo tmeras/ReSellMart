@@ -19,7 +19,7 @@ export const RegistrationForm = () => {
     const countries = useMemo(() => {
         const countries = Country.getAllCountries()
         return countries.map((country) => country.name)
-    }, [])
+    }, []);
 
     const registerInputSchema = z.object({
         name: z.string().min(1, "Name is required"),
@@ -46,31 +46,30 @@ export const RegistrationForm = () => {
         validate: zodResolver(registerInputSchema),
         onValuesChange: (values) => {
             setPassword(values.password);
-            console.log("form state: ", values)
+            console.log("form state: ", values);
         },
     })
 
     const handleSubmit = async (values: typeof form.values) => {
         try {
             const response =
-                await api.post<RegistrationResponse>("api/auth/registration", values)
-            console.log("Registration result", response.data)
+                await api.post<RegistrationResponse>("api/auth/registration", values);
+            console.log("Registration result", response.data);
 
             if (response.data.mfaEnabled)
-                setQrImageUri(response.data.qrImageUri!)
+                setQrImageUri(response.data.qrImageUri!);
 
-            setFormComplete(true)
-
+            setFormComplete(true);
         } catch (error) {
             console.log("Registration error", error);
 
             if (axios.isAxiosError(error) && error.response?.status === 409) {
-                form.setFieldError("email", "An account has already been created using this email")
+                form.setFieldError("email", "An account has already been created using this email");
             } else {
                 notifications.show({
                     title: "Something went wrong", message: "Please retry registration",
                     color: "red", icon: <IconX/>, withBorder: true
-                })
+                });
             }
         }
     }
