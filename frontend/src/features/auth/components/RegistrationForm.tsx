@@ -1,4 +1,17 @@
-import { Anchor, Button, Container, Flex, Image, Paper, Select, Switch, Text, TextInput, Title } from "@mantine/core";
+import {
+    Anchor,
+    Button,
+    Container,
+    Flex,
+    Image,
+    Paper,
+    PasswordInput,
+    Select,
+    Switch,
+    Text,
+    TextInput,
+    Title
+} from "@mantine/core";
 import { z } from "zod";
 import { Country } from "country-state-city";
 import { useMemo, useState } from "react";
@@ -40,18 +53,25 @@ export const RegistrationForm = () => {
             name: "",
             email: "",
             password: "",
+            confirmPassword: "",
             homeCountry: "",
             mfaEnabled: false,
         },
         validate: zodResolver(registerInputSchema),
         onValuesChange: (values) => {
             setPassword(values.password);
-            console.log("form state: ", values);
+            console.log("Form state: ", values);
         },
     })
 
     const handleSubmit = async (values: typeof form.values) => {
         try {
+            if (values.confirmPassword !== values.password) {
+                form.setFieldError("password", "");
+                form.setFieldError("confirmPassword", "Passwords must match");
+                return;
+            }
+
             const response =
                 await api.post<RegistrationResponse>("api/auth/registration", values);
             console.log("Registration result", response.data);
@@ -152,9 +172,12 @@ export const RegistrationForm = () => {
                             { ...form.getInputProps("password") }
                         />
 
-                        {/*
-                            TODO: Password confirmation
-                        */ }
+                        <PasswordInput
+                            mt="sm"
+                            label="Confirm password" required
+                            key={ form.key("confirmPassword") }
+                            { ...form.getInputProps("confirmPassword") }
+                        />
 
                         <Select
                             mt="sm"
