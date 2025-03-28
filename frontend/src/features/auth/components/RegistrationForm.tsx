@@ -152,6 +152,10 @@ export const RegistrationForm = () => {
                             { ...form.getInputProps("password") }
                         />
 
+                        {/*
+                            TODO: Password confirmation
+                        */ }
+
                         <Select
                             mt="sm"
                             label="Home country" placeholder="Pick a country"

@@ -8,11 +8,18 @@ import { AuthLayout } from "./components/layouts/AuthLayout.tsx";
 import { useMemo } from "react";
 import { RegistrationPage } from "./pages/auth/RegistrationPage.tsx";
 import { ActivationPage } from "./pages/auth/ActivationPage.tsx";
+import { MainErrorBoundary } from "./components/error/MainErrorBoundary.tsx";
+import { ErrorBoundary } from "react-error-boundary";
+import { NotFound } from "./components/error/NotFound.tsx";
 
 const createAppRouter = () =>
     createBrowserRouter([
         {
-            element: <AuthLayout/>,
+            element: (
+                <ErrorBoundary FallbackComponent={ MainErrorBoundary }>
+                    <AuthLayout/>
+                </ErrorBoundary>
+            ),
             children: [
                 {
                     path: paths.auth.login,
@@ -31,8 +38,8 @@ const createAppRouter = () =>
         {
             element: (
                 <ProtectedRoute/>
+                // TODO: Add main error boundary at app root too
             ),
-            // TODO: Add error boundary
             children: [
                 {
                     path: paths.app.products,
@@ -43,7 +50,11 @@ const createAppRouter = () =>
                     element: <Orders/>
                 }
             ]
-        } // TODO: Not found path
+        },
+        {
+            path: "*",
+            element: <NotFound/>
+        }
     ]);
 
 export const AppRouter = () => {
