@@ -1,3 +1,7 @@
+import { paths } from "@/config/paths.ts";
+import { useAuth } from "@/hooks/useAuth.ts";
+import { api } from "@/lib/api-client.ts";
+import { AuthenticationResponse } from "@/types/api.tsx";
 import {
     Anchor,
     Button,
@@ -11,17 +15,13 @@ import {
     TextInput,
     Title
 } from "@mantine/core";
-import { useAuth } from "../../../hooks/useAuth.ts";
-import { Link, useNavigate, useSearchParams } from "react-router";
-import { api } from "../../../lib/api-client.ts";
-import { paths } from "../../../config/paths.ts";
-import { z } from "zod";
 import { useForm, zodResolver } from "@mantine/form";
-import axios from "axios";
 import { notifications } from "@mantine/notifications";
 import { IconX } from "@tabler/icons-react";
-import { AuthenticationResponse } from "../../../types/api.tsx";
+import axios from "axios";
 import { FormEvent, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router";
+import { z } from "zod";
 
 export function LoginForm() {
     const { setAccessToken, setIsLoadingUser } = useAuth();
@@ -46,7 +46,7 @@ export function LoginForm() {
             email: "",
             password: ""
         },
-        validate: zodResolver(loginInputSchema),
+        validate: zodResolver(loginInputSchema)
     });
 
     async function handleFormSubmit(values: typeof form.values) {
@@ -97,7 +97,7 @@ export function LoginForm() {
 
         if (otp.value.length !== 6) {
             setOtp({ ...otp, error: true });
-            return
+            return;
         }
 
         console.log("Submitting OTP", { ...form.getValues(), otp: otp.value });
@@ -154,8 +154,6 @@ export function LoginForm() {
             </Modal>
         );
 
-
-    // TODO: Remember me....with rememberMe auth context state?
     return (
         <Flex justify="center" align="center" h="100vh">
             <Container size={ 420 }>
@@ -178,14 +176,13 @@ export function LoginForm() {
                             { ...form.getInputProps("password") }
                         />
 
-                        {/*<Group justify="space-between" mt="lg">
-                        <Checkbox label="Remember me"/>
-                        <Anchor component="button" size="sm">
-                            Forgot password?
-                        </Anchor>
-                    </Group>*/ }
+                        <Flex justify="space-between" mt="lg">
+                            {/*<Anchor component="button" size="sm">
+                                Forgot password?
+                            </Anchor>*/ }
+                        </Flex>
 
-                        <Button fullWidth mt="xl" type="submit" loading={ form.submitting }>
+                        <Button fullWidth mt="lg" type="submit" loading={ form.submitting }>
                             Sign in
                         </Button>
                     </form>

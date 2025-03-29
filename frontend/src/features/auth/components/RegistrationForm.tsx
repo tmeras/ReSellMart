@@ -1,3 +1,6 @@
+import { PasswordInputWithStrength } from "@/components/inputs/PasswordInputWithStrength.tsx";
+import { api } from "@/lib/api-client.ts";
+import { RegistrationResponse } from "@/types/api.tsx";
 import {
     Anchor,
     Button,
@@ -12,17 +15,14 @@ import {
     TextInput,
     Title
 } from "@mantine/core";
-import { z } from "zod";
+import { useForm, zodResolver } from "@mantine/form";
+import { notifications } from "@mantine/notifications";
+import { IconAlertCircle, IconArrowBack, IconShieldLock, IconX } from "@tabler/icons-react";
+import axios from "axios";
 import { Country } from "country-state-city";
 import { useMemo, useState } from "react";
-import { useForm, zodResolver } from "@mantine/form";
-import { PasswordInputWithStrength } from "../../../components/inputs/PasswordInputWithStrength.tsx";
-import { IconAlertCircle, IconArrowBack, IconShieldLock, IconX } from "@tabler/icons-react";
 import { Link } from "react-router";
-import { api } from "../../../lib/api-client.ts";
-import { RegistrationResponse } from "../../../types/api.tsx";
-import axios from "axios";
-import { notifications } from "@mantine/notifications";
+import { z } from "zod";
 
 export const RegistrationForm = () => {
     const [password, setPassword] = useState("");

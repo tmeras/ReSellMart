@@ -1,7 +1,7 @@
+import { paths } from "@/config/paths.ts";
 import { Button, Container, Flex, Text, Title } from '@mantine/core';
-import classes from './NotFound.module.css';
 import { Link } from "react-router";
-import { paths } from "../../config/paths.ts";
+import classes from './NotFound.module.css';
 
 export function NotFound() {
     return (

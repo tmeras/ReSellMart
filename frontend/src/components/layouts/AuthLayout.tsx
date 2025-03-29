@@ -1,10 +1,10 @@
-import { Link, Outlet, useNavigate, useSearchParams } from "react-router";
-import { useEffect } from "react";
-import { useAuth } from "../../hooks/useAuth.ts";
+import { paths } from "@/config/paths.ts";
+import { useAuth } from "@/hooks/useAuth.ts";
 import { ActionIcon, AppShell, Button, Flex, Image, Text, Tooltip, useMantineColorScheme } from "@mantine/core";
-import imgUrl from "../../assets/logo.png";
-import { paths } from "../../config/paths.ts";
 import { IconBrightnessDown, IconMoon } from "@tabler/icons-react";
+import { useEffect } from "react";
+import { Link, Outlet, useNavigate, useSearchParams } from "react-router";
+import imgUrl from "../../assets/logo.png";
 
 export function AuthLayout() {
     const { user } = useAuth();
@@ -42,7 +42,7 @@ export function AuthLayout() {
                             <Tooltip label="Light Mode">
                                 <ActionIcon
                                     aria-label="Light Mode" onClick={ () => toggleColorScheme() }
-                                    variant="filled" ms="sm" size="md"
+                                    variant="filled" ms="sm" size="md" mt={ 2 }
                                 >
                                     <IconBrightnessDown size={ 60 }/>
                                 </ActionIcon>
@@ -51,7 +51,7 @@ export function AuthLayout() {
                             <Tooltip label="Dark Mode">
                                 <ActionIcon
                                     aria-label="Dark Mode" onClick={ () => toggleColorScheme() }
-                                    variant="outline" ms="sm" size="md"
+                                    variant="outline" ms="sm" size="md" mt={ 2 }
                                 >
                                     <IconMoon size={ 50 }/>
                                 </ActionIcon>

@@ -1,9 +1,9 @@
-import { Link, useSearchParams } from "react-router";
-import { useEffect, useState } from "react";
-import { api } from "../../lib/api-client.ts";
-import axios from "axios";
+import { api } from "@/lib/api-client.ts";
 import { Button, Container, Flex, Loader, Paper, Text } from "@mantine/core";
 import { IconArrowBack, IconCircleCheckFilled, IconExclamationCircleFilled } from "@tabler/icons-react";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router";
 
 export function ActivationPage() {
     const [searchParams] = useSearchParams();
