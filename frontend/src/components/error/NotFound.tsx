@@ -3,7 +3,6 @@ import classes from './NotFound.module.css';
 import { Link } from "react-router";
 import { paths } from "../../config/paths.ts";
 
-// TODO: Test this and error boundary with dark theme
 export function NotFound() {
     return (
         <Container className={ classes.root }>

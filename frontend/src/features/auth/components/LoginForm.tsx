@@ -25,7 +25,6 @@ import { FormEvent, useState } from "react";
 
 export function LoginForm() {
     const { setAccessToken, setIsLoadingUser } = useAuth();
-
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const redirectTo = searchParams.get("redirectTo");
@@ -167,14 +166,14 @@ export function LoginForm() {
 
                     <form onSubmit={ form.onSubmit(handleFormSubmit) }>
                         <TextInput
-                            label="Email" required
+                            label="Email" required withAsterisk={ false }
                             key={ form.key("email") }
                             { ...form.getInputProps("email") }
                         />
 
                         <PasswordInput
                             mt="sm"
-                            label="Password" required
+                            label="Password" required withAsterisk={ false }
                             key={ form.key("password") }
                             { ...form.getInputProps("password") }
                         />

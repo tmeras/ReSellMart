@@ -10,15 +10,8 @@
 .image {
     position: absolute;
     inset: 0;
-    opacity: 1;
-    color: var(--mantine-color-gray-0);
-}
-
-@media (prefers-color-scheme: dark) {
-    .image {
-        opacity: 0.1;
-        color: var(--mantine-color-dark-6);
-    }
+    opacity: 0.2;
+    color: var(--mantine-color-dark-3);
 }
 
 .content {

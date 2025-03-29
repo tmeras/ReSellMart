@@ -1,13 +1,14 @@
 import { Link, Outlet, useNavigate, useSearchParams } from "react-router";
 import { useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth.ts";
-import { AppShell, Button, Flex, Image, Text } from "@mantine/core";
+import { ActionIcon, AppShell, Button, Flex, Image, Text, Tooltip, useMantineColorScheme } from "@mantine/core";
 import imgUrl from "../../assets/logo.png";
 import { paths } from "../../config/paths.ts";
+import { IconBrightnessDown, IconMoon } from "@tabler/icons-react";
 
 export function AuthLayout() {
     const { user } = useAuth();
-
+    const { colorScheme, toggleColorScheme } = useMantineColorScheme();
     const [searchParams] = useSearchParams();
     const redirectTo = searchParams.get('redirectTo');
     const navigate = useNavigate();
@@ -17,7 +18,7 @@ export function AuthLayout() {
             if (redirectTo)
                 navigate(redirectTo, { replace: true });
             else
-                navigate("/app/products", { replace: true });
+                navigate(paths.app.products, { replace: true });
     }, [user, navigate, redirectTo]);
 
     return (
@@ -33,9 +34,30 @@ export function AuthLayout() {
                             ReSellMart
                         </Text>
                     </Flex>
-                    <Button size="xs" component={ Link } to={ paths.auth.login }>
-                        Sign in
-                    </Button>
+                    <Flex>
+                        <Button size="xs" component={ Link } to={ paths.auth.login }>
+                            Sign in
+                        </Button>
+                        { colorScheme === "dark" ? (
+                            <Tooltip label="Light Mode">
+                                <ActionIcon
+                                    aria-label="Light Mode" onClick={ () => toggleColorScheme() }
+                                    variant="filled" ms="sm" size="md"
+                                >
+                                    <IconBrightnessDown size={ 60 }/>
+                                </ActionIcon>
+                            </Tooltip>
+                        ) : (
+                            <Tooltip label="Dark Mode">
+                                <ActionIcon
+                                    aria-label="Dark Mode" onClick={ () => toggleColorScheme() }
+                                    variant="outline" ms="sm" size="md"
+                                >
+                                    <IconMoon size={ 50 }/>
+                                </ActionIcon>
+                            </Tooltip>
+                        ) }
+                    </Flex>
                 </Flex>
             </AppShell.Header>
 

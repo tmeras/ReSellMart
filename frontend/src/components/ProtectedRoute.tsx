@@ -9,7 +9,6 @@ type ProtectedRouteProps = {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
     const {user, isLoadingUser} = useAuth();
-
     const location = useLocation();
 
     if (isLoadingUser)
