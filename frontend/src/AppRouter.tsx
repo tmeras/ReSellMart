@@ -11,6 +11,7 @@ import { ActivationPage } from "./pages/auth/ActivationPage.tsx";
 import { MainErrorBoundary } from "./components/error/MainErrorBoundary.tsx";
 import { ErrorBoundary } from "react-error-boundary";
 import { NotFound } from "./components/error/NotFound.tsx";
+import { AppLayout } from "./components/layouts/AppLayout.tsx";
 
 const createAppRouter = () =>
     createBrowserRouter([
@@ -37,7 +38,9 @@ const createAppRouter = () =>
         },
         {
             element: (
-                <ProtectedRoute/>
+                <ProtectedRoute>
+                    <AppLayout/>
+                </ProtectedRoute>
                 // TODO: Add main error boundary at app root too
             ),
             children: [

@@ -16,7 +16,7 @@ import { z } from "zod";
 import { Country } from "country-state-city";
 import { useMemo, useState } from "react";
 import { useForm, zodResolver } from "@mantine/form";
-import { PasswordInputWithStrength } from "../../../components/PasswordInputWithStrength.tsx";
+import { PasswordInputWithStrength } from "../../../components/inputs/PasswordInputWithStrength.tsx";
 import { IconAlertCircle, IconArrowBack, IconShieldLock, IconX } from "@tabler/icons-react";
 import { Link } from "react-router";
 import { api } from "../../../lib/api-client.ts";
