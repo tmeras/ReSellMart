@@ -25,9 +25,9 @@ INSERT IGNORE INTO user(id, name, email, password, home_country, image_path, ena
 VALUES (1, 'Theodore Meras', 'tmeras@yahoo.gr', '$2a$10$h2UMOIQGcBEjM0Dc3if4BuRBLzKKhnGy8i.vesnGwphl0BmTI/yMi',
         'Greece', './uploads/flyway-user-images/user_image.png', true, false, null, CURDATE()),
        (2, 'Edmund Smith', 'admin@yahoo.gr', '$2a$10$h2UMOIQGcBEjM0Dc3if4BuRBLzKKhnGy8i.vesnGwphl0BmTI/yMi',
-        'UK', './uploads/flyway-user-images/admin_image.jpeg', true, false, null, CURDATE()),
+        'United Kingdom', './uploads/flyway-user-images/admin_image.png', true, false, null, CURDATE()),
        (3, 'Mary Cole', 'mary@gmail.com', '$2a$10$h2UMOIQGcBEjM0Dc3if4BuRBLzKKhnGy8i.vesnGwphl0BmTI/yMi',
-        'UK', './uploads/flyway-user-images/user_image_2.png', true, false, null, CURDATE());
+        'United Kingdom', './uploads/flyway-user-images/user_image_2.png', true, false, null, CURDATE());
 
 INSERT IGNORE INTO user_roles(user_id, roles_id)
 VALUES (1, 2),

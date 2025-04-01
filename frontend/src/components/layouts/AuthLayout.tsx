@@ -1,3 +1,4 @@
+import { LogoText } from "@/components/ui/LogoText.tsx";
 import { paths } from "@/config/paths.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { ActionIcon, AppShell, Button, Flex, Image, Text, Tooltip, useMantineColorScheme } from "@mantine/core";
@@ -30,9 +31,7 @@ export function AuthLayout() {
                 <Flex align="center" justify="space-between">
                     <Flex>
                         <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
-                        <Text size="lg">
-                            ReSellMart
-                        </Text>
+                        <LogoText/>
                     </Flex>
                     <Flex>
                         <Button size="xs" component={ Link } to={ paths.auth.login }>
@@ -69,9 +68,7 @@ export function AuthLayout() {
                 <Flex direction="column" justify="center" align="center">
                     <Flex justify="center" align="center" mb="sm">
                         <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
-                        <Text size="lg">
-                            ReSellMart
-                        </Text>
+                        <LogoText/>
                     </Flex>
                     <Text c="dimmed" size="sm">
                         © 2025 ReSellMart. All rights reserved.

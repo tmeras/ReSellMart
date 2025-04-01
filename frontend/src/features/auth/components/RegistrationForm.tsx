@@ -1,4 +1,4 @@
-import { PasswordInputWithStrength } from "@/components/inputs/PasswordInputWithStrength.tsx";
+import { PasswordInputWithStrength } from "@/components/form/PasswordInputWithStrength.tsx";
 import { api } from "@/lib/api-client.ts";
 import { RegistrationResponse } from "@/types/api.tsx";
 import {

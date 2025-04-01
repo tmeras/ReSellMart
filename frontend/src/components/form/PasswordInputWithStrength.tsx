@@ -1,6 +1,6 @@
 import { PasswordInput, PasswordInputProps, Popover, Progress } from "@mantine/core";
-import { getStrength, PasswordRequirement, requirements } from "./PasswordRequirement.tsx";
 import { useState } from "react";
+import { getStrength, PasswordRequirement, requirements } from "./PasswordRequirement.tsx";
 
 type PasswordRequirementProps = PasswordInputProps & {
     value: string;

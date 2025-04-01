@@ -1,14 +1,14 @@
-import {createContext, ReactNode, useEffect, useLayoutEffect, useMemo, useState} from "react";
-import {UserResponse} from "../types/api.tsx";
-import {api} from "../lib/api-client.ts"
-import {InternalAxiosRequestConfig} from "axios";
+import { InternalAxiosRequestConfig } from "axios";
+import { createContext, ReactNode, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { api } from "../lib/api-client.ts";
+import { UserResponse } from "../types/api.tsx";
 
 type AuthContext = {
     accessToken: string | null;
     user: UserResponse | null;
     isLoadingUser: boolean;
     setAccessToken: (token: string) => void;
-    setUser: (user: UserResponse) => void;
+    setUser: (user: UserResponse | null) => void;
     setIsLoadingUser: (isLoading: boolean) => void;
 };
 
