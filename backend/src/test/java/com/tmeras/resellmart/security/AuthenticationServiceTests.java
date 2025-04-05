@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseCookie;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -107,7 +108,7 @@ public class AuthenticationServiceTests {
         assertThat(response.getMfaEnabled()).isEqualTo(expectedResponse.getMfaEnabled());
         verify(emailService, times(1)).sendActivationEmail(
                 eq(registrationRequest.getEmail()), eq(registrationRequest.getName()),
-                eq(ACTIVATION_URL), any(String.class)
+                startsWith(ACTIVATION_URL), any(String.class)
         );
         verify(tokenRepository, times(1)).save(any(Token.class));
     }
@@ -156,9 +157,16 @@ public class AuthenticationServiceTests {
                 .email(user.getEmail())
                 .password(user.getPassword())
                 .build();
+        ResponseCookie refreshCookie = ResponseCookie
+                .from("refresh-token", "refreshToken")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(REFRESH_TOKEN_EXPIRATION_TIME / 1000)
+                .build();
         AuthenticationResponse expectedResponse = AuthenticationResponse.builder()
                 .accessToken("accessToken")
-                .refreshToken("refreshToken")
+                .refreshTokenCookie(refreshCookie.toString())
                 .mfaEnabled(false)
                 .build();
 
@@ -171,7 +179,7 @@ public class AuthenticationServiceTests {
         AuthenticationResponse response = authenticationService.login(authenticationRequest);
 
         assertThat(response.getAccessToken()).isEqualTo(expectedResponse.getAccessToken());
-        assertThat(response.getRefreshToken()).isEqualTo(expectedResponse.getRefreshToken());
+        assertThat(response.getRefreshTokenCookie()).isEqualTo(expectedResponse.getRefreshTokenCookie());
         assertThat(response.getMfaEnabled()).isEqualTo(expectedResponse.getMfaEnabled());
         verify(tokenRepository, times(1)).save(any(Token.class));
     }
@@ -193,7 +201,7 @@ public class AuthenticationServiceTests {
         AuthenticationResponse response = authenticationService.login(authenticationRequest);
 
         assertThat(response.getAccessToken()).isNull();
-        assertThat(response.getRefreshToken()).isNull();
+        assertThat(response.getRefreshTokenCookie()).isNull();
         assertThat(response.getMfaEnabled()).isTrue();
     }
 
@@ -248,7 +256,6 @@ public class AuthenticationServiceTests {
                 LocalDateTime.now().plusMinutes(1), null, false, user);
         AuthenticationResponse expectedResponse = AuthenticationResponse.builder()
                 .accessToken("accessToken")
-                .refreshToken(refreshToken.getToken())
                 .build();
 
         MockHttpServletRequest request = new MockHttpServletRequest();
@@ -261,7 +268,7 @@ public class AuthenticationServiceTests {
         when(jwtService.isTokenValid(refreshToken.getToken(), user)).thenReturn(true);
         when(jwtService.generateAccessToken(Map.of("name", user.getRealName()), user)).thenReturn("accessToken");
 
-        authenticationService.refreshToken(request, response);
+        authenticationService.refreshToken(refreshToken.getToken(), response);
 
         ObjectMapper objectMapper = new ObjectMapper();
         assertThat(response.getContentAsString()).isEqualTo(objectMapper.writeValueAsString(expectedResponse));
@@ -269,12 +276,11 @@ public class AuthenticationServiceTests {
 
     @Test
     public void shouldNotRefreshTokenWhenMissingRefreshToken() {
-        MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        assertThatThrownBy(() -> authenticationService.refreshToken(request, response))
+        assertThatThrownBy(() -> authenticationService.refreshToken("", response))
                 .isInstanceOf(JwtException.class)
-                .hasMessage("No refresh token in Bearer header");
+                .hasMessage("No refresh token was provided");
     }
 
     @Test
@@ -282,15 +288,12 @@ public class AuthenticationServiceTests {
         User user = TestDataUtils.createUserA(Set.of(new Role(1, "USER")));
         Token refreshToken = new Token(null, "refreshToken", TokenType.BEARER, LocalDateTime.now().minusMinutes(2),
                 LocalDateTime.now().minusMinutes(1), null, false, user);
-
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader("Authorization", "Bearer " + refreshToken.getToken());
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         when(jwtService.extractUsername(refreshToken.getToken())).thenReturn(user.getEmail());
         when(userRepository.findWithAssociationsByEmail(user.getEmail())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> authenticationService.refreshToken(request, response))
+        assertThatThrownBy(() -> authenticationService.refreshToken(refreshToken.getToken(), response))
                 .isInstanceOf(UsernameNotFoundException.class)
                 .hasMessage("User with the email '" + user.getEmail() + "' does not exist");
     }
@@ -301,15 +304,13 @@ public class AuthenticationServiceTests {
         Token refreshToken = new Token(null, "refreshToken", TokenType.BEARER, LocalDateTime.now().minusMinutes(2),
                 LocalDateTime.now().minusMinutes(1), null, false, user);
 
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader("Authorization", "Bearer " + refreshToken.getToken());
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         when(jwtService.extractUsername(refreshToken.getToken())).thenReturn(user.getEmail());
         when(userRepository.findWithAssociationsByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(tokenRepository.findByToken(refreshToken.getToken())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> authenticationService.refreshToken(request, response))
+        assertThatThrownBy(() -> authenticationService.refreshToken(refreshToken.getToken(), response))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Refresh token was not found");
     }
@@ -320,15 +321,13 @@ public class AuthenticationServiceTests {
         Token refreshToken = new Token(null, "refreshToken", TokenType.BEARER, LocalDateTime.now().minusMinutes(2),
                 LocalDateTime.now().minusMinutes(1), null, true, user);
 
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader("Authorization", "Bearer " + refreshToken.getToken());
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         when(jwtService.extractUsername(refreshToken.getToken())).thenReturn(user.getEmail());
         when(userRepository.findWithAssociationsByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(tokenRepository.findByToken(refreshToken.getToken())).thenReturn(Optional.of(refreshToken));
 
-        assertThatThrownBy(() -> authenticationService.refreshToken(request, response))
+        assertThatThrownBy(() -> authenticationService.refreshToken(refreshToken.getToken(), response))
                 .isInstanceOf(JwtException.class)
                 .hasMessage("Invalid refresh token");
     }
@@ -347,7 +346,6 @@ public class AuthenticationServiceTests {
                 .build();
         AuthenticationResponse expectedResponse = AuthenticationResponse.builder()
                 .accessToken("accessToken")
-                .refreshToken("refreshToken")
                 .mfaEnabled(true)
                 .build();
 
@@ -361,7 +359,6 @@ public class AuthenticationServiceTests {
         AuthenticationResponse response  = authenticationService.verifyOtp(verificationRequest);
 
         assertThat(response.getAccessToken()).isEqualTo(expectedResponse.getAccessToken());
-        assertThat(response.getRefreshToken()).isEqualTo(expectedResponse.getRefreshToken());
         assertThat(response.getMfaEnabled()).isEqualTo(expectedResponse.getMfaEnabled());
     }
 

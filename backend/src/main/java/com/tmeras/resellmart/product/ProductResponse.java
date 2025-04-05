@@ -29,7 +29,7 @@ public class ProductResponse {
 
     private Integer availableQuantity;
 
-    private Boolean isDeleted;
+    private Boolean isDeleted; // TODO: Investigate changing to primitive
 
     private List<ProductImageResponse> images;
 

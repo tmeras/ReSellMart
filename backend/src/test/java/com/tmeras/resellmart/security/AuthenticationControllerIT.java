@@ -24,10 +24,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -182,14 +179,20 @@ public class AuthenticationControllerIT {
         ResponseEntity<AuthenticationResponse> response =
                 restTemplate.exchange("/api/auth/login", HttpMethod.POST,
                         new HttpEntity<>(authenticationRequest), AuthenticationResponse.class);
+        List<String> responseCookies = response.getHeaders().get(HttpHeaders.SET_COOKIE);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getAccessToken()).isNotNull();
-        assertThat(response.getBody().getRefreshToken()).isNotNull();
         assertThat(tokenRepository.findAllValidRefreshTokensByUserEmail(userA.getEmail()).size()).isEqualTo(1);
         assertThat(jwtService.isTokenValid(response.getBody().getAccessToken(), userA)).isTrue();
-        assertThat(jwtService.isTokenValid(response.getBody().getRefreshToken(), userA)).isTrue();
+        assertThat(responseCookies).isNotNull();
+        String refreshToken = responseCookies.stream()
+                .filter(cookie -> cookie.startsWith("refresh-token="))
+                .map(cookie -> cookie.split(";")[0].split("=")[1])  // Extract the value
+                .findFirst()
+                .orElse(null);
+        assertThat(refreshToken).isNotNull();
     }
 
     @Test
@@ -232,7 +235,6 @@ public class AuthenticationControllerIT {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMfaEnabled()).isTrue();
         assertThat(response.getBody().getAccessToken()).isNull();
-        assertThat(response.getBody().getRefreshToken()).isNull();
     }
 
     @Test
@@ -302,7 +304,7 @@ public class AuthenticationControllerIT {
         tokenRepository.save(new Token(null, refreshToken, TokenType.BEARER, LocalDateTime.now().minusMinutes(2),
                 LocalDateTime.now().plusMinutes(2), null, false, userA));
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + refreshToken);
+        headers.set("Cookie", "refresh-token=" + refreshToken);
 
         ResponseEntity<AuthenticationResponse> response =
                 restTemplate.exchange("/api/auth/refresh", HttpMethod.POST,
@@ -311,8 +313,6 @@ public class AuthenticationControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getAccessToken()).isNotNull();
-        assertThat(response.getBody().getRefreshToken()).isNotNull();
-        assertThat(response.getBody().getRefreshToken()).isEqualTo(refreshToken);
         assertThat(jwtService.isTokenValid(response.getBody().getAccessToken(), userA)).isTrue();
     }
 
@@ -324,7 +324,7 @@ public class AuthenticationControllerIT {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getMessage()).isEqualTo("No refresh token in Bearer header");
+        assertThat(response.getBody().getMessage()).isEqualTo("No refresh token was provided");
     }
 
     @Test
@@ -332,8 +332,7 @@ public class AuthenticationControllerIT {
         User userB = TestDataUtils.createUserB(userA.getRoles());
         String refreshToken = jwtService.generateRefreshToken(userB);
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + refreshToken);
-
+        headers.set("Cookie", "refresh-token=" + refreshToken);
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/auth/refresh", HttpMethod.POST,
                         new HttpEntity<>(headers), ExceptionResponse.class);
@@ -348,7 +347,7 @@ public class AuthenticationControllerIT {
     public void shouldNotRefreshTokenWhenRefreshTokenDoesNotExist() {
         String refreshToken = jwtService.generateRefreshToken(userA);
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + refreshToken);
+        headers.set("Cookie", "refresh-token=" + refreshToken);
 
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/auth/refresh", HttpMethod.POST,
@@ -367,7 +366,7 @@ public class AuthenticationControllerIT {
         tokenRepository.save(new Token(null, refreshToken, TokenType.BEARER, LocalDateTime.now().minusMinutes(2),
                 LocalDateTime.now().minusMinutes(1), null, true, userA));
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + refreshToken);
+        headers.set("Cookie", "refresh-token=" + refreshToken);
 
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/auth/refresh", HttpMethod.POST,

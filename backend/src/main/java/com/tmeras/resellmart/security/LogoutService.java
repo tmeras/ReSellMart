@@ -1,5 +1,8 @@
 package com.tmeras.resellmart.security;
 
+import com.tmeras.resellmart.token.JwtService;
+import com.tmeras.resellmart.token.Token;
+import com.tmeras.resellmart.token.TokenRepository;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -9,9 +12,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
-import com.tmeras.resellmart.token.JwtService;
-import com.tmeras.resellmart.token.Token;
-import com.tmeras.resellmart.token.TokenRepository;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,14 +35,7 @@ public class LogoutService implements LogoutHandler {
                 return;
             }
 
-            // Ensure refresh token wasn't sent instead of access token
             final String accessToken = authHeader.substring(7);
-            if (tokenRepository.existsByToken(accessToken)) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json");
-                response.getWriter().write("{\"error\": \"Invalid access token\"}");
-                return;
-            }
 
             // Revoke all of the user's refresh tokens
             try {

@@ -14,7 +14,7 @@ public class WishListItemResponse {
 
         private Integer id;
 
-        private LocalDateTime addedAt;
-
         private ProductResponse product;
+
+        private LocalDateTime addedAt;
 }

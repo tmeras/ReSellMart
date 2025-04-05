@@ -47,14 +47,7 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Ensure refresh token wasn't sent instead of access token
         final String accessToken = authHeader.substring(7);
-        if (tokenRepository.existsByToken(accessToken)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Invalid access token\"}");
-            return;
-        }
 
         try {
             final String userEmail = jwtService.extractUsername(accessToken);

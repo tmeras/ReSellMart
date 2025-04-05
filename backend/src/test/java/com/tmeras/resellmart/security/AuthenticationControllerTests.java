@@ -1,12 +1,9 @@
 package com.tmeras.resellmart.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tmeras.resellmart.TestDataUtils;
 import com.tmeras.resellmart.configuration.TestConfig;
-import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.token.JwtFilter;
-import com.tmeras.resellmart.user.User;
-import org.junit.jupiter.api.BeforeEach;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -14,12 +11,13 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.Arrays;
 import java.util.Map;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,6 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 )
 @Import(TestConfig.class)
 public class AuthenticationControllerTests {
+
+    private static final Integer REFRESH_TOKEN_EXPIRATION_TIME = 120000; // 2 minutes
 
     @Autowired
     private MockMvc mockMvc;
@@ -96,9 +96,16 @@ public class AuthenticationControllerTests {
                 .email("test@test.com")
                 .password("pass")
                 .build();
+        ResponseCookie refreshCookie = ResponseCookie
+                .from("refresh-token", "refreshToken")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(REFRESH_TOKEN_EXPIRATION_TIME / 1000)
+                .build();
         AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
                 .accessToken("accessToken")
-                .refreshToken("refreshToken")
+                .refreshTokenCookie(refreshCookie.toString())
                 .build();
 
         when(authenticationService.login(any(AuthenticationRequest.class))).thenReturn(authenticationResponse);
@@ -110,6 +117,12 @@ public class AuthenticationControllerTests {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
 
         assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(authenticationResponse));
+        Cookie cookie = Arrays.stream(mvcResult.getResponse().getCookies())
+                .filter(c -> c.getName().equals("refresh-token"))
+                .findFirst()
+                .orElse(null);
+        assertThat(cookie).isNotNull();
+        assertThat(cookie.getValue()).isEqualTo("refreshToken");
     }
 
     @Test
@@ -138,7 +151,6 @@ public class AuthenticationControllerTests {
                 .otp("123456")
                 .build();
         AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
-                .refreshToken("refreshToken")
                 .accessToken("accessToken")
                 .mfaEnabled(false)
                 .build();

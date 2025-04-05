@@ -111,19 +111,6 @@ public class LogoutServiceIT {
     }
 
     @Test
-    public void shouldNotLogoutUserWhenRefreshTokenIsSent() {
-        headers.set("Authorization", "Bearer " + refreshToken.getToken());
-        String expectedResponse = "{\"error\": \"Invalid access token\"}";
-
-        ResponseEntity<String> response =
-                restTemplate.exchange("/api/auth/logout", HttpMethod.POST,
-                        new HttpEntity<>(headers), String.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
-        assertThat(response.getBody()).isEqualTo(expectedResponse);
-    }
-
-    @Test
     public void shouldNotLogoutUserWhenInvalidAccessToken() {
         headers.set("Authorization", "Bearer  invalidToken");
         String expectedResponse = "{\"error\": \"Invalid access token\"}";

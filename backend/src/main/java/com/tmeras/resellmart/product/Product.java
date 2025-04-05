@@ -29,6 +29,7 @@ public class Product {
     private Double previousPrice;
 
     @Enumerated(EnumType.STRING)
+    // TODO: Rename to condition
     private ProductCondition productCondition;
 
     private Integer availableQuantity;

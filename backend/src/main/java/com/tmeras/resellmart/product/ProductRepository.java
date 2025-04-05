@@ -12,14 +12,13 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     @Query("""
-            SELECT p FROM Product p WHERE p.availableQuantity > 0 AND
-                    p.isDeleted <> true AND p.seller.id <> :sellerId
+                    SELECT p FROM Product p WHERE p.availableQuantity > 0 
+                    AND p.isDeleted <> true AND p.seller.id <> :sellerId
     """)
     Page<Product> findAllBySellerIdNot(Pageable pageable, Integer sellerId);
 
     @Query("""
-            SELECT p FROM Product p
-                    WHERE p.isDeleted <> true AND p.seller.id = :sellerId
+                    SELECT p FROM Product p WHERE p.isDeleted <> true AND p.seller.id = :sellerId
     """)
     Page<Product> findAllBySellerId(Pageable pageable, Integer sellerId);
 
@@ -31,9 +30,9 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     Page<Product> findAllByCategoryId(Pageable pageable, Integer categoryId, Integer sellerId);
 
     @Query("""
-            SELECT p FROM Product p
-                    WHERE p.isDeleted <> true AND p.seller.id <> :sellerId
-            AND p.name LIKE %:keyword%
+                    SELECT p FROM Product p WHERE p.availableQuantity > 0
+                    AND p.isDeleted <> true AND p.seller.id <> :sellerId
+                    AND (p.name LIKE %:keyword% OR p.description LIKE %:keyword%)
     """)
     Page<Product> findAllByKeyword(Pageable pageable, String keyword, Integer sellerId);
 

@@ -269,7 +269,7 @@ public class UserControllerTests {
     @Test
     public void shouldSaveWishListItemWhenValidRequest() throws Exception {
         WishListItemRequest wishListItemRequest = new WishListItemRequest(productResponseA.getId(), userA.getId());
-        WishListItemResponse wishListItemResponse = new WishListItemResponse(1, LocalDateTime.now(), productResponseA);
+        WishListItemResponse wishListItemResponse = new WishListItemResponse(1, productResponseA, LocalDateTime.now());
 
         when(userService.saveWishListItem(any(WishListItemRequest.class), eq(userA.getId()), any(Authentication.class)))
                 .thenReturn(wishListItemResponse);
@@ -301,7 +301,7 @@ public class UserControllerTests {
     @Test
     public void shouldFindALLWishListItemsByUserId() throws Exception {
         List<WishListItemResponse> wishListItemResponses = List.of(
-                new WishListItemResponse(1, LocalDateTime.now(), productResponseA)
+                new WishListItemResponse(1, productResponseA, LocalDateTime.now())
         );
 
         when(userService.findAllWishListItemsByUserId(eq(userA.getId()), any(Authentication.class)))
