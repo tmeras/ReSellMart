@@ -120,6 +120,18 @@ public class UserControllerTests {
     }
 
     @Test
+    public void shouldFindLoggedInUser() throws Exception {
+        when(userService.findMe(any(Authentication.class))).thenReturn(userResponseA);
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/users/me"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(userResponseA));
+    }
+
+    @Test
     public void shouldUpdateUserWhenValidRequest() throws Exception {
         userRequestA.setName("Updated user name");
         userResponseA.setName("Updated user name");

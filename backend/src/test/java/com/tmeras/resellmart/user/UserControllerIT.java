@@ -51,8 +51,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 // TODO: Code coverage
 @SpringBootTest(
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = {"application.file.upload.user-images-path=./test-uploads/user-images"}
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @Testcontainers
 public class UserControllerIT {
@@ -202,6 +201,20 @@ public class UserControllerIT {
     }
 
     @Test
+    public void shouldFetchLoggedInUser() {
+        ResponseEntity<UserResponse> response =
+                restTemplate.exchange("/api/users/me", HttpMethod.GET,
+                        new HttpEntity<>(headers), UserResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getName()).isEqualTo(userA.getRealName());
+        assertThat(response.getBody().getEmail()).isEqualTo(userA.getEmail());
+        assertThat(response.getBody().getRoles().stream().findFirst().get().getName()).isEqualTo("ADMIN");
+        assertThat(response.getBody().getHomeCountry()).isEqualTo(userA.getHomeCountry());
+    }
+
+    @Test
     public void shouldUpdateUserWhenValidRequest() {
         userRequestA.setName("Updated user A");
         userRequestA.setHomeCountry("Updated home country");
@@ -315,7 +328,8 @@ public class UserControllerIT {
 
         ResponseEntity<Map<String, String>> response =
                 restTemplate.exchange("/api/users/" + userA.getId() + "/cart/products", HttpMethod.POST,
-                        new HttpEntity<>(cartItemRequest, headers), new ParameterizedTypeReference<Map<String, String>>() {});
+                        new HttpEntity<>(cartItemRequest, headers), new ParameterizedTypeReference<>() {
+                        });
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();

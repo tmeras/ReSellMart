@@ -157,6 +157,15 @@ public class UserServiceTests {
     }
 
     @Test
+    public void shouldFindLoggedInUser() {
+        when(userMapper.toUserResponse(userA)).thenReturn(userResponseA);
+
+        UserResponse userResponse = userService.findMe(authentication);
+
+        assertThat(userResponse).isEqualTo(userResponseA);
+    }
+
+    @Test
     public void shouldUpdateUserWhenValidRequest() {
         userRequestA.setName("Updated user name");
         userRequestA.setHomeCountry("Updated home country");

@@ -41,6 +41,12 @@ public class UserController {
         return new ResponseEntity<>(foundUsers, HttpStatus.OK);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> findMe(Authentication authentication) {
+        UserResponse userResponse = userService.findMe(authentication);
+        return new ResponseEntity<>(userResponse, HttpStatus.OK);
+    }
+
     @PutMapping("/{user-id}")
     public ResponseEntity<UserResponse> update(
             @Valid @RequestBody UserRequest userRequest,

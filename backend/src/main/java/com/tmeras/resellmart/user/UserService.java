@@ -76,6 +76,12 @@ public class UserService {
         );
     }
 
+    public UserResponse findMe(Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+
+        return userMapper.toUserResponse(currentUser);
+    }
+
     public UserResponse update(UserRequest userRequest, Integer userId, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
 
