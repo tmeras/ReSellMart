@@ -29,6 +29,8 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     """)
     Page<Product> findAllByCategoryId(Pageable pageable, Integer categoryId, Integer sellerId);
 
+    Boolean existsByCategoryId(Integer categoryId);
+
     @Query("""
                     SELECT p FROM Product p WHERE p.availableQuantity > 0
                     AND p.isDeleted <> true AND p.seller.id <> :sellerId
@@ -50,5 +52,4 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     Optional<Product> findWithImagesById(Integer id);
 
     List<Product> findAllBySellerId(Integer sellerId);
-
 }

@@ -1,11 +1,15 @@
 package com.tmeras.resellmart.product;
 
 import com.tmeras.resellmart.TestDataUtils;
+import com.tmeras.resellmart.address.Address;
+import com.tmeras.resellmart.address.AddressRepository;
 import com.tmeras.resellmart.category.Category;
 import com.tmeras.resellmart.category.CategoryRepository;
 import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.ExceptionResponse;
+import com.tmeras.resellmart.order.Order;
+import com.tmeras.resellmart.order.OrderRepository;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.token.JwtService;
@@ -55,6 +59,8 @@ public class ProductControllerIT {
     private final JwtService jwtService;
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
+    private final AddressRepository addressRepository;
 
     // Used to add JWT in requests
     private HttpHeaders headers;
@@ -68,7 +74,8 @@ public class ProductControllerIT {
             TestRestTemplate restTemplate, UserRepository userRepository,
             RoleRepository roleRepository, PasswordEncoder passwordEncoder,
             JwtService jwtService, CategoryRepository categoryRepository,
-            ProductRepository productRepository
+            ProductRepository productRepository, OrderRepository orderRepository,
+            AddressRepository addressRepository
     ) {
         this.restTemplate = restTemplate;
         this.userRepository = userRepository;
@@ -77,11 +84,15 @@ public class ProductControllerIT {
         this.jwtService = jwtService;
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
+        this.orderRepository = orderRepository;
+        this.addressRepository = addressRepository;
     }
 
     @BeforeEach
     public void setUp() throws IOException {
         // Empty relevant database tables
+        orderRepository.deleteAll();
+        addressRepository.deleteAll();
         productRepository.deleteAll();
         categoryRepository.deleteAll();
         userRepository.deleteAll();
@@ -591,5 +602,26 @@ public class ProductControllerIT {
                         new HttpEntity<>(headers), Object.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    public void shouldNotDeleteProductWhenForeignKeyConstraint() {
+        // Create order that references productA
+        Address address = TestDataUtils.createAddressA(productA.getSeller());
+        address.setId(null);
+        address = addressRepository.save(address);
+        Order order = TestDataUtils.createOrderA(productA.getSeller(), address, productA);
+        order.setId(null);
+        order.getOrderItems().get(0).setId(null);
+        orderRepository.save(order);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.DELETE,
+                        new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("Cannot delete product due to existing orders that reference it");
     }
 }

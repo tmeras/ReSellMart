@@ -7,9 +7,11 @@ import com.tmeras.resellmart.category.CategoryResponse;
 import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.APIException;
+import com.tmeras.resellmart.exception.ForeignKeyConstraintException;
 import com.tmeras.resellmart.exception.OperationNotPermittedException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.file.FileService;
+import com.tmeras.resellmart.order.OrderItemRepository;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
@@ -55,6 +57,9 @@ public class ProductServiceTests {
 
     @Mock
     private CategoryRepository categoryRepository;
+
+    @Mock
+    private OrderItemRepository orderItemRepository;
 
     @Mock
     private ProductMapper productMapper;
@@ -533,6 +538,7 @@ public class ProductServiceTests {
     @Test
     public void shouldDeleteProduct() throws IOException {
         ProductImage productImageA = new ProductImage(1, "/uploads/test_image_1.jpeg", false);
+        productA.setId(99); // To ensure fileService.deleteFile() is called
         productA.getImages().add(productImageA);
 
         when(productRepository.findWithImagesById(productA.getId())).thenReturn(Optional.of(productA));
@@ -541,5 +547,14 @@ public class ProductServiceTests {
 
         verify(productRepository, times(1)).deleteById(productA.getId());
         verify(fileService, times(1)).deleteFile(productImageA.getFilePath());
+    }
+
+    @Test
+    public void shouldNotDeleteProductWhenForeignKeyConstraint() {
+        when(orderItemRepository.existsByProductId(productA.getId())).thenReturn(true);
+
+        assertThatThrownBy(() -> productService.delete(productA.getId()))
+                .isInstanceOf(ForeignKeyConstraintException.class)
+                .hasMessage("Cannot delete product due to existing orders that reference it");
     }
 }

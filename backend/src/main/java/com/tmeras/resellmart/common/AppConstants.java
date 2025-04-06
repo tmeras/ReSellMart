@@ -21,4 +21,8 @@ public class AppConstants {
     // Thymeleaf template names
     public static final String USER_ACTIVATION_TEMPLATE = "account_activation";
     public static final String ORDER_CONFIRMATION_TEMPLATE = "order_confirmation";
+
+    // Number of entities manually created using flyway
+    // used to prevent deletion of related images       TODO: Update when more data is added
+    public static final Integer FLYWAY_PRODUCTS_NUMBER = 17;
 }

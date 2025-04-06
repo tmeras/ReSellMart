@@ -5,9 +5,11 @@ import com.tmeras.resellmart.category.CategoryRepository;
 import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.APIException;
+import com.tmeras.resellmart.exception.ForeignKeyConstraintException;
 import com.tmeras.resellmart.exception.OperationNotPermittedException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.file.FileService;
+import com.tmeras.resellmart.order.OrderItemRepository;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.tmeras.resellmart.common.AppConstants.FLYWAY_PRODUCTS_NUMBER;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -36,6 +40,7 @@ public class ProductService {
     private final ProductImageRepository productImageRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final OrderItemRepository orderItemRepository;
     private final ProductMapper productMapper;
     private final FileService fileService;
 
@@ -326,14 +331,19 @@ public class ProductService {
 
     @PreAuthorize("hasRole('ADMIN')") // Deletion possible by admins only, users can only mark products as unavailable
     public void delete(Integer productId) throws IOException {
+        if (orderItemRepository.existsByProductId(productId))
+            throw new ForeignKeyConstraintException("Cannot delete product due to existing orders that reference it");
+
         Optional<Product> existingProduct = productRepository.findWithImagesById(productId);
-        if (existingProduct.isPresent() && existingProduct.get().getImages() != null) {
+
+        // Delete images only if the product was not created using flyway script
+        if (productId > FLYWAY_PRODUCTS_NUMBER && existingProduct.isPresent() &&
+                existingProduct.get().getImages() != null
+        ) {
             for (ProductImage productImage : existingProduct.get().getImages()) {
                 fileService.deleteFile(productImage.getFilePath());
             }
         }
-
-        // TODO: Ensure that no order refers to this product
 
         productRepository.deleteById(productId);
     }

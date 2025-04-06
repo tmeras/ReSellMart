@@ -4,8 +4,10 @@ import com.tmeras.resellmart.TestDataUtils;
 import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.APIException;
+import com.tmeras.resellmart.exception.ForeignKeyConstraintException;
 import com.tmeras.resellmart.exception.ResourceAlreadyExistsException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
+import com.tmeras.resellmart.product.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +28,9 @@ public class CategoryServiceTests {
 
     @Mock
     private CategoryRepository categoryRepository;
+
+    @Mock
+    private ProductRepository productRepository;
 
     @Mock
     private CategoryMapper categoryMapper;
@@ -194,9 +199,18 @@ public class CategoryServiceTests {
     }
 
     @Test
-    public void shouldDeleteCategory() {
+    public void shouldDeleteCategoryWhenValidRequest() {
         categoryService.delete(categoryA.getId());
 
         verify(categoryRepository, times(1)).deleteById(categoryA.getId());
+    }
+
+    @Test
+    public void shouldNotDeleteCategoryWhenForeignKeyConstraint() {
+        when(productRepository.existsByCategoryId(categoryA.getId())).thenReturn(true);
+
+        assertThatThrownBy(() -> categoryService.delete(categoryA.getId()))
+                .isInstanceOf(ForeignKeyConstraintException.class)
+                .hasMessage("Cannot delete category due to existing products that reference it");
     }
 }

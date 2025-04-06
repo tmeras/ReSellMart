@@ -2,8 +2,10 @@ package com.tmeras.resellmart.category;
 
 import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.APIException;
+import com.tmeras.resellmart.exception.ForeignKeyConstraintException;
 import com.tmeras.resellmart.exception.ResourceAlreadyExistsException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
+import com.tmeras.resellmart.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +21,7 @@ import java.util.List;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
     private final CategoryMapper categoryMapper;
 
     public CategoryResponse save(CategoryRequest categoryRequest) {
@@ -114,7 +117,9 @@ public class CategoryService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public void delete(Integer categoryId) {
-        // TODO: Ensure that no products refer to this category
+        if (productRepository.existsByCategoryId(categoryId))
+            throw new ForeignKeyConstraintException("Cannot delete category due to existing products that reference it");
+
         categoryRepository.deleteById(categoryId);
     }
 }

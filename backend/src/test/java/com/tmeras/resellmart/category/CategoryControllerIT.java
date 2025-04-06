@@ -3,6 +3,8 @@ package com.tmeras.resellmart.category;
 import com.tmeras.resellmart.TestDataUtils;
 import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.ExceptionResponse;
+import com.tmeras.resellmart.product.Product;
+import com.tmeras.resellmart.product.ProductRepository;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.token.JwtService;
@@ -37,11 +39,12 @@ class CategoryControllerIT {
     private static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:9.2.0");
 
     private final TestRestTemplate restTemplate;
+    private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final ProductRepository productRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final CategoryRepository categoryRepository;
 
     // Used to add JWT in requests
     private HttpHeaders headers;
@@ -54,12 +57,14 @@ class CategoryControllerIT {
     public CategoryControllerIT(
             TestRestTemplate restTemplate, CategoryRepository categoryRepository,
             UserRepository userRepository, RoleRepository roleRepository,
+            ProductRepository productRepository,
             PasswordEncoder passwordEncoder, JwtService jwtService
     ) {
         this.restTemplate = restTemplate;
         this.categoryRepository = categoryRepository;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.productRepository = productRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
     }
@@ -67,6 +72,7 @@ class CategoryControllerIT {
     @BeforeEach
     public void setUp() {
         // Empty relevant database tables
+        productRepository.deleteAll();
         userRepository.deleteAll();
         roleRepository.deleteAll();
         categoryRepository.deleteAll();
@@ -284,5 +290,22 @@ class CategoryControllerIT {
                         new HttpEntity<>(headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    public void shouldNotDeleteCategoryWhenForeignKeyConstraint() {
+        // Create product that references parent category
+        Product product = TestDataUtils.createProductA(parentCategory, user);
+        product.setId(null);
+        productRepository.save(product);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/categories/" + parentCategory.getId(), HttpMethod.DELETE,
+                        new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("Cannot delete category due to existing products that reference it");
     }
 }
