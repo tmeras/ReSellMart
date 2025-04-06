@@ -19,5 +19,7 @@ public class OrderItem {
     @ManyToOne(fetch = FetchType.LAZY)
     private Product product;
 
+    // TODO: Add status
+
     private Integer productQuantity;
 }

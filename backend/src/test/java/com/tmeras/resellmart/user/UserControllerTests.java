@@ -120,6 +120,18 @@ public class UserControllerTests {
     }
 
     @Test
+    public void shouldFindLoggedInUser() throws Exception {
+        when(userService.findMe(any(Authentication.class))).thenReturn(userResponseA);
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/users/me"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(userResponseA));
+    }
+
+    @Test
     public void shouldUpdateUserWhenValidRequest() throws Exception {
         userRequestA.setName("Updated user name");
         userResponseA.setName("Updated user name");
@@ -269,7 +281,7 @@ public class UserControllerTests {
     @Test
     public void shouldSaveWishListItemWhenValidRequest() throws Exception {
         WishListItemRequest wishListItemRequest = new WishListItemRequest(productResponseA.getId(), userA.getId());
-        WishListItemResponse wishListItemResponse = new WishListItemResponse(1, LocalDateTime.now(), productResponseA);
+        WishListItemResponse wishListItemResponse = new WishListItemResponse(1, productResponseA, LocalDateTime.now());
 
         when(userService.saveWishListItem(any(WishListItemRequest.class), eq(userA.getId()), any(Authentication.class)))
                 .thenReturn(wishListItemResponse);
@@ -301,7 +313,7 @@ public class UserControllerTests {
     @Test
     public void shouldFindALLWishListItemsByUserId() throws Exception {
         List<WishListItemResponse> wishListItemResponses = List.of(
-                new WishListItemResponse(1, LocalDateTime.now(), productResponseA)
+                new WishListItemResponse(1, productResponseA, LocalDateTime.now())
         );
 
         when(userService.findAllWishListItemsByUserId(eq(userA.getId()), any(Authentication.class)))

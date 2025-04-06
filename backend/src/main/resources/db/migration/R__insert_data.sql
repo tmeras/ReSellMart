@@ -20,14 +20,15 @@ INSERT IGNORE INTO role(id, name)
 VALUES (1, 'ADMIN'),
        (2, 'USER');
 
+-- TODO: Remove image background
 INSERT IGNORE INTO user(id, name, email, password, home_country, image_path, enabled, mfa_enabled, secret,
                         registered_at)
 VALUES (1, 'Theodore Meras', 'tmeras@yahoo.gr', '$2a$10$h2UMOIQGcBEjM0Dc3if4BuRBLzKKhnGy8i.vesnGwphl0BmTI/yMi',
         'Greece', './uploads/flyway-user-images/user_image.png', true, false, null, CURDATE()),
        (2, 'Edmund Smith', 'admin@yahoo.gr', '$2a$10$h2UMOIQGcBEjM0Dc3if4BuRBLzKKhnGy8i.vesnGwphl0BmTI/yMi',
-        'UK', './uploads/flyway-user-images/admin_image.jpeg', true, false, null, CURDATE()),
+        'United Kingdom', './uploads/flyway-user-images/admin_image.png', true, false, null, CURDATE()),
        (3, 'Mary Cole', 'mary@gmail.com', '$2a$10$h2UMOIQGcBEjM0Dc3if4BuRBLzKKhnGy8i.vesnGwphl0BmTI/yMi',
-        'UK', './uploads/flyway-user-images/user_image_2.png', true, false, null, CURDATE());
+        'United Kingdom', './uploads/flyway-user-images/user_image_2.png', true, false, null, CURDATE());
 
 INSERT IGNORE INTO user_roles(user_id, roles_id)
 VALUES (1, 2),
@@ -51,7 +52,7 @@ VALUES (1, './uploads/flyway-product-images/iphone 16 pro max.jpg', true, 1);
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id)
-VALUES (2, 'MacBook Air 13\'\' M1', 'A brand new MacBook Air with M1 chip. Still sealed.', 1500, 1300,
+VALUES (2, 'MacBook Air 13\'\' M1', 'A brand new MacBook Air with M1 chip. Still sealed.', 1300,1500,
         'NEW', 1, false, 2, 1);
 INSERT IGNORE INTO product_image(id, file_path, displayed, product_id)
 VALUES (2, './uploads/flyway-product-images/macbook air M1.jpeg', true, 2);
@@ -77,7 +78,7 @@ VALUES (6, './uploads/flyway-product-images/xm4_1.jpeg', true, 4),
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id)
 VALUES (5, 'Apple iPad Pro 12.9\'\'', 'Brand new iPad Pro, sealed.', 1100, NULL,
-        'NEW', 7, false, 2, 1);
+        'NEW', 7, false, 1, 1);
 INSERT IGNORE INTO product_image(id, file_path, displayed, product_id)
 VALUES (9, './uploads/flyway-product-images/ipad_1.jpeg', true, 5),
        (10, './uploads/flyway-product-images/ipad_2.jpeg', false, 5);
@@ -118,7 +119,7 @@ VALUES (17, './uploads/flyway-product-images/levis_jeans_1.jpeg', true, 9),
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id)
-VALUES (10, 'Sony PlayStation 5 Slim', 'Brand new sealed PS5 Slim, with 1 controller.', 600, 580,
+VALUES (10, 'Sony PlayStation 5 Slim', 'Brand new sealed PS5 Slim, with 1 controller.', 580, 600,
         'NEW', 20, false, 6, 2);
 INSERT IGNORE INTO product_image(id, file_path, displayed, product_id)
 VALUES (19, './uploads/flyway-product-images/ps5_slim_1.jpeg', true, 10),
@@ -135,7 +136,7 @@ VALUES (21, './uploads/flyway-product-images/canon_1.jpeg', true, 11),
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id)
 VALUES (12, 'Nintendo Switch OLED', 'Brand new Nintendo Switch OLED model. Sealed.', 350, NULL,
-        'NEW', 8, false, 14, 2);
+        'NEW', 8, false, 6, 2);
 INSERT IGNORE INTO product_image(id, file_path, displayed, product_id)
 VALUES (23, './uploads/flyway-product-images/switch_1.jpeg', true, 12),
        (24, './uploads/flyway-product-images/switch_2.jpeg', false, 12),
@@ -166,7 +167,7 @@ VALUES (29, './uploads/flyway-product-images/ac_1.jpeg', true, 15);
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id)
-VALUES (16, 'Xbox Series X 1TB', 'Used Xbox Series X console with damaged cover', 500, 450,
+VALUES (16, 'Xbox Series X 1TB', 'Used Xbox Series X console with damaged cover', 450, 500,
         'DAMAGED', 5, false, 6, 3);
 INSERT IGNORE INTO product_image(id, file_path, displayed, product_id)
 VALUES (30, './uploads/flyway-product-images/xbox_1.jpeg', true, 16),

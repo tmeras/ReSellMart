@@ -36,8 +36,7 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = {"application.file.upload.product-images-path=./test-uploads/product-images"}
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @Testcontainers
 public class ProductControllerIT {
@@ -265,6 +264,19 @@ public class ProductControllerIT {
     }
 
     @Test
+    public void shouldFindAllProductsByKeywordExceptSellerProducts() {
+        ResponseEntity<PageResponse<ProductResponse>> response =
+                restTemplate.exchange("/api/products/others?search=Test product", HttpMethod.GET,
+                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
+                        });
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getContent().size()).isEqualTo(1);
+        assertThat(response.getBody().getContent().get(0).getName()).isEqualTo(productB.getName());
+    }
+
+    @Test
     public void shouldFindAllProductsBySellerId() {
         ResponseEntity<PageResponse<ProductResponse>> response =
                 restTemplate.exchange("/api/products/user/" + productA.getSeller().getId(), HttpMethod.GET,
@@ -289,10 +301,11 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void shouldFindAllProductsByKeyword() {
+    public void shouldFindAllProductsByKeywordAndCategoryId() {
         ResponseEntity<PageResponse<ProductResponse>> response =
-                restTemplate.exchange("/api/products/search?keyword=Test Product", HttpMethod.GET,
-                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
+                restTemplate.exchange("/api/products/category/" + productA.getCategory().getId() + "?search=Test product",
+                        HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
+                        });
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();

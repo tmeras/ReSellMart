@@ -53,7 +53,6 @@ public class LogoutServiceTests {
                 user, user.getPassword(), user.getAuthorities()
         );
 
-        when(tokenRepository.existsByToken(accessToken)).thenReturn(false);
         when(jwtService.extractUsername(accessToken)).thenReturn(user.getEmail());
         when(tokenRepository.findAllValidRefreshTokensByUserEmail(user.getEmail())).thenReturn(List.of(refreshToken));
 
@@ -80,28 +79,6 @@ public class LogoutServiceTests {
     }
 
     @Test
-    public void shouldNotLogoutUserWhenAccessTokenIsSent() throws IOException {
-        User user = TestDataUtils.createUserA(Set.of(new Role(1, "USER")));
-        Token refreshToken = new Token(null, "refreshToken", TokenType.BEARER, LocalDateTime.now().minusMinutes(2),
-                LocalDateTime.now().plusMinutes(1), null, false, user);
-
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader("Authorization", "Bearer " + refreshToken.getToken());
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                user, user.getPassword(), user.getAuthorities()
-        );
-        String expectedResponse = "{\"error\": \"Invalid access token\"}";
-
-        when(tokenRepository.existsByToken(refreshToken.getToken())).thenReturn(true);
-
-        logoutService.logout(request, response, authentication);
-
-        assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_UNAUTHORIZED);
-        assertThat(response.getContentAsString()).isEqualTo(expectedResponse);
-    }
-
-    @Test
     public void shouldNotLogoutUserWhenInvalidAccessToken() throws IOException {
         User user = TestDataUtils.createUserA(Set.of(new Role(1, "USER")));
         String accessToken = "accessToken";
@@ -114,7 +91,6 @@ public class LogoutServiceTests {
         );
         String expectedResponse = "{\"error\": \"Invalid access token\"}";
 
-        when(tokenRepository.existsByToken(accessToken)).thenReturn(false);
         when(jwtService.extractUsername(accessToken)).thenThrow(new JwtException("Invalid access token"));
 
         logoutService.logout(request, response, authentication);

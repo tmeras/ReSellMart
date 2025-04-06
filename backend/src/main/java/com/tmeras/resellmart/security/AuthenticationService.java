@@ -15,11 +15,10 @@ import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
 import io.jsonwebtoken.JwtException;
 import jakarta.mail.MessagingException;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -99,7 +98,7 @@ public class AuthenticationService {
         emailService.sendActivationEmail(
                 user.getEmail(),
                 user.getRealName(),
-                activationUrl,
+                activationUrl + activationCode,
                 activationCode
         );
     }
@@ -176,16 +175,11 @@ public class AuthenticationService {
         tokenRepository.save(savedToken);
     }
 
-    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        final String refreshToken;
-        final String userEmail;
+    public void refreshToken(String refreshToken, HttpServletResponse response) throws IOException {
+        if (refreshToken.isEmpty())
+            throw new JwtException("No refresh token was provided");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer "))
-            throw new JwtException("No refresh token in Bearer header");
-
-        refreshToken = authHeader.substring(7);
-        userEmail = jwtService.extractUsername(refreshToken);
+        String userEmail = jwtService.extractUsername(refreshToken);
         if (userEmail != null) {
             User user = userRepository.findWithAssociationsByEmail(userEmail)
                     .orElseThrow(() -> new UsernameNotFoundException("User with the email '" + userEmail + "' does not exist"));
@@ -202,7 +196,6 @@ public class AuthenticationService {
                 AuthenticationResponse authenticationResponse =
                         AuthenticationResponse.builder()
                                 .accessToken(newAccessToken)
-                                .refreshToken(refreshToken)
                                 .build();
 
                 response.setContentType("application/json");
@@ -243,9 +236,18 @@ public class AuthenticationService {
                 .build()
         );
 
+        // Include refresh token in HttpOnly cookie
+        ResponseCookie refreshCookie = ResponseCookie
+                .from("refresh-token", refreshToken)
+                .httpOnly(true)
+                .secure(false) //TODO: Use secure in prod?
+                .path("/")
+                .maxAge(refreshExpirationTime / 1000)
+                .build();
+
         return AuthenticationResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .refreshTokenCookie(refreshCookie.toString())
                 .mfaEnabled(user.isMfaEnabled())
                 .build();
     }

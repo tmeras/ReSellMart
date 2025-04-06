@@ -236,12 +236,31 @@ public class ProductServiceTests {
         Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
         Page<Product> page = new PageImpl<>(List.of(productB));
 
-        when(productRepository.findAllByKeyword(pageable, "Test product", productA.getSeller().getId())).thenReturn(page);
+        when(productRepository.findAllByKeyword(pageable, "Test product", userA.getId())).thenReturn(page);
         when(productMapper.toProductResponse(productB)).thenReturn(productResponseB);
 
         PageResponse<ProductResponse> pageResponse =
                 productService.findAllByKeyword(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                         AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR, "Test product", authentication);
+
+        assertThat(pageResponse.getContent().size()).isEqualTo(1);
+        assertThat(pageResponse.getContent().get(0)).isEqualTo(productResponseB);
+    }
+
+    @Test
+    public void shouldFindAllProductsByCategoryIdAndKeyword() {
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
+        Page<Product> page = new PageImpl<>(List.of(productB));
+
+        when(productRepository.findAllByCategoryIdAndKeyword(pageable, productA.getCategory().getId(), "Test product",
+                userA.getId())).thenReturn(page);
+        when(productMapper.toProductResponse(productB)).thenReturn(productResponseB);
+
+        PageResponse<ProductResponse> pageResponse =
+                productService.findAllByCategoryIdAndKeyword(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR, productA.getCategory().getId(), "Test product", authentication);
 
         assertThat(pageResponse.getContent().size()).isEqualTo(1);
         assertThat(pageResponse.getContent().get(0)).isEqualTo(productResponseB);
@@ -261,7 +280,7 @@ public class ProductServiceTests {
         when(productRepository.save(productA)).thenReturn(productA);
         when(productMapper.toProductResponse(productA)).thenReturn(productResponseA);
 
-        ProductResponse productResponse = productService.update(productRequestA, productRequestA.getId(), authentication);
+        ProductResponse productResponse = productService.update(productRequestA, productA.getId(), authentication);
 
         assertThat(productResponse).isEqualTo(productResponseA);
         assertThat(productA.getName()).isEqualTo("Updated product name");
@@ -274,7 +293,7 @@ public class ProductServiceTests {
 
         when(categoryRepository.findWithAssociationsById(99)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> productService.update(productRequestA, productRequestA.getId(), authentication))
+        assertThatThrownBy(() -> productService.update(productRequestA, productA.getId(), authentication))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("No category found with ID: 99");
     }

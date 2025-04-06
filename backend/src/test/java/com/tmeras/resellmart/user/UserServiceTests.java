@@ -157,6 +157,15 @@ public class UserServiceTests {
     }
 
     @Test
+    public void shouldFindLoggedInUser() {
+        when(userMapper.toUserResponse(userA)).thenReturn(userResponseA);
+
+        UserResponse userResponse = userService.findMe(authentication);
+
+        assertThat(userResponse).isEqualTo(userResponseA);
+    }
+
+    @Test
     public void shouldUpdateUserWhenValidRequest() {
         userRequestA.setName("Updated user name");
         userRequestA.setHomeCountry("Updated home country");
@@ -420,7 +429,7 @@ public class UserServiceTests {
     public void shouldSaveWishListItemWhenValidRequest() {
         WishListItem wishListItem = new WishListItem(1, LocalDateTime.now(), productB, userA);
         WishListItemRequest wishListItemRequest = new WishListItemRequest(productB.getId(), userA.getId());
-        WishListItemResponse wishListItemResponse = new WishListItemResponse(1, LocalDateTime.now(), productResponseB);
+        WishListItemResponse wishListItemResponse = new WishListItemResponse(1, productResponseB, LocalDateTime.now());
 
         when(wishListItemRepository.existsByUserIdAndProductId(userA.getId(), productB.getId())).thenReturn(false);
         when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
@@ -496,7 +505,7 @@ public class UserServiceTests {
     @Test
     public void shouldFindAllWishListItemsByUserIdWhenValidRequest() {
         WishListItem wishListItem = new WishListItem(1, LocalDateTime.now(), productB, userA);
-        WishListItemResponse wishListItemResponse = new WishListItemResponse(1, LocalDateTime.now(), productResponseB);
+        WishListItemResponse wishListItemResponse = new WishListItemResponse(1, productResponseB, LocalDateTime.now());
 
         when(wishListItemRepository.findAllWithProductDetailsByUserId(userA.getId()))
                 .thenReturn(List.of(wishListItem));

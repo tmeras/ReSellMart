@@ -1,16 +1,15 @@
 package com.tmeras.resellmart.security;
 
 import jakarta.mail.MessagingException;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.nio.file.AccessDeniedException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -40,15 +39,21 @@ public class AuthenticationController {
             @Valid @RequestBody AuthenticationRequest authenticationRequest
     ) {
         AuthenticationResponse authenticationResponse = authenticationService.login(authenticationRequest);
-        return new ResponseEntity<>(authenticationResponse, HttpStatus.OK);
+        String refreshCookie = authenticationResponse.getRefreshTokenCookie();
+        authenticationResponse.setRefreshTokenCookie(null);
+
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.SET_COOKIE, refreshCookie)
+                .body(authenticationResponse);
     }
 
     @PostMapping("/refresh")
     public void refreshToken(
-            HttpServletRequest request,
+            @CookieValue(name = "refresh-token", defaultValue = "") String refreshToken,
             HttpServletResponse response
     ) throws IOException {
-        authenticationService.refreshToken(request, response);
+        authenticationService.refreshToken(refreshToken, response);
     }
 
     @PostMapping("/verification")

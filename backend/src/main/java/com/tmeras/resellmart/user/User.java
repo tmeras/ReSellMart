@@ -51,7 +51,7 @@ public class User implements UserDetails, Principal {
     private Set<Role> roles;
 
     public String getRealName() {
-        return name;
+        return this.name;
     }
 
     @Override
