@@ -43,7 +43,7 @@ public class ProductMapper {
                 .previousPrice(product.getPreviousPrice())
                 .productCondition(product.getProductCondition())
                 .availableQuantity(product.getAvailableQuantity())
-                .isDeleted(product.getIsDeleted())
+                .deleted(product.getIsDeleted())
                 .images(productImageResponses)
                 .category(categoryMapper.toCategoryResponse(product.getCategory()))
                 .seller(userMapper.toUserResponse(product.getSeller()))
