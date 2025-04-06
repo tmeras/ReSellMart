@@ -164,11 +164,34 @@ public class ProductControllerTests {
     }
 
     @Test
+    public void shouldFindAllProductsByKeywordExceptSellerProducts() throws Exception {
+        PageResponse<ProductResponse> pageResponse = new PageResponse<>(
+                List.of(productResponseB),
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                1, 1,
+                true, true
+        );
+
+        when(productService.findAllByKeyword(
+                eq(AppConstants.PAGE_NUMBER_INT), eq(AppConstants.PAGE_SIZE_INT),
+                eq(AppConstants.SORT_PRODUCTS_BY), eq(AppConstants.SORT_DIR),
+                eq("Test product"), any(Authentication.class)
+        )).thenReturn(pageResponse);
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/products/others?search=Test product"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(pageResponse));
+    }
+
+    @Test
     public void shouldFindAllProductsBySellerId() throws Exception {
         PageResponse<ProductResponse> pageResponse = new PageResponse<>(
                 List.of(productResponseA),
                 AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
-                2, 1,
+                1, 1,
                 true, true
         );
 
@@ -189,9 +212,9 @@ public class ProductControllerTests {
     @Test
     public void shouldFindAllProductsByCategoryId() throws Exception {
         PageResponse<ProductResponse> pageResponse = new PageResponse<>(
-                List.of(productResponseA, productResponseB),
+                List.of(productResponseB),
                 AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
-                2, 1,
+                1, 1,
                 true, true
         );
 
@@ -210,21 +233,22 @@ public class ProductControllerTests {
     }
 
     @Test
-    public void shouldFindAllProductsByKeyword() throws Exception {
+    public void shouldFindAllProductsByCategoryIdAndKeyword() throws Exception {
         PageResponse<ProductResponse> pageResponse = new PageResponse<>(
-                List.of(productResponseA, productResponseB),
+                List.of(productResponseB),
                 AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
-                2, 1,
+                1, 1,
                 true, true
         );
 
-        when(productService.findAllByKeyword(
+        when(productService.findAllByCategoryIdAndKeyword(
                 eq(AppConstants.PAGE_NUMBER_INT), eq(AppConstants.PAGE_SIZE_INT),
                 eq(AppConstants.SORT_PRODUCTS_BY), eq(AppConstants.SORT_DIR),
-                eq("Test product"), any(Authentication.class)
+                eq(productRequestA.getCategoryId()), eq("Test product"), any(Authentication.class)
         )).thenReturn(pageResponse);
 
-        MvcResult mvcResult = mockMvc.perform(get("/api/products/search?keyword=Test product"))
+        MvcResult mvcResult = mockMvc.perform(
+                        get("/api/products/category/" + productRequestA.getCategoryId() + "?search=Test product"))
                 .andExpect(status().isOk())
                 .andReturn();
         String jsonResponse = mvcResult.getResponse().getContentAsString();

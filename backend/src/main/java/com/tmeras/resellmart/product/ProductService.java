@@ -202,7 +202,37 @@ public class ProductService {
                 products.getTotalPages(),
                 products.isFirst(),
                 products.isLast()
-        );    }
+        );
+    }
+
+    public PageResponse<ProductResponse> findAllByCategoryIdAndKeyword(
+            Integer pageNumber, Integer pageSize, String sortBy, String sortDirection,
+            Integer categoryId, String keyword, Authentication authentication
+    ) {
+        User currentUser = (User) authentication.getPrincipal();
+        Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        Page<Product> products = productRepository.findAllByCategoryIdAndKeyword(pageable, categoryId, keyword, currentUser.getId());
+        // Initialize lazy associations
+        for (Product product : products) {
+            product.getImages().size();
+            product.getSeller().getRoles().size();
+        }
+        List<ProductResponse> productResponses = products.stream()
+                .map(productMapper::toProductResponse)
+                .toList();
+
+        return new PageResponse<>(
+                productResponses,
+                products.getNumber(),
+                products.getSize(),
+                products.getTotalElements(),
+                products.getTotalPages(),
+                products.isFirst(),
+                products.isLast()
+        );
+    }
 
     public ProductResponse update(ProductRequest productRequest, Integer productId, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
@@ -284,8 +314,9 @@ public class ProductService {
 
         // Make displayed=false for all images of this product
         // before making displayed=true for the specified image
-        for (ProductImage productImage: existingproduct.getImages())
+        for (ProductImage productImage : existingproduct.getImages()) {
             productImage.setDisplayed(false);
+        }
         int imageIndex = existingproduct.getImages().indexOf(existingImage);
         existingproduct.getImages().get(imageIndex).setDisplayed(true);
 
@@ -296,9 +327,11 @@ public class ProductService {
     @PreAuthorize("hasRole('ADMIN')") // Deletion possible by admins only, users can only mark products as unavailable
     public void delete(Integer productId) throws IOException {
         Optional<Product> existingProduct = productRepository.findWithImagesById(productId);
-        if (existingProduct.isPresent() && existingProduct.get().getImages() != null)
-            for (ProductImage productImage: existingProduct.get().getImages())
+        if (existingProduct.isPresent() && existingProduct.get().getImages() != null) {
+            for (ProductImage productImage : existingProduct.get().getImages()) {
                 fileService.deleteFile(productImage.getFilePath());
+            }
+        }
 
         // TODO: Ensure that no order refers to this product
 

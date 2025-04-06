@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     @Query("""
-                    SELECT p FROM Product p WHERE p.availableQuantity > 0 
+                    SELECT p FROM Product p WHERE p.availableQuantity > 0
                     AND p.isDeleted <> true AND p.seller.id <> :sellerId
     """)
     Page<Product> findAllBySellerIdNot(Pageable pageable, Integer sellerId);
@@ -36,6 +36,13 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     """)
     Page<Product> findAllByKeyword(Pageable pageable, String keyword, Integer sellerId);
 
+    @Query("""
+                    SELECT p FROM Product p WHERE p.isDeleted <> true AND p.availableQuantity > 0
+                    AND p.seller.id <> :sellerId AND p.category.id = :categoryId
+                    AND (p.name LIKE %:keyword% OR p.description LIKE %:keyword%)
+            """)
+    Page<Product> findAllByCategoryIdAndKeyword(Pageable pageable, Integer categoryId, String keyword, Integer sellerId);
+
     @EntityGraph(attributePaths = {"category.parentCategory", "seller.roles", "images"})
     Optional<Product> findWithAssociationsById(Integer id);
 
@@ -43,4 +50,5 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     Optional<Product> findWithImagesById(Integer id);
 
     List<Product> findAllBySellerId(Integer sellerId);
+
 }

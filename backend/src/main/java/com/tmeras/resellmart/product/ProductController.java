@@ -44,8 +44,8 @@ public class ProductController {
             @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_PRODUCTS_BY, required = false) String sortBy,
             @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection
     ) {
-        PageResponse<ProductResponse> foundProducts =
-                productService.findAll(pageNumber, pageSize, sortBy, sortDirection);
+
+        PageResponse<ProductResponse> foundProducts = productService.findAll(pageNumber, pageSize, sortBy, sortDirection);
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
     }
 
@@ -55,11 +55,13 @@ public class ProductController {
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_PRODUCTS_BY, required = false) String sortBy,
             @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection,
+            @RequestParam(name = "search", required = false) String search,
             Authentication authentication
     ) {
         // Get all products excluding those sold by the logged-in user
-        PageResponse<ProductResponse> foundProducts =
-                productService.findAllExceptSellerProducts(pageNumber, pageSize, sortBy, sortDirection, authentication);
+        PageResponse<ProductResponse> foundProducts = (search == null || search.isEmpty()) ?
+                productService.findAllExceptSellerProducts(pageNumber, pageSize, sortBy, sortDirection, authentication)
+                : productService.findAllByKeyword(pageNumber, pageSize, sortBy, sortDirection, search, authentication);
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
     }
 
@@ -83,26 +85,13 @@ public class ProductController {
             @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_PRODUCTS_BY, required = false) String sortBy,
             @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection,
             @PathVariable(name = "category-id") Integer categoryId,
+            @RequestParam(name = "search", required = false) String search,
             Authentication authentication
     ) {
         // Get all products belonging to the specified category excluding those sold by the logged-in user
-        PageResponse<ProductResponse> foundProducts =
-                productService.findAllByCategoryId(pageNumber, pageSize, sortBy, sortDirection, categoryId, authentication);
-        return new ResponseEntity<>(foundProducts, HttpStatus.OK);
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity<PageResponse<ProductResponse>> findAllByKeyword(
-            @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
-            @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_PRODUCTS_BY, required = false) String sortBy,
-            @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection,
-            @RequestParam(name = "keyword") String keyword,
-            Authentication authentication
-    ) {
-        // Search for products based on the provided keyword excluding those sold by the logged-in user
-        PageResponse<ProductResponse> foundProducts =
-                productService.findAllByKeyword(pageNumber, pageSize, sortBy, sortDirection, keyword, authentication);
+        PageResponse<ProductResponse> foundProducts = (search == null || search.isEmpty()) ?
+                productService.findAllByCategoryId(pageNumber, pageSize, sortBy, sortDirection, categoryId, authentication)
+                : productService.findAllByCategoryIdAndKeyword(pageNumber, pageSize, sortBy, sortDirection, categoryId, search, authentication);
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
     }
 

@@ -61,5 +61,5 @@ application:
 
   file:
     upload:
-      product-images-path: ./uploads/product-images
-      user-images-path: ./uploads/user-images
+      product-images-path: ./test-uploads/product-images
+      user-images-path: ./test-uploads/user-images
