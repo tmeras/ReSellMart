@@ -1,7 +1,8 @@
+import { api } from "@/lib/apiClient.ts";
+import { UserResponse } from "@/types/api.tsx";
 import { InternalAxiosRequestConfig } from "axios";
 import { createContext, ReactNode, useEffect, useLayoutEffect, useMemo, useState } from "react";
-import { api } from "../lib/api-client.ts";
-import { UserResponse } from "../types/api.tsx";
+
 
 type AuthContext = {
     accessToken: string | null;
@@ -26,10 +27,9 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
     type AxiosRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
     useLayoutEffect(() => {
-        console.log("In response effect")
         const responseInterceptor = api.interceptors.response.use(
             (response) => {
-                return response
+                return response;
             },
             async (error) => {
                 const originalRequest = error.config;
@@ -41,7 +41,7 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
                 ) {
                     try {
                         const response = await api.post("api/auth/refresh", {},)
-                        console.log("Refresh success", response.data)
+                        console.log("Refresh success", response);
                         setAccessToken(response.data.accessToken)
 
                         originalRequest._retry = true;
@@ -97,8 +97,8 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
             const response = await api.get("api/users/me");
             console.log("Got user", response.data)
             setUser(response.data);
-        } catch {
-            console.log("Error fetching user");
+        } catch (error) {
+            console.log("Error fetching user", error);
             setUser(null);
         }
     };

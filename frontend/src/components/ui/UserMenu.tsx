@@ -1,22 +1,25 @@
 import { UserButton } from "@/components/ui/UserButton.tsx";
 import { paths } from "@/config/paths.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
-import { api } from "@/lib/api-client.ts";
+import { api } from "@/lib/apiClient.ts";
 import { byteToBase64 } from "@/utils/fileUtils.ts";
 import { Menu, useMantineTheme } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconHeart, IconLogout, IconSettings, IconX } from "@tabler/icons-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 
 export function UserMenu() {
     const theme = useMantineTheme();
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const { user, setUser } = useAuth();
 
     async function handleLogout() {
         try {
             await api.get("/api/auth/logout");
             setUser(null);
+            await queryClient.invalidateQueries();
             navigate(paths.auth.login);
         } catch (error) {
             console.log("Logout error:", error);
@@ -45,7 +48,7 @@ export function UserMenu() {
                     Account Settings
                 </Menu.Item>
 
-                <Menu.Item leftSection={ <IconHeart size={ 16 } color={ theme.colors.red[6] }/> }>
+                <Menu.Item leftSection={ <IconHeart size={ 16 } color={ theme.colors.red[4] }/> }>
                     Wishlist
                 </Menu.Item>
 

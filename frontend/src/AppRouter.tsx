@@ -1,17 +1,17 @@
-import { createBrowserRouter, RouterProvider } from "react-router";
-import { LoginPage } from "./pages/auth/LoginPage.tsx";
-import { Products } from "./pages/products.tsx";
-import { Orders } from "./pages/orders/Orders.tsx";
-import { ProtectedRoute } from "./components/ProtectedRoute.tsx";
-import { paths } from "./config/paths.ts";
-import { AuthLayout } from "./components/layouts/AuthLayout.tsx";
+import { ProductsPage } from "@/pages/app/products/ProductsPage.tsx";
 import { useMemo } from "react";
-import { RegistrationPage } from "./pages/auth/RegistrationPage.tsx";
-import { ActivationPage } from "./pages/auth/ActivationPage.tsx";
-import { MainErrorBoundary } from "./components/error/MainErrorBoundary.tsx";
 import { ErrorBoundary } from "react-error-boundary";
+import { createBrowserRouter, RouterProvider } from "react-router";
+import { MainErrorBoundary } from "./components/error/MainErrorBoundary.tsx";
 import { NotFound } from "./components/error/NotFound.tsx";
 import { AppLayout } from "./components/layouts/AppLayout.tsx";
+import { AuthLayout } from "./components/layouts/AuthLayout.tsx";
+import { ProtectedRoute } from "./components/ProtectedRoute.tsx";
+import { paths } from "./config/paths.ts";
+import { ActivationPage } from "./pages/auth/ActivationPage.tsx";
+import { LoginPage } from "./pages/auth/LoginPage.tsx";
+import { RegistrationPage } from "./pages/auth/RegistrationPage.tsx";
+import { Orders } from "./pages/orders/Orders.tsx";
 
 const createAppRouter = () =>
     createBrowserRouter([
@@ -38,15 +38,16 @@ const createAppRouter = () =>
         },
         {
             element: (
-                <ProtectedRoute>
-                    <AppLayout/>
-                </ProtectedRoute>
-                // TODO: Add main error boundary at app root too
+                <ErrorBoundary FallbackComponent={ MainErrorBoundary }>
+                    <ProtectedRoute>
+                        <AppLayout/>
+                    </ProtectedRoute>
+                </ErrorBoundary>
             ),
             children: [
                 {
                     path: paths.app.products,
-                    element: <Products/>
+                    element: <ProductsPage/>
                 },
                 {
                     path: paths.app.orders,

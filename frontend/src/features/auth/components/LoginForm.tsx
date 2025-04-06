@@ -1,6 +1,6 @@
 import { paths } from "@/config/paths.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
-import { api } from "@/lib/api-client.ts";
+import { api } from "@/lib/apiClient.ts";
 import { AuthenticationResponse } from "@/types/api.tsx";
 import {
     Anchor,
@@ -52,7 +52,7 @@ export function LoginForm() {
     async function handleFormSubmit(values: typeof form.values) {
         try {
             const response =
-                await api.post<AuthenticationResponse>("api/auth/login", values);
+                await api.post("api/auth/login", values);
 
             if (response.data.mfaEnabled) {
                 setOtp({
@@ -85,7 +85,7 @@ export function LoginForm() {
                 });
             } else {
                 notifications.show({
-                    title: "Something went wrong", message: "Please retry login",
+                    title: "Something went wrong", message: "Please try logging in again",
                     color: "red", icon: <IconX/>, withBorder: true
                 });
             }

@@ -1,6 +1,5 @@
 import { PasswordInputWithStrength } from "@/components/form/PasswordInputWithStrength.tsx";
-import { api } from "@/lib/api-client.ts";
-import { RegistrationResponse } from "@/types/api.tsx";
+import { api } from "@/lib/apiClient.ts";
 import {
     Anchor,
     Button,
@@ -73,7 +72,7 @@ export const RegistrationForm = () => {
             }
 
             const response =
-                await api.post<RegistrationResponse>("api/auth/registration", values);
+                await api.post("api/auth/registration", values);
             console.log("Registration result", response.data);
 
             if (response.data.mfaEnabled)
@@ -87,7 +86,7 @@ export const RegistrationForm = () => {
                 form.setFieldError("email", "An account has already been created using this email");
             } else {
                 notifications.show({
-                    title: "Something went wrong", message: "Please retry registration",
+                    title: "Something went wrong", message: "Please try registering again",
                     color: "red", icon: <IconX/>, withBorder: true
                 });
             }

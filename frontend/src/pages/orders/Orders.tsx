@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuth.ts";
-import { api } from "@/lib/api-client.ts";
+import { api } from "@/lib/apiClient.ts";
 import { useQuery } from "@tanstack/react-query";
 
 export const Orders = () => {

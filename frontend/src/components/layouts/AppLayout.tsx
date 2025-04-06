@@ -1,19 +1,22 @@
-import { ActionIcon, AppShell, Burger, Flex, Image, Text, Tooltip, useMantineColorScheme } from "@mantine/core";
+import imgUrl from "@/assets/logo.png";
+import { LogoText } from "@/components/ui/LogoText.tsx";
+import { UserMenu } from "@/components/ui/UserMenu.tsx";
+import { ActionIcon, AppShell, Burger, Flex, Image, Text, Title, Tooltip, useMantineColorScheme } from "@mantine/core";
 import { IconBrightnessDown, IconMoon } from "@tabler/icons-react";
 import { useState } from "react";
 import { Outlet } from "react-router";
-import imgUrl from "../../assets/logo.png";
 
 export function AppLayout() {
     const [navBarOpened, setNavBarOpened] = useState(false);
     const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
+    // TODO: Add error boundary
     return (
         <AppShell
             header={ { height: 60 } }
             navbar={ {
                 width: 250,
-                breakpoint: "sm",
+                breakpoint: "md",
                 collapsed: { mobile: !navBarOpened }
             } }
             padding="md"
@@ -22,13 +25,11 @@ export function AppLayout() {
                 <Flex align="center" justify="space-between">
                     <Flex>
                         <Burger
-                            hiddenFrom="sm" size="sm" me="md"
+                            hiddenFrom="md" size="sm" me="md"
                             opened={ navBarOpened } onClick={ () => setNavBarOpened(!navBarOpened) }
                         />
                         <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
-                        <Text size="lg">
-                            ReSellMart
-                        </Text>
+                        <LogoText/>
                     </Flex>
                     { colorScheme === "dark" ? (
                         <Tooltip label="Light Mode">
@@ -52,9 +53,19 @@ export function AppLayout() {
                 </Flex>
             </AppShell.Header>
 
-            {/*TODO: Logout*/ }
             <AppShell.Navbar p="md">
-                Placeholder
+                <Flex direction="column" justify="space-between" h="100%">
+                    <div>
+                        <Title order={ 3 } c="paleIndigo.5" mb="sm">
+                            Buying
+                        </Title>
+                        ...
+
+                    </div>
+
+                    <UserMenu/>
+                </Flex>
+
             </AppShell.Navbar>
 
             <AppShell.Main>
@@ -65,9 +76,7 @@ export function AppLayout() {
                 <Flex direction="column" justify="center" align="center">
                     <Flex justify="center" align="center" mb="sm">
                         <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
-                        <Text size="lg">
-                            ReSellMart
-                        </Text>
+                        <LogoText/>
                     </Flex>
                     <Text c="dimmed" size="sm">
                         © 2025 ReSellMart. All rights reserved.

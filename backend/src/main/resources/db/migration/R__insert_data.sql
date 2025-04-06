@@ -48,14 +48,14 @@ INSERT IGNORE INTO product(id, name, description, price, previous_price, product
 VALUES (1, 'Iphone 16 Pro Max', 'A brand new Iphone 16 Pro Max. Used for <2 hours.', 200, NULL,
         'LIKE_NEW', 1, false, 4, 1);
 INSERT IGNORE INTO product_image(id, file_path, displayed, product_id)
-VALUES (1, './uploads/flyway-product-images/iphone 16 pro max.jpg', true, 1);
+VALUES (1, './uploads/flyway-product-images/iphone_16_pro_max.png', true, 1);
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id)
 VALUES (2, 'MacBook Air 13\'\' M1', 'A brand new MacBook Air with M1 chip. Still sealed.', 1300,1500,
         'NEW', 1, false, 2, 1);
 INSERT IGNORE INTO product_image(id, file_path, displayed, product_id)
-VALUES (2, './uploads/flyway-product-images/macbook air M1.jpeg', true, 2);
+VALUES (2, './uploads/flyway-product-images/macbook_air_M1.png', true, 2);
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id)
@@ -71,17 +71,17 @@ INSERT IGNORE INTO product(id, name, description, price, previous_price, product
 VALUES (4, 'Sony WH-1000XM4', 'Top-rated noise-canceling headphones, like new condition.', 350, NULL,
         'LIKE_NEW', 10, false, 1, 1);
 INSERT IGNORE INTO product_image(id, file_path, displayed, product_id)
-VALUES (6, './uploads/flyway-product-images/xm4_1.jpeg', true, 4),
-       (7, './uploads/flyway-product-images/xm4_2.jpeg', false, 4),
-       (8, './uploads/flyway-product-images/xm4_3.jpeg', false, 4);
+VALUES (6, './uploads/flyway-product-images/xm4_1.png', true, 4),
+       (7, './uploads/flyway-product-images/xm4_2.png', false, 4),
+       (8, './uploads/flyway-product-images/xm4_3.png', false, 4);
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id)
 VALUES (5, 'Apple iPad Pro 12.9\'\'', 'Brand new iPad Pro, sealed.', 1100, NULL,
         'NEW', 7, false, 1, 1);
 INSERT IGNORE INTO product_image(id, file_path, displayed, product_id)
-VALUES (9, './uploads/flyway-product-images/ipad_1.jpeg', true, 5),
-       (10, './uploads/flyway-product-images/ipad_2.jpeg', false, 5);
+VALUES (9, './uploads/flyway-product-images/ipad_1.png', true, 5),
+       (10, './uploads/flyway-product-images/ipad_2.png', false, 5);
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id)
@@ -89,8 +89,8 @@ VALUES (6, 'LG 55\'\' OLED TV',
         'A high-quality OLED TV with amazing picture quality. Used for 6 months, has some dead pixels.', 1300, 1200,
         'DAMAGED', 1, false, 5, 2);
 INSERT IGNORE INTO product_image(id, file_path, displayed, product_id)
-VALUES (11, './uploads/flyway-product-images/lg_oled_1.jpeg', true, 6),
-       (12, './uploads/flyway-product-images/lg_oled_2.jpeg', false, 6);
+VALUES (11, './uploads/flyway-product-images/lg_oled_1.png', true, 6),
+       (12, './uploads/flyway-product-images/lg_oled_2.png', false, 6);
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id)
@@ -98,64 +98,64 @@ VALUES (7, 'Bose QuietComfort', 'Amazing noise-canceling headphones in mint cond
         NULL,
         'LIKE_NEW', 1, false, 1, 2);
 INSERT IGNORE INTO product_image(id, file_path, displayed, product_id)
-VALUES (13, './uploads/flyway-product-images/bose_1.jpeg', true, 7),
-       (14, './uploads/flyway-product-images/bose_2.jpeg', false, 7),
-       (15, './uploads/flyway-product-images/bose_3.jpeg', false, 7);
+VALUES (13, './uploads/flyway-product-images/bose_1.png', true, 7),
+       (14, './uploads/flyway-product-images/bose_2.png', false, 7),
+       (15, './uploads/flyway-product-images/bose_3.png', false, 7);
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id)
 VALUES (8, 'Nike T-shirt', 'A comfortable cotton T-shirt for casual wear.', 25, NULL,
         'NEW', 50, false, 8, 2);
 INSERT IGNORE INTO product_image(id, file_path, displayed, product_id)
-VALUES (16, './uploads/flyway-product-images/nike_shirt_1.jpeg', true, 8);
+VALUES (16, './uploads/flyway-product-images/nike_shirt_1.png', true, 8);
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id)
 VALUES (9, 'Levi\'s Jeans', 'Stylish denim jeans, good condition.', 60, NULL,
         'FAIR', 30, false, 9, 2);
 INSERT IGNORE INTO product_image(id, file_path, displayed, product_id)
-VALUES (17, './uploads/flyway-product-images/levis_jeans_1.jpeg', true, 9),
-       (18, './uploads/flyway-product-images/levis_jeans_2.jpeg', false, 9);
+VALUES (17, './uploads/flyway-product-images/levis_jeans_1.png', true, 9),
+       (18, './uploads/flyway-product-images/levis_jeans_2.png', false, 9);
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id)
 VALUES (10, 'Sony PlayStation 5 Slim', 'Brand new sealed PS5 Slim, with 1 controller.', 580, 600,
         'NEW', 20, false, 6, 2);
 INSERT IGNORE INTO product_image(id, file_path, displayed, product_id)
-VALUES (19, './uploads/flyway-product-images/ps5_slim_1.jpeg', true, 10),
-       (20, './uploads/flyway-product-images/ps5_slim_2.jpeg', false, 10);
+VALUES (19, './uploads/flyway-product-images/ps5_slim_1.png', true, 10),
+       (20, './uploads/flyway-product-images/ps5_slim_2.png', false, 10);
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id)
 VALUES (11, 'Canon EOS 5D Mark IV', 'Used Canon DSLR camera with 2 lenses. Great condition.', 1000, NULL,
         'LIKE_NEW', 3, false, 16, 2);
 INSERT IGNORE INTO product_image(id, file_path, displayed, product_id)
-VALUES (21, './uploads/flyway-product-images/canon_1.jpeg', true, 11),
-       (22, './uploads/flyway-product-images/canon_2.jpeg', false, 11);
+VALUES (21, './uploads/flyway-product-images/canon_1.png', true, 11),
+       (22, './uploads/flyway-product-images/canon_2.png', false, 11);
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id)
 VALUES (12, 'Nintendo Switch OLED', 'Brand new Nintendo Switch OLED model. Sealed.', 350, NULL,
         'NEW', 8, false, 6, 2);
 INSERT IGNORE INTO product_image(id, file_path, displayed, product_id)
-VALUES (23, './uploads/flyway-product-images/switch_1.jpeg', true, 12),
-       (24, './uploads/flyway-product-images/switch_2.jpeg', false, 12),
-       (25, './uploads/flyway-product-images/switch_3.jpeg', false, 12);
+VALUES (23, './uploads/flyway-product-images/switch_1.png', true, 12),
+       (24, './uploads/flyway-product-images/switch_2.png', false, 12),
+       (25, './uploads/flyway-product-images/switch_3.png', false, 12);
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id)
 VALUES (13, 'Harry Potter Book Set', 'A complete set of all 7 Harry Potter books in great condition.', 150, NULL,
         'LIKE_NEW', 15, false, 14, 3);
 INSERT IGNORE INTO product_image(id, file_path, displayed, product_id)
-VALUES (26, './uploads/flyway-product-images/harry_1.jpeg', true, 13),
-       (27, './uploads/flyway-product-images/harry_2.jpeg', false, 13);
+VALUES (26, './uploads/flyway-product-images/harry_1.png', true, 13),
+       (27, './uploads/flyway-product-images/harry_2.png', false, 13);
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id)
 VALUES (14, 'The Lord of the Rings Trilogy', 'A 3-book set of The Lord of the Rings in new condition.', 60, NULL,
         'NEW', 10, false, 13, 3);
 INSERT IGNORE INTO product_image(id, file_path, displayed, product_id)
-VALUES (28, './uploads/flyway-product-images/lotr_1.jpeg', true, 14);
+VALUES (28, './uploads/flyway-product-images/lotr_1.png', true, 14);
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id)

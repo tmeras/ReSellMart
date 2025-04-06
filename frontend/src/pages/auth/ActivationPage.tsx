@@ -1,4 +1,4 @@
-import { api } from "@/lib/api-client.ts";
+import { api } from "@/lib/apiClient.ts";
 import { Button, Container, Flex, Loader, Paper, Text } from "@mantine/core";
 import { IconArrowBack, IconCircleCheckFilled, IconExclamationCircleFilled } from "@tabler/icons-react";
 import axios from "axios";
