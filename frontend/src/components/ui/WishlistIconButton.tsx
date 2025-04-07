@@ -16,7 +16,6 @@ export function WishlistIconButton({ inWishlist, productId }: WishlistIconButton
     const createWishlistItemMutation = useCreateWishlistItem({ userId: user!.id });
     const deleteWishlistItemMutation = useDeleteWishlistItem({ userId: user!.id });
 
-
     async function addToWishlist() {
         try {
             await createWishlistItemMutation.mutateAsync({

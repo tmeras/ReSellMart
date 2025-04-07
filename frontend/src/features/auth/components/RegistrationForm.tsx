@@ -59,7 +59,6 @@ export const RegistrationForm = () => {
         validate: zodResolver(registerInputSchema),
         onValuesChange: (values) => {
             setPassword(values.password);
-            console.log("Form state: ", values);
         },
     })
 

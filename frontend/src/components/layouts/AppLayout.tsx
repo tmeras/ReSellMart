@@ -1,14 +1,13 @@
 import imgUrl from "@/assets/logo.png";
+import { DarkModeButton } from "@/components/ui/DarkModeButton.tsx";
 import { LogoText } from "@/components/ui/LogoText.tsx";
 import { UserMenu } from "@/components/ui/UserMenu.tsx";
-import { ActionIcon, AppShell, Burger, Flex, Image, Text, Title, Tooltip, useMantineColorScheme } from "@mantine/core";
-import { IconBrightnessDown, IconMoon } from "@tabler/icons-react";
+import { AppShell, Burger, Flex, Image, Text, Title } from "@mantine/core";
 import { useState } from "react";
 import { Outlet } from "react-router";
 
 export function AppLayout() {
     const [navBarOpened, setNavBarOpened] = useState(false);
-    const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
     // TODO: Add error boundary
     return (
@@ -31,25 +30,8 @@ export function AppLayout() {
                         <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
                         <LogoText/>
                     </Flex>
-                    { colorScheme === "dark" ? (
-                        <Tooltip label="Light Mode">
-                            <ActionIcon
-                                aria-label="Light Mode" onClick={ () => toggleColorScheme() }
-                                variant="filled" ms="sm" size="md" mt={ 2 }
-                            >
-                                <IconBrightnessDown size={ 60 }/>
-                            </ActionIcon>
-                        </Tooltip>
-                    ) : (
-                        <Tooltip label="Dark Mode">
-                            <ActionIcon
-                                aria-label="Dark Mode" onClick={ () => toggleColorScheme() }
-                                variant="outline" ms="sm" size="md" mt={ 2 }
-                            >
-                                <IconMoon size={ 50 }/>
-                            </ActionIcon>
-                        </Tooltip>
-                    ) }
+
+                    <DarkModeButton/>
                 </Flex>
             </AppShell.Header>
 
