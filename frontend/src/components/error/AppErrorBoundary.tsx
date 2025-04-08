@@ -1,12 +1,12 @@
-import { Button, Flex, Text, Title } from '@mantine/core';
+import { Button, Flex, Text, Title } from "@mantine/core";
 import { IconAlertTriangleFilled, IconMoodCry } from "@tabler/icons-react";
 
-type MainErrorBoundaryProps = {
-    error: Error;
-}
+type AppErrorBoundaryProps = {
+    error: Error
+};
 
-export function MainErrorBoundary({ error }: MainErrorBoundaryProps) {
-    console.log("MainErrorFallback caught", error)
+export function AppErrorBoundary({ error }: AppErrorBoundaryProps) {
+    console.log("AppErrorFallback caught", error);
 
     return (
         <Flex direction="column" align="center" justify="center" h="80vh">
@@ -18,7 +18,7 @@ export function MainErrorBoundary({ error }: MainErrorBoundaryProps) {
             </Flex>
 
             <Text c="dimmed" size="lg" ta="center" mt="sm">
-                Please refresh the page and try again.
+                Please use the navigation bar or refresh the page and try again.
             </Text>
 
             <Button

@@ -133,7 +133,7 @@ export function LoginForm() {
         if (redirectTo)
             navigate(redirectTo, { replace: true });
         else
-            navigate(paths.app.products, { replace: true });
+            navigate(paths.app.products.path, { replace: true });
     }
 
     if (otp.showModal)
@@ -155,7 +155,7 @@ export function LoginForm() {
         );
 
     return (
-        <Flex justify="center" align="center" h="100vh">
+        <Flex justify="center" align="center" h="80vh">
             <Container size={ 420 }>
                 <Paper withBorder shadow="lg" p={ 30 } radius="md">
                     <Title ta="center">

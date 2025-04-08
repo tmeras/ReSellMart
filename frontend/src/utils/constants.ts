@@ -1,3 +1,5 @@
+export const DEFAULT_PAGE_SIZE = 12 as const;
+
 export const PRODUCT_CONDITION = {
     NEW: "New",
     LIKE_NEW: "Like New",

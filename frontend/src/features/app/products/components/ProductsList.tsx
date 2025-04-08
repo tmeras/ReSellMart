@@ -27,12 +27,12 @@ export function ProductsList({ products }: ProductsListProps) {
     const wishlistItems = getWishlistQuery.data?.data;
 
     if (getCartQuery.isError || !cartItems) {
-        console.log("Cart fetch error", getCartQuery.error);
+        console.log("Get cart error", getCartQuery.error);
         return <div>There was an error when fetching your cart. Please try again later</div>;
     }
 
     if (getWishlistQuery.isError || !wishlistItems) {
-        console.log("Wishlist fetch error", getWishlistQuery.error);
+        console.log("Get wishlist error", getWishlistQuery.error);
         return <div>There was an error when fetching your wishlist. Please try again later</div>;
     }
 

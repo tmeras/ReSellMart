@@ -196,25 +196,25 @@ class CategoryControllerIT {
 
     @Test
     public void shouldFindAllCategories() {
-        ResponseEntity<PageResponse<CategoryResponse>> response =
+        ResponseEntity<List<CategoryResponse>> response =
                 restTemplate.exchange("/api/categories", HttpMethod.GET,
                         new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getContent().size()).isEqualTo(2);
+        assertThat(response.getBody().size()).isEqualTo(2);
     }
 
     @Test
     public void shouldFindAllCategoriesByParentId() {
-        ResponseEntity<PageResponse<CategoryResponse>> response =
+        ResponseEntity<List<CategoryResponse>> response =
                 restTemplate.exchange("/api/categories/parents/" + parentCategory.getId(), HttpMethod.GET,
                         new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getContent().size()).isEqualTo(1);
-        assertThat(response.getBody().getContent().get(0).getName()).isEqualTo(childCategory.getName());
+        assertThat(response.getBody().size()).isEqualTo(1);
+        assertThat(response.getBody().get(0).getName()).isEqualTo(childCategory.getName());
     }
 
     @Test

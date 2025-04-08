@@ -1,3 +1,4 @@
+import { paths } from "@/config/paths.ts";
 import { api } from "@/lib/apiClient.ts";
 import { Button, Container, Flex, Loader, Paper, Text } from "@mantine/core";
 import { IconArrowBack, IconCircleCheckFilled, IconExclamationCircleFilled } from "@tabler/icons-react";
@@ -56,7 +57,7 @@ export function ActivationPage() {
                             <Button
                                 leftSection={ <IconArrowBack/> } fullWidth
                                 variant="light" mt="lg"
-                                component={ Link } to="/auth/login"
+                                component={ Link } to={ paths.auth.login.path }
                             >
                                 To login
                             </Button>
@@ -73,7 +74,7 @@ export function ActivationPage() {
                             <Button
                                 leftSection={ <IconArrowBack/> } fullWidth
                                 variant="light" mt="lg"
-                                component={ Link } to="/auth/login"
+                                component={ Link } to={ paths.auth.login.path }
                             >
                                 To login
                             </Button>

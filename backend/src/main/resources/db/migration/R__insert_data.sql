@@ -1,7 +1,7 @@
 INSERT IGNORE INTO category (id, name, parent_id)
 VALUES (1, 'Electronics', NULL),
        (2, 'Laptops', 1),
-       (3, 'Computers', 1),
+       (3, 'Desktops', 1),
        (4, 'Smartphones', 1),
        (5, 'Smart TVs', 1),
        (6, 'Gaming Consoles', 1),
@@ -16,11 +16,12 @@ VALUES (1, 'Electronics', NULL),
        (15, 'Videogames', 12),
        (16, 'Cameras', 1);
 
+-- TODO: More categories and products
+
 INSERT IGNORE INTO role(id, name)
 VALUES (1, 'ADMIN'),
        (2, 'USER');
 
--- TODO: Remove image background
 INSERT IGNORE INTO user(id, name, email, password, home_country, image_path, enabled, mfa_enabled, secret,
                         registered_at)
 VALUES (1, 'Theodore Meras', 'tmeras@yahoo.gr', '$2a$10$h2UMOIQGcBEjM0Dc3if4BuRBLzKKhnGy8i.vesnGwphl0BmTI/yMi',

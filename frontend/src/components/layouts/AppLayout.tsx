@@ -1,10 +1,15 @@
 import imgUrl from "@/assets/logo.png";
+import { AppErrorBoundary } from "@/components/error/AppErrorBoundary.tsx";
+import { CategoryNavLinks } from "@/components/ui/CategoryNavLinks.tsx";
 import { DarkModeButton } from "@/components/ui/DarkModeButton.tsx";
 import { LogoText } from "@/components/ui/LogoText.tsx";
 import { UserMenu } from "@/components/ui/UserMenu.tsx";
-import { AppShell, Burger, Flex, Image, Text, Title } from "@mantine/core";
+import { paths } from "@/config/paths.ts";
+import { AppShell, Burger, Flex, Image, NavLink, ScrollArea, Text } from "@mantine/core";
+import { IconGridDots } from "@tabler/icons-react";
 import { useState } from "react";
-import { Outlet } from "react-router";
+import { ErrorBoundary } from "react-error-boundary";
+import { NavLink as RouterNavLink, Outlet } from "react-router";
 
 export function AppLayout() {
     const [navBarOpened, setNavBarOpened] = useState(false);
@@ -36,26 +41,41 @@ export function AppLayout() {
             </AppShell.Header>
 
             <AppShell.Navbar p="md">
-                <Flex direction="column" justify="space-between" h="100%">
-                    <div>
-                        <Title order={ 3 } c="paleIndigo.5" mb="sm">
-                            Buying
-                        </Title>
-                        ...
+                <AppShell.Section
+                    my="sm"
+                    component={ ScrollArea } grow
+                    type="hover" scrollbarSize={ 2 }
+                >
+                    <Text size="xl" fw={ 700 } c="paleIndigo.5" mb="sm">
+                        Buying
+                    </Text>
 
-                    </div>
+                    <NavLink
+                        label="All Products"
+                        leftSection={ <IconGridDots size={ 18 }/> }
+                        component={ RouterNavLink } onClick={ () => setNavBarOpened(false) }
+                        to={ paths.app.products.path } end
+                    />
 
-                    <UserMenu/>
-                </Flex>
+                    <CategoryNavLinks closeNavBar={ () => setNavBarOpened(false) }/>
+                </AppShell.Section>
 
+                <AppShell.Section>
+                    <UserMenu closeNavBar={ () => setNavBarOpened(false) }/>
+                </AppShell.Section>
             </AppShell.Navbar>
 
             <AppShell.Main>
-                <Outlet/>
+                <ErrorBoundary FallbackComponent={ AppErrorBoundary }>
+                    <Outlet/>
+                </ErrorBoundary>
             </AppShell.Main>
 
-            <AppShell.Footer p="md" style={ { position: "relative" } }>
-                <Flex direction="column" justify="center" align="center">
+            <AppShell.Footer p="md" pos="relative">
+                <Flex
+                    direction="column" justify="center" align="center"
+                    ml={ { base: 0, md: "15%" } }
+                >
                     <Flex justify="center" align="center" mb="sm">
                         <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
                         <LogoText/>

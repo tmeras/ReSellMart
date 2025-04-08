@@ -34,27 +34,18 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<PageResponse<CategoryResponse>> findAll(
-            @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
-            @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_CATEGORIES_BY, required = false) String sortBy,
-            @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection
-    ) {
-        PageResponse<CategoryResponse> foundCategories =
-                categoryService.findAll(pageNumber, pageSize, sortBy, sortDirection);
+    public ResponseEntity<List<CategoryResponse>> findAll() {
+        List<CategoryResponse> foundCategories =
+                categoryService.findAll();
         return new ResponseEntity<>(foundCategories, HttpStatus.OK);
     }
 
     @GetMapping("/parents/{parent-id}")
-    public ResponseEntity<PageResponse<CategoryResponse>> findAllByParentId(
-            @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
-            @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_CATEGORIES_BY, required = false) String sortBy,
-            @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection,
+    public ResponseEntity<List<CategoryResponse>> findAllByParentId(
             @PathVariable(name = "parent-id") Integer parentId
     ) {
-        PageResponse<CategoryResponse> foundCategories =
-                categoryService.findAllByParentId(pageNumber, pageSize, sortBy, sortDirection, parentId);
+        List<CategoryResponse> foundCategories =
+                categoryService.findAllByParentId(parentId);
         return new ResponseEntity<>(foundCategories, HttpStatus.OK);
     }
 

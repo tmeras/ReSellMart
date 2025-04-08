@@ -1,15 +1,20 @@
-import { useGetProducts } from "@/features/app/products/api/getProducts.ts";
+import { useGetProductsByCategory } from "@/features/app/products/api/getProductsByCategory.ts";
 import { ProductsList } from "@/features/app/products/components/ProductsList.tsx";
 import { SearchProducts } from "@/features/app/products/components/SearchProducts.tsx";
 import { Flex, Loader, Pagination } from "@mantine/core";
 import { useState } from "react";
+import { useParams } from "react-router";
 
-export function ProductsPage() {
+//TODO: Products by user
+export function ProductsByCategoryPage() {
+    const params = useParams();
+    const categoryId = params.categoryId as string;
+
     const [page, setPage] = useState(0);
     const [search, setSearch] = useState("");
     const [querySearch, setQuerySearch] = useState("");
-
-    const getProductsQuery = useGetProducts({
+    const getProductsByCategoryQuery = useGetProductsByCategory({
+        categoryId,
         page,
         search: querySearch
     });
@@ -19,10 +24,14 @@ export function ProductsPage() {
         setQuerySearch(search);
     }
 
-    if (getProductsQuery.isError) console.log("Error fetching products", getProductsQuery.error);
+    if (getProductsByCategoryQuery.isError) {
+        console.log("Error fetching products by category", getProductsByCategoryQuery.error);
+    }
 
-    const products = getProductsQuery.data?.data.content;
-    const totalPages = getProductsQuery.data?.data.totalPages;
+    const products = getProductsByCategoryQuery.data?.data.content;
+    const totalPages = getProductsByCategoryQuery.data?.data?.totalPages;
+
+    console.log(getProductsByCategoryQuery.data);
 
     return (
         <>
@@ -32,17 +41,17 @@ export function ProductsPage() {
                 mb="xl" w="50%"
             />
 
-            { getProductsQuery.isLoading &&
+            { getProductsByCategoryQuery.isLoading &&
                 <Flex align="center" justify="center" h="100vh">
                     <Loader type="bars" size="md"/>
                 </Flex>
             }
 
-            { getProductsQuery.isError &&
-                <div>There was an error when fetching products. Please try again.</div>
+            { getProductsByCategoryQuery.isError &&
+                <div>There was an error when fetching the products. Please try again.</div>
             }
 
-            { products && !getProductsQuery.isError &&
+            { products && !getProductsByCategoryQuery.isError &&
                 <>
                     <ProductsList products={ products }/>
 

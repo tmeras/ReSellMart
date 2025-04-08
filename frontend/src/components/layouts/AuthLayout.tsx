@@ -18,7 +18,7 @@ export function AuthLayout() {
             if (redirectTo)
                 navigate(redirectTo, { replace: true });
             else
-                navigate(paths.app.products, { replace: true });
+                navigate(paths.app.products.path, { replace: true });
     }, [user, navigate, redirectTo]);
 
     return (
@@ -33,7 +33,7 @@ export function AuthLayout() {
                         <LogoText/>
                     </Flex>
                     <Flex>
-                        <Button size="xs" component={ Link } to={ paths.auth.login }>
+                        <Button size="xs" component={ Link } to={ paths.auth.login.path }>
                             Sign in
                         </Button>
 

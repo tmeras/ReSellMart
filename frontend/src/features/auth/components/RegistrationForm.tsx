@@ -1,4 +1,5 @@
 import { PasswordInputWithStrength } from "@/components/form/PasswordInputWithStrength.tsx";
+import { paths } from "@/config/paths.ts";
 import { api } from "@/lib/apiClient.ts";
 import {
     Anchor,
@@ -44,7 +45,7 @@ export const RegistrationForm = () => {
             ),
         homeCountry: z.string().min(1, "Home country is required"),
         mfaEnabled: z.boolean().default(false)
-    })
+    });
 
     const form = useForm({
         mode: "uncontrolled",
@@ -60,7 +61,7 @@ export const RegistrationForm = () => {
         onValuesChange: (values) => {
             setPassword(values.password);
         },
-    })
+    });
 
     const handleSubmit = async (values: typeof form.values) => {
         try {
@@ -94,7 +95,7 @@ export const RegistrationForm = () => {
 
     if (formComplete)
         return (
-            <Flex justify="center" align="center" h="100vh">
+            <Flex justify="center" align="center" h="90vh">
                 <Container size="400">
                     <Paper withBorder shadow="lg" p={ 30 } radius="md">
                         <Flex direction="column" align="center" justify="center">
@@ -126,7 +127,7 @@ export const RegistrationForm = () => {
                             <Button
                                 leftSection={ <IconArrowBack/> } fullWidth
                                 variant="light" mt="xl"
-                                component={ Link } to="/auth/login"
+                                component={ Link } to={ paths.auth.login.path }
                             >
                                 To login
                             </Button>

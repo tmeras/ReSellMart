@@ -65,15 +65,11 @@ public class CategoryRepositoryTests {
 
     @Test
     public void shouldFindAllCategoriesByParentId() {
-        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstants.SORT_CATEGORIES_BY).ascending() : Sort.by(AppConstants.SORT_CATEGORIES_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
+        List<Category> categories = categoryRepository.findAllByParentId(parentCategory.getId());
 
-        Page<Category> categoryPage = categoryRepository.findAllByParentId(pageable, parentCategory.getId());
-
-        assertThat(categoryPage.getContent().size()).isEqualTo(1);
-        assertThat(categoryPage.getContent().get(0).getId()).isEqualTo(childCategory.getId());
-        assertThat(categoryPage.getContent().get(0).getName()).isEqualTo(childCategory.getName());
+        assertThat(categories.size()).isEqualTo(1);
+        assertThat(categories.get(0).getId()).isEqualTo(childCategory.getId());
+        assertThat(categories.get(0).getName()).isEqualTo(childCategory.getName());
     }
 
     @Test

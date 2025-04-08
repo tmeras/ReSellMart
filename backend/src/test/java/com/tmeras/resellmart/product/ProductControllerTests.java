@@ -201,7 +201,7 @@ public class ProductControllerTests {
                 productResponseA.getSeller().getId()
         )).thenReturn(pageResponse);
 
-        MvcResult mvcResult = mockMvc.perform(get("/api/products/user/" + productResponseA.getSeller().getId()))
+        MvcResult mvcResult = mockMvc.perform(get("/api/products/users/" + productResponseA.getSeller().getId()))
                 .andExpect(status().isOk())
                 .andReturn();
         String jsonResponse = mvcResult.getResponse().getContentAsString();
@@ -224,7 +224,7 @@ public class ProductControllerTests {
                 eq(productRequestA.getCategoryId()), any(Authentication.class)
         )).thenReturn(pageResponse);
 
-        MvcResult mvcResult = mockMvc.perform(get("/api/products/category/" + productRequestA.getCategoryId()))
+        MvcResult mvcResult = mockMvc.perform(get("/api/products/categories/" + productRequestA.getCategoryId()))
                 .andExpect(status().isOk())
                 .andReturn();
         String jsonResponse = mvcResult.getResponse().getContentAsString();
@@ -248,7 +248,7 @@ public class ProductControllerTests {
         )).thenReturn(pageResponse);
 
         MvcResult mvcResult = mockMvc.perform(
-                        get("/api/products/category/" + productRequestA.getCategoryId() + "?search=Test product"))
+                        get("/api/products/categories/" + productRequestA.getCategoryId() + "?search=Test product"))
                 .andExpect(status().isOk())
                 .andReturn();
         String jsonResponse = mvcResult.getResponse().getContentAsString();

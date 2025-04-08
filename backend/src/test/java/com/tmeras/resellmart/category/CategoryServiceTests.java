@@ -127,22 +127,15 @@ public class CategoryServiceTests {
 
     @Test
     public void shouldFindAllCategories() {
-        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstants.SORT_CATEGORIES_BY).ascending() : Sort.by(AppConstants.SORT_CATEGORIES_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
-        Page<Category> page = new PageImpl<>(List.of(categoryA, categoryB));
-
-        when(categoryRepository.findAll(pageable)).thenReturn(page);
+        when(categoryRepository.findAll()).thenReturn(List.of(categoryA, categoryB));
         when(categoryMapper.toCategoryResponse(categoryA)).thenReturn(categoryResponseA);
         when(categoryMapper.toCategoryResponse(categoryB)).thenReturn(categoryResponseB);
 
-        PageResponse<CategoryResponse> pageResponse =
-                categoryService.findAll(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
-                        AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR);
+        List<CategoryResponse> pageResponse = categoryService.findAll();
 
-        assertThat(pageResponse.getContent().size()).isEqualTo(2);
-        assertThat(pageResponse.getContent().get(0)).isEqualTo(categoryResponseA);
-        assertThat(pageResponse.getContent().get(1)).isEqualTo(categoryResponseB);
+        assertThat(pageResponse.size()).isEqualTo(2);
+        assertThat(pageResponse.get(0)).isEqualTo(categoryResponseA);
+        assertThat(pageResponse.get(1)).isEqualTo(categoryResponseB);
     }
 
     @Test
@@ -152,15 +145,14 @@ public class CategoryServiceTests {
         Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
         Page<Category> page = new PageImpl<>(List.of(categoryB));
 
-        when(categoryRepository.findAllByParentId(pageable, categoryB.getParentCategory().getId())).thenReturn(page);
+        when(categoryRepository.findAllByParentId(categoryB.getParentCategory().getId())).thenReturn(List.of(categoryB));
         when(categoryMapper.toCategoryResponse(categoryB)).thenReturn(categoryResponseB);
 
-        PageResponse<CategoryResponse> pageResponse =
-                categoryService.findAllByParentId(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
-                        AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR, categoryB.getParentCategory().getId());
+        List<CategoryResponse> pageResponse =
+                categoryService.findAllByParentId( categoryB.getParentCategory().getId());
 
-        assertThat(pageResponse.getContent().size()).isEqualTo(1);
-        assertThat(pageResponse.getContent().get(0)).isEqualTo(categoryResponseB);
+        assertThat(pageResponse.size()).isEqualTo(1);
+        assertThat(pageResponse.get(0)).isEqualTo(categoryResponseB);
     }
 
     @Test

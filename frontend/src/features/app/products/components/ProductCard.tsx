@@ -36,16 +36,16 @@ export function ProductCard({ product, cartItem, inWishlist }: ProductCardProps)
                 <Flex direction="column" justify="start" gap={ 2 }>
                     <Flex justify="space-between" mb={ 2 }>
                         <Flex align="center">
-                            <IconTool size={ 16 }/>
+                            <IconList size={ 16 }/>
                             <Text span size="sm" ms={ 5 }>
-                                Condition: { PRODUCT_CONDITION[product.productCondition] }
+                                { product.category.name }
                             </Text>
                         </Flex>
 
                         <Flex align="center">
-                            <IconList size={ 16 }/>
+                            <IconTool size={ 16 }/>
                             <Text span size="sm" ms={ 5 }>
-                                { product.category.name }
+                                { PRODUCT_CONDITION[product.productCondition] }
                             </Text>
                         </Flex>
                     </Flex>

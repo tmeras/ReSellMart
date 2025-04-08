@@ -65,7 +65,7 @@ public class ProductController {
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
     }
 
-    @GetMapping("/user/{seller-id}")
+    @GetMapping("/users/{seller-id}")
     public ResponseEntity<PageResponse<ProductResponse>> findAllBySellerId(
             @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
@@ -78,7 +78,7 @@ public class ProductController {
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
     }
 
-    @GetMapping("/category/{category-id}")
+    @GetMapping("/categories/{category-id}")
     public ResponseEntity<PageResponse<ProductResponse>> findAllByCategoryId(
             @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,

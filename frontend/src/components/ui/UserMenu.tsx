@@ -9,7 +9,11 @@ import { IconHeart, IconLogout, IconSettings, IconX } from "@tabler/icons-react"
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 
-export function UserMenu() {
+type UserMenuProps = {
+    closeNavBar: () => void;
+}
+
+export function UserMenu({ closeNavBar }: UserMenuProps) {
     const theme = useMantineTheme();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
@@ -20,7 +24,7 @@ export function UserMenu() {
             await api.get("/api/auth/logout");
             setUser(null);
             await queryClient.invalidateQueries();
-            navigate(paths.auth.login);
+            navigate(paths.auth.login.path);
         } catch (error) {
             console.log("Logout error:", error);
 
@@ -44,11 +48,17 @@ export function UserMenu() {
             </Menu.Target>
 
             <Menu.Dropdown>
-                <Menu.Item leftSection={ <IconSettings size={ 16 }/> }>
+                <Menu.Item
+                    leftSection={ <IconSettings size={ 16 }/> }
+                    onClick={ closeNavBar }
+                >
                     Account Settings
                 </Menu.Item>
 
-                <Menu.Item leftSection={ <IconHeart size={ 16 } color={ theme.colors.red[4] }/> }>
+                <Menu.Item
+                    leftSection={ <IconHeart size={ 16 } color={ theme.colors.red[4] }/> }
+                    onClick={ closeNavBar }
+                >
                     Wishlist
                 </Menu.Item>
 

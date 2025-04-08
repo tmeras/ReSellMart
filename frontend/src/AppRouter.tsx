@@ -1,3 +1,4 @@
+import { ProductsByCategoryPage } from "@/pages/app/products/ProductsByCategoryPage.tsx";
 import { ProductsPage } from "@/pages/app/products/ProductsPage.tsx";
 import { useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
@@ -11,7 +12,6 @@ import { paths } from "./config/paths.ts";
 import { ActivationPage } from "./pages/auth/ActivationPage.tsx";
 import { LoginPage } from "./pages/auth/LoginPage.tsx";
 import { RegistrationPage } from "./pages/auth/RegistrationPage.tsx";
-import { Orders } from "./pages/orders/Orders.tsx";
 
 const createAppRouter = () =>
     createBrowserRouter([
@@ -23,15 +23,15 @@ const createAppRouter = () =>
             ),
             children: [
                 {
-                    path: paths.auth.login,
+                    path: paths.auth.login.path,
                     element: <LoginPage/>
                 },
                 {
-                    path: paths.auth.register,
+                    path: paths.auth.register.path,
                     element: <RegistrationPage/>
                 },
                 {
-                    path: paths.auth.activation,
+                    path: paths.auth.activation.path,
                     element: <ActivationPage/>
                 }
             ]
@@ -46,13 +46,14 @@ const createAppRouter = () =>
             ),
             children: [
                 {
-                    path: paths.app.products,
+                    path: paths.app.products.path,
                     element: <ProductsPage/>
                 },
                 {
-                    path: paths.app.orders,
-                    element: <Orders/>
-                }
+                    path: paths.app.productByCategory.path,
+                    element: <ProductsByCategoryPage/>
+                },
+
             ]
         },
         {
