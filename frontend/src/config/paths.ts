@@ -22,6 +22,10 @@ export const paths = {
         productByCategory: {
             path: "/app/products/categories/:categoryId",
             getHref: (id: string) => `/app/products/categories/${ id }`
+        },
+        productsByUser: {
+            path: "/app/products/users/:userId",
+            getHref: (id: string) => `/app/products/users/${ id }`
         }
     },
 } as const

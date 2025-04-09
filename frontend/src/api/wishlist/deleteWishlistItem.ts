@@ -8,7 +8,7 @@ export function deleteWishlistItem(
     return api.delete(`/api/users/${ userId }/wishlist/products/${ productId }`);
 }
 
-type UseDeleteWishlistItemOptions = {
+export type UseDeleteWishlistItemOptions = {
     userId: number;
 };
 

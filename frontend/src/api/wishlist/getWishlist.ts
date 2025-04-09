@@ -14,7 +14,7 @@ export function getWishlistQueryOptions({ userId }: { userId: number }) {
     });
 }
 
-type UseGetWishlistOptions = {
+export type UseGetWishlistOptions = {
     userId: number;
 };
 

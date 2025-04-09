@@ -71,10 +71,12 @@ public class ProductController {
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_PRODUCTS_BY, required = false) String sortBy,
             @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection,
-            @PathVariable(name = "seller-id") Integer sellerId
+            @PathVariable(name = "seller-id") Integer sellerId,
+            @RequestParam(name = "search", required = false) String search
     ) {
-        PageResponse<ProductResponse> foundProducts =
-                productService.findAllBySellerId(pageNumber, pageSize, sortBy, sortDirection, sellerId);
+        PageResponse<ProductResponse> foundProducts = (search == null || search.isEmpty()) ?
+                productService.findAllBySellerId(pageNumber, pageSize, sortBy, sortDirection, sellerId)
+                : productService.findAllBySellerIdAndKeyword(pageNumber, pageSize, sortBy, sortDirection, sellerId, search);
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
     }
 

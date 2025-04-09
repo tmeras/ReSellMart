@@ -15,7 +15,7 @@ export function createCartItem({ data }: { data: CreateCartItemInput }) {
     return api.post(`/api/users/${ data.userId }/cart/products`, data);
 }
 
-type UseCreateCartItemOptions = {
+export type UseCreateCartItemOptions = {
     userId: number
 }
 

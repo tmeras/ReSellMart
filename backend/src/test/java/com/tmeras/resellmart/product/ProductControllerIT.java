@@ -300,6 +300,18 @@ public class ProductControllerIT {
     }
 
     @Test
+    public void shouldFindAllProductsBySellerIdAndKeyword() {
+        ResponseEntity<PageResponse<ProductResponse>> response =
+                restTemplate.exchange("/api/products/users/" + productA.getSeller().getId() + "?search=Test product",
+                        HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getContent().size()).isEqualTo(1);
+        assertThat(response.getBody().getContent().get(0).getName()).isEqualTo(productA.getName());
+    }
+
+    @Test
     public void shouldFindAllProductsByCategoryId() {
         ResponseEntity<PageResponse<ProductResponse>> response =
                 restTemplate.exchange("/api/products/categories/" + productA.getCategory().getId(), HttpMethod.GET,

@@ -1,4 +1,4 @@
-import { useGetCategories } from "@/api/category/getCategories.ts";
+import { useGetCategories } from "@/api/categories/getCategories.ts";
 import { paths } from "@/config/paths.ts";
 import { Flex, Loader, NavLink, Tooltip } from "@mantine/core";
 import { IconBrandAppleArcade, IconCpu2, IconHome, IconList, IconShirt } from "@tabler/icons-react";

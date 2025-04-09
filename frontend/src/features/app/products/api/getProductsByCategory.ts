@@ -22,11 +22,11 @@ export function getProductsByCategoryQueryOptions(
     });
 }
 
-type UseGetProductsByCategoryOptions = {
+export type UseGetProductsByCategoryOptions = {
     categoryId: string;
     page: number;
     search?: string;
-}
+};
 
 export function useGetProductsByCategory({ categoryId, page, search }: UseGetProductsByCategoryOptions) {
     return useQuery({

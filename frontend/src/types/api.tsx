@@ -30,7 +30,7 @@ export type UserResponse = {
     homeCountry: string;
     registeredAt: string;
     mfaEnabled: boolean;
-    profileImage: Uint8Array;
+    profileImage?: Uint8Array;
     roles: Role[];
     qrImageUri?: string;
 }

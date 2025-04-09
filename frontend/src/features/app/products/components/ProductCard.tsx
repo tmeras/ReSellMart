@@ -1,8 +1,10 @@
 import { CartButtonGroup } from "@/components/ui/CartButtonGroup.tsx";
+import { CustomLink } from "@/components/ui/link/CustomLink.tsx";
 import { WishlistIconButton } from "@/components/ui/WishlistIconButton.tsx";
+import { paths } from "@/config/paths.ts";
 import { CartItemResponse, ProductResponse } from "@/types/api.tsx";
 import { PRODUCT_CONDITION } from "@/utils/constants.ts";
-import { byteToBase64, findDisplayedImage } from "@/utils/fileUtils.ts";
+import { bytesToBase64, findDisplayedImage } from "@/utils/fileUtils.ts";
 import { Card, Flex, Image, Text, Title } from "@mantine/core";
 import { IconList, IconPackages, IconTool } from "@tabler/icons-react";
 
@@ -20,7 +22,7 @@ export function ProductCard({ product, cartItem, inWishlist }: ProductCardProps)
     return (
         <Card withBorder radius="md" w={ 300 }>
             <Card.Section>
-                <Image src={ byteToBase64(displayedImage) } fit="contain" h={ 200 } bg="gray.4"/>
+                <Image src={ bytesToBase64(displayedImage) } fit="contain" h={ 200 } bg="gray.4"/>
             </Card.Section>
 
             <Card.Section inheritPadding withBorder mt="sm">
@@ -79,7 +81,10 @@ export function ProductCard({ product, cartItem, inWishlist }: ProductCardProps)
                     <CartButtonGroup cartItem={ cartItem } product={ product }/>
 
                     <Text size="xs" c="dimmed">
-                        Sold by { product.seller.name }
+                        Sold by { " " }
+                        <CustomLink to={ paths.app.productsByUser.getHref(product.seller.id.toString()) }>
+                            { product.seller.name }
+                        </CustomLink>
                     </Text>
                 </Flex>
             </Card.Section>

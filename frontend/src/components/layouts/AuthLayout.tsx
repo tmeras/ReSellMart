@@ -8,9 +8,10 @@ import { Link, Outlet, useNavigate, useSearchParams } from "react-router";
 import imgUrl from "../../assets/logo.png";
 
 export function AuthLayout() {
-    const { user } = useAuth();
     const [searchParams] = useSearchParams();
     const redirectTo = searchParams.get('redirectTo');
+
+    const { user } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {

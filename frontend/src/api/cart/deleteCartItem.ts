@@ -8,7 +8,7 @@ export function deleteCartItem(
     return api.delete(`/api/users/${ userId }/cart/products/${ productId }`);
 }
 
-type UseDeleteCartItemOptions = {
+export type UseDeleteCartItemOptions = {
     userId: number;
 };
 

@@ -17,7 +17,7 @@ export function updateCartItem(
     return api.patch(`/api/users/${ data.userId }/cart/products/${ data.productId }`, data);
 }
 
-type UseUpdateCartItemOptions = {
+export type UseUpdateCartItemOptions = {
     userId: number
 }
 

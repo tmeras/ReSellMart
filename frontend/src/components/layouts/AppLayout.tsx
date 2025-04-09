@@ -14,7 +14,6 @@ import { NavLink as RouterNavLink, Outlet } from "react-router";
 export function AppLayout() {
     const [navBarOpened, setNavBarOpened] = useState(false);
 
-    // TODO: Add error boundary
     return (
         <AppShell
             header={ { height: 60 } }

@@ -14,7 +14,7 @@ export function getCartQueryOptions({ userId }: { userId: number }) {
     });
 }
 
-type UseGetCartOptions = {
+export type UseGetCartOptions = {
     userId: number;
 };
 

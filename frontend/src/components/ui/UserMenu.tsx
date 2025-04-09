@@ -2,7 +2,7 @@ import { UserButton } from "@/components/ui/UserButton.tsx";
 import { paths } from "@/config/paths.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { api } from "@/lib/apiClient.ts";
-import { byteToBase64 } from "@/utils/fileUtils.ts";
+import { bytesToBase64 } from "@/utils/fileUtils.ts";
 import { Menu, useMantineTheme } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconHeart, IconLogout, IconSettings, IconX } from "@tabler/icons-react";
@@ -43,7 +43,7 @@ export function UserMenu({ closeNavBar }: UserMenuProps) {
             <Menu.Target>
                 <UserButton
                     name={ user!.name } email={ user!.email }
-                    image={ user!.profileImage ? byteToBase64(user!.profileImage) : null }
+                    image={ user!.profileImage ? bytesToBase64(user!.profileImage) : null }
                 />
             </Menu.Target>
 

@@ -253,6 +253,24 @@ public class ProductServiceTests {
     }
 
     @Test
+    public void shouldFindAllProductsBySellerIdAndKeyword() {
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
+        Page<Product> page = new PageImpl<>(List.of(productA));
+
+        when(productRepository.findAllBySellerIdAndKeyword(pageable, productA.getSeller().getId(), "Test product")).thenReturn(page);
+        when(productMapper.toProductResponse(productA)).thenReturn(productResponseA);
+
+        PageResponse<ProductResponse> pageResponse =
+                productService.findAllBySellerIdAndKeyword(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR, productA.getSeller().getId(), "Test product");
+
+        assertThat(pageResponse.getContent().size()).isEqualTo(1);
+        assertThat(pageResponse.getContent().get(0)).isEqualTo(productResponseA);
+    }
+
+    @Test
     public void shouldFindAllProductsByCategoryIdAndKeyword() {
         Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
                 Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();

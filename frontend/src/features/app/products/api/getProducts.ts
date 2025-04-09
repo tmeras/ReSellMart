@@ -9,7 +9,7 @@ export function getProducts(page = 0, search = ""): Promise<AxiosResponse<PageRe
 }
 
 export function getProductsQueryOptions(
-    { page, search }: { page?: number, search?: string }
+    { page = 0, search }: { page?: number, search?: string }
 ) {
     return queryOptions({
         queryKey: (page || page === 0) ?
@@ -23,7 +23,7 @@ export function getProductsQueryOptions(
     });
 }
 
-type UseGetProductsOptions = {
+export type UseGetProductsOptions = {
     page: number;
     search?: string
 };

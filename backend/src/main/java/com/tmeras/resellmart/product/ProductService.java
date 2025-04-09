@@ -210,6 +210,33 @@ public class ProductService {
         );
     }
 
+    public PageResponse<ProductResponse> findAllBySellerIdAndKeyword(
+        Integer pageNumber, Integer pageSize, String sortBy, String sortDirection, Integer sellerId, String keyword
+    ) {
+        Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        Page<Product> products = productRepository.findAllBySellerIdAndKeyword(pageable, sellerId, keyword);
+        // Initialize lazy associations
+        for(Product product : products) {
+            product.getImages().size();
+            product.getSeller().getRoles().size();
+        }
+        List<ProductResponse> productResponses = products.stream()
+                .map(productMapper::toProductResponse)
+                .toList();
+
+        return new PageResponse<>(
+                productResponses,
+                products.getNumber(),
+                products.getSize(),
+                products.getTotalElements(),
+                products.getTotalPages(),
+                products.isFirst(),
+                products.isLast()
+        );
+    }
+
     public PageResponse<ProductResponse> findAllByCategoryIdAndKeyword(
             Integer pageNumber, Integer pageSize, String sortBy, String sortDirection,
             Integer categoryId, String keyword, Authentication authentication

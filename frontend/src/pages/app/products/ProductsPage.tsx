@@ -25,7 +25,7 @@ export function ProductsPage() {
 
     return (
         <>
-            <Title order={ 1 } ta="center" mb="lg">
+            <Title ta="center" mb="lg">
                 All Products
             </Title>
 

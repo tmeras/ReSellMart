@@ -1,4 +1,5 @@
 import { ProductsByCategoryPage } from "@/pages/app/products/ProductsByCategoryPage.tsx";
+import { ProductsByUserPage } from "@/pages/app/products/ProductsByUserPage.tsx";
 import { ProductsPage } from "@/pages/app/products/ProductsPage.tsx";
 import { useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
@@ -53,7 +54,10 @@ const createAppRouter = () =>
                     path: paths.app.productByCategory.path,
                     element: <ProductsByCategoryPage/>
                 },
-
+                {
+                    path: paths.app.productsByUser.path,
+                    element: <ProductsByUserPage/>
+                }
             ]
         },
         {

@@ -41,7 +41,7 @@ export function ProductsByCategoryPage() {
     return (
         <>
             { category &&
-                <Title order={ 1 } ta="center" mb="md">
+                <Title ta="center" mb="md">
                     { category.name }
                 </Title>
             }
