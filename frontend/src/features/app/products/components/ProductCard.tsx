@@ -50,7 +50,7 @@ export function ProductCard({ product, cartItem, inWishlist }: ProductCardProps)
                         </Flex>
                     </Flex>
 
-                    <Flex align="center" c={ product.availableQuantity <= 5 ? "red.6" : "" } mb="sm">
+                    <Flex align="center" c={ product.availableQuantity <= 3 ? "red.6" : "" } mb="sm">
                         <IconPackages size={ 16 }/>
                         <Text span size="sm" ms={ 5 }>
                             Available Quantity: { product.availableQuantity }

@@ -1,28 +1,25 @@
 import { ActionIcon, TextInput, TextInputProps } from "@mantine/core";
 import { IconArrowRight, IconSearch } from "@tabler/icons-react";
+import { useState } from "react";
 
 type SearchProductsProps = TextInputProps & {
-    search: string;
-    setSearch: (search: string) => void;
     handleSearch: (search: string) => void;
 }
 
-export function SearchProducts({ search, setSearch, handleSearch, ...props }: SearchProductsProps) {
+export function SearchProducts({ handleSearch, ...props }: SearchProductsProps) {
+    const [search, setSearch] = useState("");
 
     return (
         <form
             style={ {
-                width: "100%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center"
-
             } }
             onSubmit={ (e) => {
                 e.preventDefault();
-                handleSearch(search);
-            }
-            }
+                handleSearch(search); // Only trigger search when user has clicked on search button or pressed enter
+            } }
         >
             <TextInput
                 radius="lg" size="md" placeholder="Search products..."

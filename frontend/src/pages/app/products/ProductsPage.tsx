@@ -1,22 +1,21 @@
 import { useGetProducts } from "@/features/app/products/api/getProducts.ts";
 import { ProductsList } from "@/features/app/products/components/ProductsList.tsx";
 import { SearchProducts } from "@/features/app/products/components/SearchProducts.tsx";
-import { Flex, Loader, Pagination } from "@mantine/core";
+import { Flex, Loader, Pagination, Text, Title } from "@mantine/core";
 import { useState } from "react";
 
 export function ProductsPage() {
     const [page, setPage] = useState(0);
     const [search, setSearch] = useState("");
-    const [querySearch, setQuerySearch] = useState("");
 
     const getProductsQuery = useGetProducts({
         page,
-        search: querySearch
+        search
     });
 
-    // Only trigger search query when user has clicked on search button or pressed enter
+    // Only trigger search when user has clicked on search button or pressed enter
     function handleSearch(search: string) {
-        setQuerySearch(search);
+        setSearch(search);
     }
 
     if (getProductsQuery.isError) console.log("Error fetching products", getProductsQuery.error);
@@ -26,8 +25,11 @@ export function ProductsPage() {
 
     return (
         <>
+            <Title order={ 1 } ta="center" mb="lg">
+                All Products
+            </Title>
+
             <SearchProducts
-                search={ search } setSearch={ setSearch }
                 handleSearch={ handleSearch }
                 mb="xl" w="50%"
             />
@@ -39,8 +41,9 @@ export function ProductsPage() {
             }
 
             { getProductsQuery.isError &&
-                <div>There was an error when fetching products. Please try again.</div>
-            }
+                <Text c="red.5">
+                    There was an error when fetching the products. Please try again.
+                </Text> }
 
             { products && !getProductsQuery.isError &&
                 <>
