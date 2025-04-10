@@ -25,6 +25,8 @@ export function ProductsPage() {
 
     return (
         <>
+            <title>{ `All Products | ReSellMart` }</title>
+
             <Title ta="center" mb="lg">
                 All Products
             </Title>
@@ -42,7 +44,7 @@ export function ProductsPage() {
 
             { getProductsQuery.isError &&
                 <Text c="red.5">
-                    There was an error when fetching the products. Please try again.
+                    There was an error when fetching the products. Please refresh and try again.
                 </Text> }
 
             { products && !getProductsQuery.isError &&

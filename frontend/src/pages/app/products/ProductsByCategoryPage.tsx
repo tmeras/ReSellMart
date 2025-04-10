@@ -40,6 +40,8 @@ export function ProductsByCategoryPage() {
 
     return (
         <>
+            <title>{ `${ category?.name } | ReSellMart` }</title>
+
             { category &&
                 <Title ta="center" mb="md">
                     { category.name }
@@ -59,7 +61,7 @@ export function ProductsByCategoryPage() {
 
             { getProductsByCategoryQuery.isError &&
                 <Text c="red.5">
-                    There was an error when fetching the products. Please try again.
+                    There was an error when fetching the products. Please refresh and try again.
                 </Text>
             }
 

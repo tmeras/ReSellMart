@@ -40,48 +40,52 @@ export function ActivationPage() {
     }, [activationCode]);
 
     return (
-        <Flex justify="center" align="center" h="100vh">
-            <Container size={ 420 }>
-                <Paper withBorder shadow="lg" p={ 30 } radius="md">
-                    { loading &&
-                        <Loader type="dots" size={ 40 }/>
-                    }
+        <>
+            <title>{ `Activate Account | ReSellMart` }</title>
 
-                    { showSuccess &&
-                        <Flex direction="column" gap="xs" mt="sm" align="center" justify="center">
-                            <IconCircleCheckFilled color="teal" size={ 50 }/>
-                            <Text size="lg" fw="bold">
-                                Account successfully activated!
-                            </Text>
+            <Flex justify="center" align="center" h="100vh">
+                <Container size={ 420 }>
+                    <Paper withBorder shadow="lg" p={ 30 } radius="md">
+                        { loading &&
+                            <Loader type="dots" size={ 40 }/>
+                        }
 
-                            <Button
-                                leftSection={ <IconArrowBack/> } fullWidth
-                                variant="light" mt="lg"
-                                component={ Link } to={ paths.auth.login.path }
-                            >
-                                To login
-                            </Button>
-                        </Flex>
-                    }
+                        { showSuccess &&
+                            <Flex direction="column" gap="xs" mt="sm" align="center" justify="center">
+                                <IconCircleCheckFilled color="teal" size={ 50 }/>
+                                <Text size="lg" fw="bold">
+                                    Account successfully activated!
+                                </Text>
 
-                    { showError &&
-                        <Flex direction="column" gap="xs" mt="sm" align="center" justify="center">
-                            <IconExclamationCircleFilled color="red" size={ 50 }/>
-                            <Text size="lg" fw="bold">
-                                { error }
-                            </Text>
+                                <Button
+                                    leftSection={ <IconArrowBack/> } fullWidth
+                                    variant="light" mt="lg"
+                                    component={ Link } to={ paths.auth.login.path }
+                                >
+                                    To login
+                                </Button>
+                            </Flex>
+                        }
 
-                            <Button
-                                leftSection={ <IconArrowBack/> } fullWidth
-                                variant="light" mt="lg"
-                                component={ Link } to={ paths.auth.login.path }
-                            >
-                                To login
-                            </Button>
-                        </Flex>
-                    }
-                </Paper>
-            </Container>
-        </Flex>
+                        { showError &&
+                            <Flex direction="column" gap="xs" mt="sm" align="center" justify="center">
+                                <IconExclamationCircleFilled color="red" size={ 50 }/>
+                                <Text size="lg" fw="bold">
+                                    { error }
+                                </Text>
+
+                                <Button
+                                    leftSection={ <IconArrowBack/> } fullWidth
+                                    variant="light" mt="lg"
+                                    component={ Link } to={ paths.auth.login.path }
+                                >
+                                    To login
+                                </Button>
+                            </Flex>
+                        }
+                    </Paper>
+                </Container>
+            </Flex>
+        </>
     );
 }

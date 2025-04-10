@@ -40,9 +40,10 @@ export function ProductsByUserPage() {
     const totalPages = getProductsByUserQuery.data?.data.totalPages;
     const user = getUserQuery.data?.data;
 
-    //TODO: Add helmet
     return (
         <>
+            <title>{ `Products by ${ user?.name } | ReSellMart` }</title>
+
             { user &&
                 <Flex justify="center" align="center" mb="md">
                     <Title me="sm">
@@ -68,8 +69,9 @@ export function ProductsByUserPage() {
 
             { getProductsByUserQuery.isError &&
                 <Text c="red.5">
-                    There was an error when fetching the products. Please try again.
-                </Text> }
+                    There was an error when fetching the products. Please refresh and try again.
+                </Text>
+            }
 
             { products && !getProductsByUserQuery.isError &&
                 <>
