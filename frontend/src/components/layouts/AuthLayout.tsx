@@ -1,5 +1,4 @@
 import { DarkModeButton } from "@/components/ui/DarkModeButton.tsx";
-import { LogoText } from "@/components/ui/LogoText.tsx";
 import { paths } from "@/config/paths.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { AppShell, Button, Flex, Image, Text } from "@mantine/core";
@@ -31,8 +30,14 @@ export function AuthLayout() {
                 <Flex align="center" justify="space-between">
                     <Flex>
                         <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
-                        <LogoText/>
+                        <Text
+                            size="lg" variant="gradient" fw={ 700 }
+                            gradient={ { from: "paleIndigo.8", to: "paleIndigo.4", deg: 150 } }
+                        >
+                            ReSellMart
+                        </Text>
                     </Flex>
+
                     <Flex>
                         <Button size="xs" component={ Link } to={ paths.auth.login.path }>
                             Sign in
@@ -51,7 +56,12 @@ export function AuthLayout() {
                 <Flex direction="column" justify="center" align="center">
                     <Flex justify="center" align="center" mb="sm">
                         <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
-                        <LogoText/>
+                        <Text
+                            size="lg" variant="gradient" fw={ 700 }
+                            gradient={ { from: "paleIndigo.8", to: "paleIndigo.4", deg: 150 } }
+                        >
+                            ReSellMart
+                        </Text>
                     </Flex>
                     <Text c="dimmed" size="sm">
                         © 2025 ReSellMart. All rights reserved.

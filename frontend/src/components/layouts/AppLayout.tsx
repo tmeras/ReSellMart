@@ -2,17 +2,18 @@ import imgUrl from "@/assets/logo.png";
 import { AppErrorBoundary } from "@/components/error/AppErrorBoundary.tsx";
 import { CategoryNavLinks } from "@/components/ui/CategoryNavLinks.tsx";
 import { DarkModeButton } from "@/components/ui/DarkModeButton.tsx";
-import { LogoText } from "@/components/ui/LogoText.tsx";
 import { UserMenu } from "@/components/ui/UserMenu.tsx";
 import { paths } from "@/config/paths.ts";
-import { AppShell, Burger, Flex, Image, NavLink, ScrollArea, Text } from "@mantine/core";
+import { AppShell, Burger, Divider, Flex, Image, NavLink, ScrollArea, Text } from "@mantine/core";
 import { IconGridDots } from "@tabler/icons-react";
 import { useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { NavLink as RouterNavLink, Outlet } from "react-router";
+import { NavLink as RouterNavLink, Outlet, useNavigate } from "react-router";
 
 export function AppLayout() {
+    const navigate = useNavigate();
     const [navBarOpened, setNavBarOpened] = useState(false);
+
 
     return (
         <AppShell
@@ -31,8 +32,16 @@ export function AppLayout() {
                             hiddenFrom="md" size="sm" me="md"
                             opened={ navBarOpened } onClick={ () => setNavBarOpened(!navBarOpened) }
                         />
+
                         <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
-                        <LogoText/>
+                        <Text
+                            size="lg" variant="gradient" fw={ 700 }
+                            gradient={ { from: "paleIndigo.8", to: "paleIndigo.4", deg: 150 } }
+                            style={ { cursor: "pointer" } }
+                            onClick={ () => navigate(paths.app.products.path) }
+                        >
+                            ReSellMart
+                        </Text>
                     </Flex>
 
                     <DarkModeButton/>
@@ -66,24 +75,31 @@ export function AppLayout() {
 
             <AppShell.Main>
                 <ErrorBoundary FallbackComponent={ AppErrorBoundary }>
-                    <Outlet/>
+                    <Flex direction="column" mih="100vh" w="100%">
+                        <Outlet/>
+
+                        <Flex direction="column" mt="auto" w="100%">
+                            <Divider size="xs" mb="lg" mt="xl" w="100%"/>
+
+                            <Flex direction="column" justify="center" align="center" w="100%">
+                                <Flex mb="sm">
+                                    <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
+                                    <Text
+                                        size="lg" variant="gradient" fw={ 700 }
+                                        gradient={ { from: "paleIndigo.8", to: "paleIndigo.4", deg: 150 } }
+                                    >
+                                        ReSellMart
+                                    </Text>
+                                </Flex>
+
+                                <Text c="dimmed" size="sm">
+                                    © 2025 ReSellMart. All rights reserved.
+                                </Text>
+                            </Flex>
+                        </Flex>
+                    </Flex>
                 </ErrorBoundary>
             </AppShell.Main>
-
-            <AppShell.Footer p="md" pos="relative">
-                <Flex
-                    direction="column" justify="center" align="center"
-                    ml={ { base: 0, md: "15%" } }
-                >
-                    <Flex justify="center" align="center" mb="sm">
-                        <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
-                        <LogoText/>
-                    </Flex>
-                    <Text c="dimmed" size="sm">
-                        © 2025 ReSellMart. All rights reserved.
-                    </Text>
-                </Flex>
-            </AppShell.Footer>
         </AppShell>
     );
 }

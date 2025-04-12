@@ -1,18 +1,24 @@
 import { useCreateWishlistItem } from "@/api/wishlist/createWishlistItem.ts";
 import { useDeleteWishlistItem } from "@/api/wishlist/deleteWishlistItem.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
-import { ActionIcon, useMantineTheme } from "@mantine/core";
+import { ActionIcon, Tooltip, useMantineColorScheme, useMantineTheme } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconHeart, IconHeartFilled, IconX } from "@tabler/icons-react";
 
 type WishlistIconButtonProps = {
     inWishlist: boolean; // Used to determine if product is already in wishlist
     productId: number;
+    wishlistEnabled: boolean;
+    size: number;
 }
 
-export function WishlistIconButton({ inWishlist, productId }: WishlistIconButtonProps) {
+export function WishlistIconButton(
+    { inWishlist, productId, wishlistEnabled, size }: WishlistIconButtonProps
+) {
     const theme = useMantineTheme();
+    const { colorScheme } = useMantineColorScheme();
     const { user } = useAuth();
+
     const createWishlistItemMutation = useCreateWishlistItem({ userId: user!.id });
     const deleteWishlistItemMutation = useDeleteWishlistItem({ userId: user!.id });
 
@@ -49,18 +55,33 @@ export function WishlistIconButton({ inWishlist, productId }: WishlistIconButton
     }
 
     return (
-        <ActionIcon variant="subtle">
-            { inWishlist ? (
-                <IconHeartFilled
-                    size={ 20 } color={ theme.colors.red[4] }
-                    onClick={ deleteFromWishlist }
-                />
-            ) : (
-                <IconHeart
-                    size={ 20 } color={ theme.colors.red[4] }
-                    onClick={ addToWishlist }
-                />
-            ) }
-        </ActionIcon>
+        wishlistEnabled ? (
+            <ActionIcon variant="subtle">
+                { inWishlist ? (
+                    <IconHeartFilled
+                        size={ size } color={ theme.colors.red[4] }
+                        onClick={ deleteFromWishlist }
+                    />
+                ) : (
+                    <IconHeart
+                        size={ size } color={ theme.colors.red[4] }
+                        onClick={ addToWishlist }
+                    />
+                ) }
+            </ActionIcon>
+        ) : (
+            <Tooltip
+                multiline w={ 250 }
+                label="Wishlist could not be fetched. Please refresh and try again."
+                events={ { hover: true, focus: false, touch: true } }
+            >
+                <ActionIcon
+                    variant="subtle" disabled
+                    bg={ colorScheme === "dark" ? "dark.4" : "gray.2" }
+                >
+                    <IconHeart size={ size }/>
+                </ActionIcon>
+            </Tooltip>
+        )
     );
 }

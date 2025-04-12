@@ -3,17 +3,19 @@ import { useDeleteCartItem } from "@/api/cart/deleteCartItem.ts";
 import { useUpdateCartItem } from "@/api/cart/updateCartItem.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { CartItemResponse, ProductResponse } from "@/types/api.tsx";
-import { Button, useMantineTheme } from "@mantine/core";
+import { Button, Tooltip, useMantineColorScheme, useMantineTheme } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconMinus, IconPlus, IconX } from "@tabler/icons-react";
 
 type CartButtonGroupProps = {
     cartItem: CartItemResponse | undefined; // Used to determine if product is already in cart
     product: ProductResponse;
+    cartEnabled: boolean
 }
 
-export function CartButtonGroup({ cartItem, product }: CartButtonGroupProps) {
+export function CartButtonGroup({ cartItem, product, cartEnabled }: CartButtonGroupProps) {
     const theme = useMantineTheme();
+    const { colorScheme } = useMantineColorScheme();
     const { user } = useAuth();
 
     const createCartItemMutation = useCreateCartItem({ userId: user!.id });
@@ -65,28 +67,45 @@ export function CartButtonGroup({ cartItem, product }: CartButtonGroupProps) {
 
     return (
         <>
-            { cartItem ? (
-                <Button.Group>
-                    <Button variant="default" radius="md" size="compact-md"
-                            onClick={ () => updateQuantityInCart(cartItem.quantity - 1) }
-                    >
-                        <IconMinus color={ theme.colors.red[6] } size={ 18 }/>
+            { cartEnabled ? (
+                cartItem ? (
+                    <Button.Group>
+                        <Button variant="default" radius="md" size="compact-md"
+                                onClick={ () => updateQuantityInCart(cartItem.quantity - 1) }
+                                loading={ updateCartItemMutation.isPending }
+                        >
+                            <IconMinus color={ theme.colors.red[6] } size={ 18 }/>
+                        </Button>
+                        <Button.GroupSection variant="default" size="compact-md" bg="var(--mantine-color-body)">
+                            { cartItem.quantity }
+                        </Button.GroupSection>
+                        <Button
+                            variant="default" radius="md" size="compact-md"
+                            onClick={ () => updateQuantityInCart(cartItem.quantity + 1) }
+                            loading={ updateCartItemMutation.isPending }
+                            disabled={ cartItem.quantity == product.availableQuantity }
+                        >
+                            <IconPlus color={ theme.colors.teal[6] } size={ 18 }/>
+                        </Button>
+                    </Button.Group>
+                ) : (
+                    <Button size="xs" onClick={ addToCart } loading={ createCartItemMutation.isPending }>
+                        Add to cart
                     </Button>
-                    <Button.GroupSection variant="default" size="compact-md" bg="var(--mantine-color-body)">
-                        { cartItem.quantity }
-                    </Button.GroupSection>
-                    <Button
-                        variant="default" radius="md" size="compact-md"
-                        onClick={ () => updateQuantityInCart(cartItem.quantity + 1) }
-                        disabled={ cartItem.quantity == product.availableQuantity }
-                    >
-                        <IconPlus color={ theme.colors.teal[6] } size={ 18 }/>
-                    </Button>
-                </Button.Group>
+                )
             ) : (
-                <Button size="xs" onClick={ addToCart } loading={ createCartItemMutation.isPending }>
-                    Add to cart
-                </Button>
+                <Tooltip
+                    multiline w={ 250 }
+                    label="Cart could not be fetched. Please refresh and try again"
+                    events={ { hover: true, focus: false, touch: true } }
+                >
+                    <Button
+                        size="xs" disabled
+                        bg={ colorScheme === "dark" ? "dark.4" : "gray.2" }
+                    >
+                        Add to cart
+                    </Button>
+                </Tooltip>
             ) }
         </>
     );

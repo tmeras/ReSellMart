@@ -1,3 +1,5 @@
+import { ScrollToTop } from "@/components/ScrollToTop.tsx";
+import { ProductDetailsPage } from "@/pages/app/products/ProductDetailsPage.tsx";
 import { ProductsByCategoryPage } from "@/pages/app/products/ProductsByCategoryPage.tsx";
 import { ProductsByUserPage } from "@/pages/app/products/ProductsByUserPage.tsx";
 import { ProductsPage } from "@/pages/app/products/ProductsPage.tsx";
@@ -19,6 +21,7 @@ const createAppRouter = () =>
         {
             element: (
                 <ErrorBoundary FallbackComponent={ MainErrorBoundary }>
+                    <ScrollToTop/>
                     <AuthLayout/>
                 </ErrorBoundary>
             ),
@@ -40,6 +43,7 @@ const createAppRouter = () =>
         {
             element: (
                 <ErrorBoundary FallbackComponent={ MainErrorBoundary }>
+                    <ScrollToTop/>
                     <ProtectedRoute>
                         <AppLayout/>
                     </ProtectedRoute>
@@ -57,6 +61,10 @@ const createAppRouter = () =>
                 {
                     path: paths.app.productsByUser.path,
                     element: <ProductsByUserPage/>
+                },
+                {
+                    path: paths.app.productDetails.path,
+                    element: <ProductDetailsPage/>
                 }
             ]
         },

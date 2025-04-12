@@ -14,6 +14,7 @@ export function ProductsByUserPage() {
 
     const [page, setPage] = useState(0);
     const [search, setSearch] = useState("");
+
     const getProductsByUserQuery = useGetProductsByUser({
         userId,
         page,

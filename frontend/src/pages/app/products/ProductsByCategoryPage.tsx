@@ -12,6 +12,7 @@ export function ProductsByCategoryPage() {
 
     const [page, setPage] = useState(0);
     const [search, setSearch] = useState("");
+
     const getProductsByCategoryQuery = useGetProductsByCategory({
         categoryId,
         page,

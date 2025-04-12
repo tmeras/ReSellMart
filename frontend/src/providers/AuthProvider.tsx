@@ -95,7 +95,7 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
     const fetchMe = async () => {
         try {
             const response = await api.get("api/users/me");
-            console.log("Got user", response.data)
+            //console.log("Got user", response.data)
             setUser(response.data);
         } catch (error) {
             console.log("Error fetching user", error);

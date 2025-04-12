@@ -38,7 +38,7 @@ export type UserResponse = {
 export type CategoryResponse = {
     id: number;
     name: string;
-    parentId: number;
+    parentId?: number;
 }
 
 export type ProductImageResponse = {

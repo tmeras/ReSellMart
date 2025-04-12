@@ -5,16 +5,24 @@ import { paths } from "@/config/paths.ts";
 import { CartItemResponse, ProductResponse } from "@/types/api.tsx";
 import { PRODUCT_CONDITION } from "@/utils/constants.ts";
 import { bytesToBase64, findDisplayedImage } from "@/utils/fileUtils.ts";
-import { Card, Flex, Image, Text, Title } from "@mantine/core";
+import { Anchor, Card, Flex, Image, Text, useMantineColorScheme } from "@mantine/core";
 import { IconList, IconPackages, IconTool } from "@tabler/icons-react";
+import { Link, useNavigate } from "react-router";
 
 type ProductCardProps = {
     product: ProductResponse,
     cartItem: CartItemResponse | undefined, // Used to determine if product is already in cart
     inWishlist: boolean // Used to determine if product is already in wishlist
+    cartEnabled: boolean
+    wishlistEnabled: boolean
 };
 
-export function ProductCard({ product, cartItem, inWishlist }: ProductCardProps) {
+export function ProductCard(
+    { product, cartItem, inWishlist, cartEnabled, wishlistEnabled }: ProductCardProps
+) {
+    const { colorScheme } = useMantineColorScheme();
+    const navigate = useNavigate();
+
     // Find the product image that should be displayed as front cover
     const displayedImage =
         findDisplayedImage(product.images)?.image ?? product.images[0].image;
@@ -22,20 +30,30 @@ export function ProductCard({ product, cartItem, inWishlist }: ProductCardProps)
     return (
         <Card withBorder radius="md" w={ 300 }>
             <Card.Section>
-                <Image src={ bytesToBase64(displayedImage) } fit="contain" h={ 200 } bg="gray.4"/>
+                <Image
+                    src={ bytesToBase64(displayedImage) } alt="Product Image"
+                    fit="contain" h={ 200 }
+                    bg={ colorScheme === "dark" ? "dark.4" : "gray.2" }
+                    style={ { cursor: "pointer" } }
+                    onClick={ () => navigate(paths.app.productDetails.getHref(product.id.toString())) }
+                />
             </Card.Section>
 
             <Card.Section inheritPadding withBorder mt="sm">
-                <Title order={ 3 }>
+                <Anchor
+                    size="xl" lineClamp={ 2 }
+                    c="var(--mantine-color-text)"
+                    component={ Link } to={ paths.app.productDetails.getHref(product.id.toString()) }
+                >
                     { product.name }
-                </Title>
+                </Anchor>
                 <Text c="dimmed" size="xs" mb="sm">
                     Product #{ product.id }
                 </Text>
             </Card.Section>
 
             <Card.Section inheritPadding withBorder mt="xs">
-                <Flex direction="column" justify="start" gap={ 2 }>
+                <Flex direction="column" gap={ 2 }>
                     <Flex justify="space-between" mb={ 2 }>
                         <Flex align="center">
                             <IconList size={ 16 }/>
@@ -74,11 +92,16 @@ export function ProductCard({ product, cartItem, inWishlist }: ProductCardProps)
                         }
                     </div>
 
-                    <WishlistIconButton inWishlist={ inWishlist } productId={ product.id }/>
+                    <WishlistIconButton
+                        inWishlist={ inWishlist } productId={ product.id } wishlistEnabled={ wishlistEnabled }
+                        size={ 20 }
+                    />
                 </Flex>
 
                 <Flex justify="space-between" align="center" mt="sm" mb="sm">
-                    <CartButtonGroup cartItem={ cartItem } product={ product }/>
+                    <CartButtonGroup
+                        cartItem={ cartItem } product={ product } cartEnabled={ cartEnabled }
+                    />
 
                     <Text size="xs" c="dimmed">
                         Sold by { " " }
