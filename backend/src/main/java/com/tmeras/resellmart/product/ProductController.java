@@ -123,7 +123,7 @@ public class ProductController {
             @PathVariable(name = "image-id") Integer imageId,
             Authentication authentication
     ) {
-        // Mark a particular as the main one (i.e. should be displayed first)
+        // Mark an image as the main one (i.e. should be displayed first)
         // for a particular product
         ProductResponse updatedProduct = productService.displayImage(productId, imageId, authentication);
         return new ResponseEntity<>(updatedProduct, HttpStatus.OK);

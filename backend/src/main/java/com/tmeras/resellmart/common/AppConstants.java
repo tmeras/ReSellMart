@@ -1,5 +1,7 @@
 package com.tmeras.resellmart.common;
 
+import java.util.Set;
+
 public class AppConstants {
 
     // Pagination constants
@@ -17,6 +19,7 @@ public class AppConstants {
 
     // Image upload constants
     public static final Integer MAX_IMAGE_NUMBER = 5;
+    public static final Set<String> ACCEPTED_IMAGE_EXTENSIONS = Set.of("jpg", "jpeg", "png", "webp");
 
     // Thymeleaf template names
     public static final String USER_ACTIVATION_TEMPLATE = "account_activation";

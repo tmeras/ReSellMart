@@ -27,8 +27,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
+import static com.tmeras.resellmart.common.AppConstants.ACCEPTED_IMAGE_EXTENSIONS;
 import static com.tmeras.resellmart.common.AppConstants.FLYWAY_PRODUCTS_NUMBER;
 
 @Service
@@ -306,8 +306,7 @@ public class ProductService {
         for (MultipartFile image : images) {
             String fileName = image.getOriginalFilename();
             String fileExtension = fileService.getFileExtension(fileName);
-            Set<String> validImageExtensions = Set.of("jpg", "jpeg", "png", "gif", "bmp", "tiff");
-            if (!validImageExtensions.contains(fileExtension))
+            if (!ACCEPTED_IMAGE_EXTENSIONS.contains(fileExtension))
                 throw new APIException("Only images can be uploaded");
         }
 
