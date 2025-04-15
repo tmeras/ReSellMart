@@ -8,21 +8,14 @@ export function ProductsPage() {
     const [page, setPage] = useState(0);
     const [search, setSearch] = useState("");
 
-    const getProductsQuery = useGetProducts({
-        page,
-        search
-    });
-
-    // Only trigger search when user has clicked on search button or pressed enter
-    function handleSearch(search: string) {
-        setSearch(search);
-    }
+    const getProductsQuery = useGetProducts({ page, search });
 
     if (getProductsQuery.isError) console.log("Error fetching products", getProductsQuery.error);
 
     const products = getProductsQuery.data?.data.content;
     const totalPages = getProductsQuery.data?.data.totalPages;
 
+    //TODO: SCROLL UP ON PAGINATION CHANGE
     return (
         <>
             <title>{ `All Products | ReSellMart` }</title>
@@ -32,7 +25,7 @@ export function ProductsPage() {
             </Title>
 
             <SearchProducts
-                handleSearch={ handleSearch }
+                handleSearch={ (search) => setSearch(search) }
                 mb="xl" w="50%"
             />
 

@@ -1,5 +1,5 @@
 import { api } from "@/lib/apiClient.ts";
-import { WishlistItemResponse } from "@/types/api.tsx";
+import { WishlistItemResponse } from "@/types/api.ts";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 

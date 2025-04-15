@@ -1,3 +1,21 @@
+import {
+    ACCEPTED_IMAGE_EXTENSIONS,
+    ACCEPTED_IMAGE_TYPES,
+    MAX_FILE_SIZE,
+    ProductConditionKeys
+} from "@/utils/constants.ts";
+import { z } from "zod";
+
+export const uploadImageInputSchema = z.instanceof(File)
+    .refine(file => file.size <= MAX_FILE_SIZE, {
+        message: `File size must be no greater than ${ MAX_FILE_SIZE / (1024 * 1024) }MB`
+    })
+    .refine(file => ACCEPTED_IMAGE_TYPES.includes(file.type), {
+        message: `File type must be one of ${ ACCEPTED_IMAGE_EXTENSIONS.join(", ") }`
+    });
+
+export type UploadImageInput = z.infer<typeof uploadImageInputSchema>;
+
 export type PageResponse<T> = {
     content: T[];
     pageNumber: number;
@@ -53,7 +71,7 @@ export type ProductResponse = {
     description: string;
     price: number;
     previousPrice: number;
-    productCondition: "NEW" | "LIKE_NEW" | "GOOD" | "FAIR" | "DAMAGED";
+    productCondition: ProductConditionKeys
     availableQuantity: number;
     deleted: boolean;
     images: ProductImageResponse[];

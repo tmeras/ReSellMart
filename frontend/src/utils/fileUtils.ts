@@ -1,4 +1,4 @@
-import { ProductImageResponse } from "@/types/api.tsx";
+import { ProductImageResponse } from "@/types/api.ts";
 
 export function bytesToBase64(bytes: Uint8Array | undefined) {
     if (!bytes) return null;

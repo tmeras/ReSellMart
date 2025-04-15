@@ -1,5 +1,5 @@
 import { api } from "@/lib/apiClient.ts";
-import { PageResponse, ProductResponse } from "@/types/api.tsx";
+import { PageResponse, ProductResponse } from "@/types/api.ts";
 import { DEFAULT_PAGE_SIZE } from "@/utils/constants.ts";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
@@ -9,7 +9,7 @@ export function getProducts(page = 0, search = ""): Promise<AxiosResponse<PageRe
 }
 
 export function getProductsQueryOptions(
-    { page = 0, search }: { page?: number, search?: string }
+    { page, search }: { page?: number, search?: string } = {}
 ) {
     return queryOptions({
         queryKey: (page || page === 0) ?

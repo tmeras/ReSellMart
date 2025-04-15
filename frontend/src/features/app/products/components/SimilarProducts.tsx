@@ -1,6 +1,6 @@
 import { useGetProductsByCategory } from "@/features/app/products/api/getProductsByCategory.ts";
 import { ProductCard } from "@/features/app/products/components/ProductCard.tsx";
-import { CartItemResponse, ProductResponse, WishlistItemResponse } from "@/types/api.tsx";
+import { CartItemResponse, ProductResponse, WishlistItemResponse } from "@/types/api.ts";
 import { shuffleArray } from "@/utils/generalUtils.ts";
 import { Flex, Grid, Title } from "@mantine/core";
 import { memo, useMemo } from "react";

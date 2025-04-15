@@ -2,7 +2,7 @@ import { useGetCart } from "@/api/cart/getCart.ts";
 import { useGetWishlist } from "@/api/wishlist/getWishlist.ts";
 import { ProductCard } from "@/features/app/products/components/ProductCard.tsx";
 import { useAuth } from "@/hooks/useAuth.ts";
-import { ProductResponse } from "@/types/api.tsx";
+import { ProductResponse } from "@/types/api.ts";
 import { Flex, Grid, Loader } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconX } from "@tabler/icons-react";

@@ -30,6 +30,10 @@ export const paths = {
         productDetails: {
             path: "/app/products/:productId",
             getHref: (id: string) => `/app/products/${ id }`
+        },
+        createProduct: {
+            path: "/app/products/create",
+            getHref: () => "/app/products/create"
         }
     },
 } as const

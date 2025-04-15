@@ -1,4 +1,5 @@
 import { ScrollToTop } from "@/components/ScrollToTop.tsx";
+import { CreateProductPage } from "@/pages/app/products/CreateProductPage.tsx";
 import { ProductDetailsPage } from "@/pages/app/products/ProductDetailsPage.tsx";
 import { ProductsByCategoryPage } from "@/pages/app/products/ProductsByCategoryPage.tsx";
 import { ProductsByUserPage } from "@/pages/app/products/ProductsByUserPage.tsx";
@@ -65,6 +66,10 @@ const createAppRouter = () =>
                 {
                     path: paths.app.productDetails.path,
                     element: <ProductDetailsPage/>
+                },
+                {
+                    path: paths.app.createProduct.path,
+                    element: <CreateProductPage/>
                 }
             ]
         },

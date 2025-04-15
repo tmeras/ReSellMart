@@ -1,5 +1,5 @@
 import { api } from "@/lib/apiClient.ts";
-import { UserResponse } from "@/types/api.tsx";
+import { UserResponse } from "@/types/api.ts";
 import { InternalAxiosRequestConfig } from "axios";
 import { createContext, ReactNode, useEffect, useLayoutEffect, useMemo, useState } from "react";
 

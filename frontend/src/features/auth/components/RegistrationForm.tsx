@@ -63,7 +63,7 @@ export const RegistrationForm = () => {
         },
     });
 
-    const handleSubmit = async (values: typeof form.values) => {
+    async function handleSubmit(values: typeof form.values) {
         try {
             if (values.confirmPassword !== values.password) {
                 form.setFieldError("password", "");
@@ -151,21 +151,21 @@ export const RegistrationForm = () => {
                     <form onSubmit={ form.onSubmit(handleSubmit) }>
                         <TextInput
                             mt="sm"
-                            label="Name" required
+                            label="Name" required withAsterisk={ false }
                             key={ form.key("name") }
                             { ...form.getInputProps("name") }
                         />
 
                         <TextInput
                             mt="sm"
-                            label="Email" required
+                            label="Email" required withAsterisk={ false }
                             key={ form.key("email") }
                             { ...form.getInputProps("email") }
                         />
 
                         <PasswordInputWithStrength
                             mt="sm"
-                            label="Password" required
+                            label="Password" required withAsterisk={ false }
                             value={ password }
                             key={ form.key("password") }
                             { ...form.getInputProps("password") }
@@ -173,7 +173,7 @@ export const RegistrationForm = () => {
 
                         <PasswordInput
                             mt="sm"
-                            label="Confirm password" required
+                            label="Confirm password" required withAsterisk={ false }
                             key={ form.key("confirmPassword") }
                             { ...form.getInputProps("confirmPassword") }
                         />
@@ -181,7 +181,7 @@ export const RegistrationForm = () => {
                         <Select
                             mt="sm"
                             label="Home country" placeholder="Pick a country"
-                            required searchable
+                            required withAsterisk={ false } searchable
                             data={ countries }
                             key={ form.key("homeCountry") }
                             { ...form.getInputProps("homeCountry") }

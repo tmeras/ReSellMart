@@ -1,5 +1,19 @@
+//Pagination
 export const DEFAULT_PAGE_SIZE = 12 as const;
 
+// Files
+export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+export const MAX_IMAGE_COUNT = 5 as const;
+export const ACCEPTED_IMAGE_TYPES =
+    ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+export const ACCEPTED_IMAGE_EXTENSIONS =
+    [".jpeg", ".jpg", ".png", ".webp"] as const;
+
+// Products
+export const MAX_PRODUCT_PRICE = 10000 as const;
+export const MAX_PRODUCT_QUANTITY = 1000 as const;
+
+// Product condition
 export const PRODUCT_CONDITION = {
     NEW: "New",
     LIKE_NEW: "Like New",
@@ -7,3 +21,15 @@ export const PRODUCT_CONDITION = {
     FAIR: "Fair",
     DAMAGED: "Damaged"
 } as const;
+
+export type ProductConditionKeys = keyof typeof PRODUCT_CONDITION;
+export type ProductConditionValues = typeof PRODUCT_CONDITION[ProductConditionKeys];
+
+export const PRODUCT_CONDITION_REVERSE = {
+    New: "NEW",
+    "Like New": "LIKE_NEW",
+    Good: "GOOD",
+    Fair: "FAIR",
+    Damaged: "DAMAGED"
+} as const;
+

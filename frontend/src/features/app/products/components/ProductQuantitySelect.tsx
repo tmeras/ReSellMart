@@ -2,8 +2,8 @@ import { useCreateCartItem } from "@/api/cart/createCartItem.ts";
 import { useDeleteCartItem } from "@/api/cart/deleteCartItem.ts";
 import { useUpdateCartItem } from "@/api/cart/updateCartItem.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
-import { CartItemResponse, ProductResponse } from "@/types/api.tsx";
-import { ActionIcon, Button, Flex, Select, Tooltip, useMantineColorScheme } from "@mantine/core";
+import { CartItemResponse, ProductResponse } from "@/types/api.ts";
+import { ActionIcon, Button, Flex, NumberInput, Tooltip, useMantineColorScheme } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconTrash, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
@@ -19,7 +19,7 @@ export function ProductQuantitySelect(
 ) {
     const { colorScheme } = useMantineColorScheme();
     const { user } = useAuth();
-    const [quantity, setQuantity] = useState<string | null>("1");
+    const [quantity, setQuantity] = useState(1);
 
     const createCartItemMutation = useCreateCartItem({ userId: user!.id });
     const updateCartItemMutation = useUpdateCartItem({ userId: user!.id });
@@ -27,21 +27,18 @@ export function ProductQuantitySelect(
 
     useEffect(() => {
         if (cartEnabled && cartItem) {
-            setQuantity(cartItem.quantity.toString());
+            setQuantity(cartItem.quantity);
         } else {
-            setQuantity("1");
+            setQuantity(1);
         }
     }, [cartEnabled, cartItem]);
-
-    const quantityOptions =
-        Array.from({ length: product.availableQuantity }, (_, index) => (index + 1).toString());
 
     async function addToCart() {
         try {
             await createCartItemMutation.mutateAsync({
                 data: {
                     productId: product.id,
-                    quantity: Number(quantity),
+                    quantity,
                     userId: user!.id
                 }
             });
@@ -59,7 +56,7 @@ export function ProductQuantitySelect(
             await updateCartItemMutation.mutateAsync({
                 data: {
                     productId: product.id,
-                    quantity: Number(quantity),
+                    quantity,
                     userId: user!.id
                 }
             });
@@ -78,7 +75,7 @@ export function ProductQuantitySelect(
                 productId: product.id,
                 userId: user!.id
             });
-            setQuantity("1");
+            setQuantity(1);
         } catch (error) {
             console.log("Error deleting cart item", error);
             notifications.show({
@@ -106,32 +103,43 @@ export function ProductQuantitySelect(
     }
 
     return (
-        <Flex direction="column" gap="sm">
-            <Select
-                label="Quantity" w={ 200 }
-                placeholder={ `Select quantity` }
-                data={ quantityOptions }
-                value={ quantity } onChange={ setQuantity }
-            />
-
-            <Flex gap="sm" align="center">
-                <Button
-                    size="sm"
-                    onClick={ cartItem ? updateQuantityInCart : addToCart }
-                    loading={ cartItem ? updateCartItemMutation.isPending : createCartItemMutation.isPending }
-                >
-                    { cartItem ? "Update cart quantity" : "Add to cart" }
-                </Button>
-
-                { cartItem &&
-                    <ActionIcon
-                        size="lg" variant="light"
-                        onClick={ deleteFromCart } loading={ deleteCartItemMutation.isPending }
-                    >
-                        <IconTrash size={ 25 }/>
-                    </ActionIcon>
+        <Flex direction="column">
+            <form onSubmit={ async (e) => {
+                e.preventDefault();
+                if (cartItem) {
+                    await updateQuantityInCart();
+                } else {
+                    await addToCart();
                 }
-            </Flex>
+            } }>
+                <NumberInput
+                    mt="sm" maw="70%"
+                    label="Quantity" required withAsterisk={ false }
+                    description={ `Max ${ product.availableQuantity }` }
+                    min={ 1 } max={ product.availableQuantity }
+                    allowNegative={ false } allowDecimal={ false } value={ quantity }
+                    onChange={ (value) => typeof value === "number" && setQuantity(value) }
+                />
+
+                <Flex gap="sm" align="center" mt="sm">
+                    <Button
+                        size="sm"
+                        type="submit"
+                        loading={ cartItem ? updateCartItemMutation.isPending : createCartItemMutation.isPending }
+                    >
+                        { cartItem ? "Update cart quantity" : "Add to cart" }
+                    </Button>
+
+                    { cartItem &&
+                        <ActionIcon
+                            size="lg" variant="light"
+                            onClick={ deleteFromCart } loading={ deleteCartItemMutation.isPending }
+                        >
+                            <IconTrash size={ 25 }/>
+                        </ActionIcon>
+                    }
+                </Flex>
+            </form>
         </Flex>
     );
 }

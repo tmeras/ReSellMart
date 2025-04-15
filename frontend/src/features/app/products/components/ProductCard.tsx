@@ -2,7 +2,7 @@ import { CartButtonGroup } from "@/components/ui/CartButtonGroup.tsx";
 import { CustomLink } from "@/components/ui/link/CustomLink.tsx";
 import { WishlistIconButton } from "@/components/ui/WishlistIconButton.tsx";
 import { paths } from "@/config/paths.ts";
-import { CartItemResponse, ProductResponse } from "@/types/api.tsx";
+import { CartItemResponse, ProductResponse } from "@/types/api.ts";
 import { PRODUCT_CONDITION } from "@/utils/constants.ts";
 import { bytesToBase64, findDisplayedImage } from "@/utils/fileUtils.ts";
 import { Anchor, Card, Flex, Image, Text, useMantineColorScheme } from "@mantine/core";
@@ -31,6 +31,7 @@ export function ProductCard(
         <Card withBorder radius="md" w={ 300 }>
             <Card.Section>
                 <Image
+                    // TODO: Convert to blob?
                     src={ bytesToBase64(displayedImage) } alt="Product Image"
                     fit="contain" h={ 200 }
                     bg={ colorScheme === "dark" ? "dark.4" : "gray.2" }

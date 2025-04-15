@@ -15,16 +15,15 @@ type UserMenuProps = {
 
 export function UserMenu({ closeNavBar }: UserMenuProps) {
     const theme = useMantineTheme();
-    const navigate = useNavigate();
+    useNavigate();
     const queryClient = useQueryClient();
-    const { user, setUser } = useAuth();
+    const { user } = useAuth();
 
     async function handleLogout() {
         try {
             await api.get("/api/auth/logout");
-            setUser(null);
-            await queryClient.invalidateQueries();
-            navigate(paths.auth.login.path);
+            queryClient.removeQueries();
+            window.location.href = paths.auth.login.path;
         } catch (error) {
             console.log("Logout error:", error);
 

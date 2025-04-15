@@ -4,22 +4,21 @@ import { CategoryNavLinks } from "@/components/ui/CategoryNavLinks.tsx";
 import { DarkModeButton } from "@/components/ui/DarkModeButton.tsx";
 import { UserMenu } from "@/components/ui/UserMenu.tsx";
 import { paths } from "@/config/paths.ts";
-import { AppShell, Burger, Divider, Flex, Image, NavLink, ScrollArea, Text } from "@mantine/core";
-import { IconGridDots } from "@tabler/icons-react";
+import { AppShell, Burger, Button, Divider, Flex, Image, NavLink, ScrollArea, Text } from "@mantine/core";
+import { IconCirclePlus, IconGridDots } from "@tabler/icons-react";
 import { useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { NavLink as RouterNavLink, Outlet, useNavigate } from "react-router";
+import { Link, NavLink as RouterNavLink, Outlet, useNavigate } from "react-router";
 
 export function AppLayout() {
     const navigate = useNavigate();
     const [navBarOpened, setNavBarOpened] = useState(false);
 
-
     return (
         <AppShell
             header={ { height: 60 } }
             navbar={ {
-                width: 250,
+                width: 270,
                 breakpoint: "md",
                 collapsed: { mobile: !navBarOpened }
             } }
@@ -55,7 +54,7 @@ export function AppLayout() {
                     type="hover" scrollbarSize={ 2 }
                 >
                     <Text size="xl" fw={ 700 } c="paleIndigo.5" mb="sm">
-                        Buying
+                        Buy
                     </Text>
 
                     <NavLink
@@ -66,6 +65,19 @@ export function AppLayout() {
                     />
 
                     <CategoryNavLinks closeNavBar={ () => setNavBarOpened(false) }/>
+
+                    <Text size="xl" fw={ 700 } c="paleIndigo.5" mb="sm">
+                        Sell
+                    </Text>
+
+                    <Button
+                        size="compact-md" variant="light"
+                        leftSection={ <IconCirclePlus size={ 18 }/> }
+                        component={ Link } to={ paths.app.createProduct.path }
+                    >
+                        Create product listing
+                    </Button>
+
                 </AppShell.Section>
 
                 <AppShell.Section>

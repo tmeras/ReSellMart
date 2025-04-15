@@ -56,7 +56,10 @@ export function WishlistIconButton(
 
     return (
         wishlistEnabled ? (
-            <ActionIcon variant="subtle">
+            <ActionIcon
+                variant="subtle"
+                loading={ createWishlistItemMutation.isPending || deleteWishlistItemMutation.isPending }
+            >
                 { inWishlist ? (
                     <IconHeartFilled
                         size={ size } color={ theme.colors.red[4] }

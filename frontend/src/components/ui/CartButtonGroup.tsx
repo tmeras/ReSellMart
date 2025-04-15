@@ -2,7 +2,7 @@ import { useCreateCartItem } from "@/api/cart/createCartItem.ts";
 import { useDeleteCartItem } from "@/api/cart/deleteCartItem.ts";
 import { useUpdateCartItem } from "@/api/cart/updateCartItem.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
-import { CartItemResponse, ProductResponse } from "@/types/api.tsx";
+import { CartItemResponse, ProductResponse } from "@/types/api.ts";
 import { Button, Tooltip, useMantineColorScheme, useMantineTheme } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconMinus, IconPlus, IconX } from "@tabler/icons-react";
@@ -72,7 +72,7 @@ export function CartButtonGroup({ cartItem, product, cartEnabled }: CartButtonGr
                     <Button.Group>
                         <Button variant="default" radius="md" size="compact-md"
                                 onClick={ () => updateQuantityInCart(cartItem.quantity - 1) }
-                                loading={ updateCartItemMutation.isPending }
+                                loading={ updateCartItemMutation.isPending || deleteCartItemMutation.isPending }
                         >
                             <IconMinus color={ theme.colors.red[6] } size={ 18 }/>
                         </Button>

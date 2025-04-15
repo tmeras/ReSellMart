@@ -1,5 +1,5 @@
 import { api } from "@/lib/apiClient.ts";
-import { UserResponse } from "@/types/api.tsx";
+import { UserResponse } from "@/types/api.ts";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 

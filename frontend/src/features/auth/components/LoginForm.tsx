@@ -1,7 +1,7 @@
 import { paths } from "@/config/paths.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { api } from "@/lib/apiClient.ts";
-import { AuthenticationResponse } from "@/types/api.tsx";
+import { AuthenticationResponse } from "@/types/api.ts";
 import {
     Anchor,
     Button,
