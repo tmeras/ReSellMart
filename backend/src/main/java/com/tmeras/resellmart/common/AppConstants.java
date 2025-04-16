@@ -4,6 +4,10 @@ import java.util.Set;
 
 public class AppConstants {
 
+    // Product Constants
+    public static final int MAX_PRODUCT_QUANTITY = 1000;
+    public static final int MAX_PRODUCT_PRICE = 10000;
+
     // Pagination constants
     public static final String PAGE_NUMBER = "0";
     public static final Integer PAGE_NUMBER_INT = 0;
@@ -15,7 +19,6 @@ public class AppConstants {
     public static final String SORT_ORDERS_BY = "id";
     public static final String SORT_USERS_BY = "id";
     public static final String SORT_ADDRESSES_BY = "id";
-
 
     // Image upload constants
     public static final Integer MAX_IMAGE_NUMBER = 5;

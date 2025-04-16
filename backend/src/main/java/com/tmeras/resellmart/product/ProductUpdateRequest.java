@@ -15,29 +15,23 @@ import static com.tmeras.resellmart.common.AppConstants.MAX_PRODUCT_QUANTITY;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProductRequest {
+public class ProductUpdateRequest {
 
-    private Integer id;
-
-    @NotBlank(message = "Name must not be empty")
     private String name;
 
-    @NotBlank(message = "Description must not be empty")
     private String description;
 
-    @NotNull(message = "Price must not be empty")
     @PositiveOrZero(message = "Price must be a non-negative value")
     @Max(value = MAX_PRODUCT_PRICE, message = "Price must not exceed 10000")
     private Double price;
 
-    @NotNull(message = "Product condition must not be empty ")
     private ProductCondition productCondition;
 
-    @NotNull(message = "Quantity must not be empty")
     @PositiveOrZero(message = "Quantity must be a non-negative value")
     @Max(value = MAX_PRODUCT_QUANTITY, message = "Quantity must not exceed 1000")
     private Integer availableQuantity;
 
-    @NotNull(message = "Category ID must not be empty")
     private Integer categoryId;
+
+    private Boolean isDeleted;
 }

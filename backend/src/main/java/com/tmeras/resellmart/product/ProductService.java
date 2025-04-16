@@ -28,8 +28,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.tmeras.resellmart.common.AppConstants.ACCEPTED_IMAGE_EXTENSIONS;
-import static com.tmeras.resellmart.common.AppConstants.FLYWAY_PRODUCTS_NUMBER;
+import static com.tmeras.resellmart.common.AppConstants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -53,12 +52,13 @@ public class ProductService {
         Category category = categoryRepository.findWithAssociationsById(productRequest.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("No category found with ID: " + productRequest.getCategoryId()));
 
-        if(productRequest.getAvailableQuantity() == 0)
+        if (productRequest.getAvailableQuantity() == 0)
             throw new APIException("Quantity of newly created product must be greater than be 0");
 
         Product product = productMapper.toProduct(productRequest);
         product.setSeller(currentUser);
         product.setCategory(category);
+        product.setIsDeleted(false);
 
         Product savedProduct = productRepository.save(product);
         return productMapper.toProductResponse(savedProduct);
@@ -266,25 +266,41 @@ public class ProductService {
         );
     }
 
-    public ProductResponse update(ProductRequest productRequest, Integer productId, Authentication authentication) {
+    public ProductResponse update(ProductUpdateRequest productRequest, Integer productId, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
-        Category category = categoryRepository.findWithAssociationsById(productRequest.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("No category found with ID: " + productRequest.getCategoryId()));
+
         Product existingproduct = productRepository.findWithAssociationsById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
 
         if (!Objects.equals(existingproduct.getSeller().getId(), currentUser.getId()))
             throw new OperationNotPermittedException("You do not have permission to update this product");
 
-        existingproduct.setName(productRequest.getName());
-        existingproduct.setDescription(productRequest.getDescription());
-        existingproduct.setPreviousPrice(existingproduct.getPrice());
-        existingproduct.setPrice(productRequest.getPrice());
-        existingproduct.setProductCondition(productRequest.getProductCondition());
-        existingproduct.setAvailableQuantity(productRequest.getAvailableQuantity());
+        if (productRequest.getCategoryId() != null)
+        {
+            Category category = categoryRepository.findWithAssociationsById(productRequest.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("No category found with ID: " + productRequest.getCategoryId()));
+            existingproduct.setCategory(category);
+        }
+
+        if (existingproduct.getName() != null)
+            existingproduct.setName(productRequest.getName());
+
+        if (productRequest.getDescription() != null)
+            existingproduct.setDescription(productRequest.getDescription());
+
+        if (productRequest.getPrice() != null) {
+            existingproduct.setPreviousPrice(existingproduct.getPrice());
+            existingproduct.setPrice(productRequest.getPrice());
+        }
+
+        if (productRequest.getProductCondition() != null)
+            existingproduct.setProductCondition(productRequest.getProductCondition());
+
+        if (productRequest.getAvailableQuantity() != null)
+            existingproduct.setAvailableQuantity(productRequest.getAvailableQuantity());
+
         if (productRequest.getIsDeleted() != null)
             existingproduct.setIsDeleted(productRequest.getIsDeleted());
-        existingproduct.setCategory(category);
 
         Product updatedProduct = productRepository.save(existingproduct);
         return productMapper.toProductResponse(updatedProduct);
@@ -300,8 +316,8 @@ public class ProductService {
         if (!Objects.equals(existingproduct.getSeller().getId(), currentUser.getId()))
             throw new OperationNotPermittedException("You do not have permission to upload images for this product");
 
-        if (images.size() > AppConstants.MAX_IMAGE_NUMBER)
-            throw new APIException("Maximum " + AppConstants.MAX_IMAGE_NUMBER + " images can be uploaded");
+        if (images.size() > MAX_IMAGE_NUMBER)
+            throw new APIException("Maximum " + MAX_IMAGE_NUMBER + " images can be uploaded");
 
         for (MultipartFile image : images) {
             String fileName = image.getOriginalFilename();
@@ -324,6 +340,7 @@ public class ProductService {
                     .build();
             existingproduct.getImages().add(productImage);
         }
+        // TODO: Displayed field likely redundant
         existingproduct.getImages().get(0).setDisplayed(true);
 
         Product updatedProduct = productRepository.save(existingproduct);

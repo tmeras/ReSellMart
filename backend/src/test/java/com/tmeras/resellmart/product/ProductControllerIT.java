@@ -68,6 +68,7 @@ public class ProductControllerIT {
     private Product productA;
     private Product productB;
     private ProductRequest productRequestA;
+    private ProductUpdateRequest productUpdateRequestA;
 
     @Autowired
     public ProductControllerIT(
@@ -121,6 +122,15 @@ public class ProductControllerIT {
         productA.setId(null);
         productA = productRepository.save(productA);
         productRequestA = TestDataUtils.createProductRequestA(category.getId());
+        productUpdateRequestA = ProductUpdateRequest.builder()
+                .name("Updated test product A")
+                .description("Updated description A")
+                .price(10.0)
+                .productCondition(ProductCondition.NEW)
+                .availableQuantity(2)
+                .categoryId(productRequestA.getCategoryId())
+                .isDeleted(false)
+                .build();
 
         productB = TestDataUtils.createProductB(category, userB);
         productB.setId(null);
@@ -143,8 +153,7 @@ public class ProductControllerIT {
     public void shouldSaveProductWhenValidRequest() {
         ProductRequest productRequest =
                 new ProductRequest(3, "Test product C", "Description C",
-                        50.0, ProductCondition.FAIR, 1,
-                        false, productA.getCategory().getId());
+                        50.0, ProductCondition.FAIR, 1, productA.getCategory().getId());
 
         ResponseEntity<ProductResponse> response =
                 restTemplate.exchange("/api/products", HttpMethod.POST,
@@ -164,7 +173,7 @@ public class ProductControllerIT {
     public void shouldNotSaveProductWhenInvalidRequest() {
         ProductRequest productRequest =
                 new ProductRequest(3, null, "Description C",
-                        50.0, ProductCondition.FAIR, 1, false, productA.getCategory().getId());
+                        50.0, ProductCondition.FAIR, 1, productA.getCategory().getId());
         Map<String, String> expectedErrors = new HashMap<>();
         expectedErrors.put("name", "Name must not be empty");
 
@@ -181,7 +190,7 @@ public class ProductControllerIT {
     public void shouldNotSaveProductWhenInvalidCategoryId() {
         ProductRequest productRequest =
                 new ProductRequest(3, "Test product C", "Description C",
-                        50.0, ProductCondition.FAIR, 1, false, 99);
+                        50.0, ProductCondition.FAIR, 1, 99);
 
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/products", HttpMethod.POST,
@@ -196,7 +205,7 @@ public class ProductControllerIT {
     public void shouldNotSaveProductWhenInvalidQuantity() {
         ProductRequest productRequest =
                 new ProductRequest(3, "Test product C", "Description C",
-                        50.0, ProductCondition.FAIR, 0, false, productA.getCategory().getId());
+                        50.0, ProductCondition.FAIR, 0, productA.getCategory().getId());
 
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/products", HttpMethod.POST,
@@ -338,26 +347,23 @@ public class ProductControllerIT {
 
     @Test
     public void shouldUpdateProductWhenValidRequest() {
-        productRequestA.setName("Updated product A");
-        productRequestA.setDescription("Updated description A");
-
         ResponseEntity<ProductResponse> response =
-                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.PUT,
-                        new HttpEntity<>(productRequestA, headers), ProductResponse.class);
+                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.PATCH,
+                        new HttpEntity<>(productUpdateRequestA, headers), ProductResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getName()).isEqualTo(productRequestA.getName());
-        assertThat(response.getBody().getDescription()).isEqualTo(productRequestA.getDescription());
+        assertThat(response.getBody().getName()).isEqualTo(productUpdateRequestA.getName());
+        assertThat(response.getBody().getDescription()).isEqualTo(productUpdateRequestA.getDescription());
     }
 
     @Test
     public void shouldNotUpdateProductWhenInvalidCategoryId() {
-        productRequestA.setCategoryId(99);
+        productUpdateRequestA.setCategoryId(99);
 
         ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.PUT,
-                        new HttpEntity<>(productRequestA, headers), ExceptionResponse.class);
+                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.PATCH,
+                        new HttpEntity<>(productUpdateRequestA, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNotNull();
@@ -367,8 +373,8 @@ public class ProductControllerIT {
     @Test
     public void shouldNotUpdateProductWhenInvalidProductId() {
         ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/products/99", HttpMethod.PUT,
-                        new HttpEntity<>(productRequestA, headers), ExceptionResponse.class);
+                restTemplate.exchange("/api/products/99", HttpMethod.PATCH,
+                        new HttpEntity<>(productUpdateRequestA, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNotNull();
@@ -378,8 +384,8 @@ public class ProductControllerIT {
     @Test
     public void shouldNotUpdateProductWhenSellerIsNotLoggedIn() {
         ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/products/" + productB.getId(), HttpMethod.PUT,
-                        new HttpEntity<>(productRequestA, headers), ExceptionResponse.class);
+                restTemplate.exchange("/api/products/" + productB.getId(), HttpMethod.PATCH,
+                        new HttpEntity<>(productUpdateRequestA, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         assertThat(response.getBody()).isNotNull();

@@ -282,16 +282,25 @@ public class ProductControllerTests {
 
     @Test
     public void shouldUpdateProductWhenValidRequest() throws Exception {
-        productRequestA.setName("Updated product name");
-        productResponseA.setName("Updated product name");
+        ProductUpdateRequest productUpdateRequest = ProductUpdateRequest.builder()
+                .name("Updated test product A")
+                .description("Updated description A")
+                .price(10.0)
+                .productCondition(ProductCondition.NEW)
+                .availableQuantity(2)
+                .categoryId(productRequestA.getCategoryId())
+                .isDeleted(false)
+                .build();
+        productResponseA.setName("Updated test product A");
+        productRequestA.setDescription("Updated description A");
 
         when(productService.update(
-                any(ProductRequest.class), eq(productRequestA.getId()), any(Authentication.class))
+                any(ProductUpdateRequest.class), eq(productRequestA.getId()), any(Authentication.class))
         ).thenReturn(productResponseA);
 
-        MvcResult mvcResult = mockMvc.perform(put("/api/products/" + productRequestA.getId())
+        MvcResult mvcResult = mockMvc.perform(patch("/api/products/" + productRequestA.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(productRequestA))
+                .content(objectMapper.writeValueAsString(productUpdateRequest))
         ).andExpect(status().isOk()).andReturn();
         String jsonResponse = mvcResult.getResponse().getContentAsString();
 

@@ -155,7 +155,6 @@ public final class TestDataUtils {
                 .price(10.0)
                 .productCondition(ProductCondition.NEW)
                 .availableQuantity(2)
-                .isDeleted(false)
                 .categoryId(categoryId)
                 .build();
     }

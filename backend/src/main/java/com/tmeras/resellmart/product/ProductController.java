@@ -97,9 +97,9 @@ public class ProductController {
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
     }
 
-    @PutMapping("/{product-id}")
+    @PatchMapping("/{product-id}")
     public ResponseEntity<ProductResponse> update(
-            @Valid @RequestBody ProductRequest productRequest,
+            @Valid @RequestBody ProductUpdateRequest productRequest,
             @PathVariable(name = "product-id") Integer productId,
             Authentication authentication
     ) {

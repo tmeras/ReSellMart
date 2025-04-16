@@ -24,7 +24,6 @@ public class ProductMapper {
                 .price(productRequest.getPrice())
                 .productCondition(productRequest.getProductCondition())
                 .availableQuantity(productRequest.getAvailableQuantity())
-                .isDeleted(productRequest.getIsDeleted())
                 .images(new ArrayList<>())
                 .build();
     }

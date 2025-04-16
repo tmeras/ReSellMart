@@ -70,10 +70,13 @@ public class OrderService {
             throw new APIException("You do not have any items in your cart");
 
         for (CartItem cartItem : cartItems) {
+            // TODO: Check if product is deleted
+
             // Reduce product's available quantity by the requested quantity
             Product cartProduct = cartItem.getProduct();
             if (cartProduct.getAvailableQuantity() < cartItem.getQuantity())
-                throw new APIException("Requested quantity of product with ID '" + cartProduct.getId() + "' cannot be larger than available quantity");
+                throw new APIException("Requested quantity of product with ID '" + cartProduct.getId() +
+                        "' cannot be larger than available quantity");
             cartProduct.setAvailableQuantity(cartProduct.getAvailableQuantity() - cartItem.getQuantity());
             cartProducts.add(cartProduct);
 

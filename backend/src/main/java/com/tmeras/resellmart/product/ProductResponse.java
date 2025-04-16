@@ -29,6 +29,7 @@ public class ProductResponse {
 
     private Integer availableQuantity;
 
+    //TODO: Refactor by enforcing consistent boolean naming
     private Boolean deleted;
 
     private List<ProductImageResponse> images;

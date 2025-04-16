@@ -49,7 +49,7 @@ CREATE TABLE product
     discounted_price   DOUBLE             NULL,
     product_condition  VARCHAR(255)       NULL,
     available_quantity INT                NULL,
-    is_available       BIT(1)             NULL,
+    is_available       BIT(1)             NOT NULL,
     category_id        INT                NOT NULL,
     seller_id          INT                NOT NULL,
     CONSTRAINT pk_product PRIMARY KEY (id)

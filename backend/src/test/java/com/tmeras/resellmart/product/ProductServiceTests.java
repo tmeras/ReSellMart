@@ -73,6 +73,7 @@ public class ProductServiceTests {
     private Product productA;
     private Product productB;
     private ProductRequest productRequestA;
+    private ProductUpdateRequest productUpdateRequestA;
     private ProductResponse productResponseA;
     private ProductResponse productResponseB;
     private User userA;
@@ -92,6 +93,16 @@ public class ProductServiceTests {
         productA = TestDataUtils.createProductA(category, userA);
         productB = TestDataUtils.createProductB(category, userB);
         productRequestA = TestDataUtils.createProductRequestA(category.getId());
+        productUpdateRequestA = ProductUpdateRequest.builder()
+                .name("Updated test product A")
+                .description("Updated description A")
+                .price(10.0)
+                .productCondition(ProductCondition.NEW)
+                .availableQuantity(2)
+                .categoryId(productRequestA.getCategoryId())
+                .isDeleted(false)
+                .build();
+
         CategoryResponse categoryResponse = TestDataUtils.createCategoryResponseA();
         productResponseA = TestDataUtils.createProductResponseA(categoryResponse, userResponseA);
         productResponseB = TestDataUtils.createProductResponseB(categoryResponse, userResponseB);
@@ -291,10 +302,8 @@ public class ProductServiceTests {
 
     @Test
     public void shouldUpdateProductWhenValidRequest() {
-        productRequestA.setName("Updated product name");
-        productRequestA.setDescription("Updated product description");
-        productResponseA.setName("Updated product name");
-        productResponseA.setDescription("Updated product description");
+        productResponseA.setName("Updated test product A");
+        productRequestA.setDescription("Updated description A");
 
         when(categoryRepository.findWithAssociationsById(productA.getCategory().getId()))
                 .thenReturn(Optional.ofNullable(productA.getCategory()));
@@ -303,31 +312,31 @@ public class ProductServiceTests {
         when(productRepository.save(productA)).thenReturn(productA);
         when(productMapper.toProductResponse(productA)).thenReturn(productResponseA);
 
-        ProductResponse productResponse = productService.update(productRequestA, productA.getId(), authentication);
+        ProductResponse productResponse = productService.update(productUpdateRequestA, productA.getId(), authentication);
 
         assertThat(productResponse).isEqualTo(productResponseA);
-        assertThat(productA.getName()).isEqualTo("Updated product name");
-        assertThat(productA.getDescription()).isEqualTo("Updated product description");
+        assertThat(productA.getName()).isEqualTo("Updated test product A");
+        assertThat(productA.getDescription()).isEqualTo("Updated description A");
     }
 
     @Test
     public void shouldNotUpdateProductWhenInvalidCategoryId() {
-        productRequestA.setCategoryId(99);
+        productUpdateRequestA.setCategoryId(99);
 
+        when(productRepository.findWithAssociationsById(productA.getId()))
+                .thenReturn(Optional.of(productA));
         when(categoryRepository.findWithAssociationsById(99)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> productService.update(productRequestA, productA.getId(), authentication))
+        assertThatThrownBy(() -> productService.update(productUpdateRequestA, productA.getId(), authentication))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("No category found with ID: 99");
     }
 
     @Test
     public void shouldNotUpdateProductWhenInvalidProductId() {
-        when(categoryRepository.findWithAssociationsById(productA.getCategory().getId()))
-                .thenReturn(Optional.ofNullable(productA.getCategory()));
         when(productRepository.findWithAssociationsById(99)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> productService.update(productRequestA, 99, authentication))
+        assertThatThrownBy(() -> productService.update(productUpdateRequestA, 99, authentication))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("No product found with ID: 99");
     }
@@ -340,11 +349,9 @@ public class ProductServiceTests {
                 productB.getSeller().getAuthorities()
         );
 
-        when(categoryRepository.findWithAssociationsById(productA.getCategory().getId()))
-                .thenReturn(Optional.ofNullable(productA.getCategory()));
         when(productRepository.findWithAssociationsById(productA.getId())).thenReturn(Optional.ofNullable(productA));
 
-        assertThatThrownBy(() -> productService.update(productRequestA, productRequestA.getId(), authentication))
+        assertThatThrownBy(() -> productService.update(productUpdateRequestA, productRequestA.getId(), authentication))
                 .isInstanceOf(OperationNotPermittedException.class)
                 .hasMessage("You do not have permission to update this product");
     }
