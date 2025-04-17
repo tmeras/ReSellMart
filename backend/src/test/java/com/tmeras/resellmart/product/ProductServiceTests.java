@@ -32,9 +32,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -43,8 +41,23 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class ProductServiceTests {
 
-    public static final Path TEST_IMAGE_PATH_1 = Paths.get("src/test/resources/test_image_1.jpeg");
-    public static final Path TEST_IMAGE_PATH_2 = Paths.get("src/test/resources/test_image_2.jpeg");
+    public static final MockMultipartFile TEST_IMAGE_1;
+    public static final MockMultipartFile TEST_IMAGE_2;
+
+    static {
+        try {
+            TEST_IMAGE_1 = new MockMultipartFile(
+                    "image1", "test_image_1.jpeg", "image/jpeg",
+                    Files.readAllBytes(Path.of("src/test/resources/test_image_1.jpeg"))
+            );
+            TEST_IMAGE_2 = new MockMultipartFile(
+                    "image2", "test_image_2.jpeg", "image/jpeg",
+                    Files.readAllBytes(Path.of("src/test/resources/test_image_2.jpeg"))
+            );
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Mock
     private ProductRepository productRepository;
@@ -358,17 +371,13 @@ public class ProductServiceTests {
 
     @Test
     public void shouldUploadProductImagesWhenValidRequest() throws IOException {
-        List<MultipartFile> images = List.of(
-                new MockMultipartFile(
-                        "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(TEST_IMAGE_PATH_1)
-                )
-        );
+        List<MultipartFile> images = List.of(TEST_IMAGE_1);
         productResponseA.setImages(List.of(
                 new ProductImageResponse(
                         1,
-                        Files.readAllBytes(TEST_IMAGE_PATH_1),
-                        false
+                        TEST_IMAGE_1.getOriginalFilename(),
+                        TEST_IMAGE_1.getContentType(),
+                        TEST_IMAGE_1.getBytes()
                 )
         ));
 
@@ -388,12 +397,7 @@ public class ProductServiceTests {
 
     @Test
     public void shouldNotUploadProductImagesWhenInvalidProductId() throws IOException {
-        List<MultipartFile> images = List.of(
-                new MockMultipartFile(
-                        "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(TEST_IMAGE_PATH_1)
-                )
-        );
+        List<MultipartFile> images = List.of(TEST_IMAGE_1);
 
         when(productRepository.findWithAssociationsById(99)).thenReturn(Optional.empty());
 
@@ -404,12 +408,7 @@ public class ProductServiceTests {
 
     @Test
     public void shouldNotUploadProductImagesWhenSellerIsNotLoggedIn() throws IOException {
-        List<MultipartFile> images = List.of(
-                new MockMultipartFile(
-                        "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(TEST_IMAGE_PATH_1)
-                )
-        );
+        List<MultipartFile> images = List.of(TEST_IMAGE_1);
 
         authentication = new UsernamePasswordAuthenticationToken(
                 productB.getSeller(),
@@ -426,32 +425,7 @@ public class ProductServiceTests {
 
     @Test
     public void shouldNotUploadProductImagesWhenImageLimitExceeded() throws IOException {
-        List<MultipartFile> images = List.of(
-                new MockMultipartFile(
-                        "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(TEST_IMAGE_PATH_1)
-                ),
-                new MockMultipartFile(
-                        "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(TEST_IMAGE_PATH_1)
-                ),
-                new MockMultipartFile(
-                        "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(TEST_IMAGE_PATH_1)
-                ),
-                new MockMultipartFile(
-                        "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(TEST_IMAGE_PATH_1)
-                ),
-                new MockMultipartFile(
-                        "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(TEST_IMAGE_PATH_1)
-                ),
-                new MockMultipartFile(
-                        "images", "test_image_1.jpeg", "image/jpeg",
-                        Files.readAllBytes(TEST_IMAGE_PATH_1)
-                )
-        );
+        List<MultipartFile> images = Collections.nCopies(6, TEST_IMAGE_1);
 
         when(productRepository.findWithAssociationsById(productA.getId())).thenReturn(Optional.of(productA));
 
@@ -477,92 +451,15 @@ public class ProductServiceTests {
                 .hasMessage("Only images can be uploaded");
     }
 
-    @Test
-    public void shouldDisplayImageWhenValidRequest() throws IOException {
-        productResponseA.setImages(List.of(
-                new ProductImageResponse(
-                        1,
-                        Files.readAllBytes(TEST_IMAGE_PATH_1),
-                        true
-                ),
-                new ProductImageResponse(
-                        2,
-                        Files.readAllBytes(TEST_IMAGE_PATH_2),
-                        false
-                )
-        ));
-        ProductImage productImageA = new ProductImage(1, "/uploads/test_image_1.jpeg", false);
-        ProductImage productImageB = new ProductImage(2, "/uploads/test_image_2.jpeg", true);
-        productA.getImages().addAll(List.of(productImageA, productImageB));
-
-        when(productRepository.findWithAssociationsById(productA.getId())).thenReturn(Optional.of(productA));
-        when(productImageRepository.findById(productImageA.getId())).thenReturn(Optional.of(productImageA));
-        when(productRepository.save(productA)).thenReturn(productA);
-        when(productMapper.toProductResponse(productA)).thenReturn(productResponseA);
-
-        ProductResponse productResponse =
-                productService.displayImage(productA.getId(), productImageA.getId(), authentication);
-
-        assertThat(productResponse).isEqualTo(productResponseA);
-        assertThat(productA.getImages().get(0).isDisplayed()).isTrue();
-        assertThat(productA.getImages().get(1).isDisplayed()).isFalse();
-    }
-
-    @Test
-    public void shouldNotDisplayImageWhenInvalidProductId() {
-        when(productRepository.findWithAssociationsById(99)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> productService.displayImage(99, 1, authentication))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("No product found with ID: 99");
-    }
-
-    @Test
-    public void shouldNotDisplayImageWhenInvalidImageId() {
-        when(productRepository.findWithAssociationsById(productA.getId())).thenReturn(Optional.of(productA));
-        when(productImageRepository.findById(99)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> productService.displayImage(productA.getId(), 99, authentication))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("No product image found with ID: 99");
-    }
-
-    @Test
-    public void shouldNotDisplayImageWhenImageBelongsToDifferentProduct() {
-        ProductImage productImageA = new ProductImage(1, "/uploads/test_image_1.jpeg", false);
-        ProductImage productImageB = new ProductImage(2, "/uploads/test_image_2.jpeg", true);
-        productB.getImages().addAll(List.of(productImageA, productImageB));
-
-        when(productRepository.findWithAssociationsById(productA.getId())).thenReturn(Optional.of(productA));
-        when(productImageRepository.findById(productImageA.getId())).thenReturn(Optional.of(productImageA));
-
-        assertThatThrownBy(() -> productService.displayImage(productB.getId(), productImageA.getId(), authentication))
-                .isInstanceOf(APIException.class)
-                .hasMessage("The image is related to a different product");
-    }
-
-    @Test
-    public void shouldNotDisplayImageWhenSellerIsNotLoggedIn() {
-        ProductImage productImageA = new ProductImage(1, "/uploads/test_image_1.jpeg", false);
-        ProductImage productImageB = new ProductImage(2, "/uploads/test_image_2.jpeg", true);
-        productA.getImages().addAll(List.of(productImageA, productImageB));
-        authentication = new UsernamePasswordAuthenticationToken(
-                productB.getSeller(),
-                productB.getSeller().getPassword(),
-                productB.getSeller().getAuthorities()
-        );
-
-        when(productRepository.findWithAssociationsById(productA.getId())).thenReturn(Optional.of(productA));
-        when(productImageRepository.findById(productImageA.getId())).thenReturn(Optional.of(productImageA));
-
-        assertThatThrownBy(() -> productService.displayImage(productA.getId(), productImageA.getId(), authentication))
-                .isInstanceOf(OperationNotPermittedException.class)
-                .hasMessage("You do not have permission to manage images for this product");
-    }
 
     @Test
     public void shouldDeleteProduct() throws IOException {
-        ProductImage productImageA = new ProductImage(1, "/uploads/test_image_1.jpeg", false);
+        ProductImage productImageA = new ProductImage(
+                1,
+                TEST_IMAGE_1.getOriginalFilename(),
+                TEST_IMAGE_1.getContentType(),
+                "/uploads/test_image_1.jpeg"
+        );
         productA.setId(99); // To ensure fileService.deleteFile() is called
         productA.getImages().add(productImageA);
 

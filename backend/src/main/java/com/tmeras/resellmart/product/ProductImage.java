@@ -21,11 +21,11 @@ public class ProductImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String filePath;
+    private String name;
 
-    // Indicates whether this image should be displayed
-    // first among all other images for a particular product
-    private boolean displayed;
+    private String type;
+
+    private String filePath;
 
     @Override
     public final boolean equals(Object o) {

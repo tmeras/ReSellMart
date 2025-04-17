@@ -269,40 +269,40 @@ public class ProductService {
     public ProductResponse update(ProductUpdateRequest productRequest, Integer productId, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
 
-        Product existingproduct = productRepository.findWithAssociationsById(productId)
+        Product existingProduct = productRepository.findWithAssociationsById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
 
-        if (!Objects.equals(existingproduct.getSeller().getId(), currentUser.getId()))
+        if (!Objects.equals(existingProduct.getSeller().getId(), currentUser.getId()))
             throw new OperationNotPermittedException("You do not have permission to update this product");
 
         if (productRequest.getCategoryId() != null)
         {
             Category category = categoryRepository.findWithAssociationsById(productRequest.getCategoryId())
                     .orElseThrow(() -> new ResourceNotFoundException("No category found with ID: " + productRequest.getCategoryId()));
-            existingproduct.setCategory(category);
+            existingProduct.setCategory(category);
         }
 
-        if (existingproduct.getName() != null)
-            existingproduct.setName(productRequest.getName());
+        if (existingProduct.getName() != null)
+            existingProduct.setName(productRequest.getName());
 
         if (productRequest.getDescription() != null)
-            existingproduct.setDescription(productRequest.getDescription());
+            existingProduct.setDescription(productRequest.getDescription());
 
         if (productRequest.getPrice() != null) {
-            existingproduct.setPreviousPrice(existingproduct.getPrice());
-            existingproduct.setPrice(productRequest.getPrice());
+            existingProduct.setPreviousPrice(existingProduct.getPrice());
+            existingProduct.setPrice(productRequest.getPrice());
         }
 
         if (productRequest.getProductCondition() != null)
-            existingproduct.setProductCondition(productRequest.getProductCondition());
+            existingProduct.setProductCondition(productRequest.getProductCondition());
 
         if (productRequest.getAvailableQuantity() != null)
-            existingproduct.setAvailableQuantity(productRequest.getAvailableQuantity());
+            existingProduct.setAvailableQuantity(productRequest.getAvailableQuantity());
 
         if (productRequest.getIsDeleted() != null)
-            existingproduct.setIsDeleted(productRequest.getIsDeleted());
+            existingProduct.setIsDeleted(productRequest.getIsDeleted());
 
-        Product updatedProduct = productRepository.save(existingproduct);
+        Product updatedProduct = productRepository.save(existingProduct);
         return productMapper.toProductResponse(updatedProduct);
     }
 
@@ -310,10 +310,10 @@ public class ProductService {
             List<MultipartFile> images, Integer productId, Authentication authentication
     ) throws IOException {
         User currentUser = (User) authentication.getPrincipal();
-        Product existingproduct = productRepository.findWithAssociationsById(productId)
+        Product existingProduct = productRepository.findWithAssociationsById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
 
-        if (!Objects.equals(existingproduct.getSeller().getId(), currentUser.getId()))
+        if (!Objects.equals(existingProduct.getSeller().getId(), currentUser.getId()))
             throw new OperationNotPermittedException("You do not have permission to upload images for this product");
 
         if (images.size() > MAX_IMAGE_NUMBER)
@@ -327,48 +327,22 @@ public class ProductService {
         }
 
         // Delete any previous images
-        for (ProductImage productImage: existingproduct.getImages())
+        for (ProductImage productImage: existingProduct.getImages())
             fileService.deleteFile(productImage.getFilePath());
-        existingproduct.getImages().clear();
+        existingProduct.getImages().clear();
 
         // Save images
-        List<String> filePaths = fileService.saveProductImages(images, existingproduct.getId());
-        for (String filePath: filePaths) {
+        List<String> filePaths = fileService.saveProductImages(images, existingProduct.getId());
+        for (int i = 0; i < images.size(); i++) {
             ProductImage productImage = ProductImage.builder()
-                    .filePath(filePath)
-                    .displayed(false)
+                    .name(images.get(i).getName())
+                    .type(images.get(i).getContentType())
+                    .filePath(filePaths.get(i))
                     .build();
-            existingproduct.getImages().add(productImage);
+            existingProduct.getImages().add(productImage);
         }
-        // TODO: Displayed field likely redundant
-        existingproduct.getImages().get(0).setDisplayed(true);
 
-        Product updatedProduct = productRepository.save(existingproduct);
-        return productMapper.toProductResponse(updatedProduct);
-    }
-
-    public ProductResponse displayImage(Integer productId, Integer imageId, Authentication authentication) {
-        User currentUser = (User) authentication.getPrincipal();
-        Product existingproduct = productRepository.findWithAssociationsById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
-        ProductImage existingImage = productImageRepository.findById(imageId)
-                .orElseThrow(() -> new ResourceNotFoundException("No product image found with ID: " + imageId));
-
-        if (!existingproduct.getImages().contains(existingImage))
-            throw new APIException("The image is related to a different product");
-
-        if (!Objects.equals(existingproduct.getSeller().getId(), currentUser.getId()))
-            throw new OperationNotPermittedException("You do not have permission to manage images for this product");
-
-        // Make displayed=false for all images of this product
-        // before making displayed=true for the specified image
-        for (ProductImage productImage : existingproduct.getImages()) {
-            productImage.setDisplayed(false);
-        }
-        int imageIndex = existingproduct.getImages().indexOf(existingImage);
-        existingproduct.getImages().get(imageIndex).setDisplayed(true);
-
-        Product updatedProduct = productRepository.save(existingproduct);
+        Product updatedProduct = productRepository.save(existingProduct);
         return productMapper.toProductResponse(updatedProduct);
     }
 

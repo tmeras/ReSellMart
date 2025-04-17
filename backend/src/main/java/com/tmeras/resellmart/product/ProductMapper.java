@@ -30,6 +30,7 @@ public class ProductMapper {
 
     public ProductResponse toProductResponse(Product product) {
         List<ProductImageResponse> productImageResponses = new ArrayList<>();
+        // TODO: Sort by ID if needed
         if (product.getImages() != null)
             for (ProductImage productImage : product.getImages())
                 productImageResponses.add(toProductImageResponse(productImage));
@@ -53,7 +54,8 @@ public class ProductMapper {
         return ProductImageResponse.builder()
                 .id(productImage.getId())
                 .image(FileUtilities.readFileFromPath(productImage.getFilePath()))
-                .displayed(productImage.isDisplayed())
+                .name(productImage.getName())
+                .type(productImage.getType())
                 .build();
     }
 }

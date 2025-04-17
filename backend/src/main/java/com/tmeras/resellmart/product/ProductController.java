@@ -117,18 +117,6 @@ public class ProductController {
         return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
     }
 
-    @PatchMapping("/{product-id}/images/{image-id}/set-display")
-    public ResponseEntity<ProductResponse> displayImage(
-            @PathVariable(name = "product-id") Integer productId,
-            @PathVariable(name = "image-id") Integer imageId,
-            Authentication authentication
-    ) {
-        // Mark an image as the main one (i.e. should be displayed first)
-        // for a particular product
-        ProductResponse updatedProduct = productService.displayImage(productId, imageId, authentication);
-        return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
-    }
-
     @DeleteMapping("/{product-id}")
     public ResponseEntity<?> delete(
             @PathVariable(name = "product-id") Integer productId

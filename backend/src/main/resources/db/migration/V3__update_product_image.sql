@@ -1,0 +1,4 @@
+ALTER TABLE product_image
+    ADD COLUMN name VARCHAR(255) NULL,
+    ADD COLUMN type VARCHAR(255) NULL,
+    DROP COLUMN displayed

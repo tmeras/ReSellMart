@@ -24,6 +24,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,8 +47,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WithMockUser(roles = "ADMIN")
 public class ProductControllerTests {
 
-    public static final Path TEST_IMAGE_PATH_1 = Paths.get("src/test/resources/test_image_1.jpeg");
-    public static final Path TEST_IMAGE_PATH_2 = Paths.get("src/test/resources/test_image_2.jpeg");
+    public static final MockMultipartFile TEST_IMAGE_1;
+    public static final MockMultipartFile TEST_IMAGE_2;
+
+    static {
+        try {
+            TEST_IMAGE_1 = new MockMultipartFile(
+                    "images", "test_image_1.jpeg", "image/jpeg",
+                    Files.readAllBytes(Path.of("src/test/resources/test_image_1.jpeg"))
+            );
+            TEST_IMAGE_2 = new MockMultipartFile(
+                    "images", "test_image_2.jpeg", "image/jpeg",
+                    Files.readAllBytes(Path.of("src/test/resources/test_image_2.jpeg"))
+            );
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -309,24 +325,18 @@ public class ProductControllerTests {
 
     @Test
     public void shouldUploadProductImages() throws Exception {
-        MockMultipartFile image1 = new MockMultipartFile(
-                "images", "test_image_1.jpeg",
-                "image/jpeg", Files.readAllBytes(TEST_IMAGE_PATH_1)
-        );
-        MockMultipartFile image2 = new MockMultipartFile(
-                "images", "test_image_2.jpeg",
-                "image/jpeg", Files.readAllBytes(TEST_IMAGE_PATH_2)
-        );
         productResponseA.setImages(List.of(
                 new ProductImageResponse(
                         1,
-                        Files.readAllBytes(TEST_IMAGE_PATH_1),
-                        false
+                        TEST_IMAGE_1.getOriginalFilename(),
+                        TEST_IMAGE_1.getContentType(),
+                        TEST_IMAGE_1.getBytes()
                 ),
                 new ProductImageResponse(
                         2,
-                        Files.readAllBytes(TEST_IMAGE_PATH_2),
-                        false
+                        TEST_IMAGE_2.getOriginalFilename(),
+                        TEST_IMAGE_2.getContentType(),
+                        TEST_IMAGE_2.getBytes()
                 )
         ));
 
@@ -334,33 +344,12 @@ public class ProductControllerTests {
                 .thenReturn(productResponseA);
 
         MvcResult result = mockMvc.perform(multipart("/api/products/" + productRequestA.getId() + "/images")
-                .file(image1)
-                .file(image2)
+                .file(TEST_IMAGE_1)
+                .file(TEST_IMAGE_2)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .with(request -> { request.setMethod("PUT"); return request; })
         ).andExpect(status().isOk()).andReturn();
         String jsonResponse = result.getResponse().getContentAsString();
-
-        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(productResponseA));
-    }
-
-    @Test
-    public void shouldDisplayImage() throws Exception {
-        productResponseA.setImages(List.of(
-                new ProductImageResponse(
-                        1,
-                        Files.readAllBytes(TEST_IMAGE_PATH_1),
-                        true
-                )
-        ));
-
-        when(productService.displayImage(eq(productRequestA.getId()), eq(1), any(Authentication.class)))
-                .thenReturn(productResponseA);
-
-        MvcResult mvcResult = mockMvc.perform(
-                patch("/api/products/{product-id}/images/{image-id}/set-display", productRequestA.getId(), 1)
-        ).andExpect(status().isOk()).andReturn();
-        String jsonResponse = mvcResult.getResponse().getContentAsString();
 
         assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(productResponseA));
     }
