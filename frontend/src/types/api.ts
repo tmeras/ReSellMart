@@ -61,8 +61,9 @@ export type CategoryResponse = {
 
 export type ProductImageResponse = {
     id: number;
-    image: Uint8Array;
-    displayed: boolean;
+    image: string; //base64 string
+    name: string;
+    type: string;
 }
 
 export type ProductResponse = {

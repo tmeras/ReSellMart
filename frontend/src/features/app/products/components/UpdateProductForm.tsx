@@ -1,7 +1,8 @@
 import { useGetCategories } from "@/api/categories/getCategories.ts";
 import { FileInputValueComponent } from "@/components/form/FileInputValueComponent.tsx";
 import { ImagePreviewCarousel } from "@/components/ui/ImagePreviewCarousel.tsx";
-import { createProductInputSchema, useCreateProduct } from "@/features/app/products/api/createProduct.ts";
+import { useGetProduct } from "@/features/app/products/api/getProduct.ts";
+import { updateProductInputSchema, useUpdateProduct } from "@/features/app/products/api/updateProduct.ts";
 import {
     uploadProductImagesInputSchema,
     useUploadProductImages
@@ -15,6 +16,7 @@ import {
     PRODUCT_CONDITION,
     ProductConditionKeys
 } from "@/utils/constants.ts";
+import { base64ToFile } from "@/utils/fileUtils.ts";
 import {
     Button,
     FileInput,
@@ -30,18 +32,28 @@ import {
 import { FormErrors, useForm, zodResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconPhoto, IconX } from "@tabler/icons-react";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
+import { useParams } from "react-router";
 
-export function CreateProductForm() {
+export function UpdateProductForm() {
+    const params = useParams();
+    const productId = params.productId as string;
+
+    // TODO: Authorization component??
+
     const { user } = useAuth();
     const [images, setImages] = useState<File[]>([]);
     const [mainImageValue, setMainImageValue] = useState("0");
 
     const getCategoriesQuery = useGetCategories();
-    const createProductMutation = useCreateProduct({ sellerId: user!.id });
+    const getProductQuery = useGetProduct({ productId });
+    const updateProductMutation = useUpdateProduct({
+        sellerId: user!.id,
+        productId
+    });
     const uploadProductImagesMutation = useUploadProductImages();
 
-    const formInputSchema = createProductInputSchema.merge(uploadProductImagesInputSchema);
+    const formInputSchema = updateProductInputSchema.merge(uploadProductImagesInputSchema);
 
     const form = useForm<{
         name: string;
@@ -62,7 +74,15 @@ export function CreateProductForm() {
             categoryId: "1",
             images: []
         },
-        validate: zodResolver(formInputSchema)
+        validate: zodResolver(formInputSchema),
+        // Disable form if not yet initialised with product data received from API
+        enhanceGetInputProps: (payload) => {
+            if (!payload.form.initialized) {
+                return { disabled: true };
+            }
+
+            return {};
+        }
     });
 
     form.watch("images", ({ value: images }) => {
@@ -74,27 +94,45 @@ export function CreateProductForm() {
         setImages(images);
     });
 
+    // Initialise form using product data received from API
+    useEffect(() => {
+        const data = getProductQuery.data?.data;
+        if (data && !form.initialized) {
+            const { id, seller, deleted, images: imageResponses, category, ...rest } = data;
+            const images = imageResponses.map((imageResponse) => {
+                return base64ToFile(imageResponse.image, imageResponse.name, imageResponse.type);
+            });
+
+            form.initialize({
+                ...rest,
+                categoryId: category.id.toString(),
+                images
+            });
+        }
+    }, [getProductQuery.data]);
+
     async function handleSubmit(values: typeof form.values) {
         try {
             // Submit images separately from remaining form
             const { images, ...formValues } = values;
-            const response = await createProductMutation.mutateAsync({ data: formValues });
+            await updateProductMutation.mutateAsync({
+                productId,
+                data: formValues
+            });
 
-            const productId = response.data.id;
             await uploadProductImagesMutation.mutateAsync({
-                productId: productId.toString(),
+                productId,
                 data: {
                     images
                 }
             });
 
             notifications.show({
-                title: "Product listing successfully created", message: "You can manage it in the `My Products` page",
+                title: "Product listing successfully updated", message: "",
                 color: "teal", withBorder: true
             });
-            //TODO: Redirect to my products
         } catch (error) {
-            console.log("Error creating product", error);
+            console.log("Error updating product", error);
             notifications.show({
                 title: "Something went wrong", message: "Please try submitting the product details again",
                 color: "red", icon: <IconX/>, withBorder: true
@@ -120,7 +158,7 @@ export function CreateProductForm() {
         setMainImageValue("0");
     }
 
-    if (getCategoriesQuery.isPending) {
+    if (getCategoriesQuery.isPending || getProductQuery.isPending) {
         return (
             <Flex w="100%" h="100vh" align="center" justify="center">
                 <Loader size="md"/>
@@ -128,10 +166,11 @@ export function CreateProductForm() {
         );
     }
 
-    if (getCategoriesQuery.isError) {
+    if (getCategoriesQuery.isError || getProductQuery.isError) {
+        console.log("Product error", getProductQuery.error);
         return (
             <Text c="red.5">
-                There was an error when fetching the product categories. Please refresh and try again.
+                There was an error when fetching the product details. Please refresh and try again.
             </Text>
         );
     }
@@ -253,8 +292,11 @@ export function CreateProductForm() {
                         />
                     }
 
-                    <Button fullWidth mt="xl" type="submit" loading={ form.submitting }>
-                        Create product listing
+                    <Button
+                        fullWidth mt="xl" type="submit"
+                        loading={ form.submitting } disabled={ !form.initialized }
+                    >
+                        Update product listing
                     </Button>
                 </form>
             </Paper>

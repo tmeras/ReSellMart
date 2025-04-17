@@ -21,11 +21,6 @@ export function ProductsByCategoryPage() {
     // Use cached categories that were previously fetched to be displayed in the navbar
     const getCategoriesQuery = useGetCategories();
 
-    // Only trigger search query when user has clicked on search button or pressed enter
-    function handleSearch(search: string) {
-        setSearch(search);
-    }
-
     if (getProductsByCategoryQuery.isError) {
         console.log("Error fetching products by category", getProductsByCategoryQuery.error);
     }
@@ -50,7 +45,10 @@ export function ProductsByCategoryPage() {
             }
 
             <SearchProducts
-                handleSearch={ handleSearch }
+                handleSearch={ (search) => {
+                    setSearch(search);
+                    setPage(0);
+                } }
                 mb="lg" w="50%"
             />
 
@@ -66,19 +64,21 @@ export function ProductsByCategoryPage() {
                 </Text>
             }
 
-            { products && !getProductsByCategoryQuery.isError &&
+            { products && getProductsByCategoryQuery.isSuccess &&
                 <>
                     <ProductsList products={ products }/>
 
-                    <Flex align="center" justify="center" mt="xl">
-                        <Pagination
-                            total={ totalPages! } value={ page + 1 }
-                            onChange={ (p) => {
-                                setPage(p - 1);
-                                window.scrollTo({ top: 0 });
-                            } }
-                        />
-                    </Flex>
+                    { totalPages! > 1 &&
+                        <Flex align="center" justify="center" mt="xl">
+                            <Pagination
+                                total={ totalPages! } value={ page + 1 }
+                                onChange={ (p) => {
+                                    setPage(p - 1);
+                                    window.scrollTo({ top: 0 });
+                                } }
+                            />
+                        </Flex>
+                    }
                 </>
             }
         </>

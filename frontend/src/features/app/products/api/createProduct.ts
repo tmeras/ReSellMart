@@ -1,4 +1,4 @@
-import { getProductsQueryOptions } from "@/features/app/products/api/getProducts.ts";
+import { getProductsByUserQueryOptions } from "@/features/app/products/api/getProductsByUser.ts";
 import { api } from "@/lib/apiClient.ts";
 import { ProductResponse } from "@/types/api.ts";
 import { PRODUCT_CONDITION } from "@/utils/constants.ts";
@@ -21,13 +21,18 @@ export function createProduct({ data }: { data: CreateProductInput }): Promise<A
     return api.post("/api/products", data);
 }
 
-export function useCreateProduct() {
+export type UseCreateProductOptions = {
+    sellerId: number
+}
+
+export function useCreateProduct({ sellerId }: UseCreateProductOptions) {
     const queryClient = useQueryClient();
 
     return useMutation({
         onSuccess: async () => {
             await queryClient.invalidateQueries({
-                queryKey: getProductsQueryOptions().queryKey
+                queryKey: getProductsByUserQueryOptions({ userId: sellerId.toString() }).queryKey,
+                exact: true
             });
         },
         mutationFn: createProduct

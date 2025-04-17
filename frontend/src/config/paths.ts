@@ -34,6 +34,10 @@ export const paths = {
         createProduct: {
             path: "/app/products/create",
             getHref: () => "/app/products/create"
+        },
+        updateProduct: {
+            path: "/app/products/:productId/update",
+            getHref: (id: string) => `/app/products/${ id }/update`
         }
     },
 } as const

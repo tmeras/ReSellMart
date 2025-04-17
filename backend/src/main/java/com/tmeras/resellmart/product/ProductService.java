@@ -289,7 +289,8 @@ public class ProductService {
             existingProduct.setDescription(productRequest.getDescription());
 
         if (productRequest.getPrice() != null) {
-            existingProduct.setPreviousPrice(existingProduct.getPrice());
+            if (!productRequest.getPrice().equals(existingProduct.getPrice()))
+                existingProduct.setPreviousPrice(existingProduct.getPrice());
             existingProduct.setPrice(productRequest.getPrice());
         }
 
@@ -326,16 +327,17 @@ public class ProductService {
                 throw new APIException("Only images can be uploaded");
         }
 
-        // Delete any previous images
-        for (ProductImage productImage: existingProduct.getImages())
-            fileService.deleteFile(productImage.getFilePath());
+        // Delete any previous images if product wasn't created using flyway script
+        if (productId > FLYWAY_PRODUCTS_NUMBER)
+            for (ProductImage productImage: existingProduct.getImages())
+                fileService.deleteFile(productImage.getFilePath());
         existingProduct.getImages().clear();
 
         // Save images
         List<String> filePaths = fileService.saveProductImages(images, existingProduct.getId());
         for (int i = 0; i < images.size(); i++) {
             ProductImage productImage = ProductImage.builder()
-                    .name(images.get(i).getName())
+                    .name(images.get(i).getOriginalFilename())
                     .type(images.get(i).getContentType())
                     .filePath(filePaths.get(i))
                     .build();

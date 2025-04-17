@@ -24,11 +24,6 @@ export function ProductsByUserPage() {
 
     // TODO: Navigate to seller's product page if user is the logged-in user
 
-    // Only trigger search when user has clicked on search button or pressed enter
-    function handleSearch(search: string) {
-        setSearch(search);
-    }
-
     if (getProductsByUserQuery.isError) {
         console.log("Error fetching products by user", getProductsByUserQuery.error);
     }
@@ -58,7 +53,10 @@ export function ProductsByUserPage() {
             }
 
             <SearchProducts
-                handleSearch={ handleSearch }
+                handleSearch={ (search) => {
+                    setSearch(search);
+                    setPage(0);
+                } }
                 mb="xl" w="50%"
             />
 
@@ -74,19 +72,21 @@ export function ProductsByUserPage() {
                 </Text>
             }
 
-            { products && !getProductsByUserQuery.isError &&
+            { products && getProductsByUserQuery.isSuccess &&
                 <>
                     <ProductsList products={ products }/>
 
-                    <Flex align="center" justify="center" mt="xl">
-                        <Pagination
-                            total={ totalPages! } value={ page + 1 }
-                            onChange={ (p) => {
-                                setPage(p - 1);
-                                window.scrollTo({ top: 0 });
-                            } }
-                        />
-                    </Flex>
+                    { totalPages! > 1 &&
+                        <Flex align="center" justify="center" mt="xl">
+                            <Pagination
+                                total={ totalPages! } value={ page + 1 }
+                                onChange={ (p) => {
+                                    setPage(p - 1);
+                                    window.scrollTo({ top: 0 });
+                                } }
+                            />
+                        </Flex>
+                    }
                 </>
             }
         </>

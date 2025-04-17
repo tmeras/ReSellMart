@@ -46,7 +46,7 @@ VALUES (1, 'Greece', 'Ermou Street', 'Attica', 'Athens', '10563',
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id)
-VALUES (1, 'Iphone 16 Pro Max', 'A brand new Iphone 16 Pro Max. Used for <2 hours.', 200, NULL,
+VALUES (1, 'Iphone 16 Pro Max', 'A brand new Iphone 16 Pro Max. Used for <2 hours.', 500, NULL,
         'LIKE_NEW', 1, false, 4, 1);
 INSERT IGNORE INTO product_image(id, file_path, name, type, product_id)
 VALUES (1, './uploads/flyway-product-images/iphone_16_pro_max.png', 'iphone_16_pro_max.png', 'image/png', 1);

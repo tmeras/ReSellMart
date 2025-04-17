@@ -44,7 +44,8 @@ export function ProductDetails(
                     { product.images.map((imageResponse, index) => (
                         <Carousel.Slide key={ index }>
                             <Image
-                                src={ bytesToBase64(imageResponse.image) } alt={ `Product Image ${ index + 1 }` }
+                                src={ bytesToBase64(imageResponse.image, imageResponse.type) }
+                                alt={ `Product Image ${ index + 1 }` }
                                 bg={ colorScheme === "dark" ? "dark.4" : "gray.2" }
                                 fit="contain" radius="md"
                                 h={ { base: 450, md: 550 } } w={ { base: 450, md: 550 } }

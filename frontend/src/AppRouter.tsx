@@ -4,6 +4,7 @@ import { ProductDetailsPage } from "@/pages/app/products/ProductDetailsPage.tsx"
 import { ProductsByCategoryPage } from "@/pages/app/products/ProductsByCategoryPage.tsx";
 import { ProductsByUserPage } from "@/pages/app/products/ProductsByUserPage.tsx";
 import { ProductsPage } from "@/pages/app/products/ProductsPage.tsx";
+import { UpdateProductPage } from "@/pages/app/products/UpdateProductPage.tsx";
 import { useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { createBrowserRouter, RouterProvider } from "react-router";
@@ -70,6 +71,10 @@ const createAppRouter = () =>
                 {
                     path: paths.app.createProduct.path,
                     element: <CreateProductPage/>
+                },
+                {
+                    path: paths.app.updateProduct.path,
+                    element: <UpdateProductPage/>
                 }
             ]
         },

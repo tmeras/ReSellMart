@@ -24,7 +24,10 @@ export function ProductsPage() {
             </Title>
 
             <SearchProducts
-                handleSearch={ (search) => setSearch(search) }
+                handleSearch={ (search) => {
+                    setSearch(search);
+                    setPage(0);
+                } }
                 mb="xl" w="50%"
             />
 
@@ -39,19 +42,21 @@ export function ProductsPage() {
                     There was an error when fetching the products. Please refresh and try again.
                 </Text> }
 
-            { products && !getProductsQuery.isError &&
+            { products && getProductsQuery.isSuccess &&
                 <>
                     <ProductsList products={ products }/>
 
-                    <Flex align="center" justify="center" mt="xl">
-                        <Pagination
-                            total={ totalPages! } value={ page + 1 }
-                            onChange={ (p) => {
-                                setPage(p - 1);
-                                window.scrollTo({ top: 0 });
-                            } }
-                        />
-                    </Flex>
+                    { totalPages! > 1 &&
+                        <Flex align="center" justify="center" mt="xl">
+                            <Pagination
+                                total={ totalPages! } value={ page + 1 }
+                                onChange={ (p) => {
+                                    setPage(p - 1);
+                                    window.scrollTo({ top: 0 });
+                                } }
+                            />
+                        </Flex>
+                    }
                 </>
             }
         </>
