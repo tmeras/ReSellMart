@@ -54,13 +54,13 @@ export function ProductsByCategoryPage() {
                 mb="lg" w="50%"
             />
 
-            { getProductsByCategoryQuery.isLoading &&
+            { (getProductsByCategoryQuery.isPending || getCategoriesQuery.isPending) &&
                 <Flex align="center" justify="center" h="100vh">
                     <Loader type="bars" size="md"/>
                 </Flex>
             }
 
-            { getProductsByCategoryQuery.isError &&
+            { (getProductsByCategoryQuery.isError || getCategoriesQuery.isError) &&
                 <Text c="red.5">
                     There was an error when fetching the products. Please refresh and try again.
                 </Text>
@@ -71,7 +71,13 @@ export function ProductsByCategoryPage() {
                     <ProductsList products={ products }/>
 
                     <Flex align="center" justify="center" mt="xl">
-                        <Pagination total={ totalPages! } value={ page + 1 } onChange={ (p) => setPage(p - 1) }/>
+                        <Pagination
+                            total={ totalPages! } value={ page + 1 }
+                            onChange={ (p) => {
+                                setPage(p - 1);
+                                window.scrollTo({ top: 0 });
+                            } }
+                        />
                     </Flex>
                 </>
             }

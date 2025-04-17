@@ -9,7 +9,7 @@ export function getWishlist(userId: number): Promise<AxiosResponse<WishlistItemR
 
 export function getWishlistQueryOptions({ userId }: { userId: number }) {
     return queryOptions({
-        queryKey: ["user", { userId }, "wishlist"],
+        queryKey: ["user", userId, "wishlist"],
         queryFn: () => getWishlist(userId)
     });
 }

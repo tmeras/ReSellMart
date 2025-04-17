@@ -13,7 +13,7 @@ export function getProductsQueryOptions(
 ) {
     return queryOptions({
         queryKey: (page || page === 0) ?
-            (search ? ["products", { page }, { search }]
+            (search ? ["products", { page, search }]
                     : ["products", { page }]
             )
             : search ? ["products", { search }]

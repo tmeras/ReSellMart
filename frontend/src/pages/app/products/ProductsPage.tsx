@@ -15,7 +15,6 @@ export function ProductsPage() {
     const products = getProductsQuery.data?.data.content;
     const totalPages = getProductsQuery.data?.data.totalPages;
 
-    //TODO: SCROLL UP ON PAGINATION CHANGE
     return (
         <>
             <title>{ `All Products | ReSellMart` }</title>
@@ -29,7 +28,7 @@ export function ProductsPage() {
                 mb="xl" w="50%"
             />
 
-            { getProductsQuery.isLoading &&
+            { getProductsQuery.isPending &&
                 <Flex align="center" justify="center" h="100vh">
                     <Loader type="bars" size="md"/>
                 </Flex>
@@ -45,7 +44,13 @@ export function ProductsPage() {
                     <ProductsList products={ products }/>
 
                     <Flex align="center" justify="center" mt="xl">
-                        <Pagination total={ totalPages! } value={ page + 1 } onChange={ (p) => setPage(p - 1) }/>
+                        <Pagination
+                            total={ totalPages! } value={ page + 1 }
+                            onChange={ (p) => {
+                                setPage(p - 1);
+                                window.scrollTo({ top: 0 });
+                            } }
+                        />
                     </Flex>
                 </>
             }

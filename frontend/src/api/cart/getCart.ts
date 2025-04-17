@@ -9,7 +9,7 @@ export function getCart(userId: number): Promise<AxiosResponse<CartItemResponse[
 
 export function getCartQueryOptions({ userId }: { userId: number }) {
     return queryOptions({
-        queryKey: ["users", { userId }, "cart"],
+        queryKey: ["users", userId, "cart"],
         queryFn: () => getCart(userId)
     });
 }

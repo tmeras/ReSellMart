@@ -6,6 +6,7 @@ import {
     uploadProductImagesInputSchema,
     useUploadProductImages
 } from "@/features/app/products/api/uploadProductImages.ts";
+import { useAuth } from "@/hooks/useAuth.ts";
 import {
     ACCEPTED_IMAGE_TYPES,
     MAX_FILE_SIZE,
@@ -34,9 +35,10 @@ import { ChangeEvent, useState } from "react";
 export function CreateProductForm() {
     const [images, setImages] = useState<File[]>([]);
     const [mainImageValue, setMainImageValue] = useState("0");
+    const { user } = useAuth();
 
     const getCategoriesQuery = useGetCategories();
-    const createProductMutation = useCreateProduct();
+    const createProductMutation = useCreateProduct({ sellerId: user!.id });
     const uploadProductImagesMutation = useUploadProductImages();
 
     const formInputSchema = createProductInputSchema.merge(uploadProductImagesInputSchema);
@@ -118,7 +120,7 @@ export function CreateProductForm() {
         setMainImageValue("0");
     }
 
-    if (getCategoriesQuery.isLoading) {
+    if (getCategoriesQuery.isPending) {
         return (
             <Flex w="100%" h="100vh" align="center" justify="center">
                 return <Loader size="md"/>
@@ -126,15 +128,15 @@ export function CreateProductForm() {
         );
     }
 
-    const categories = getCategoriesQuery.data?.data;
-
-    if (getCategoriesQuery.isError || !categories) {
+    if (getCategoriesQuery.isError) {
         return (
             <Text c="red.5">
                 There was an error when fetching the product categories. Please refresh and try again.
             </Text>
         );
     }
+
+    const categories = getCategoriesQuery.data?.data;
 
     const parentCategories = categories.filter((category) => category.parentId === undefined);
     const categoryOptions = parentCategories.map((parent) => {

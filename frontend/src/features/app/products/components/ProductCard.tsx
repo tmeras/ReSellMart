@@ -31,7 +31,6 @@ export function ProductCard(
         <Card withBorder radius="md" w={ 300 }>
             <Card.Section>
                 <Image
-                    // TODO: Convert to blob?
                     src={ bytesToBase64(displayedImage) } alt="Product Image"
                     fit="contain" h={ 200 }
                     bg={ colorScheme === "dark" ? "dark.4" : "gray.2" }

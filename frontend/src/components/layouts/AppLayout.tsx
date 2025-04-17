@@ -73,6 +73,7 @@ export function AppLayout() {
                     <Button
                         size="compact-md" variant="light"
                         leftSection={ <IconCirclePlus size={ 18 }/> }
+                        onClick={ () => setNavBarOpened(false) }
                         component={ Link } to={ paths.app.createProduct.path }
                     >
                         Create product listing

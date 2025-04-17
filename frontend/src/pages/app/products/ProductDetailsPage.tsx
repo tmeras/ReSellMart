@@ -40,7 +40,7 @@ export function ProductDetailsPage() {
         }
     }, [getCartQuery.isError, getCartQuery.error]);
 
-    if (getProductQuery.isLoading || getWishlistQuery.isLoading || getCartQuery.isLoading) {
+    if (getProductQuery.isPending || getWishlistQuery.isPending || getCartQuery.isPending) {
         return (
             <Flex align="center" justify="center" h="100vh">
                 <Loader type="bars" size="md"/>
@@ -48,11 +48,10 @@ export function ProductDetailsPage() {
         );
     }
 
-    const product = getProductQuery.data?.data;
     const wishlistItems = getWishlistQuery.data?.data;
     const cartItems = getCartQuery.data?.data;
 
-    if (getProductQuery.isError || !product) {
+    if (getProductQuery.isError) {
         console.log("Error fetching product", getProductQuery.error);
         return (
             <Text c="red.5">
@@ -60,6 +59,8 @@ export function ProductDetailsPage() {
             </Text>
         );
     }
+
+    const product = getProductQuery.data?.data;
 
     return (
         <>

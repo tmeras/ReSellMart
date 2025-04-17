@@ -38,7 +38,7 @@ export function ProductsList({ products }: ProductsListProps) {
         }
     }, [getCartQuery.isError, getCartQuery.error]);
 
-    if (getCartQuery.isLoading || getWishlistQuery.isLoading) {
+    if (getCartQuery.isPending || getWishlistQuery.isPending) {
         return (
             <Flex align="center" justify="center" h="100vh">
                 <Loader type="bars" size="md"/>

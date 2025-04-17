@@ -13,7 +13,7 @@ export function getProductsByUserQueryOptions(
 ) {
     return queryOptions({
         queryKey: (page || page === 0) ?
-            (search ? ["products", `user ${ userId }`, { page }, { search }]
+            (search ? ["products", `user ${ userId }`, { page, search }]
                     : ["products", `user ${ userId }`, { page }]
             )
             : search ? ["products", `user ${ userId }`, { search }]

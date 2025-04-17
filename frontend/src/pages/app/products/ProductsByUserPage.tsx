@@ -62,13 +62,13 @@ export function ProductsByUserPage() {
                 mb="xl" w="50%"
             />
 
-            { getProductsByUserQuery.isLoading &&
+            { (getProductsByUserQuery.isPending || getUserQuery.isPending) &&
                 <Flex align="center" justify="center" h="100vh">
                     <Loader type="bars" size="md"/>
                 </Flex>
             }
 
-            { getProductsByUserQuery.isError &&
+            { (getProductsByUserQuery.isError || getUserQuery.isError) &&
                 <Text c="red.5">
                     There was an error when fetching the products. Please refresh and try again.
                 </Text>
@@ -79,7 +79,13 @@ export function ProductsByUserPage() {
                     <ProductsList products={ products }/>
 
                     <Flex align="center" justify="center" mt="xl">
-                        <Pagination total={ totalPages! } value={ page + 1 } onChange={ (p) => setPage(p - 1) }/>
+                        <Pagination
+                            total={ totalPages! } value={ page + 1 }
+                            onChange={ (p) => {
+                                setPage(p - 1);
+                                window.scrollTo({ top: 0 });
+                            } }
+                        />
                     </Flex>
                 </>
             }

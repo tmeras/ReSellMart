@@ -19,7 +19,7 @@ type CategoryNavLinksProps = {
 export function CategoryNavLinks({ closeNavBar }: CategoryNavLinksProps) {
     const getCategoriesQuery = useGetCategories();
 
-    if (getCategoriesQuery.isLoading) {
+    if (getCategoriesQuery.isPending) {
         return (
             <Flex align="center" justify="center" mt="xl">
                 <Loader size="sm"/>
@@ -27,9 +27,7 @@ export function CategoryNavLinks({ closeNavBar }: CategoryNavLinksProps) {
         );
     }
 
-    const categories = getCategoriesQuery.data?.data;
-
-    if (getCategoriesQuery.isError || !categories) {
+    if (getCategoriesQuery.isError) {
         console.log("Get categories error", getCategoriesQuery.error);
         return (
             <Tooltip
@@ -47,6 +45,8 @@ export function CategoryNavLinks({ closeNavBar }: CategoryNavLinksProps) {
             </Tooltip>
         );
     }
+
+    const categories = getCategoriesQuery.data?.data;
 
     const parentCategories =
         categories.filter(category => category.parentId === undefined);
