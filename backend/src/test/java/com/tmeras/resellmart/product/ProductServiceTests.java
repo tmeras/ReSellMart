@@ -29,10 +29,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -109,7 +113,7 @@ public class ProductServiceTests {
         productUpdateRequestA = ProductUpdateRequest.builder()
                 .name("Updated test product A")
                 .description("Updated description A")
-                .price(10.0)
+                .price(BigDecimal.valueOf(10.0))
                 .productCondition(ProductCondition.NEW)
                 .availableQuantity(2)
                 .categoryId(productRequestA.getCategoryId())

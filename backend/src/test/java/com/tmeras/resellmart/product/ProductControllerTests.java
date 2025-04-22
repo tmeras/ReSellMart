@@ -25,9 +25,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -301,7 +301,7 @@ public class ProductControllerTests {
         ProductUpdateRequest productUpdateRequest = ProductUpdateRequest.builder()
                 .name("Updated test product A")
                 .description("Updated description A")
-                .price(10.0)
+                .price(BigDecimal.valueOf(10.0))
                 .productCondition(ProductCondition.NEW)
                 .availableQuantity(2)
                 .categoryId(productRequestA.getCategoryId())

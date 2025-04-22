@@ -30,6 +30,7 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -142,7 +143,7 @@ public class OrderControllerIT {
         Product orderProduct = Product.builder()
                 .name("Test Product")
                 .description("Test description")
-                .price(10.0)
+                .price(BigDecimal.valueOf(10))
                 .productCondition(ProductCondition.NEW)
                 .availableQuantity(5)
                 .isDeleted(false)
@@ -275,7 +276,7 @@ public class OrderControllerIT {
         Product orderProduct = Product.builder()
                 .name("Test Product")
                 .description("Test description")
-                .price(10.0)
+                .price(BigDecimal.valueOf(10.0))
                 .productCondition(ProductCondition.NEW)
                 .availableQuantity(5)
                 .isDeleted(false)

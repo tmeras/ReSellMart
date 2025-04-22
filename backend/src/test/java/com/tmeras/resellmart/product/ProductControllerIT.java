@@ -35,7 +35,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -125,7 +128,7 @@ public class ProductControllerIT {
         productUpdateRequestA = ProductUpdateRequest.builder()
                 .name("Updated test product A")
                 .description("Updated description A")
-                .price(10.0)
+                .price(BigDecimal.valueOf(10.00))
                 .productCondition(ProductCondition.NEW)
                 .availableQuantity(2)
                 .categoryId(productRequestA.getCategoryId())
@@ -153,7 +156,7 @@ public class ProductControllerIT {
     public void shouldSaveProductWhenValidRequest() {
         ProductRequest productRequest =
                 new ProductRequest(3, "Test product C", "Description C",
-                        50.0, ProductCondition.FAIR, 1, productA.getCategory().getId());
+                        BigDecimal.valueOf(50.0), ProductCondition.FAIR, 1, productA.getCategory().getId());
 
         ResponseEntity<ProductResponse> response =
                 restTemplate.exchange("/api/products", HttpMethod.POST,
@@ -173,7 +176,7 @@ public class ProductControllerIT {
     public void shouldNotSaveProductWhenInvalidRequest() {
         ProductRequest productRequest =
                 new ProductRequest(3, null, "Description C",
-                        50.0, ProductCondition.FAIR, 1, productA.getCategory().getId());
+                        BigDecimal.valueOf(50.0), ProductCondition.FAIR, 1, productA.getCategory().getId());
         Map<String, String> expectedErrors = new HashMap<>();
         expectedErrors.put("name", "Name must not be empty");
 
@@ -190,7 +193,7 @@ public class ProductControllerIT {
     public void shouldNotSaveProductWhenInvalidCategoryId() {
         ProductRequest productRequest =
                 new ProductRequest(3, "Test product C", "Description C",
-                        50.0, ProductCondition.FAIR, 1, 99);
+                        BigDecimal.valueOf(50.0), ProductCondition.FAIR, 1, 99);
 
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/products", HttpMethod.POST,
@@ -205,7 +208,7 @@ public class ProductControllerIT {
     public void shouldNotSaveProductWhenInvalidQuantity() {
         ProductRequest productRequest =
                 new ProductRequest(3, "Test product C", "Description C",
-                        50.0, ProductCondition.FAIR, 0, productA.getCategory().getId());
+                        BigDecimal.valueOf(50.0), ProductCondition.FAIR, 0, productA.getCategory().getId());
 
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/products", HttpMethod.POST,
@@ -223,12 +226,13 @@ public class ProductControllerIT {
                 restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.GET,
                         new HttpEntity<>(headers), ProductResponse.class);
 
+        System.out.println(productA.getPrice());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getName()).isEqualTo(productA.getName());
         assertThat(response.getBody().getDescription()).isEqualTo(productA.getDescription());
-        assertThat(response.getBody().getPrice()).isEqualTo(productA.getPrice());
-        assertThat(response.getBody().getPreviousPrice()).isEqualTo(productA.getPreviousPrice());
+        assertThat(response.getBody().getPrice().compareTo(productA.getPrice())).isEqualTo(0);
+        assertThat(response.getBody().getPreviousPrice().compareTo(productA.getPreviousPrice())).isEqualTo(0);
         assertThat(response.getBody().getProductCondition()).isEqualTo(productA.getProductCondition());
         assertThat(response.getBody().getCategory().getName()).isEqualTo(productA.getCategory().getName());
         assertThat(response.getBody().getSeller().getEmail()).isEqualTo(productA.getSeller().getEmail());

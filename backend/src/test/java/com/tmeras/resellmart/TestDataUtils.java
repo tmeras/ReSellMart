@@ -17,8 +17,8 @@ import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRequest;
 import com.tmeras.resellmart.user.UserResponse;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -137,8 +137,8 @@ public final class TestDataUtils {
                 .id(1)
                 .name("Test product A")
                 .description("Description A")
-                .price(10.0)
-                .previousPrice(5.0)
+                .price(BigDecimal.valueOf(10.00))
+                .previousPrice(BigDecimal.valueOf(5.0))
                 .productCondition(ProductCondition.NEW)
                 .availableQuantity(2)
                 .listedAt(CURRENT_TIME)
@@ -154,7 +154,7 @@ public final class TestDataUtils {
                 .id(1)
                 .name("Test product A")
                 .description("Description A")
-                .price(10.0)
+                .price(BigDecimal.valueOf(10.00))
                 .productCondition(ProductCondition.NEW)
                 .availableQuantity(2)
                 .categoryId(categoryId)
@@ -166,8 +166,8 @@ public final class TestDataUtils {
                 .id(1)
                 .name("Test product A")
                 .description("Description A")
-                .price(10.0)
-                .previousPrice(5.0)
+                .price(BigDecimal.valueOf(10.00))
+                .previousPrice(BigDecimal.valueOf(5.0))
                 .productCondition(ProductCondition.NEW)
                 .availableQuantity(2)
                 .listedAt(CURRENT_TIME)
@@ -183,8 +183,8 @@ public final class TestDataUtils {
                 .id(1)
                 .name("Test product B")
                 .description("Description B")
-                .price(20.0)
-                .previousPrice(10.0)
+                .price(BigDecimal.valueOf(20.0))
+                .previousPrice(BigDecimal.valueOf(10.0))
                 .productCondition(ProductCondition.LIKE_NEW)
                 .availableQuantity(3)
                 .listedAt(CURRENT_TIME)
@@ -200,8 +200,8 @@ public final class TestDataUtils {
                 .id(1)
                 .name("Test product B")
                 .description("Description B")
-                .price(20.0)
-                .previousPrice(10.0)
+                .price(BigDecimal.valueOf(20.0))
+                .previousPrice(BigDecimal.valueOf(10.0))
                 .productCondition(ProductCondition.LIKE_NEW)
                 .availableQuantity(3)
                 .listedAt(CURRENT_TIME)
