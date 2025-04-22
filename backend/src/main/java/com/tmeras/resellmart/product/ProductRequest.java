@@ -20,6 +20,7 @@ public class ProductRequest {
     private Integer id;
 
     @NotBlank(message = "Name must not be empty")
+    // TODO: Limit length?
     private String name;
 
     @NotBlank(message = "Description must not be empty")

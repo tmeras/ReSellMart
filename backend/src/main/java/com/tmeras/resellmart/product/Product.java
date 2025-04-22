@@ -5,6 +5,8 @@ import com.tmeras.resellmart.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +26,7 @@ public class Product {
 
     private String description;
 
+    // TODO: Specify precision (7, 2) and BigDecimal type + SORTING
     private Double price;
 
     private Double previousPrice;
@@ -32,6 +35,8 @@ public class Product {
     private ProductCondition productCondition;
 
     private Integer availableQuantity;
+
+    private LocalDateTime listedAt;
 
     @Column(nullable = false)
     private Boolean isDeleted;

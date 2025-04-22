@@ -5,6 +5,8 @@ import com.tmeras.resellmart.category.CategoryResponse;
 import com.tmeras.resellmart.user.UserResponse;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -28,6 +30,8 @@ public class ProductResponse {
     private ProductCondition productCondition;
 
     private Integer availableQuantity;
+
+    private LocalDateTime listedAt;
 
     //TODO: Refactor by enforcing consistent boolean naming
     private Boolean deleted;
