@@ -5,6 +5,7 @@ import com.tmeras.resellmart.user.UserResponse;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Getter
@@ -16,7 +17,7 @@ public class OrderResponse {
 
     private Integer id;
 
-    private LocalDateTime placedAt;
+    private ZonedDateTime placedAt;
 
     private PaymentMethod paymentMethod;
 

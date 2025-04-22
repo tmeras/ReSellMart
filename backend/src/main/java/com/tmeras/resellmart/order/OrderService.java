@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +57,7 @@ public class OrderService {
             throw new APIException("One or both of the specified addresses are related to another user");
 
         Order order = new Order();
-        order.setPlacedAt(LocalDateTime.now());
+        order.setPlacedAt(ZonedDateTime.now());
         order.setPaymentMethod(PaymentMethod.valueOf(orderRequest.getPaymentMethod()));
         order.setBuyer(currentUser);
         order.setBillingAddress(billingAddress);

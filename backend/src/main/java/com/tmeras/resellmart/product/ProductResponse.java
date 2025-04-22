@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Getter
@@ -31,7 +32,7 @@ public class ProductResponse {
 
     private Integer availableQuantity;
 
-    private LocalDateTime listedAt;
+    private ZonedDateTime listedAt;
 
     //TODO: Refactor by enforcing consistent boolean naming
     private Boolean deleted;

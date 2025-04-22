@@ -19,13 +19,14 @@ import com.tmeras.resellmart.user.UserResponse;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 public final class TestDataUtils {
 
-    private static final LocalDateTime CURRENT_TIME = LocalDateTime.now();
+    private static final ZonedDateTime CURRENT_TIME = ZonedDateTime.now();
 
     private TestDataUtils() {
         throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
@@ -140,7 +141,7 @@ public final class TestDataUtils {
                 .previousPrice(5.0)
                 .productCondition(ProductCondition.NEW)
                 .availableQuantity(2)
-                .listedAt(LocalDateTime.now())
+                .listedAt(CURRENT_TIME)
                 .isDeleted(false)
                 .category(category)
                 .seller(seller)
@@ -169,7 +170,7 @@ public final class TestDataUtils {
                 .previousPrice(5.0)
                 .productCondition(ProductCondition.NEW)
                 .availableQuantity(2)
-                .listedAt(LocalDateTime.now())
+                .listedAt(CURRENT_TIME)
                 .deleted(false)
                 .category(categoryResponse)
                 .seller(userResponse)
@@ -186,7 +187,7 @@ public final class TestDataUtils {
                 .previousPrice(10.0)
                 .productCondition(ProductCondition.LIKE_NEW)
                 .availableQuantity(3)
-                .listedAt(LocalDateTime.now())
+                .listedAt(CURRENT_TIME)
                 .isDeleted(false)
                 .category(category)
                 .seller(seller)
@@ -203,7 +204,7 @@ public final class TestDataUtils {
                 .previousPrice(10.0)
                 .productCondition(ProductCondition.LIKE_NEW)
                 .availableQuantity(3)
-                .listedAt(LocalDateTime.now())
+                .listedAt(CURRENT_TIME)
                 .deleted(false)
                 .category(categoryResponse)
                 .seller(userResponse)

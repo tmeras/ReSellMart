@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class Product {
 
     private Integer availableQuantity;
 
-    private LocalDateTime listedAt;
+    private ZonedDateTime listedAt;
 
     @Column(nullable = false)
     private Boolean isDeleted;

@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -59,7 +60,7 @@ public class ProductService {
         Product product = productMapper.toProduct(productRequest);
         product.setSeller(currentUser);
         product.setCategory(category);
-        product.setListedAt(LocalDateTime.now());
+        product.setListedAt(ZonedDateTime.now());
         product.setIsDeleted(false);
 
         Product savedProduct = productRepository.save(product);
