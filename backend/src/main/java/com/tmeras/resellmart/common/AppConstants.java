@@ -5,6 +5,8 @@ import java.util.Set;
 public class AppConstants {
 
     // Product Constants
+    public static final int MAX_PRODUCT_NAME_LENGTH = 100;
+    public static final int MAX_PRODUCT_DESCRIPTION_LENGTH = 5000;
     public static final int MAX_PRODUCT_QUANTITY = 1000;
     public static final int MAX_PRODUCT_PRICE = 10000;
 

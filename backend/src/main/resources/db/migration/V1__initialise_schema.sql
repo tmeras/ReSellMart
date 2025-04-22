@@ -43,7 +43,7 @@ CREATE TABLE order_item
 CREATE TABLE product
 (
     id                 INT AUTO_INCREMENT NOT NULL,
-    name               VARCHAR(255)       NULL,
+    name               VARCHAR(100)       NULL,
     `description`      VARCHAR(5000)      NULL,
     price              DOUBLE             NULL,
     discounted_price   DOUBLE             NULL,

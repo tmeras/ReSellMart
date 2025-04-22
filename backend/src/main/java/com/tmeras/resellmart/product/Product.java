@@ -5,6 +5,7 @@ import com.tmeras.resellmart.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -27,10 +28,9 @@ public class Product {
 
     private String description;
 
-    // TODO: Specify precision (7, 2) and BigDecimal type + SORTING
-    private Double price;
+    private BigDecimal price;
 
-    private Double previousPrice;
+    private BigDecimal previousPrice;
 
     @Enumerated(EnumType.STRING)
     private ProductCondition productCondition;

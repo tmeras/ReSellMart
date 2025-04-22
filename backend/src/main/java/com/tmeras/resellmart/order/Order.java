@@ -5,6 +5,7 @@ import com.tmeras.resellmart.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -46,12 +47,15 @@ public class Order {
     @JoinColumn(name = "orderId", nullable = false)
     private List<OrderItem> orderItems;
 
-    public Double getTotalPrice() {
-        Double totalPrice = 0.0;
+    public BigDecimal getTotalPrice() {
+        BigDecimal totalPrice = BigDecimal.ZERO;
 
-        // TODO: Fix by multiplying by quantity
-        for (OrderItem orderItem : orderItems)
-            totalPrice += orderItem.getProduct().getPrice();
+        // TODO: Verify correctness
+        for (OrderItem orderItem : orderItems) {
+            BigDecimal productPrice = orderItem.getProduct().getPrice();
+            Integer productQuantity = orderItem.getProductQuantity();
+            totalPrice = totalPrice.add(productPrice.multiply(BigDecimal.valueOf(productQuantity)));
+        }
 
         return totalPrice;
     }

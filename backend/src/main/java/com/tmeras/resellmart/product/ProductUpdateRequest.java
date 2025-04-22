@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 import static com.tmeras.resellmart.common.AppConstants.MAX_PRODUCT_PRICE;
 import static com.tmeras.resellmart.common.AppConstants.MAX_PRODUCT_QUANTITY;
 
@@ -23,7 +25,7 @@ public class ProductUpdateRequest {
 
     @PositiveOrZero(message = "Price must be a non-negative value")
     @Max(value = MAX_PRODUCT_PRICE, message = "Price must not exceed 10000")
-    private Double price;
+    private BigDecimal price;
 
     private ProductCondition productCondition;
 

@@ -5,6 +5,7 @@ import com.tmeras.resellmart.category.CategoryResponse;
 import com.tmeras.resellmart.user.UserResponse;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -24,9 +25,9 @@ public class ProductResponse {
 
     private String description;
 
-    private Double price;
+    private BigDecimal price;
 
-    private Double previousPrice;
+    private BigDecimal previousPrice;
 
     private ProductCondition productCondition;
 

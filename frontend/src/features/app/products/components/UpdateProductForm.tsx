@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/useAuth.ts";
 import {
     ACCEPTED_IMAGE_TYPES,
     MAX_FILE_SIZE,
-    MAX_IMAGE_COUNT,
+    MAX_IMAGE_COUNT, MAX_PRODUCT_DESCRIPTION_LENGTH, MAX_PRODUCT_NAME_LENGTH, MAX_PRODUCT_PRICE,
     MAX_PRODUCT_QUANTITY,
     PRODUCT_CONDITION,
     ProductConditionKeys
@@ -218,12 +218,13 @@ export function UpdateProductForm() {
         <Flex
             direction={ { base: "column", md: "row" } }
             align="center" justify="center"
-            gap="xl" mt="md"
+            gap="xl"
         >
             <Paper withBorder shadow="lg" p="xl" radius="md" miw={ 400 } maw={ 500 }>
                 <form onSubmit={ form.onSubmit(handleSubmit, handleErrors) }>
-                    <TextInput
+                    <Textarea
                         label="Name" required withAsterisk={ false }
+                        autosize maxRows={ 3 }
                         key={ form.key("name") }
                         { ...form.getInputProps("name") }
                     />
@@ -232,7 +233,8 @@ export function UpdateProductForm() {
                         mt="sm"
                         label="Description" required withAsterisk={ false }
                         description="Please provide a detailed description of the product"
-                        minRows={ 4 } maxRows={ 6 } autosize resize="vertical"
+                        minRows={ 4 } maxRows={ 6 }
+                        autosize resize="vertical"
                         key={ form.key("description") }
                         { ...form.getInputProps("description") }
                     />
@@ -240,7 +242,8 @@ export function UpdateProductForm() {
                     <NumberInput
                         mt="sm"
                         label="Price" required withAsterisk={ false }
-                        min={ 1 } allowNegative={ false } prefix="£"
+                        min={ 1 } max={MAX_PRODUCT_PRICE}
+                        allowNegative={ false } prefix="£"
                         fixedDecimalScale decimalScale={ 2 }
                         key={ form.key("price") }
                         { ...form.getInputProps("price") }

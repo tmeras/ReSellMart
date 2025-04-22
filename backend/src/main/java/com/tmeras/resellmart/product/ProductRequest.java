@@ -1,14 +1,13 @@
 package com.tmeras.resellmart.product;
 
 import com.tmeras.resellmart.common.AppConstants;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.*;
 import lombok.*;
+import org.hibernate.validator.constraints.Length;
 
-import static com.tmeras.resellmart.common.AppConstants.MAX_PRODUCT_PRICE;
-import static com.tmeras.resellmart.common.AppConstants.MAX_PRODUCT_QUANTITY;
+import java.math.BigDecimal;
+
+import static com.tmeras.resellmart.common.AppConstants.*;
 
 @Getter
 @Setter
@@ -20,16 +19,18 @@ public class ProductRequest {
     private Integer id;
 
     @NotBlank(message = "Name must not be empty")
-    // TODO: Limit length?
+    @Size(max = MAX_PRODUCT_NAME_LENGTH, message = "Name must not exceed 100 characters")
     private String name;
 
     @NotBlank(message = "Description must not be empty")
+    @Size(max= MAX_PRODUCT_DESCRIPTION_LENGTH, message = "Description must not exceed 5000 characters")
     private String description;
 
     @NotNull(message = "Price must not be empty")
     @PositiveOrZero(message = "Price must be a non-negative value")
     @Max(value = MAX_PRODUCT_PRICE, message = "Price must not exceed 10000")
-    private Double price;
+    @Digits(integer = 5, fraction = 2, message = "Price must be a decimal number with up to 2 decimal places")
+    private BigDecimal price;
 
     @NotNull(message = "Product condition must not be empty ")
     private ProductCondition productCondition;

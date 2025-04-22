@@ -10,6 +10,8 @@ export const ACCEPTED_IMAGE_EXTENSIONS =
     [".jpeg", ".jpg", ".png", ".webp"] as const;
 
 // Products
+export const MAX_PRODUCT_NAME_LENGTH = 100 as const;
+export const MAX_PRODUCT_DESCRIPTION_LENGTH = 5000 as const;
 export const MAX_PRODUCT_PRICE = 10000 as const;
 export const MAX_PRODUCT_QUANTITY = 1000 as const;
 
