@@ -7,11 +7,11 @@ export function CreateProductPage() {
         <>
             <title>{ `Create Product | ReSellMart` }</title>
 
-            <Flex direction="column" justify="center" gap="md" mih="100vh">
-                <Title ta="center">
-                    Create Product Listing
-                </Title>
+            <Title ta="center" mt="xl">
+                Create Product Listing
+            </Title>
 
+            <Flex justify="center" align="center" mih="100vh">
                 <CreateProductForm/>
             </Flex>
         </>

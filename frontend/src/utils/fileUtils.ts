@@ -1,7 +1,7 @@
-export function bytesToBase64(bytes: string | undefined, imageType: string) {
-    if (!bytes) return null;
+export function base64ToDataUri(base64: string | undefined, imageType = "image/png") {
+    if (!base64) return null;
 
-    return `data:${ imageType };base64,${ bytes }`;
+    return `data:${ imageType };base64,${ base64 }`;
 }
 
 export function base64ToFile(base64: string, fileName: string, mimeType: string) {

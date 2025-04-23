@@ -49,7 +49,7 @@ export function ProductsByCategoryPage() {
                     setSearch(search);
                     setPage(0);
                 } }
-                mb="lg" w="50%"
+                mb="xl" w="50%"
             />
 
             { (getProductsByCategoryQuery.isPending || getCategoriesQuery.isPending) &&

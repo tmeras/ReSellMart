@@ -38,6 +38,10 @@ export const paths = {
         updateProduct: {
             path: "/app/products/:productId/update",
             getHref: (id: string) => `/app/products/${ id }/update`
+        },
+        sellerProducts: {
+            path: "/app/my-products",
+            getHref: () => "/app/my-products"
         }
     },
 } as const

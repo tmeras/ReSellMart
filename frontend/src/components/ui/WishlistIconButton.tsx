@@ -59,16 +59,15 @@ export function WishlistIconButton(
             <ActionIcon
                 variant="subtle"
                 loading={ createWishlistItemMutation.isPending || deleteWishlistItemMutation.isPending }
+                onClick={ inWishlist ? deleteFromWishlist : addToWishlist }
             >
                 { inWishlist ? (
                     <IconHeartFilled
                         size={ size } color={ theme.colors.red[4] }
-                        onClick={ deleteFromWishlist }
                     />
                 ) : (
                     <IconHeart
                         size={ size } color={ theme.colors.red[4] }
-                        onClick={ addToWishlist }
                     />
                 ) }
             </ActionIcon>

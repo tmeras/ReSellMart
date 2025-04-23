@@ -48,7 +48,7 @@ export type UserResponse = {
     homeCountry: string;
     registeredAt: string;
     mfaEnabled: boolean;
-    profileImage?: Uint8Array;
+    profileImage?: string; //base64 string
     roles: Role[];
     qrImageUri?: string;
 }
@@ -74,6 +74,7 @@ export type ProductResponse = {
     previousPrice: number;
     productCondition: ProductConditionKeys
     availableQuantity: number;
+    listedAt: string; // UTC datetime string
     deleted: boolean;
     images: ProductImageResponse[];
     category: CategoryResponse;

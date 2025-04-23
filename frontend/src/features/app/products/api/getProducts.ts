@@ -12,13 +12,9 @@ export function getProductsQueryOptions(
     { page, search }: { page?: number, search?: string } = {}
 ) {
     return queryOptions({
-        queryKey: (page || page === 0) ?
-            (search ? ["products", { page, search }]
-                    : ["products", { page }]
-            )
-            : search ? ["products", { search }]
-                : ["products"]
-        ,
+        queryKey: (page || page === 0 || search)
+            ? ["products", { page, search }]
+            : ["products"],
         queryFn: () => getProducts(page, search)
     });
 }

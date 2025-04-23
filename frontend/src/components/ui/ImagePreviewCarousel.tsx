@@ -13,14 +13,12 @@ export function ImagePreviewCarousel({ images }: ImagePreviewCarouselProps) {
     useEffect(() => {
         // Create new URLs
         const newUrls = images.map((image) => URL.createObjectURL(image));
-        console.log("URLs", newUrls);
         setImagePreviewUrls(newUrls);
     }, [images]);
 
     // Cleanup previous URLs
     useEffect(() => {
         return () => {
-            console.log("Cleaning up URLs", imagePreviewUrls);
             imagePreviewUrls.forEach((url) => URL.revokeObjectURL(url));
         };
     }, [imagePreviewUrls]);

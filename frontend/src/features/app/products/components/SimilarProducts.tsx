@@ -2,7 +2,7 @@ import { useGetProductsByCategory } from "@/features/app/products/api/getProduct
 import { ProductCard } from "@/features/app/products/components/ProductCard.tsx";
 import { CartItemResponse, ProductResponse, WishlistItemResponse } from "@/types/api.ts";
 import { shuffleArray } from "@/utils/generalUtils.ts";
-import { Flex, Grid, Title } from "@mantine/core";
+import { Divider, Flex, Grid, Title } from "@mantine/core";
 import { memo, useMemo } from "react";
 
 export type SimilarProductsProps = {
@@ -44,6 +44,8 @@ export const SimilarProducts = memo(function SimilarProducts(
 
     return (
         <>
+            <Divider size="md" my="xl"/>
+
             <Title order={ 2 } my="lg" ta={ { base: "center", "md": "start" } }>
                 Similar Products
             </Title>

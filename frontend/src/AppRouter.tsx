@@ -4,6 +4,7 @@ import { ProductDetailsPage } from "@/pages/app/products/ProductDetailsPage.tsx"
 import { ProductsByCategoryPage } from "@/pages/app/products/ProductsByCategoryPage.tsx";
 import { ProductsByUserPage } from "@/pages/app/products/ProductsByUserPage.tsx";
 import { ProductsPage } from "@/pages/app/products/ProductsPage.tsx";
+import { SellerProductsPage } from "@/pages/app/products/SellerProductsPage.tsx";
 import { UpdateProductPage } from "@/pages/app/products/UpdateProductPage.tsx";
 import { useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
@@ -28,6 +29,7 @@ const createAppRouter = () =>
                 </ErrorBoundary>
             ),
             children: [
+                // TODO: Home page with latest products
                 {
                     path: paths.auth.login.path,
                     element: <LoginPage/>
@@ -75,6 +77,10 @@ const createAppRouter = () =>
                 {
                     path: paths.app.updateProduct.path,
                     element: <UpdateProductPage/>
+                },
+                {
+                    path: paths.app.sellerProducts.path,
+                    element: <SellerProductsPage/>
                 }
             ]
         },

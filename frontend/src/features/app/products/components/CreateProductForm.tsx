@@ -1,6 +1,7 @@
 import { useGetCategories } from "@/api/categories/getCategories.ts";
 import { FileInputValueComponent } from "@/components/form/FileInputValueComponent.tsx";
 import { ImagePreviewCarousel } from "@/components/ui/ImagePreviewCarousel.tsx";
+import { paths } from "@/config/paths.ts";
 import { createProductInputSchema, useCreateProduct } from "@/features/app/products/api/createProduct.ts";
 import {
     uploadProductImagesInputSchema,
@@ -10,29 +11,21 @@ import { useAuth } from "@/hooks/useAuth.ts";
 import {
     ACCEPTED_IMAGE_TYPES,
     MAX_FILE_SIZE,
-    MAX_IMAGE_COUNT, MAX_PRODUCT_DESCRIPTION_LENGTH, MAX_PRODUCT_NAME_LENGTH, MAX_PRODUCT_PRICE,
+    MAX_IMAGE_COUNT,
+    MAX_PRODUCT_PRICE,
     MAX_PRODUCT_QUANTITY,
     PRODUCT_CONDITION,
     ProductConditionKeys
 } from "@/utils/constants.ts";
-import {
-    Button,
-    FileInput,
-    Flex,
-    Loader,
-    NativeSelect,
-    NumberInput,
-    Paper,
-    Text,
-    Textarea,
-    TextInput
-} from "@mantine/core";
+import { Button, FileInput, Flex, Loader, NativeSelect, NumberInput, Paper, Text, Textarea } from "@mantine/core";
 import { FormErrors, useForm, zodResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconPhoto, IconX } from "@tabler/icons-react";
 import { ChangeEvent, useState } from "react";
+import { useNavigate } from "react-router";
 
 export function CreateProductForm() {
+    const navigate = useNavigate();
     const { user } = useAuth();
     const [images, setImages] = useState<File[]>([]);
     const [mainImageValue, setMainImageValue] = useState("0");
@@ -92,7 +85,7 @@ export function CreateProductForm() {
                 title: "Product listing successfully created", message: "You can manage it in the `My Products` page",
                 color: "teal", withBorder: true
             });
-            //TODO: Redirect to my products
+            navigate(paths.app.sellerProducts.getHref());
         } catch (error) {
             console.log("Error creating product", error);
             notifications.show({

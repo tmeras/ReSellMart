@@ -4,7 +4,7 @@ import { WishlistIconButton } from "@/components/ui/WishlistIconButton.tsx";
 import { paths } from "@/config/paths.ts";
 import { CartItemResponse, ProductResponse } from "@/types/api.ts";
 import { PRODUCT_CONDITION } from "@/utils/constants.ts";
-import { bytesToBase64 } from "@/utils/fileUtils.ts";
+import { base64ToDataUri } from "@/utils/fileUtils.ts";
 import { Anchor, Card, Flex, Image, Text, useMantineColorScheme } from "@mantine/core";
 import { IconList, IconPackages, IconTool } from "@tabler/icons-react";
 import { Link, useNavigate } from "react-router";
@@ -30,7 +30,7 @@ export function ProductCard(
         <Card withBorder radius="md" w={ 300 }>
             <Card.Section>
                 <Image
-                    src={ bytesToBase64(displayedImage.image, displayedImage.type) } alt="Product Image"
+                    src={ base64ToDataUri(displayedImage.image, displayedImage.type) } alt="Product Image"
                     fit="contain" h={ 200 }
                     bg={ colorScheme === "dark" ? "dark.4" : "gray.2" }
                     style={ { cursor: "pointer" } }

@@ -6,11 +6,11 @@ export function UpdateProductPage() {
         <>
             <title>{ `Update Product | ReSellMart` }</title>
 
-            <Flex direction="column" justify="center" gap="md" mih="100vh">
-                <Title ta="center">
-                    Update Product Listing
-                </Title>
+            <Title ta="center" mt="xl">
+                Update Product Listing
+            </Title>
 
+            <Flex justify="center" align="center" mih="100vh" mt="md">
                 <UpdateProductForm/>
             </Flex>
         </>

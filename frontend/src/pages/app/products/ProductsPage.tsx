@@ -40,7 +40,8 @@ export function ProductsPage() {
             { getProductsQuery.isError &&
                 <Text c="red.5">
                     There was an error when fetching the products. Please refresh and try again.
-                </Text> }
+                </Text>
+            }
 
             { products && getProductsQuery.isSuccess &&
                 <>

@@ -5,7 +5,7 @@ import { DarkModeButton } from "@/components/ui/DarkModeButton.tsx";
 import { UserMenu } from "@/components/ui/UserMenu.tsx";
 import { paths } from "@/config/paths.ts";
 import { AppShell, Burger, Button, Divider, Flex, Image, NavLink, ScrollArea, Text } from "@mantine/core";
-import { IconCirclePlus, IconGridDots } from "@tabler/icons-react";
+import { IconCirclePlus, IconGridDots, IconPackage } from "@tabler/icons-react";
 import { useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Link, NavLink as RouterNavLink, Outlet, useNavigate } from "react-router";
@@ -66,12 +66,19 @@ export function AppLayout() {
 
                     <CategoryNavLinks closeNavBar={ () => setNavBarOpened(false) }/>
 
-                    <Text size="xl" fw={ 700 } c="paleIndigo.5" mb="sm">
+                    <Text size="xl" fw={ 700 } c="paleIndigo.5">
                         Sell
                     </Text>
 
+                    <NavLink
+                        label="My Products"
+                        leftSection={ <IconPackage size={ 18 }/> }
+                        component={ RouterNavLink } onClick={ () => setNavBarOpened(false) }
+                        to={ paths.app.sellerProducts.path } end
+                    />
+
                     <Button
-                        size="compact-md" variant="light"
+                        size="compact-md" variant="light" mt="sm" ms="sm"
                         leftSection={ <IconCirclePlus size={ 18 }/> }
                         onClick={ () => setNavBarOpened(false) }
                         component={ Link } to={ paths.app.createProduct.path }
@@ -91,7 +98,7 @@ export function AppLayout() {
                     <Flex direction="column" mih="100vh" w="100%">
                         <Outlet/>
 
-                        <Flex direction="column" mt="auto" w="100%">
+                        <Flex direction="column" mt={ 50 } w="100%">
                             <Divider size="xs" mb="lg" mt="xl" w="100%"/>
 
                             <Flex direction="column" justify="center" align="center" w="100%">

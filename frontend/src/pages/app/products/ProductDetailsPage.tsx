@@ -4,7 +4,7 @@ import { useGetProduct } from "@/features/app/products/api/getProduct.ts";
 import { ProductDetails } from "@/features/app/products/components/ProductDetails.tsx";
 import { SimilarProducts } from "@/features/app/products/components/SimilarProducts.tsx";
 import { useAuth } from "@/hooks/useAuth.ts";
-import { Divider, Flex, Loader, Text } from "@mantine/core";
+import { Flex, Loader, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconX } from "@tabler/icons-react";
 import { useEffect } from "react";
@@ -62,6 +62,9 @@ export function ProductDetailsPage() {
 
     const product = getProductQuery.data?.data;
 
+    // Determine if product is sold by logged-in user
+    const isAuthUserProduct = product.seller.id === user!.id;
+
     return (
         <>
             <title>{ `${ product.name } | ReSellMart` }</title>
@@ -73,13 +76,13 @@ export function ProductDetailsPage() {
                     wishlistEnabled={ getWishlistQuery.isSuccess } cartEnabled={ getCartQuery.isSuccess }
                 />
 
-                <Divider size="md" my="xl"/>
-
-                <SimilarProducts
-                    product={ product }
-                    wishlistItems={ wishlistItems } cartItems={ cartItems }
-                    wishlistEnabled={ getWishlistQuery.isSuccess } cartEnabled={ getCartQuery.isSuccess }
-                />
+                { !isAuthUserProduct &&
+                    <SimilarProducts
+                        product={ product }
+                        wishlistItems={ wishlistItems } cartItems={ cartItems }
+                        wishlistEnabled={ getWishlistQuery.isSuccess } cartEnabled={ getCartQuery.isSuccess }
+                    />
+                }
             </Flex>
         </>
     );

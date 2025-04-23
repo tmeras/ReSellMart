@@ -1,6 +1,7 @@
 import { useGetCategories } from "@/api/categories/getCategories.ts";
 import { FileInputValueComponent } from "@/components/form/FileInputValueComponent.tsx";
 import { ImagePreviewCarousel } from "@/components/ui/ImagePreviewCarousel.tsx";
+import { paths } from "@/config/paths.ts";
 import { useGetProduct } from "@/features/app/products/api/getProduct.ts";
 import { updateProductInputSchema, useUpdateProduct } from "@/features/app/products/api/updateProduct.ts";
 import {
@@ -11,29 +12,19 @@ import { useAuth } from "@/hooks/useAuth.ts";
 import {
     ACCEPTED_IMAGE_TYPES,
     MAX_FILE_SIZE,
-    MAX_IMAGE_COUNT, MAX_PRODUCT_DESCRIPTION_LENGTH, MAX_PRODUCT_NAME_LENGTH, MAX_PRODUCT_PRICE,
+    MAX_IMAGE_COUNT,
+    MAX_PRODUCT_PRICE,
     MAX_PRODUCT_QUANTITY,
     PRODUCT_CONDITION,
     ProductConditionKeys
 } from "@/utils/constants.ts";
 import { base64ToFile } from "@/utils/fileUtils.ts";
-import {
-    Button,
-    FileInput,
-    Flex,
-    Loader,
-    NativeSelect,
-    NumberInput,
-    Paper,
-    Text,
-    Textarea,
-    TextInput
-} from "@mantine/core";
+import { Button, FileInput, Flex, Loader, NativeSelect, NumberInput, Paper, Text, Textarea } from "@mantine/core";
 import { FormErrors, useForm, zodResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconPhoto, IconX } from "@tabler/icons-react";
 import { ChangeEvent, useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 export function UpdateProductForm() {
     const params = useParams();
@@ -41,6 +32,7 @@ export function UpdateProductForm() {
 
     // TODO: Authorization component??
 
+    const navigate = useNavigate();
     const { user } = useAuth();
     const [images, setImages] = useState<File[]>([]);
     const [mainImageValue, setMainImageValue] = useState("0");
@@ -131,6 +123,7 @@ export function UpdateProductForm() {
                 title: "Product listing successfully updated", message: "",
                 color: "teal", withBorder: true
             });
+            navigate(paths.app.sellerProducts.getHref());
         } catch (error) {
             console.log("Error updating product", error);
             notifications.show({

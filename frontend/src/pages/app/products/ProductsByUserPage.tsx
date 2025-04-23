@@ -1,17 +1,20 @@
 import { useGetUser } from "@/api/users/getUser.ts";
 import imgUrl from "@/assets/user.png";
+import { paths } from "@/config/paths.ts";
 import { useGetProductsByUser } from "@/features/app/products/api/getProductsByUser.ts";
 import { ProductsList } from "@/features/app/products/components/ProductsList.tsx";
 import { SearchProducts } from "@/features/app/products/components/SearchProducts.tsx";
-import { bytesToBase64 } from "@/utils/fileUtils.ts";
+import { useAuth } from "@/hooks/useAuth.ts";
+import { base64ToDataUri } from "@/utils/fileUtils.ts";
 import { Avatar, Flex, Loader, Pagination, Text, Title } from "@mantine/core";
 import { useState } from "react";
-import { useParams } from "react-router";
+import { Navigate, useParams } from "react-router";
 
 export function ProductsByUserPage() {
     const params = useParams();
     const userId = params.userId as string;
 
+    const { user: authUser } = useAuth();
     const [page, setPage] = useState(0);
     const [search, setSearch] = useState("");
 
@@ -22,7 +25,8 @@ export function ProductsByUserPage() {
     });
     const getUserQuery = useGetUser({ userId });
 
-    // TODO: Navigate to seller's product page if user is the logged-in user
+    // Redirect to seller's product page if user is the logged-in user
+    if (authUser!.id === Number(userId)) return <Navigate to={ paths.app.sellerProducts.getHref() }/>;
 
     if (getProductsByUserQuery.isError) {
         console.log("Error fetching products by user", getProductsByUserQuery.error);
@@ -47,7 +51,7 @@ export function ProductsByUserPage() {
                     </Title>
                     <Avatar
                         size={ 45 }
-                        src={ user.profileImage ? bytesToBase64(user.profileImage) : imgUrl }
+                        src={ user.profileImage ? base64ToDataUri(user.profileImage) : imgUrl }
                     />
                 </Flex>
             }

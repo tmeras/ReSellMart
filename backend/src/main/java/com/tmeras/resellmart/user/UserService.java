@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -160,7 +161,7 @@ public class UserService {
         CartItem cartItem = cartItemMapper.toCartItem(cartItemRequest);
         cartItem.setProduct(existingProduct);
         cartItem.setUser(currentUser);
-        cartItem.setAddedAt(LocalDateTime.now());
+        cartItem.setAddedAt(ZonedDateTime.now());
 
         CartItem savedCartItem = cartItemRepository.save(cartItem);
         return cartItemMapper.toCartItemResponse(savedCartItem);
@@ -233,7 +234,7 @@ public class UserService {
         WishListItem wishListItem = new WishListItem();
         wishListItem.setProduct(existingProduct);
         wishListItem.setUser(currentUser);
-        wishListItem.setAddedAt(LocalDateTime.now());
+        wishListItem.setAddedAt(ZonedDateTime.now());
 
         WishListItem savedWishListItem = wishListItemRepository.save(wishListItem);
         return wishListItemMapper.toWishListItemResponse(savedWishListItem);

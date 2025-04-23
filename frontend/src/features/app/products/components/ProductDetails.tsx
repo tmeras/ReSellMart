@@ -5,7 +5,7 @@ import { ProductQuantitySelect } from "@/features/app/products/components/Produc
 import { useAuth } from "@/hooks/useAuth.ts";
 import { CartItemResponse, ProductResponse, WishlistItemResponse } from "@/types/api.ts";
 import { PRODUCT_CONDITION } from "@/utils/constants.ts";
-import { bytesToBase64 } from "@/utils/fileUtils.ts";
+import { base64ToDataUri } from "@/utils/fileUtils.ts";
 import { Carousel } from "@mantine/carousel";
 import { Divider, Flex, Image, Paper, Text, Title, useMantineColorScheme } from "@mantine/core";
 import { IconList, IconTool } from "@tabler/icons-react";
@@ -44,7 +44,7 @@ export function ProductDetails(
                     { product.images.map((imageResponse, index) => (
                         <Carousel.Slide key={ index }>
                             <Image
-                                src={ bytesToBase64(imageResponse.image, imageResponse.type) }
+                                src={ base64ToDataUri(imageResponse.image, imageResponse.type) }
                                 alt={ `Product Image ${ index + 1 }` }
                                 bg={ colorScheme === "dark" ? "dark.4" : "gray.2" }
                                 fit="contain" radius="md"
@@ -66,15 +66,17 @@ export function ProductDetails(
                         }
                     </Flex>
 
-                    <Flex justify="space-between" align="center">
-                        <Text size="sm" c="dimmed">
-                            Sold by { " " }
-                            <CustomLink to={ paths.app.productsByUser.getHref(product.seller.id.toString()) }>
-                                { product.seller.name }
-                            </CustomLink>
-                        </Text>
+                    <Flex align="center" w="100%">
+                        { !isAuthUserProduct &&
+                            <Text size="sm" c="dimmed">
+                                Sold by { " " }
+                                <CustomLink to={ paths.app.productsByUser.getHref(product.seller.id.toString()) }>
+                                    { product.seller.name }
+                                </CustomLink>
+                            </Text>
+                        }
 
-                        <Text size="sm" c="dimmed">
+                        <Text size="sm" c="dimmed" ms="auto">
                             Product #{ product.id }
                         </Text>
                     </Flex>

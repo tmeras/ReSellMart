@@ -285,7 +285,7 @@ public class ProductService {
             existingProduct.setCategory(category);
         }
 
-        if (existingProduct.getName() != null)
+        if (productRequest.getName() != null)
             existingProduct.setName(productRequest.getName());
 
         if (productRequest.getDescription() != null)

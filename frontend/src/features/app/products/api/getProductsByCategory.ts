@@ -12,12 +12,9 @@ export function getProductsByCategoryQueryOptions(
     { categoryId, page, search }: { categoryId: string, page?: number, search?: string }
 ) {
     return queryOptions({
-        queryKey: (page || page === 0) ?
-            (search ? ["products", `category ${ categoryId }`, { page, search }]
-                    : ["products", `category ${ categoryId }`, { page }]
-            )
-            : search ? ["products", `category ${ categoryId }`, { search }]
-                : ["products", `category ${ categoryId }`],
+        queryKey: (page || page === 0 || search)
+            ? ["products", `category ${ categoryId }`, { page, search }]
+            : ["products", `category ${ categoryId }`],
         queryFn: () => getProductsByCategory(categoryId, page, search)
     });
 }
