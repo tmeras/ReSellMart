@@ -7,6 +7,7 @@ import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 
 @Entity
@@ -31,7 +32,7 @@ public class CartItem {
     @JoinColumn(nullable = false)
     private User user;
 
-    private LocalDateTime addedAt;
+    private ZonedDateTime addedAt;
 
     @Override
     public final boolean equals(Object o) {

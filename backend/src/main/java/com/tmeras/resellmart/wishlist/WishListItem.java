@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Entity
 @Getter
@@ -19,7 +20,7 @@ public class WishListItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private LocalDateTime addedAt;
+    private ZonedDateTime addedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)

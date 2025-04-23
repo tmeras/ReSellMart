@@ -4,6 +4,7 @@ import com.tmeras.resellmart.product.ProductResponse;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -16,5 +17,5 @@ public class WishListItemResponse {
 
         private ProductResponse product;
 
-        private LocalDateTime addedAt;
+        private ZonedDateTime addedAt;
 }

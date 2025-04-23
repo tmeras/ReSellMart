@@ -42,6 +42,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -353,7 +354,7 @@ public class UserControllerIT {
     @Test
     public void shouldNotSaveCartItemWhenDuplicateCartItem() {
         CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 1, userA.getId());
-        cartItemRepository.save(new CartItem(null, productB, 1, userA, LocalDateTime.now()));
+        cartItemRepository.save(new CartItem(null, productB, 1, userA, ZonedDateTime.now()));
 
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/users/" + userA.getId() + "/cart/products", HttpMethod.POST,
@@ -423,7 +424,7 @@ public class UserControllerIT {
 
     @Test
     public void shouldFindAllCartItemsByUserIdWhenValidUserId() {
-        cartItemRepository.save(new CartItem(null, productB, 1, userA, LocalDateTime.now()));
+        cartItemRepository.save(new CartItem(null, productB, 1, userA, ZonedDateTime.now()));
 
         ResponseEntity<List<CartItemResponse>> response =
                 restTemplate.exchange("/api/users/" + userA.getId() + "/cart/products", HttpMethod.GET,
@@ -449,7 +450,7 @@ public class UserControllerIT {
 
     @Test
     public void shouldUpdateCartItemQuantityWhenValidRequest() {
-        cartItemRepository.save(new CartItem(null, productB, 1, userA, LocalDateTime.now()));
+        cartItemRepository.save(new CartItem(null, productB, 1, userA, ZonedDateTime.now()));
         CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 2, userA.getId());
 
         ResponseEntity<CartItemResponse> response =
@@ -463,7 +464,7 @@ public class UserControllerIT {
 
     @Test
     public void shouldNotUpdateCartItemQuantityWhenCartOwnerIsNotLoggedIn() {
-        cartItemRepository.save(new CartItem(null, productB, 1, userA, LocalDateTime.now()));
+        cartItemRepository.save(new CartItem(null, productB, 1, userA, ZonedDateTime.now()));
         CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 2, userA.getId());
 
         ResponseEntity<ExceptionResponse> response =
@@ -492,7 +493,7 @@ public class UserControllerIT {
 
     @Test
     public void shouldNotUpdateCartItemQuantityWhenInvalidQuantity() {
-        cartItemRepository.save(new CartItem(null, productB, 1, userA, LocalDateTime.now()));
+        cartItemRepository.save(new CartItem(null, productB, 1, userA, ZonedDateTime.now()));
         CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 99, userA.getId());
 
         ResponseEntity<ExceptionResponse> response =
@@ -507,7 +508,7 @@ public class UserControllerIT {
 
     @Test
     public void shouldDeleteCartItemWhenValidRequest() {
-        cartItemRepository.save(new CartItem(null, productB, 1, userA, LocalDateTime.now()));
+        cartItemRepository.save(new CartItem(null, productB, 1, userA, ZonedDateTime.now()));
 
         ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userA.getId() + "/cart/products/" + productB.getId(),
                 HttpMethod.DELETE, new HttpEntity<>(headers), Object.class);
@@ -518,7 +519,7 @@ public class UserControllerIT {
 
     @Test
     public void shouldNotDeleteCartItemWhenCartOwnerIsNotLoggedIn() {
-        cartItemRepository.save(new CartItem(null, productB, 1, userA, LocalDateTime.now()));
+        cartItemRepository.save(new CartItem(null, productB, 1, userA, ZonedDateTime.now()));
 
         ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userB.getId() + "/cart/products/" + productB.getId(),
                 HttpMethod.DELETE, new HttpEntity<>(headers), ExceptionResponse.class);
@@ -573,7 +574,7 @@ public class UserControllerIT {
 
     @Test
     public void shouldNotSaveWishListItemWhenDuplicateWishlistItem() {
-        wishListItemRepository.save(new WishListItem(null, LocalDateTime.now(), productB, userA));
+        wishListItemRepository.save(new WishListItem(null, ZonedDateTime.now(), productB, userA));
         WishListItemRequest wishListItemRequest = new WishListItemRequest(productB.getId(), userA.getId());
 
         ResponseEntity<ExceptionResponse> response =
@@ -632,7 +633,7 @@ public class UserControllerIT {
 
     @Test
     public void shouldFindAllWishlistItemsByUserIdWhenValidUserId() {
-        wishListItemRepository.save(new WishListItem(null, LocalDateTime.now(), productB, userA));
+        wishListItemRepository.save(new WishListItem(null, ZonedDateTime.now(), productB, userA));
 
         ResponseEntity<List<WishListItemResponse>> response =
                 restTemplate.exchange("/api/users/" + userA.getId() + "/wishlist/products", HttpMethod.GET,
@@ -646,7 +647,7 @@ public class UserControllerIT {
 
     @Test
     public void shouldNotFindAllWishlistItemsByUserIdWhenListOwnerIsNotLoggedIn() {
-        wishListItemRepository.save(new WishListItem(null, LocalDateTime.now(), productB, userA));
+        wishListItemRepository.save(new WishListItem(null, ZonedDateTime.now(), productB, userA));
 
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/users/" + 99+ "/wishlist/products", HttpMethod.GET,
@@ -660,7 +661,7 @@ public class UserControllerIT {
 
     @Test
     public void shouldDeleteWishListItemWhenValidRequest() {
-        wishListItemRepository.save(new WishListItem(null, LocalDateTime.now(), productB, userA));
+        wishListItemRepository.save(new WishListItem(null, ZonedDateTime.now(), productB, userA));
 
         ResponseEntity<?> response =
                 restTemplate.exchange("/api/users/" + userA.getId() + "/wishlist/products/" + productB.getId(),
@@ -672,7 +673,7 @@ public class UserControllerIT {
 
     @Test
     public void shouldNotDeleteWishListItemWhenListOwnerIsNotLoggedIn() {
-        wishListItemRepository.save(new WishListItem(null, LocalDateTime.now(), productB, userA));
+        wishListItemRepository.save(new WishListItem(null, ZonedDateTime.now(), productB, userA));
         String testJwt = jwtService.generateAccessToken(new HashMap<>(), userB);
         headers.set("Authorization", "Bearer " + testJwt);
 
