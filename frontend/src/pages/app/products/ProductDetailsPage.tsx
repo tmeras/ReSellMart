@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth.ts";
 import { Flex, Loader, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconX } from "@tabler/icons-react";
+import axios from "axios";
 import { useEffect } from "react";
 import { useParams } from "react-router";
 
@@ -52,7 +53,15 @@ export function ProductDetailsPage() {
     const cartItems = getCartQuery.data?.data;
 
     if (getProductQuery.isError) {
-        console.log("Error fetching product", getProductQuery.error);
+        const error = getProductQuery.error;
+        console.log("Error fetching product", error);
+
+        if (axios.isAxiosError(error) && error.response?.status === 404) return (
+            <Text c="red.5">
+                The product could not be found.
+            </Text>
+        );
+
         return (
             <Text c="red.5">
                 There was an error when fetching the product. Please refresh and try again.

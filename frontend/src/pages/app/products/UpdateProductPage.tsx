@@ -10,7 +10,7 @@ export function UpdateProductPage() {
                 Update Product Listing
             </Title>
 
-            <Flex justify="center" align="center" mih="100vh" mt="md">
+            <Flex justify="center" align="center" mih="100vh" mt="sm">
                 <UpdateProductForm/>
             </Flex>
         </>

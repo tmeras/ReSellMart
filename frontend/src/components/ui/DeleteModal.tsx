@@ -1,4 +1,4 @@
-import { Button, Flex, Modal, Text, useMantineColorScheme } from "@mantine/core";
+import { Button, Flex, Modal, Text } from "@mantine/core";
 
 export type DeleteModalProps = {
     opened: boolean;
@@ -11,7 +11,6 @@ export type DeleteModalProps = {
 export function DeleteModal(
     { opened, onClose, onConfirm, title, description }: DeleteModalProps
 ) {
-    const { colorScheme } = useMantineColorScheme();
 
     return (
         <Modal opened={ opened } onClose={ onClose } title={ title }>
@@ -23,10 +22,13 @@ export function DeleteModal(
                 <Button variant="default" onClick={ onClose }>
                     Cancel
                 </Button>
-                <Button onClick={ () => {
-                    onConfirm();
-                    onClose();
-                } } color="red">
+                <Button
+                    color="red" data-autofocus
+                    onClick={ () => {
+                        onConfirm();
+                        onClose();
+                    } }
+                >
                     Delete
                 </Button>
             </Flex>

@@ -11,7 +11,7 @@ export function CreateProductPage() {
                 Create Product Listing
             </Title>
 
-            <Flex justify="center" align="center" mih="100vh">
+            <Flex justify="center" align="center" mih="100vh" mt="sm">
                 <CreateProductForm/>
             </Flex>
         </>

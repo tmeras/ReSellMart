@@ -30,6 +30,7 @@ export function SellerProductsPage() {
                         Create product listing
                     </Button>
                 </Flex>
+
                 <SellerProductsList sellerId={ user!.id.toString() }/>
             </Flex>
         </>

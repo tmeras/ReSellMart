@@ -1,6 +1,7 @@
 import { paths } from "@/config/paths.ts";
 import { useGetProductsByUser } from "@/features/app/products/api/getProductsByUser.ts";
 import { DeleteProductButton } from "@/features/app/products/components/DeleteProductButton.tsx";
+import { SORT_PRODUCTS_BY } from "@/utils/constants.ts";
 import { base64ToDataUri } from "@/utils/fileUtils.ts";
 import {
     ActionIcon,
@@ -8,6 +9,7 @@ import {
     Flex,
     Image,
     Loader,
+    NativeSelect,
     Pagination,
     Paper,
     Text,
@@ -15,34 +17,44 @@ import {
     useMantineColorScheme
 } from "@mantine/core";
 import { IconEdit, IconEye } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router";
 
 type SellerProductsListProps = {
     sellerId: string;
 }
 
 export function SellerProductsList({ sellerId }: SellerProductsListProps) {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const page = parseInt(searchParams.get("page") || "0", 10) || 0;
+    const sortBy = searchParams.get("sortBy") || SORT_PRODUCTS_BY;
+    const sortDirection = searchParams.get("sortDirection") || "desc";
+    const sort = `${ sortBy } ${ sortDirection }`;
+
     const { colorScheme } = useMantineColorScheme();
     const navigate = useNavigate();
-    const [page, setPage] = useState(0);
 
-    // TODO: Sort by latest first
     const getProductsByUserQuery = useGetProductsByUser({
         userId: sellerId,
-        page
+        page,
+        search: "",
+        sortBy,
+        sortDirection
     });
 
     const products = getProductsByUserQuery.data?.data.content;
     const totalPages = getProductsByUserQuery.data?.data.totalPages;
 
     // Go back one page if current page is empty
-    //TODO: TEST
     useEffect(() => {
-        if (page !== 0 && products?.length === 0) {
-            setPage(page - 1);
+        if (!getProductsByUserQuery.isFetching && page !== 0 && products?.length === 0) {
+            setSearchParams((prev) => new URLSearchParams({
+                page: (page - 1).toString(),
+                sortBy: prev.get("sortBy") || "listedAt",
+                sortDirection: prev.get("sortDirection") || "desc"
+            }));
         }
-    }, [page, products]);
+    }, [getProductsByUserQuery.isFetching, page, products, setSearchParams]);
 
     if (getProductsByUserQuery.isPending) {
         return (
@@ -62,6 +74,17 @@ export function SellerProductsList({ sellerId }: SellerProductsListProps) {
     }
 
     if (products!.length === 0) return <div>No products to display</div>;
+
+    const sortOptions = [
+        {
+            value: "listedAt desc",
+            label: "Sort by: Date listed (descending)"
+        },
+        {
+            value: "listedAt asc",
+            label: "Sort by: Date listed (ascending)"
+        }
+    ];
 
     const productCards = products!.map((product) => {
         const displayedImage = product.images[0];
@@ -130,7 +153,24 @@ export function SellerProductsList({ sellerId }: SellerProductsListProps) {
     return (
         <>
             <Flex direction="column">
-                <Flex direction="column" gap="xl">
+                <Flex justify="flex-end">
+                    <NativeSelect
+                        data={ sortOptions }
+                        value={ sort }
+                        onChange={ (e) => {
+                            const selectedSort = e.currentTarget.value;
+                            const [sortBy, sortDirection] = selectedSort.split(" ");
+
+                            setSearchParams({
+                                page: "0",
+                                sortBy,
+                                sortDirection
+                            });
+                        } }
+                    />
+                </Flex>
+
+                <Flex direction="column" gap="xl" mt="sm">
                     { productCards }
                 </Flex>
 
@@ -139,7 +179,11 @@ export function SellerProductsList({ sellerId }: SellerProductsListProps) {
                         <Pagination
                             total={ totalPages! } value={ page + 1 }
                             onChange={ (p) => {
-                                setPage(p - 1);
+                                setSearchParams({
+                                    page: (p - 1).toString(),
+                                    sortBy,
+                                    sortDirection
+                                });
                                 window.scrollTo({ top: 0 });
                             } }
                         />

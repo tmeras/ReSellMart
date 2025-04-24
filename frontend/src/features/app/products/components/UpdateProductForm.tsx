@@ -1,7 +1,6 @@
 import { useGetCategories } from "@/api/categories/getCategories.ts";
 import { FileInputValueComponent } from "@/components/form/FileInputValueComponent.tsx";
 import { ImagePreviewCarousel } from "@/components/ui/ImagePreviewCarousel.tsx";
-import { paths } from "@/config/paths.ts";
 import { useGetProduct } from "@/features/app/products/api/getProduct.ts";
 import { updateProductInputSchema, useUpdateProduct } from "@/features/app/products/api/updateProduct.ts";
 import {
@@ -123,7 +122,8 @@ export function UpdateProductForm() {
                 title: "Product listing successfully updated", message: "",
                 color: "teal", withBorder: true
             });
-            navigate(paths.app.sellerProducts.getHref());
+            // Navigate back, previous page should be seller's products page
+            navigate(-1);
         } catch (error) {
             console.log("Error updating product", error);
             notifications.show({

@@ -95,11 +95,13 @@ export function AppLayout() {
 
             <AppShell.Main>
                 <ErrorBoundary FallbackComponent={ AppErrorBoundary }>
-                    <Flex direction="column" mih="100vh" w="100%">
-                        <Outlet/>
+                    <Flex direction="column">
+                        <Flex direction="column" mih="100vh">
+                            <Outlet/>
+                        </Flex>
 
-                        <Flex direction="column" mt={ 50 } w="100%">
-                            <Divider size="xs" mb="lg" mt="xl" w="100%"/>
+                        <Flex direction="column" mt={ 50 }>
+                            <Divider size="xs" mb="lg" mt="xl"/>
 
                             <Flex direction="column" justify="center" align="center" w="100%">
                                 <Flex mb="sm">

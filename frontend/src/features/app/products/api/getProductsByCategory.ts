@@ -1,33 +1,65 @@
 import { api } from "@/lib/apiClient.ts";
 import { PageResponse, ProductResponse } from "@/types/api.ts";
-import { DEFAULT_PAGE_SIZE } from "@/utils/constants.ts";
+import { DEFAULT_PAGE_SIZE, SORT_DIR, SORT_PRODUCTS_BY } from "@/utils/constants.ts";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 
-export function getProductsByCategory(categoryId: string, page = 0, search = ""): Promise<AxiosResponse<PageResponse<ProductResponse>>> {
-    return api.get(`/api/products/categories/${ categoryId }?pageSize=${ DEFAULT_PAGE_SIZE }&pageNumber=${ page }&search=${ search }`);
+export function getProductsByCategory(
+    categoryId: string,
+    page = 0,
+    search = "",
+    sortBy = SORT_PRODUCTS_BY,
+    sortDirection = SORT_DIR
+): Promise<AxiosResponse<PageResponse<ProductResponse>>> {
+    const params = new URLSearchParams({
+        pageSize: DEFAULT_PAGE_SIZE.toString(),
+        pageNumber: page.toString(),
+        search,
+        sortBy,
+        sortDirection
+    });
+
+    return api.get(`/api/products/categories/${ categoryId }?${ params.toString() }`);
 }
 
-export function getProductsByCategoryQueryOptions(
-    { categoryId, page, search }: { categoryId: string, page?: number, search?: string }
-) {
+export function getProductsByCategoryQueryOptions({
+                                                      categoryId,
+                                                      page,
+                                                      search,
+                                                      sortBy,
+                                                      sortDirection
+                                                  }: {
+    categoryId: string;
+    page?: number;
+    search?: string;
+    sortBy?: string;
+    sortDirection?: string;
+}) {
     return queryOptions({
-        queryKey: (page || page === 0 || search)
-            ? ["products", `category ${ categoryId }`, { page, search }]
+        queryKey: (page || page === 0 || search || sortBy || sortDirection)
+            ? ["products", `category ${ categoryId }`, { page, search, sortBy, sortDirection }]
             : ["products", `category ${ categoryId }`],
-        queryFn: () => getProductsByCategory(categoryId, page, search)
+        queryFn: () => getProductsByCategory(categoryId, page, search, sortBy, sortDirection)
     });
 }
 
 export type UseGetProductsByCategoryOptions = {
     categoryId: string;
     page: number;
-    search?: string;
+    search: string;
+    sortBy: string;
+    sortDirection: string;
 };
 
-export function useGetProductsByCategory({ categoryId, page, search }: UseGetProductsByCategoryOptions) {
+export function useGetProductsByCategory({
+                                             categoryId,
+                                             page,
+                                             search,
+                                             sortBy,
+                                             sortDirection
+                                         }: UseGetProductsByCategoryOptions) {
     return useQuery({
-        ...getProductsByCategoryQueryOptions({ categoryId, page, search })
+        ...getProductsByCategoryQueryOptions({ categoryId, page, search, sortBy, sortDirection })
     });
 }
 

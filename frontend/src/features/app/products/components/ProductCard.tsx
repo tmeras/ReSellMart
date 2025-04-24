@@ -26,6 +26,7 @@ export function ProductCard(
     // Find the product image that should be displayed as front cover
     const displayedImage = product.images[0];
 
+    // TODO: Consistent height
     return (
         <Card withBorder radius="md" w={ 300 }>
             <Card.Section>
