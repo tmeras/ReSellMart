@@ -1,17 +1,16 @@
-import { LogoText } from "@/components/ui/LogoText.tsx";
+import { DarkModeButton } from "@/components/ui/DarkModeButton.tsx";
 import { paths } from "@/config/paths.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
-import { ActionIcon, AppShell, Button, Flex, Image, Text, Tooltip, useMantineColorScheme } from "@mantine/core";
-import { IconBrightnessDown, IconMoon } from "@tabler/icons-react";
+import { AppShell, Button, Flex, Image, Text } from "@mantine/core";
 import { useEffect } from "react";
 import { Link, Outlet, useNavigate, useSearchParams } from "react-router";
 import imgUrl from "../../assets/logo.png";
 
 export function AuthLayout() {
-    const { user } = useAuth();
-    const { colorScheme, toggleColorScheme } = useMantineColorScheme();
     const [searchParams] = useSearchParams();
     const redirectTo = searchParams.get('redirectTo');
+
+    const { user } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -19,7 +18,7 @@ export function AuthLayout() {
             if (redirectTo)
                 navigate(redirectTo, { replace: true });
             else
-                navigate(paths.app.products, { replace: true });
+                navigate(paths.app.products.path, { replace: true });
     }, [user, navigate, redirectTo]);
 
     return (
@@ -31,31 +30,20 @@ export function AuthLayout() {
                 <Flex align="center" justify="space-between">
                     <Flex>
                         <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
-                        <LogoText/>
+                        <Text
+                            size="lg" variant="gradient" fw={ 700 }
+                            gradient={ { from: "paleIndigo.8", to: "paleIndigo.4", deg: 150 } }
+                        >
+                            ReSellMart
+                        </Text>
                     </Flex>
+
                     <Flex>
-                        <Button size="xs" component={ Link } to={ paths.auth.login }>
+                        <Button size="xs" component={ Link } to={ paths.auth.login.path }>
                             Sign in
                         </Button>
-                        { colorScheme === "dark" ? (
-                            <Tooltip label="Light Mode">
-                                <ActionIcon
-                                    aria-label="Light Mode" onClick={ () => toggleColorScheme() }
-                                    variant="filled" ms="sm" size="md" mt={ 2 }
-                                >
-                                    <IconBrightnessDown size={ 60 }/>
-                                </ActionIcon>
-                            </Tooltip>
-                        ) : (
-                            <Tooltip label="Dark Mode">
-                                <ActionIcon
-                                    aria-label="Dark Mode" onClick={ () => toggleColorScheme() }
-                                    variant="outline" ms="sm" size="md" mt={ 2 }
-                                >
-                                    <IconMoon size={ 50 }/>
-                                </ActionIcon>
-                            </Tooltip>
-                        ) }
+
+                        <DarkModeButton/>
                     </Flex>
                 </Flex>
             </AppShell.Header>
@@ -68,7 +56,12 @@ export function AuthLayout() {
                 <Flex direction="column" justify="center" align="center">
                     <Flex justify="center" align="center" mb="sm">
                         <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
-                        <LogoText/>
+                        <Text
+                            size="lg" variant="gradient" fw={ 700 }
+                            gradient={ { from: "paleIndigo.8", to: "paleIndigo.4", deg: 150 } }
+                        >
+                            ReSellMart
+                        </Text>
                     </Flex>
                     <Text c="dimmed" size="sm">
                         © 2025 ReSellMart. All rights reserved.

@@ -1,19 +1,25 @@
-import { ActionIcon, AppShell, Burger, Flex, Image, Text, Tooltip, useMantineColorScheme } from "@mantine/core";
-import { IconBrightnessDown, IconMoon } from "@tabler/icons-react";
+import imgUrl from "@/assets/logo.png";
+import { AppErrorBoundary } from "@/components/error/AppErrorBoundary.tsx";
+import { CategoryNavLinks } from "@/components/ui/CategoryNavLinks.tsx";
+import { DarkModeButton } from "@/components/ui/DarkModeButton.tsx";
+import { UserMenu } from "@/components/ui/UserMenu.tsx";
+import { paths } from "@/config/paths.ts";
+import { AppShell, Burger, Button, Divider, Flex, Image, NavLink, ScrollArea, Text } from "@mantine/core";
+import { IconCirclePlus, IconGridDots, IconPackage } from "@tabler/icons-react";
 import { useState } from "react";
-import { Outlet } from "react-router";
-import imgUrl from "../../assets/logo.png";
+import { ErrorBoundary } from "react-error-boundary";
+import { Link, NavLink as RouterNavLink, Outlet, useNavigate } from "react-router";
 
 export function AppLayout() {
+    const navigate = useNavigate();
     const [navBarOpened, setNavBarOpened] = useState(false);
-    const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
     return (
         <AppShell
             header={ { height: 60 } }
             navbar={ {
-                width: 250,
-                breakpoint: "sm",
+                width: 270,
+                breakpoint: "md",
                 collapsed: { mobile: !navBarOpened }
             } }
             padding="md"
@@ -22,58 +28,100 @@ export function AppLayout() {
                 <Flex align="center" justify="space-between">
                     <Flex>
                         <Burger
-                            hiddenFrom="sm" size="sm" me="md"
+                            hiddenFrom="md" size="sm" me="md"
                             opened={ navBarOpened } onClick={ () => setNavBarOpened(!navBarOpened) }
                         />
+
                         <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
-                        <Text size="lg">
+                        <Text
+                            size="lg" variant="gradient" fw={ 700 }
+                            gradient={ { from: "paleIndigo.8", to: "paleIndigo.4", deg: 150 } }
+                            style={ { cursor: "pointer" } }
+                            onClick={ () => navigate(paths.app.products.path) }
+                        >
                             ReSellMart
                         </Text>
                     </Flex>
-                    { colorScheme === "dark" ? (
-                        <Tooltip label="Light Mode">
-                            <ActionIcon
-                                aria-label="Light Mode" onClick={ () => toggleColorScheme() }
-                                variant="filled" ms="sm" size="md" mt={ 2 }
-                            >
-                                <IconBrightnessDown size={ 60 }/>
-                            </ActionIcon>
-                        </Tooltip>
-                    ) : (
-                        <Tooltip label="Dark Mode">
-                            <ActionIcon
-                                aria-label="Dark Mode" onClick={ () => toggleColorScheme() }
-                                variant="outline" ms="sm" size="md" mt={ 2 }
-                            >
-                                <IconMoon size={ 50 }/>
-                            </ActionIcon>
-                        </Tooltip>
-                    ) }
+
+                    <DarkModeButton/>
                 </Flex>
             </AppShell.Header>
 
-            {/*TODO: Logout*/ }
             <AppShell.Navbar p="md">
-                Placeholder
+                <AppShell.Section
+                    my="sm"
+                    component={ ScrollArea } grow
+                    type="hover" scrollbarSize={ 2 }
+                >
+                    <Text size="xl" fw={ 700 } c="paleIndigo.5" mb="sm">
+                        Buy
+                    </Text>
+
+                    <NavLink
+                        label="All Products"
+                        leftSection={ <IconGridDots size={ 18 }/> }
+                        component={ RouterNavLink } onClick={ () => setNavBarOpened(false) }
+                        to={ paths.app.products.path } end
+                    />
+
+                    <CategoryNavLinks closeNavBar={ () => setNavBarOpened(false) }/>
+
+                    <Text size="xl" fw={ 700 } c="paleIndigo.5">
+                        Sell
+                    </Text>
+
+                    <NavLink
+                        label="My Products"
+                        leftSection={ <IconPackage size={ 18 }/> }
+                        component={ RouterNavLink } onClick={ () => setNavBarOpened(false) }
+                        to={ paths.app.sellerProducts.path } end
+                    />
+
+                    <Button
+                        size="compact-md" variant="light" mt="sm" ms="sm"
+                        leftSection={ <IconCirclePlus size={ 18 }/> }
+                        onClick={ () => setNavBarOpened(false) }
+                        component={ Link } to={ paths.app.createProduct.path }
+                    >
+                        Create product listing
+                    </Button>
+
+                </AppShell.Section>
+
+                <AppShell.Section>
+                    <UserMenu closeNavBar={ () => setNavBarOpened(false) }/>
+                </AppShell.Section>
             </AppShell.Navbar>
 
             <AppShell.Main>
-                <Outlet/>
-            </AppShell.Main>
+                <ErrorBoundary FallbackComponent={ AppErrorBoundary }>
+                    <Flex direction="column">
+                        <Flex direction="column" mih="100vh">
+                            <Outlet/>
+                        </Flex>
 
-            <AppShell.Footer p="md" style={ { position: "relative" } }>
-                <Flex direction="column" justify="center" align="center">
-                    <Flex justify="center" align="center" mb="sm">
-                        <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
-                        <Text size="lg">
-                            ReSellMart
-                        </Text>
+                        <Flex direction="column" mt={ 50 }>
+                            <Divider size="xs" mb="lg" mt="xl"/>
+
+                            <Flex direction="column" justify="center" align="center" w="100%">
+                                <Flex mb="sm">
+                                    <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
+                                    <Text
+                                        size="lg" variant="gradient" fw={ 700 }
+                                        gradient={ { from: "paleIndigo.8", to: "paleIndigo.4", deg: 150 } }
+                                    >
+                                        ReSellMart
+                                    </Text>
+                                </Flex>
+
+                                <Text c="dimmed" size="sm">
+                                    © 2025 ReSellMart. All rights reserved.
+                                </Text>
+                            </Flex>
+                        </Flex>
                     </Flex>
-                    <Text c="dimmed" size="sm">
-                        © 2025 ReSellMart. All rights reserved.
-                    </Text>
-                </Flex>
-            </AppShell.Footer>
+                </ErrorBoundary>
+            </AppShell.Main>
         </AppShell>
     );
 }

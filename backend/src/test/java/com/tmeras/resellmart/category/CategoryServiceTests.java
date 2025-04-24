@@ -4,8 +4,10 @@ import com.tmeras.resellmart.TestDataUtils;
 import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.APIException;
+import com.tmeras.resellmart.exception.ForeignKeyConstraintException;
 import com.tmeras.resellmart.exception.ResourceAlreadyExistsException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
+import com.tmeras.resellmart.product.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +28,9 @@ public class CategoryServiceTests {
 
     @Mock
     private CategoryRepository categoryRepository;
+
+    @Mock
+    private ProductRepository productRepository;
 
     @Mock
     private CategoryMapper categoryMapper;
@@ -122,22 +127,15 @@ public class CategoryServiceTests {
 
     @Test
     public void shouldFindAllCategories() {
-        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstants.SORT_CATEGORIES_BY).ascending() : Sort.by(AppConstants.SORT_CATEGORIES_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
-        Page<Category> page = new PageImpl<>(List.of(categoryA, categoryB));
-
-        when(categoryRepository.findAll(pageable)).thenReturn(page);
+        when(categoryRepository.findAll()).thenReturn(List.of(categoryA, categoryB));
         when(categoryMapper.toCategoryResponse(categoryA)).thenReturn(categoryResponseA);
         when(categoryMapper.toCategoryResponse(categoryB)).thenReturn(categoryResponseB);
 
-        PageResponse<CategoryResponse> pageResponse =
-                categoryService.findAll(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
-                        AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR);
+        List<CategoryResponse> pageResponse = categoryService.findAll();
 
-        assertThat(pageResponse.getContent().size()).isEqualTo(2);
-        assertThat(pageResponse.getContent().get(0)).isEqualTo(categoryResponseA);
-        assertThat(pageResponse.getContent().get(1)).isEqualTo(categoryResponseB);
+        assertThat(pageResponse.size()).isEqualTo(2);
+        assertThat(pageResponse.get(0)).isEqualTo(categoryResponseA);
+        assertThat(pageResponse.get(1)).isEqualTo(categoryResponseB);
     }
 
     @Test
@@ -147,15 +145,14 @@ public class CategoryServiceTests {
         Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
         Page<Category> page = new PageImpl<>(List.of(categoryB));
 
-        when(categoryRepository.findAllByParentId(pageable, categoryB.getParentCategory().getId())).thenReturn(page);
+        when(categoryRepository.findAllByParentId(categoryB.getParentCategory().getId())).thenReturn(List.of(categoryB));
         when(categoryMapper.toCategoryResponse(categoryB)).thenReturn(categoryResponseB);
 
-        PageResponse<CategoryResponse> pageResponse =
-                categoryService.findAllByParentId(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
-                        AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR, categoryB.getParentCategory().getId());
+        List<CategoryResponse> pageResponse =
+                categoryService.findAllByParentId( categoryB.getParentCategory().getId());
 
-        assertThat(pageResponse.getContent().size()).isEqualTo(1);
-        assertThat(pageResponse.getContent().get(0)).isEqualTo(categoryResponseB);
+        assertThat(pageResponse.size()).isEqualTo(1);
+        assertThat(pageResponse.get(0)).isEqualTo(categoryResponseB);
     }
 
     @Test
@@ -194,9 +191,18 @@ public class CategoryServiceTests {
     }
 
     @Test
-    public void shouldDeleteCategory() {
+    public void shouldDeleteCategoryWhenValidRequest() {
         categoryService.delete(categoryA.getId());
 
         verify(categoryRepository, times(1)).deleteById(categoryA.getId());
+    }
+
+    @Test
+    public void shouldNotDeleteCategoryWhenForeignKeyConstraint() {
+        when(productRepository.existsByCategoryId(categoryA.getId())).thenReturn(true);
+
+        assertThatThrownBy(() -> categoryService.delete(categoryA.getId()))
+                .isInstanceOf(ForeignKeyConstraintException.class)
+                .hasMessage("Cannot delete category due to existing products that reference it");
     }
 }

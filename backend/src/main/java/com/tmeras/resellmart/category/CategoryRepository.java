@@ -21,7 +21,7 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
             FROM Category c
             WHERE c.parentCategory.id = :parentId
         """)
-    Page<Category> findAllByParentId(Pageable pageable, Integer parentId);
+    List<Category> findAllByParentId(Integer parentId);
 
     @Query("""
             SELECT c

@@ -25,7 +25,7 @@ export function NotFound() {
                     <Flex justify="center">
                         <Button
                             size="md" variant="light"
-                            component={ Link } to={ paths.app.products } replace
+                            component={ Link } to={ paths.app.products.path } replace
                         >
                             Take me back to the home page
                         </Button>

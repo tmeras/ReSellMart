@@ -11,7 +11,7 @@ type UserButtonProps = ComponentPropsWithoutRef<"button"> & {
 
 export const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
     ({ name, email, image, ...others }: UserButtonProps, ref) => (
-        <UnstyledButton ref={ ref } { ...others }>
+        <UnstyledButton ref={ ref } w="100%" { ...others }>
             <Flex gap="xs" align="center">
                 <Avatar src={ image ? image : imgUrl } radius="xl" size={ 36 }/>
 

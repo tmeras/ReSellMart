@@ -65,20 +65,22 @@ public class ProductController {
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
     }
 
-    @GetMapping("/user/{seller-id}")
+    @GetMapping("/users/{seller-id}")
     public ResponseEntity<PageResponse<ProductResponse>> findAllBySellerId(
             @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_PRODUCTS_BY, required = false) String sortBy,
             @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection,
-            @PathVariable(name = "seller-id") Integer sellerId
+            @PathVariable(name = "seller-id") Integer sellerId,
+            @RequestParam(name = "search", required = false) String search
     ) {
-        PageResponse<ProductResponse> foundProducts =
-                productService.findAllBySellerId(pageNumber, pageSize, sortBy, sortDirection, sellerId);
+        PageResponse<ProductResponse> foundProducts = (search == null || search.isEmpty()) ?
+                productService.findAllBySellerId(pageNumber, pageSize, sortBy, sortDirection, sellerId)
+                : productService.findAllBySellerIdAndKeyword(pageNumber, pageSize, sortBy, sortDirection, sellerId, search);
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
     }
 
-    @GetMapping("/category/{category-id}")
+    @GetMapping("/categories/{category-id}")
     public ResponseEntity<PageResponse<ProductResponse>> findAllByCategoryId(
             @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
@@ -95,9 +97,9 @@ public class ProductController {
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
     }
 
-    @PutMapping("/{product-id}")
+    @PatchMapping("/{product-id}")
     public ResponseEntity<ProductResponse> update(
-            @Valid @RequestBody ProductRequest productRequest,
+            @Valid @RequestBody ProductUpdateRequest productRequest,
             @PathVariable(name = "product-id") Integer productId,
             Authentication authentication
     ) {
@@ -112,18 +114,6 @@ public class ProductController {
             Authentication authentication
     ) throws IOException {
         ProductResponse updatedProduct = productService.uploadProductImages(images, productId, authentication);
-        return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
-    }
-
-    @PatchMapping("/{product-id}/images/{image-id}/set-display")
-    public ResponseEntity<ProductResponse> displayImage(
-            @PathVariable(name = "product-id") Integer productId,
-            @PathVariable(name = "image-id") Integer imageId,
-            Authentication authentication
-    ) {
-        // Mark a particular as the main one (i.e. should be displayed first)
-        // for a particular product
-        ProductResponse updatedProduct = productService.displayImage(productId, imageId, authentication);
         return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
     }
 

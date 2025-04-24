@@ -43,13 +43,13 @@ CREATE TABLE order_item
 CREATE TABLE product
 (
     id                 INT AUTO_INCREMENT NOT NULL,
-    name               VARCHAR(255)       NULL,
+    name               VARCHAR(100)       NULL,
     `description`      VARCHAR(5000)      NULL,
     price              DOUBLE             NULL,
     discounted_price   DOUBLE             NULL,
     product_condition  VARCHAR(255)       NULL,
     available_quantity INT                NULL,
-    is_available       BIT(1)             NULL,
+    is_available       BIT(1)             NOT NULL,
     category_id        INT                NOT NULL,
     seller_id          INT                NOT NULL,
     CONSTRAINT pk_product PRIMARY KEY (id)

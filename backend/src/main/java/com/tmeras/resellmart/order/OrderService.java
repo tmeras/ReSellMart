@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +57,7 @@ public class OrderService {
             throw new APIException("One or both of the specified addresses are related to another user");
 
         Order order = new Order();
-        order.setPlacedAt(LocalDateTime.now());
+        order.setPlacedAt(ZonedDateTime.now());
         order.setPaymentMethod(PaymentMethod.valueOf(orderRequest.getPaymentMethod()));
         order.setBuyer(currentUser);
         order.setBillingAddress(billingAddress);
@@ -70,10 +71,13 @@ public class OrderService {
             throw new APIException("You do not have any items in your cart");
 
         for (CartItem cartItem : cartItems) {
+            // TODO: Check if product is deleted
+
             // Reduce product's available quantity by the requested quantity
             Product cartProduct = cartItem.getProduct();
             if (cartProduct.getAvailableQuantity() < cartItem.getQuantity())
-                throw new APIException("Requested quantity of product with ID '" + cartProduct.getId() + "' cannot be larger than available quantity");
+                throw new APIException("Requested quantity of product with ID '" + cartProduct.getId() +
+                        "' cannot be larger than available quantity");
             cartProduct.setAvailableQuantity(cartProduct.getAvailableQuantity() - cartItem.getQuantity());
             cartProducts.add(cartProduct);
 

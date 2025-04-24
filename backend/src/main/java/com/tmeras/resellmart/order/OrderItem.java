@@ -19,7 +19,8 @@ public class OrderItem {
     @ManyToOne(fetch = FetchType.LAZY)
     private Product product;
 
-    // TODO: Add status
+    // TODO: Add status and replace product reference
+    //  with id and product snapshot (without images)
 
     private Integer productQuantity;
 }

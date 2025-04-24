@@ -135,6 +135,20 @@ public class ProductRepositoryTests {
     }
 
     @Test
+    public void shouldFindAllProductsBySellerIdAndKeyword() {
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
+
+        Page<Product> page =
+                productRepository.findAllBySellerIdAndKeyword(pageable, productA.getSeller().getId(), "Test product");
+
+        assertThat(page.getContent().size()).isEqualTo(1);
+        assertThat(page.getContent().get(0).getId()).isEqualTo(productA.getId());
+        assertThat(page.getContent().get(0).getName()).isEqualTo(productA.getName());
+    }
+
+    @Test
     public void shouldFindAllProductsByCategoryIdAndKeyword() {
         Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
                 Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();

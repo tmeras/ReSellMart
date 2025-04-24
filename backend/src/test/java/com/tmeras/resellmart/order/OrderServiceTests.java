@@ -33,6 +33,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -94,7 +95,7 @@ public class OrderServiceTests {
         CategoryResponse categoryResponse = TestDataUtils.createCategoryResponseA();
         ProductResponse productResponseA = TestDataUtils.createProductResponseA(categoryResponse, userResponseA);
         ProductResponse productResponseB = TestDataUtils.createProductResponseB(categoryResponse, userResponseB);
-        cartItemA = new CartItem(1, productA, 1, userA, LocalDateTime.now());
+        cartItemA = new CartItem(1, productA, 1, userA, ZonedDateTime.now());
 
         Address addressA = TestDataUtils.createAddressA(userA);
         Address addressB = TestDataUtils.createAddressB(userB);

@@ -2,5 +2,11 @@ import { RegistrationForm } from "../../features/auth/components/RegistrationFor
 
 export function RegistrationPage() {
 
-    return <RegistrationForm/>
+    return (
+        <>
+            <title>{ `Register | ReSellMart` }</title>
+
+            <RegistrationForm/>
+        </>
+    );
 }

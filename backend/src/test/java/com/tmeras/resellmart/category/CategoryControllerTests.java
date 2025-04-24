@@ -109,47 +109,32 @@ public class CategoryControllerTests {
 
     @Test
     public void shouldFindAllCategories() throws Exception {
-        PageResponse<CategoryResponse> pageResponse = new PageResponse<>(
-                List.of(parentCategoryResponse, childCategoryResponse),
-                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
-                2, 1,
-                true, true
-        );
+        List<CategoryResponse> categoryResponses =
+                List.of(parentCategoryResponse, childCategoryResponse);
 
-        when(categoryService.findAll(
-                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
-                AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR)
-        ).thenReturn(pageResponse);
+        when(categoryService.findAll()).thenReturn(categoryResponses);
 
         MvcResult mvcResult = mockMvc.perform(get("/api/categories"))
                 .andExpect(status().isOk())
                 .andReturn();
         String jsonResponse = mvcResult.getResponse().getContentAsString();
 
-        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(pageResponse));
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(categoryResponses));
     }
 
     @Test
     public void shouldFindAllCategoriesByParentId() throws Exception {
-        PageResponse<CategoryResponse> pageResponse = new PageResponse<>(
-                List.of(childCategoryResponse),
-                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
-                1, 1,
-                true, true
-        );
+        List<CategoryResponse> categoryResponses =
+                List.of(childCategoryResponse);
 
-        when(categoryService.findAllByParentId(
-                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
-                AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR,
-                parentCategoryRequest.getId())
-        ).thenReturn(pageResponse);
+        when(categoryService.findAllByParentId(parentCategoryRequest.getId())).thenReturn(categoryResponses);
 
         MvcResult mvcResult = mockMvc.perform(get("/api/categories/parents/" + parentCategoryRequest.getId()))
                 .andExpect(status().isOk())
                 .andReturn();
         String jsonResponse = mvcResult.getResponse().getContentAsString();
 
-        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(pageResponse));
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(categoryResponses));
     }
 
     @Test

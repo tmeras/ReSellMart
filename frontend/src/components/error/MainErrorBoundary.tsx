@@ -9,7 +9,7 @@ export function MainErrorBoundary({ error }: MainErrorBoundaryProps) {
     console.log("MainErrorFallback caught", error)
 
     return (
-        <Flex direction="column" align="center" justify="center" h="100vh">
+        <Flex direction="column" align="center" justify="center" h="80vh">
             <IconAlertTriangleFilled color="red" size={ 90 }/>
 
             <Flex align="center" gap={ 10 }>
@@ -18,7 +18,7 @@ export function MainErrorBoundary({ error }: MainErrorBoundaryProps) {
             </Flex>
 
             <Text c="dimmed" size="lg" ta="center" mt="sm">
-                We apologise for the inconvenience. Please refresh the page and try again.
+                Please refresh the page and try again.
             </Text>
 
             <Button

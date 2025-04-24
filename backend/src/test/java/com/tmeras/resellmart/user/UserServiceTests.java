@@ -36,6 +36,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -246,9 +247,9 @@ public class UserServiceTests {
 
     @Test
     public void shouldSaveCartItemWhenValidRequest() {
-        CartItem cartItem = new CartItem(1, productB, 1, userA, LocalDateTime.now());
+        CartItem cartItem = new CartItem(1, productB, 1, userA, ZonedDateTime.now());
         CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 1, userA.getId());
-        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseB, 1, LocalDateTime.now());
+        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseB, 1, ZonedDateTime.now());
 
         when(cartItemRepository.existsByUserIdAndProductId(userA.getId(), productB.getId())).thenReturn(false);
         when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
@@ -335,8 +336,8 @@ public class UserServiceTests {
 
     @Test
     public void shouldFindAllCartItemsByUserIdWhenValidRequest() {
-        CartItem cartItem = new CartItem(1, productB, 1, userA, LocalDateTime.now());
-        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseB, 1, LocalDateTime.now());
+        CartItem cartItem = new CartItem(1, productB, 1, userA, ZonedDateTime.now());
+        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseB, 1, ZonedDateTime.now());
 
         when(cartItemRepository.findAllWithProductDetailsByUserId(userA.getId()))
                 .thenReturn(List.of(cartItem));
@@ -357,9 +358,9 @@ public class UserServiceTests {
 
     @Test
     public void shouldUpdateCartItemQuantityWhenValidRequest() {
-        CartItem cartItem = new CartItem(1, productB, 1, userA, LocalDateTime.now());
+        CartItem cartItem = new CartItem(1, productB, 1, userA, ZonedDateTime.now());
         CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 2, userA.getId());
-        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseB, 2, LocalDateTime.now());
+        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseB, 2, ZonedDateTime.now());
 
         when(cartItemRepository.findWithProductDetailsByUserIdAndProductId(userA.getId(), productB.getId()))
                 .thenReturn(Optional.of(cartItem));
@@ -399,7 +400,7 @@ public class UserServiceTests {
     @Test
     public void shouldNotUpdateCartItemQuantityWhenInvalidQuantity() {
         CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 99, userA.getId());
-        CartItem cartItem = new CartItem(1, productB, 5, userA, LocalDateTime.now());
+        CartItem cartItem = new CartItem(1, productB, 5, userA, ZonedDateTime.now());
 
         when(cartItemRepository.findWithProductDetailsByUserIdAndProductId(userA.getId(), productB.getId()))
                 .thenReturn(Optional.of(cartItem));
@@ -427,9 +428,9 @@ public class UserServiceTests {
 
     @Test
     public void shouldSaveWishListItemWhenValidRequest() {
-        WishListItem wishListItem = new WishListItem(1, LocalDateTime.now(), productB, userA);
+        WishListItem wishListItem = new WishListItem(1, ZonedDateTime.now(), productB, userA);
         WishListItemRequest wishListItemRequest = new WishListItemRequest(productB.getId(), userA.getId());
-        WishListItemResponse wishListItemResponse = new WishListItemResponse(1, productResponseB, LocalDateTime.now());
+        WishListItemResponse wishListItemResponse = new WishListItemResponse(1, productResponseB, ZonedDateTime.now());
 
         when(wishListItemRepository.existsByUserIdAndProductId(userA.getId(), productB.getId())).thenReturn(false);
         when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
@@ -504,8 +505,8 @@ public class UserServiceTests {
 
     @Test
     public void shouldFindAllWishListItemsByUserIdWhenValidRequest() {
-        WishListItem wishListItem = new WishListItem(1, LocalDateTime.now(), productB, userA);
-        WishListItemResponse wishListItemResponse = new WishListItemResponse(1, productResponseB, LocalDateTime.now());
+        WishListItem wishListItem = new WishListItem(1, ZonedDateTime.now(), productB, userA);
+        WishListItemResponse wishListItemResponse = new WishListItemResponse(1, productResponseB, ZonedDateTime.now());
 
         when(wishListItemRepository.findAllWithProductDetailsByUserId(userA.getId()))
                 .thenReturn(List.of(wishListItem));

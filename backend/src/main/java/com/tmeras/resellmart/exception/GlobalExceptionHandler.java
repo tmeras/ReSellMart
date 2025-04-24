@@ -20,6 +20,12 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(ForeignKeyConstraintException.class)
+    public ResponseEntity<ExceptionResponse> handleForeignKeyConstraintException(ForeignKeyConstraintException ex) {
+        ExceptionResponse response = new ExceptionResponse(ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ExceptionResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
         ExceptionResponse response = new ExceptionResponse(ex.getMessage());

@@ -1,11 +1,15 @@
 package com.tmeras.resellmart.product;
 
 import com.tmeras.resellmart.TestDataUtils;
+import com.tmeras.resellmart.address.Address;
+import com.tmeras.resellmart.address.AddressRepository;
 import com.tmeras.resellmart.category.Category;
 import com.tmeras.resellmart.category.CategoryRepository;
 import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.ExceptionResponse;
+import com.tmeras.resellmart.order.Order;
+import com.tmeras.resellmart.order.OrderRepository;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.token.JwtService;
@@ -31,7 +35,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,6 +62,8 @@ public class ProductControllerIT {
     private final JwtService jwtService;
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
+    private final AddressRepository addressRepository;
 
     // Used to add JWT in requests
     private HttpHeaders headers;
@@ -62,13 +71,15 @@ public class ProductControllerIT {
     private Product productA;
     private Product productB;
     private ProductRequest productRequestA;
+    private ProductUpdateRequest productUpdateRequestA;
 
     @Autowired
     public ProductControllerIT(
             TestRestTemplate restTemplate, UserRepository userRepository,
             RoleRepository roleRepository, PasswordEncoder passwordEncoder,
             JwtService jwtService, CategoryRepository categoryRepository,
-            ProductRepository productRepository
+            ProductRepository productRepository, OrderRepository orderRepository,
+            AddressRepository addressRepository
     ) {
         this.restTemplate = restTemplate;
         this.userRepository = userRepository;
@@ -77,11 +88,15 @@ public class ProductControllerIT {
         this.jwtService = jwtService;
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
+        this.orderRepository = orderRepository;
+        this.addressRepository = addressRepository;
     }
 
     @BeforeEach
     public void setUp() throws IOException {
         // Empty relevant database tables
+        orderRepository.deleteAll();
+        addressRepository.deleteAll();
         productRepository.deleteAll();
         categoryRepository.deleteAll();
         userRepository.deleteAll();
@@ -110,6 +125,15 @@ public class ProductControllerIT {
         productA.setId(null);
         productA = productRepository.save(productA);
         productRequestA = TestDataUtils.createProductRequestA(category.getId());
+        productUpdateRequestA = ProductUpdateRequest.builder()
+                .name("Updated test product A")
+                .description("Updated description A")
+                .price(BigDecimal.valueOf(10.00))
+                .productCondition(ProductCondition.NEW)
+                .availableQuantity(2)
+                .categoryId(productRequestA.getCategoryId())
+                .isDeleted(false)
+                .build();
 
         productB = TestDataUtils.createProductB(category, userB);
         productB.setId(null);
@@ -132,8 +156,7 @@ public class ProductControllerIT {
     public void shouldSaveProductWhenValidRequest() {
         ProductRequest productRequest =
                 new ProductRequest(3, "Test product C", "Description C",
-                        50.0, ProductCondition.FAIR, 1,
-                        false, productA.getCategory().getId());
+                        BigDecimal.valueOf(50.0), ProductCondition.FAIR, 1, productA.getCategory().getId());
 
         ResponseEntity<ProductResponse> response =
                 restTemplate.exchange("/api/products", HttpMethod.POST,
@@ -153,7 +176,7 @@ public class ProductControllerIT {
     public void shouldNotSaveProductWhenInvalidRequest() {
         ProductRequest productRequest =
                 new ProductRequest(3, null, "Description C",
-                        50.0, ProductCondition.FAIR, 1, false, productA.getCategory().getId());
+                        BigDecimal.valueOf(50.0), ProductCondition.FAIR, 1, productA.getCategory().getId());
         Map<String, String> expectedErrors = new HashMap<>();
         expectedErrors.put("name", "Name must not be empty");
 
@@ -170,7 +193,7 @@ public class ProductControllerIT {
     public void shouldNotSaveProductWhenInvalidCategoryId() {
         ProductRequest productRequest =
                 new ProductRequest(3, "Test product C", "Description C",
-                        50.0, ProductCondition.FAIR, 1, false, 99);
+                        BigDecimal.valueOf(50.0), ProductCondition.FAIR, 1, 99);
 
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/products", HttpMethod.POST,
@@ -185,7 +208,7 @@ public class ProductControllerIT {
     public void shouldNotSaveProductWhenInvalidQuantity() {
         ProductRequest productRequest =
                 new ProductRequest(3, "Test product C", "Description C",
-                        50.0, ProductCondition.FAIR, 0, false, productA.getCategory().getId());
+                        BigDecimal.valueOf(50.0), ProductCondition.FAIR, 0, productA.getCategory().getId());
 
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/products", HttpMethod.POST,
@@ -203,12 +226,13 @@ public class ProductControllerIT {
                 restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.GET,
                         new HttpEntity<>(headers), ProductResponse.class);
 
+        System.out.println(productA.getPrice());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getName()).isEqualTo(productA.getName());
         assertThat(response.getBody().getDescription()).isEqualTo(productA.getDescription());
-        assertThat(response.getBody().getPrice()).isEqualTo(productA.getPrice());
-        assertThat(response.getBody().getPreviousPrice()).isEqualTo(productA.getPreviousPrice());
+        assertThat(response.getBody().getPrice().compareTo(productA.getPrice())).isEqualTo(0);
+        assertThat(response.getBody().getPreviousPrice().compareTo(productA.getPreviousPrice())).isEqualTo(0);
         assertThat(response.getBody().getProductCondition()).isEqualTo(productA.getProductCondition());
         assertThat(response.getBody().getCategory().getName()).isEqualTo(productA.getCategory().getName());
         assertThat(response.getBody().getSeller().getEmail()).isEqualTo(productA.getSeller().getEmail());
@@ -279,8 +303,20 @@ public class ProductControllerIT {
     @Test
     public void shouldFindAllProductsBySellerId() {
         ResponseEntity<PageResponse<ProductResponse>> response =
-                restTemplate.exchange("/api/products/user/" + productA.getSeller().getId(), HttpMethod.GET,
+                restTemplate.exchange("/api/products/users/" + productA.getSeller().getId(), HttpMethod.GET,
                         new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getContent().size()).isEqualTo(1);
+        assertThat(response.getBody().getContent().get(0).getName()).isEqualTo(productA.getName());
+    }
+
+    @Test
+    public void shouldFindAllProductsBySellerIdAndKeyword() {
+        ResponseEntity<PageResponse<ProductResponse>> response =
+                restTemplate.exchange("/api/products/users/" + productA.getSeller().getId() + "?search=Test product",
+                        HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -291,7 +327,7 @@ public class ProductControllerIT {
     @Test
     public void shouldFindAllProductsByCategoryId() {
         ResponseEntity<PageResponse<ProductResponse>> response =
-                restTemplate.exchange("/api/products/category/" + productA.getCategory().getId(), HttpMethod.GET,
+                restTemplate.exchange("/api/products/categories/" + productA.getCategory().getId(), HttpMethod.GET,
                         new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -303,7 +339,7 @@ public class ProductControllerIT {
     @Test
     public void shouldFindAllProductsByKeywordAndCategoryId() {
         ResponseEntity<PageResponse<ProductResponse>> response =
-                restTemplate.exchange("/api/products/category/" + productA.getCategory().getId() + "?search=Test product",
+                restTemplate.exchange("/api/products/categories/" + productA.getCategory().getId() + "?search=Test product",
                         HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
                         });
 
@@ -315,26 +351,23 @@ public class ProductControllerIT {
 
     @Test
     public void shouldUpdateProductWhenValidRequest() {
-        productRequestA.setName("Updated product A");
-        productRequestA.setDescription("Updated description A");
-
         ResponseEntity<ProductResponse> response =
-                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.PUT,
-                        new HttpEntity<>(productRequestA, headers), ProductResponse.class);
+                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.PATCH,
+                        new HttpEntity<>(productUpdateRequestA, headers), ProductResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getName()).isEqualTo(productRequestA.getName());
-        assertThat(response.getBody().getDescription()).isEqualTo(productRequestA.getDescription());
+        assertThat(response.getBody().getName()).isEqualTo(productUpdateRequestA.getName());
+        assertThat(response.getBody().getDescription()).isEqualTo(productUpdateRequestA.getDescription());
     }
 
     @Test
     public void shouldNotUpdateProductWhenInvalidCategoryId() {
-        productRequestA.setCategoryId(99);
+        productUpdateRequestA.setCategoryId(99);
 
         ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.PUT,
-                        new HttpEntity<>(productRequestA, headers), ExceptionResponse.class);
+                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.PATCH,
+                        new HttpEntity<>(productUpdateRequestA, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNotNull();
@@ -344,8 +377,8 @@ public class ProductControllerIT {
     @Test
     public void shouldNotUpdateProductWhenInvalidProductId() {
         ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/products/99", HttpMethod.PUT,
-                        new HttpEntity<>(productRequestA, headers), ExceptionResponse.class);
+                restTemplate.exchange("/api/products/99", HttpMethod.PATCH,
+                        new HttpEntity<>(productUpdateRequestA, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNotNull();
@@ -355,8 +388,8 @@ public class ProductControllerIT {
     @Test
     public void shouldNotUpdateProductWhenSellerIsNotLoggedIn() {
         ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/products/" + productB.getId(), HttpMethod.PUT,
-                        new HttpEntity<>(productRequestA, headers), ExceptionResponse.class);
+                restTemplate.exchange("/api/products/" + productB.getId(), HttpMethod.PATCH,
+                        new HttpEntity<>(productUpdateRequestA, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         assertThat(response.getBody()).isNotNull();
@@ -445,132 +478,6 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void shouldDisplayImageWhenValidRequest() {
-        // First upload images
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("images", TEST_IMAGE_1);
-        requestBody.add("images",TEST_IMAGE_2);
-
-        ResponseEntity<ProductResponse> firstResponse =
-                restTemplate.exchange("/api/products/" + productA.getId() + "/images", HttpMethod.PUT,
-                        new HttpEntity<>(requestBody, headers), ProductResponse.class);
-
-        assertThat(firstResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(firstResponse.getBody()).isNotNull();
-        assertThat(firstResponse.getBody().getImages().size()).isEqualTo(2);
-
-
-        // Then mark the first image for display
-        List<ProductImageResponse> productImages = firstResponse.getBody().getImages();
-        Integer imageId = productImages.get(0).getId();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        ResponseEntity<ProductResponse> secondResponse =
-                restTemplate.exchange("/api/products/" + productA.getId() + "/images/" + imageId + "/set-display",
-                HttpMethod.PATCH, new HttpEntity<>(headers), ProductResponse.class);
-
-        assertThat(secondResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(secondResponse.getBody()).isNotNull();
-        assertThat(secondResponse.getBody().getImages().size()).isEqualTo(2);
-
-        productImages = secondResponse.getBody().getImages();
-        Optional<ProductImageResponse> imageResponse =
-                productImages.stream().filter(it -> it.getId().equals(imageId)).findFirst();
-        assertThat(imageResponse.isPresent()).isTrue();
-        assertThat(imageResponse.get().isDisplayed()).isEqualTo(true);
-    }
-
-    @Test
-    public void shouldNotDisplayImageWhenInvalidProductId() {
-        ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/products/99/images/1/set-display", HttpMethod.PATCH,
-                        new HttpEntity<>(headers), ExceptionResponse.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getMessage()).isEqualTo("No product found with ID: 99");
-    }
-
-    @Test
-    public void shouldNotDisplayImageWhenInvalidImageId() {
-        ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/products/" + productA.getId() + "/images/99/set-display",
-                        HttpMethod.PATCH, new HttpEntity<>(headers), ExceptionResponse.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getMessage()).isEqualTo("No product image found with ID: 99");
-    }
-
-    @Test
-    public void shouldNotDisplayImageWhenImageBelongsToDifferentProduct() {
-        // First upload image as one user
-        String testJwt = jwtService.generateAccessToken(new HashMap<>(), productB.getSeller());
-        headers.set("Authorization", "Bearer " + testJwt);
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("images", TEST_IMAGE_1);
-        requestBody.add("images", TEST_IMAGE_2);
-
-        ResponseEntity<ProductResponse> firstResponse =
-                restTemplate.exchange("/api/products/" + productB.getId() + "/images", HttpMethod.PUT,
-                        new HttpEntity<>(requestBody, headers), ProductResponse.class);
-
-        assertThat(firstResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(firstResponse.getBody()).isNotNull();
-        assertThat(firstResponse.getBody().getImages().size()).isEqualTo(2);
-
-        // Then request one of those images to be displayed
-        // as another user and for a different product
-        List<ProductImageResponse> productImages = firstResponse.getBody().getImages();
-        Integer imageId = productImages.get(0).getId();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        testJwt = jwtService.generateAccessToken(new HashMap<>(), productA.getSeller());
-        headers.set("Authorization", "Bearer " + testJwt);
-
-        ResponseEntity<ExceptionResponse> secondResponse =
-                restTemplate.exchange("/api/products/" + productA.getId() + "/images/" + imageId + "/set-display",
-                        HttpMethod.PATCH, new HttpEntity<>(headers), ExceptionResponse.class);
-
-        assertThat(secondResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(secondResponse.getBody()).isNotNull();
-        assertThat(secondResponse.getBody().getMessage()).isEqualTo("The image is related to a different product");
-    }
-
-    @Test
-    public void shouldDisplayImageWhenSellerIsNotLoggedIn() {
-        String testJwt = jwtService.generateAccessToken(new HashMap<>(), productB.getSeller());
-        headers.set("Authorization", "Bearer " + testJwt);
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("images", TEST_IMAGE_1);
-        requestBody.add("images", TEST_IMAGE_2);
-
-        ResponseEntity<ProductResponse> firstResponse =
-                restTemplate.exchange("/api/products/" + productB.getId() + "/images", HttpMethod.PUT,
-                        new HttpEntity<>(requestBody, headers), ProductResponse.class);
-
-        assertThat(firstResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(firstResponse.getBody()).isNotNull();
-        assertThat(firstResponse.getBody().getImages().size()).isEqualTo(2);
-
-        List<ProductImageResponse> productImages = firstResponse.getBody().getImages();
-        Integer imageId = productImages.get(0).getId();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        testJwt = jwtService.generateAccessToken(new HashMap<>(), productA.getSeller());
-        headers.set("Authorization", "Bearer " + testJwt);
-
-        ResponseEntity<ExceptionResponse> secondResponse =
-                restTemplate.exchange("/api/products/" + productB.getId() + "/images/" + imageId + "/set-display",
-                        HttpMethod.PATCH, new HttpEntity<>(headers), ExceptionResponse.class);
-
-        assertThat(secondResponse.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-        assertThat(secondResponse.getBody()).isNotNull();
-        assertThat(secondResponse.getBody().getMessage()).isEqualTo("You do not have permission to manage images for this product");
-    }
-
-    @Test
     public void shouldDeleteProduct() {
         ResponseEntity<?> response =
                 restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.DELETE,
@@ -591,5 +498,26 @@ public class ProductControllerIT {
                         new HttpEntity<>(headers), Object.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    public void shouldNotDeleteProductWhenForeignKeyConstraint() {
+        // Create order that references productA
+        Address address = TestDataUtils.createAddressA(productA.getSeller());
+        address.setId(null);
+        address = addressRepository.save(address);
+        Order order = TestDataUtils.createOrderA(productA.getSeller(), address, productA);
+        order.setId(null);
+        order.getOrderItems().get(0).setId(null);
+        orderRepository.save(order);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.DELETE,
+                        new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("Cannot delete product due to existing orders that reference it");
     }
 }

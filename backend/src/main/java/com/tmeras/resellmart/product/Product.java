@@ -5,6 +5,10 @@ import com.tmeras.resellmart.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,16 +28,18 @@ public class Product {
 
     private String description;
 
-    private Double price;
+    private BigDecimal price;
 
-    private Double previousPrice;
+    private BigDecimal previousPrice;
 
     @Enumerated(EnumType.STRING)
-    // TODO: Rename to condition
     private ProductCondition productCondition;
 
     private Integer availableQuantity;
 
+    private ZonedDateTime listedAt;
+
+    @Column(nullable = false)
     private Boolean isDeleted;
 
     @ManyToOne(fetch = FetchType.LAZY)

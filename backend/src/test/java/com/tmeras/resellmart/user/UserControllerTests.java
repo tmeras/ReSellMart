@@ -32,6 +32,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -187,7 +188,7 @@ public class UserControllerTests {
     @Test
     public void shouldSaveCartItemWhenValidRequest() throws Exception {
         CartItemRequest cartItemRequest = new CartItemRequest(productResponseA.getId(), 1, userA.getId());
-        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseA, 1, LocalDateTime.now());
+        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseA, 1, ZonedDateTime.now());
 
         when(userService.saveCartItem(any(CartItemRequest.class), eq(userA.getId()), any(Authentication.class)))
                 .thenReturn(cartItemResponse);
@@ -219,7 +220,7 @@ public class UserControllerTests {
     @Test
     public void shouldFindALLCartItemsByUserId() throws Exception {
         List<CartItemResponse> cartItemResponses = List.of(
-                new CartItemResponse(1, productResponseA, 1, LocalDateTime.now())
+                new CartItemResponse(1, productResponseA, 1, ZonedDateTime.now())
         );
 
         when(userService.findAllCartItemsByUserId(eq(userA.getId()), any(Authentication.class)))
@@ -236,7 +237,7 @@ public class UserControllerTests {
     @Test
     public void shouldUpdateCartItemQuantityWhenValidRequest() throws  Exception {
         CartItemRequest cartItemRequest = new CartItemRequest(productResponseA.getId(), 5, userA.getId());
-        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseA, 5, LocalDateTime.now());
+        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseA, 5, ZonedDateTime.now());
 
         when(userService.updateCartItemQuantity(
                 any(CartItemRequest.class), eq(userA.getId()), eq(productResponseA.getId()), any(Authentication.class))
@@ -281,7 +282,7 @@ public class UserControllerTests {
     @Test
     public void shouldSaveWishListItemWhenValidRequest() throws Exception {
         WishListItemRequest wishListItemRequest = new WishListItemRequest(productResponseA.getId(), userA.getId());
-        WishListItemResponse wishListItemResponse = new WishListItemResponse(1, productResponseA, LocalDateTime.now());
+        WishListItemResponse wishListItemResponse = new WishListItemResponse(1, productResponseA, ZonedDateTime.now());
 
         when(userService.saveWishListItem(any(WishListItemRequest.class), eq(userA.getId()), any(Authentication.class)))
                 .thenReturn(wishListItemResponse);
@@ -313,7 +314,7 @@ public class UserControllerTests {
     @Test
     public void shouldFindALLWishListItemsByUserId() throws Exception {
         List<WishListItemResponse> wishListItemResponses = List.of(
-                new WishListItemResponse(1, productResponseA, LocalDateTime.now())
+                new WishListItemResponse(1, productResponseA, ZonedDateTime.now())
         );
 
         when(userService.findAllWishListItemsByUserId(eq(userA.getId()), any(Authentication.class)))

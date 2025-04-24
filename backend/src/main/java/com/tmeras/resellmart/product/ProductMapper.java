@@ -24,13 +24,13 @@ public class ProductMapper {
                 .price(productRequest.getPrice())
                 .productCondition(productRequest.getProductCondition())
                 .availableQuantity(productRequest.getAvailableQuantity())
-                .isDeleted(productRequest.getIsDeleted())
                 .images(new ArrayList<>())
                 .build();
     }
 
     public ProductResponse toProductResponse(Product product) {
         List<ProductImageResponse> productImageResponses = new ArrayList<>();
+        // TODO: Sort by ID if needed
         if (product.getImages() != null)
             for (ProductImage productImage : product.getImages())
                 productImageResponses.add(toProductImageResponse(productImage));
@@ -43,7 +43,8 @@ public class ProductMapper {
                 .previousPrice(product.getPreviousPrice())
                 .productCondition(product.getProductCondition())
                 .availableQuantity(product.getAvailableQuantity())
-                .isDeleted(product.getIsDeleted())
+                .listedAt(product.getListedAt())
+                .deleted(product.getIsDeleted())
                 .images(productImageResponses)
                 .category(categoryMapper.toCategoryResponse(product.getCategory()))
                 .seller(userMapper.toUserResponse(product.getSeller()))
@@ -54,7 +55,8 @@ public class ProductMapper {
         return ProductImageResponse.builder()
                 .id(productImage.getId())
                 .image(FileUtilities.readFileFromPath(productImage.getFilePath()))
-                .displayed(productImage.isDisplayed())
+                .name(productImage.getName())
+                .type(productImage.getType())
                 .build();
     }
 }

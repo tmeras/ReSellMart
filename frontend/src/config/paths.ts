@@ -1,13 +1,47 @@
 export const paths = {
     auth: {
-        login: "/auth/login",
-        register: "/auth/register",
-        activation: "/auth/activation",
+        login: {
+            path: "/auth/login",
+            getHref: () => "/auth/login"
+        },
+        register: {
+            path: "/auth/register",
+            getHref: () => "/auth/register"
+        },
+        activation: {
+            path: "/auth/activation",
+            getHref: () => "/activation"
+        }
     },
 
     app: {
-        products: "/app/products",
-        orders: "/app/orders",
+        products: {
+            path: "/app/products",
+            getHref: () => "/app/products"
+        },
+        productByCategory: {
+            path: "/app/products/categories/:categoryId",
+            getHref: (id: string) => `/app/products/categories/${ id }`
+        },
+        productsByUser: {
+            path: "/app/products/users/:userId",
+            getHref: (id: string) => `/app/products/users/${ id }`
+        },
+        productDetails: {
+            path: "/app/products/:productId",
+            getHref: (id: string) => `/app/products/${ id }`
+        },
+        createProduct: {
+            path: "/app/products/create",
+            getHref: () => "/app/products/create"
+        },
+        updateProduct: {
+            path: "/app/products/:productId/update",
+            getHref: (id: string) => `/app/products/${ id }/update`
+        },
+        sellerProducts: {
+            path: "/app/my-products",
+            getHref: () => "/app/my-products"
+        }
     },
-
 } as const

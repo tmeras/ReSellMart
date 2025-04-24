@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -151,7 +152,7 @@ public class UserService {
         if (Objects.equals(existingProduct.getSeller().getId(), currentUser.getId()))
             throw new APIException("You cannot add your own items to your cart");
 
-        if (existingProduct.getIsDeleted())
+        if (Boolean.TRUE.equals(existingProduct.getIsDeleted()))
             throw new APIException("Deleted products cannot be added to the cart");
 
         if (existingProduct.getAvailableQuantity() < cartItemRequest.getQuantity())
@@ -160,7 +161,7 @@ public class UserService {
         CartItem cartItem = cartItemMapper.toCartItem(cartItemRequest);
         cartItem.setProduct(existingProduct);
         cartItem.setUser(currentUser);
-        cartItem.setAddedAt(LocalDateTime.now());
+        cartItem.setAddedAt(ZonedDateTime.now());
 
         CartItem savedCartItem = cartItemRepository.save(cartItem);
         return cartItemMapper.toCartItemResponse(savedCartItem);
@@ -227,13 +228,13 @@ public class UserService {
         if (Objects.equals(existingProduct.getSeller().getId(), currentUser.getId()))
             throw new APIException("You cannot add your own items to your wishlist");
 
-        if (existingProduct.getIsDeleted())
+        if (Boolean.TRUE.equals(existingProduct.getIsDeleted()))
             throw new APIException("Deleted products cannot be added to the wishlist");
 
         WishListItem wishListItem = new WishListItem();
         wishListItem.setProduct(existingProduct);
         wishListItem.setUser(currentUser);
-        wishListItem.setAddedAt(LocalDateTime.now());
+        wishListItem.setAddedAt(ZonedDateTime.now());
 
         WishListItem savedWishListItem = wishListItemRepository.save(wishListItem);
         return wishListItemMapper.toWishListItemResponse(savedWishListItem);

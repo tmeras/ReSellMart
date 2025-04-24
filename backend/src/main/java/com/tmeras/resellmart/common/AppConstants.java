@@ -1,8 +1,16 @@
 package com.tmeras.resellmart.common;
 
+import java.util.Set;
+
 public class AppConstants {
 
-    // Pagination constants
+    // Product Constants
+    public static final int MAX_PRODUCT_NAME_LENGTH = 100;
+    public static final int MAX_PRODUCT_DESCRIPTION_LENGTH = 5000;
+    public static final int MAX_PRODUCT_QUANTITY = 1000;
+    public static final int MAX_PRODUCT_PRICE = 10000;
+
+    // Pagination/Sorting constants
     public static final String PAGE_NUMBER = "0";
     public static final Integer PAGE_NUMBER_INT = 0;
     public static final String PAGE_SIZE = "10";
@@ -14,11 +22,15 @@ public class AppConstants {
     public static final String SORT_USERS_BY = "id";
     public static final String SORT_ADDRESSES_BY = "id";
 
-
     // Image upload constants
     public static final Integer MAX_IMAGE_NUMBER = 5;
+    public static final Set<String> ACCEPTED_IMAGE_EXTENSIONS = Set.of("jpg", "jpeg", "png", "webp");
 
     // Thymeleaf template names
     public static final String USER_ACTIVATION_TEMPLATE = "account_activation";
     public static final String ORDER_CONFIRMATION_TEMPLATE = "order_confirmation";
+
+    // Number of entities manually created using flyway
+    // used to prevent deletion of related images       TODO: Update when more data is added
+    public static final Integer FLYWAY_PRODUCTS_NUMBER = 17;
 }

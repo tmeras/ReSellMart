@@ -1,13 +1,15 @@
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
+import '@mantine/carousel/styles.css';
+import { createTheme, MantineProvider } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ErrorBoundary } from "react-error-boundary";
+
 
 import { AppRouter } from "./AppRouter.tsx";
-import { createTheme, MantineProvider } from "@mantine/core";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "./providers/AuthProvider.tsx";
-import { Notifications } from "@mantine/notifications";
-import { ErrorBoundary } from "react-error-boundary";
 import { MainErrorBoundary } from "./components/error/MainErrorBoundary.tsx";
+import { AuthProvider } from "./providers/AuthProvider.tsx";
 
 const queryClient = new QueryClient();
 

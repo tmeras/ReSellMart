@@ -2,8 +2,10 @@ package com.tmeras.resellmart.category;
 
 import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.APIException;
+import com.tmeras.resellmart.exception.ForeignKeyConstraintException;
 import com.tmeras.resellmart.exception.ResourceAlreadyExistsException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
+import com.tmeras.resellmart.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +21,7 @@ import java.util.List;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
     private final CategoryMapper categoryMapper;
 
     public CategoryResponse save(CategoryRequest categoryRequest) {
@@ -48,48 +51,20 @@ public class CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("No category found with ID: " + categoryId));
     }
 
-    public PageResponse<CategoryResponse> findAll(
-            Integer pageNumber, Integer pageSize, String sortBy, String sortDirection
-    ) {
-        Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+    public List<CategoryResponse> findAll() {
+        List<Category> categories = categoryRepository.findAll();
 
-        Page<Category> categories= categoryRepository.findAll(pageable);
-        List<CategoryResponse> categoryResponses = categories.stream()
+        return categories.stream()
                 .map(categoryMapper::toCategoryResponse)
                 .toList();
-
-        return new PageResponse<>(
-                categoryResponses,
-                categories.getNumber(),
-                categories.getSize(),
-                categories.getTotalElements(),
-                categories.getTotalPages(),
-                categories.isFirst(),
-                categories.isLast()
-        );
     }
 
-    public PageResponse<CategoryResponse> findAllByParentId(
-            Integer pageNumber, Integer pageSize, String sortBy, String sortDirection, Integer parentId
-    ) {
-        Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+    public List<CategoryResponse> findAllByParentId(Integer parentId) {
+        List<Category> categories = categoryRepository.findAllByParentId(parentId);
 
-        Page<Category> categories= categoryRepository.findAllByParentId(pageable, parentId);
-        List<CategoryResponse> categoryResponses = categories.stream()
+        return categories.stream()
                 .map(categoryMapper::toCategoryResponse)
                 .toList();
-
-        return new PageResponse<>(
-                categoryResponses,
-                categories.getNumber(),
-                categories.getSize(),
-                categories.getTotalElements(),
-                categories.getTotalPages(),
-                categories.isFirst(),
-                categories.isLast()
-        );
     }
 
     public List<CategoryResponse> findAllParents() {
@@ -114,7 +89,10 @@ public class CategoryService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public void delete(Integer categoryId) {
-        // TODO: Ensure that no products refer to this category
+        // TODO: check constraint when another category refers to this
+        if (productRepository.existsByCategoryId(categoryId))
+            throw new ForeignKeyConstraintException("Cannot delete category due to existing products that reference it");
+
         categoryRepository.deleteById(categoryId);
     }
 }

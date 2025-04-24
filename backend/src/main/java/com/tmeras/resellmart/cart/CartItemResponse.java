@@ -5,6 +5,7 @@ import com.tmeras.resellmart.product.ProductResponse;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -20,5 +21,5 @@ public class CartItemResponse {
 
     private Integer quantity;
 
-    private LocalDateTime addedAt;
+    private ZonedDateTime addedAt;
 }
