@@ -1,13 +1,13 @@
 import { useGetCategories } from "@/api/categories/getCategories.ts";
 import { FileInputValueComponent } from "@/components/form/FileInputValueComponent.tsx";
 import { ImagePreviewCarousel } from "@/components/ui/ImagePreviewCarousel.tsx";
-import { useGetProduct } from "@/features/app/products/api/getProduct.ts";
 import { updateProductInputSchema, useUpdateProduct } from "@/features/app/products/api/updateProduct.ts";
 import {
     uploadProductImagesInputSchema,
     useUploadProductImages
 } from "@/features/app/products/api/uploadProductImages.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
+import { ProductResponse } from "@/types/api.ts";
 import {
     ACCEPTED_IMAGE_TYPES,
     MAX_FILE_SIZE,
@@ -23,24 +23,22 @@ import { FormErrors, useForm, zodResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconPhoto, IconX } from "@tabler/icons-react";
 import { ChangeEvent, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate } from "react-router";
 
-export function UpdateProductForm() {
-    const params = useParams();
-    const productId = params.productId as string;
+export type UpdateProductFormProps = {
+    product: ProductResponse;
+}
 
-    // TODO: Authorization component??
-
+export function UpdateProductForm({ product }: UpdateProductFormProps) {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [images, setImages] = useState<File[]>([]);
     const [mainImageValue, setMainImageValue] = useState("0");
 
     const getCategoriesQuery = useGetCategories();
-    const getProductQuery = useGetProduct({ productId });
     const updateProductMutation = useUpdateProduct({
         sellerId: user!.id,
-        productId
+        productId: product.id.toString()
     });
     const uploadProductImagesMutation = useUploadProductImages();
 
@@ -87,9 +85,9 @@ export function UpdateProductForm() {
 
     // Initialise form using product data received from API
     useEffect(() => {
-        const data = getProductQuery.data?.data;
-        if (data && !form.initialized) {
-            const { id, seller, deleted, images: imageResponses, category, ...rest } = data;
+        if (!form.initialized) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { id, seller, deleted, images: imageResponses, category, ...rest } = product;
             const images = imageResponses.map((imageResponse) => {
                 return base64ToFile(imageResponse.image, imageResponse.name, imageResponse.type);
             });
@@ -100,19 +98,19 @@ export function UpdateProductForm() {
                 images
             });
         }
-    }, [getProductQuery.data]);
+    }, [product]);
 
     async function handleSubmit(values: typeof form.values) {
         try {
             // Submit images separately from remaining form
             const { images, ...formValues } = values;
             await updateProductMutation.mutateAsync({
-                productId,
+                productId: product.id.toString(),
                 data: formValues
             });
 
             await uploadProductImagesMutation.mutateAsync({
-                productId,
+                productId: product.id.toString(),
                 data: {
                     images
                 }
@@ -122,6 +120,7 @@ export function UpdateProductForm() {
                 title: "Product listing successfully updated", message: "",
                 color: "teal", withBorder: true
             });
+
             // Navigate back, previous page should be seller's products page
             navigate(-1);
         } catch (error) {
@@ -151,7 +150,7 @@ export function UpdateProductForm() {
         setMainImageValue("0");
     }
 
-    if (getCategoriesQuery.isPending || getProductQuery.isPending) {
+    if (getCategoriesQuery.isPending) {
         return (
             <Flex w="100%" h="100vh" align="center" justify="center">
                 <Loader size="md"/>
@@ -159,8 +158,8 @@ export function UpdateProductForm() {
         );
     }
 
-    if (getCategoriesQuery.isError || getProductQuery.isError) {
-        console.log("Product error", getProductQuery.error);
+    if (getCategoriesQuery.isError) {
+        console.log("Product error", getCategoriesQuery.error);
         return (
             <Text c="red.5">
                 There was an error when fetching the product details. Please refresh and try again.
