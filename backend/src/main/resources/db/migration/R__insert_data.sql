@@ -36,13 +36,13 @@ VALUES (1, 2),
        (2, 1),
        (3, 2);
 
-INSERT IGNORE INTO address(id, country, street, state, city, postal_code, main, deleted, address_type, user_id)
+INSERT IGNORE INTO address(id, country, street, state, city, postal_code, main, address_type, user_id, name, phone_number)
 VALUES (1, 'Greece', 'Ermou Street', 'Attica', 'Athens', '10563',
-        true, false, 'HOME', 1),
+        true, 'HOME', 1, 'Theodore Meras', '+302101234567'),
        (2, 'UK', 'Mappin Street', 'South Yorkshire', 'Sheffield', 'S1 4DT',
-        true, false, 'WORK', 2),
+        true, 'WORK', 2, 'Edmund Smith', '+441234567890'),
        (3, 'UK', 'Oxford Road', 'Greater Manchester', 'Manchester', 'M13 9PL',
-        true, false, 'HOME', 3);
+        true, 'HOME', 3, 'Mary Cole', '+441612345678');
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id, listed_at)

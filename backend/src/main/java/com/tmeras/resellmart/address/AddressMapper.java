@@ -9,13 +9,14 @@ public class AddressMapper {
 
     public Address toAddress(AddressRequest addressRequest) {
         return Address.builder()
+                .name(addressRequest.getName())
                 .country(addressRequest.getCountry())
                 .street(addressRequest.getStreet())
                 .state(addressRequest.getState())
                 .city(addressRequest.getCity())
                 .postalCode(addressRequest.getPostalCode())
+                .phoneNumber(addressRequest.getPhoneNumber())
                 .main(addressRequest.isMain())
-                .deleted(addressRequest.isDeleted())
                 .addressType(AddressType.valueOf(addressRequest.getAddressType()))
                 .build();
     }
@@ -23,13 +24,14 @@ public class AddressMapper {
     public AddressResponse toAddressResponse(Address address) {
         return AddressResponse.builder()
                 .id(address.getId())
+                .name(address.getName())
                 .country(address.getCountry())
                 .street(address.getStreet())
                 .state(address.getState())
                 .city(address.getCity())
                 .postalCode(address.getPostalCode())
+                .phoneNumber(address.getPhoneNumber())
                 .main(address.isMain())
-                .deleted(address.isDeleted())
                 .addressType(address.getAddressType())
                 .userId(address.getUser().getId())
                 .build();

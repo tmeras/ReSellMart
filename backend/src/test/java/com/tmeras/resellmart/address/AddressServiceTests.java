@@ -24,7 +24,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AddressServiceTests {
@@ -72,8 +72,7 @@ public class AddressServiceTests {
     public void shouldSaveAddress() {
         when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
         when(addressMapper.toAddress(addressRequestA)).thenReturn(addressA);
-        when(addressRepository.findAllNonDeletedWithAssociationsByUserId(addressA.getUser().getId()))
-                .thenReturn(List.of());
+        when(addressRepository.findAllByUserId(userA.getId())).thenReturn(List.of());
         when(addressRepository.save(addressA)).thenReturn(addressA);
         when(addressMapper.toAddressResponse(addressA)).thenReturn(addressResponseA);
 
@@ -125,49 +124,31 @@ public class AddressServiceTests {
     }
 
     @Test
-    public void shouldFindAllNonDeletedAddressesByUserIdWhenValidRequest() {
-        when(addressRepository.findAllNonDeletedWithAssociationsByUserId(addressA.getUser().getId()))
-                .thenReturn(List.of(addressA));
-        when(addressMapper.toAddressResponse(addressA)).thenReturn(addressResponseA);
-
-        List<AddressResponse> addressResponses =
-                addressService.findAllNonDeletedByUserId(addressA.getUser().getId(), authentication);
-
-        assertThat(addressResponses.size()).isEqualTo(1);
-        assertThat(addressResponses.get(0)).isEqualTo(addressResponseA);
-    }
-
-    @Test
-    public void shouldNotFindAllNonDeletedAddressesByUserIdWhenAddressOwnerIsNotLoggedIn() {
-        assertThatThrownBy(() -> addressService.findAllNonDeletedByUserId(addressB.getUser().getId(), authentication))
-                .isInstanceOf(OperationNotPermittedException.class)
-                .hasMessage("You do not have permission to view the addresses of this user");
-    }
-
-    @Test
     public void shouldMakeAddressMainWhenValidRequest() {
         // Define a second address belonging to user A
         Address addressC = Address.builder()
                 .id(3)
+                .name("Test Address C")
                 .country("United Kingdom")
                 .street("Oxford Street")
                 .state("England")
                 .city("London")
                 .postalCode("W1D 1BS")
+                .phoneNumber("+44 20 1234 5678")
                 .main(false)
-                .deleted(false)
                 .addressType(AddressType.WORK)
                 .user(addressA.getUser())
                 .build();
         AddressResponse addressResponseC = AddressResponse.builder()
                 .id(3)
+                .name("Test Address C")
                 .country("United Kingdom")
                 .street("Oxford Street")
                 .state("England")
                 .city("London")
                 .postalCode("W1D 1BS")
+                .phoneNumber("+44 20 1234 5678")
                 .main(true)
-                .deleted(false)
                 .addressType(AddressType.WORK)
                 .userId(addressA.getUser().getId())
                 .build();
@@ -249,7 +230,7 @@ public class AddressServiceTests {
 
         addressService.delete(addressA.getId(), authentication);
 
-        assertThat(addressA.isDeleted()).isTrue();
+        verify(addressRepository, times(1)).deleteById(addressA.getId());
     }
 
     @Test

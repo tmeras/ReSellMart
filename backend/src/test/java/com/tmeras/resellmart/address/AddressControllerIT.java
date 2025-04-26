@@ -104,11 +104,13 @@ public class AddressControllerIT {
     @Test
     public void shouldSaveAddressWhenValidRequest() {
         AddressRequest addressRequest = AddressRequest.builder()
+                .name("Test Address")
                 .country("UK")
                 .street("High Street")
                 .state("Greater London")
                 .city("London")
                 .postalCode("SW1A 1AA")
+                .phoneNumber("+44 20 7946 0958")
                 .addressType("BILLING")
                 .build();
 
@@ -118,13 +120,14 @@ public class AddressControllerIT {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getName()).isEqualTo(addressRequest.getName());
         assertThat(response.getBody().getCountry()).isEqualTo(addressRequest.getCountry());
         assertThat(response.getBody().getStreet()).isEqualTo(addressRequest.getStreet());
         assertThat(response.getBody().getState()).isEqualTo(addressRequest.getState());
         assertThat(response.getBody().getCity()).isEqualTo(addressRequest.getCity());
         assertThat(response.getBody().getPostalCode()).isEqualTo(addressRequest.getPostalCode());
+        assertThat(response.getBody().getPhoneNumber()).isEqualTo(addressRequest.getPhoneNumber());
         assertThat(response.getBody().getAddressType().toString()).isEqualTo(addressRequest.getAddressType());
-        assertThat(response.getBody().isDeleted()).isFalse();
         assertThat(response.getBody().isMain()).isFalse();
         assertThat(response.getBody().getUserId()).isEqualTo(addressA.getUser().getId());
     }
@@ -133,6 +136,7 @@ public class AddressControllerIT {
     public void shouldNotSaveAddressWhenInvalidRequest() {
         AddressRequest addressRequest = AddressRequest.builder()
                 .country(null)
+                .name("Test Address")
                 .street("High Street")
                 .state("Greater London")
                 .city("London")
@@ -201,37 +205,6 @@ public class AddressControllerIT {
     }
 
     @Test
-    public void shouldFindAllNonDeletedAddressesByUserId() {
-        // Save a deleted address for user A
-        Address deletedAddress = TestDataUtils.createAddressA(addressA.getUser());
-        deletedAddress.setId(null);
-        deletedAddress.setDeleted(true);
-        deletedAddress.setStreet("Deleted street");
-        addressRepository.save(deletedAddress);
-
-        ResponseEntity<List<AddressResponse>> response =
-                restTemplate.exchange("/api/users/" + addressA.getUser().getId() + "/addresses/non-deleted",
-                        HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody()).hasSize(1);
-        assertThat(response.getBody().get(0).getStreet()).isEqualTo(addressA.getStreet());
-    }
-
-    @Test
-    public void shouldNotFindAllNonDeletedAddressesByUserIdWhenAddressOwnerIsNotLoggedIn() {
-        ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/users/" + addressB.getUser().getId() + "/addresses/non-deleted",
-                        HttpMethod.GET, new HttpEntity<>(headers), ExceptionResponse.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getMessage())
-                .isEqualTo("You do not have permission to view the addresses of this user");
-    }
-
-    @Test
     public void shouldMakeAddressMainWhenValidRequest() {
         // Save a second address for user A
         Address newAddress = TestDataUtils.createAddressA(addressA.getUser());
@@ -278,6 +251,7 @@ public class AddressControllerIT {
     public void shouldUpdateAddressWhenValidRequest() {
         addressRequestA.setCity("Updated city");
         addressRequestA.setCountry("Updated country");
+        addressRequestA.setName("Updated address name");
 
         ResponseEntity<AddressResponse> response =
                 restTemplate.exchange("/api/addresses/" + addressA.getId(), HttpMethod.PUT,
@@ -285,6 +259,7 @@ public class AddressControllerIT {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getName()).isEqualTo(addressRequestA.getName());
         assertThat(response.getBody().getStreet()).isEqualTo(addressRequestA.getStreet());
         assertThat(response.getBody().getCity()).isEqualTo(addressRequestA.getCity());
     }
@@ -338,7 +313,7 @@ public class AddressControllerIT {
                         new HttpEntity<>(headers), Object.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-        assertThat(addressRepository.findById(addressA.getId()).get().isDeleted()).isTrue();
+        assertThat(addressRepository.findById(addressA.getId())).isEmpty();
     }
 
     @Test

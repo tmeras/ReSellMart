@@ -128,21 +128,6 @@ public class AddressControllerTests {
     }
 
     @Test
-    public void shouldFindAllNonDeletedAddressesByUserId() throws Exception {
-        List<AddressResponse> addressResponses = List.of(addressResponseA);
-
-        when(addressService.findAllNonDeletedByUserId(eq(addressResponseA.getUserId()), any(Authentication.class)))
-                .thenReturn(addressResponses);
-
-        MvcResult mvcResult = mockMvc.perform(get("/api/users/" + addressResponseA.getUserId() + "/addresses/non-deleted"))
-                .andExpect(status().isOk())
-                .andReturn();
-        String jsonResponse = mvcResult.getResponse().getContentAsString();
-
-        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(addressResponses));
-    }
-
-    @Test
     public void shouldMakeAddressMain() throws Exception {
         addressResponseA.setMain(true);
 

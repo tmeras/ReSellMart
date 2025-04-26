@@ -16,6 +16,8 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    private String name; // Name on address
+
     private String country;
 
     private String street;
@@ -26,9 +28,9 @@ public class Address {
 
     private String postalCode;
 
-    private boolean main;
+    private String phoneNumber;
 
-    private boolean deleted;
+    private boolean main;
 
     @Enumerated(EnumType.STRING)
     private AddressType addressType;

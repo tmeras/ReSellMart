@@ -215,13 +215,14 @@ public final class TestDataUtils {
     public static Address createAddressA(User user) {
         return Address.builder()
                 .id(1)
+                .name("Test address A")
                 .country("UK")
                 .street("Mappin Street")
                 .state("South Yorkshire")
                 .city("Sheffield")
                 .postalCode("S1 4DT")
+                .phoneNumber("+441234567890")
                 .main(false)
-                .deleted(false)
                 .addressType(AddressType.HOME)
                 .user(user)
                 .build();
@@ -229,13 +230,14 @@ public final class TestDataUtils {
 
     public static AddressRequest createAddressRequestA() {
         return AddressRequest.builder()
+                .name("Test address A")
                 .country("UK")
                 .street("Mappin Street")
                 .state("South Yorkshire")
                 .city("Sheffield")
                 .postalCode("S1 4DT")
+                .phoneNumber("+441234567890")
                 .main(false)
-                .deleted(false)
                 .addressType("HOME")
                 .build();
     }
@@ -243,13 +245,14 @@ public final class TestDataUtils {
     public static AddressResponse createAddressResponseA(Integer userId) {
         return AddressResponse.builder()
                 .id(1)
+                .name("Test address A")
                 .country("UK")
                 .street("Mappin Street")
                 .state("South Yorkshire")
                 .city("Sheffield")
                 .postalCode("S1 4DT")
+                .phoneNumber("+441234567890")
                 .main(false)
-                .deleted(false)
                 .addressType(AddressType.HOME)
                 .userId(userId)
                 .build();
@@ -258,13 +261,14 @@ public final class TestDataUtils {
     public static Address createAddressB(User user) {
         return Address.builder()
                 .id(2)
+                .name("Test address B")
                 .country("Greece")
                 .street("Ermou Street")
                 .state("Attica")
                 .city("Athens")
                 .postalCode("10563")
+                .phoneNumber("+302112345678")
                 .main(false)
-                .deleted(false)
                 .addressType(AddressType.WORK)
                 .user(user)
                 .build();
@@ -273,13 +277,14 @@ public final class TestDataUtils {
     public static AddressResponse createAddressResponseB(Integer userId) {
         return AddressResponse.builder()
                 .id(2)
+                .name("Test address B")
                 .country("Greece")
                 .street("Ermou Street")
                 .state("Attica")
                 .city("Athens")
                 .postalCode("10563")
+                .phoneNumber("+302112345678")
                 .main(false)
-                .deleted(false)
                 .addressType(AddressType.HOME)
                 .userId(userId)
                 .build();
