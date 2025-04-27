@@ -21,12 +21,13 @@ export function getProducts(
     return api.get(`/api/products/others?${ params.toString() }`);
 }
 
+// @formatter:off
 export function getProductsQueryOptions({
-                                            page,
-                                            search,
-                                            sortBy,
-                                            sortDirection
-                                        }: {
+    page,
+    search,
+    sortBy,
+    sortDirection
+}: {
     page?: number;
     search?: string;
     sortBy?: string;
@@ -39,6 +40,7 @@ export function getProductsQueryOptions({
         queryFn: () => getProducts(page, search, sortBy, sortDirection)
     });
 }
+// @formatter:on
 
 export type UseGetProductsOptions = {
     page: number;

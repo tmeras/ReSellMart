@@ -49,13 +49,13 @@ export const PRODUCT_CONDITION = {
 } as const;
 
 export type ProductConditionKeys = keyof typeof PRODUCT_CONDITION;
-export type ProductConditionValues = typeof PRODUCT_CONDITION[ProductConditionKeys];
 
-export const PRODUCT_CONDITION_REVERSE = {
-    New: "NEW",
-    "Like New": "LIKE_NEW",
-    Good: "GOOD",
-    Fair: "FAIR",
-    Damaged: "DAMAGED"
+// Address type
+export const ADDRESS_TYPE = {
+    HOME: "Home",
+    WORK: "Work",
+    BILLING: "Billing",
+    SHIPPING: "Shipping"
 } as const;
 
+export type AddressTypeKeys = keyof typeof ADDRESS_TYPE;

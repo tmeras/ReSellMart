@@ -42,6 +42,10 @@ export const paths = {
         sellerProducts: {
             path: "/app/my-products",
             getHref: () => "/app/my-products"
+        },
+        addresses: {
+            path: "/app/my-addresses",
+            getHref: () => "/app/my-addresses"
         }
     },
 } as const

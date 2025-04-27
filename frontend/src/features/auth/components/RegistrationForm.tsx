@@ -1,6 +1,7 @@
 import { PasswordInputWithStrength } from "@/components/form/PasswordInputWithStrength.tsx";
 import { paths } from "@/config/paths.ts";
 import { api } from "@/lib/apiClient.ts";
+import { RegistrationResponse } from "@/types/api.ts";
 import {
     Anchor,
     Button,
@@ -72,7 +73,7 @@ export const RegistrationForm = () => {
             }
 
             const response =
-                await api.post("api/auth/registration", values);
+                await api.post<RegistrationResponse>("api/auth/registration", values);
             console.log("Registration result", response.data);
 
             if (response.data.mfaEnabled)

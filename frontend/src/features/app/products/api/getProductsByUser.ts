@@ -22,13 +22,14 @@ export function getProductsByUser(
     return api.get(`/api/products/users/${ userId }?${ params.toString() }`);
 }
 
+// @formatter:off
 export function getProductsByUserQueryOptions({
-                                                  userId,
-                                                  page,
-                                                  search,
-                                                  sortBy,
-                                                  sortDirection
-                                              }: {
+    userId,
+    page,
+    search,
+    sortBy,
+    sortDirection
+}: {
     userId: string;
     page?: number;
     search?: string;
@@ -42,6 +43,7 @@ export function getProductsByUserQueryOptions({
         queryFn: () => getProductsByUser(userId, page, search, sortBy, sortDirection)
     });
 }
+// @formatter:on
 
 export type UseGetProductsByUserOptions = {
     userId: string;

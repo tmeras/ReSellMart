@@ -1,6 +1,7 @@
 import {
     ACCEPTED_IMAGE_EXTENSIONS,
     ACCEPTED_IMAGE_TYPES,
+    AddressTypeKeys,
     MAX_FILE_SIZE,
     ProductConditionKeys
 } from "@/utils/constants.ts";
@@ -92,4 +93,18 @@ export type WishlistItemResponse = {
     id: number;
     product: ProductResponse;
     addedAt: string;
+}
+
+export type AddressResponse = {
+    id: number;
+    name: string;
+    country: string;
+    street: string;
+    state: string;
+    city: string;
+    postalCode: string;
+    phoneNumber: string;
+    main: boolean;
+    addressType: AddressTypeKeys;
+    userId: number;
 }

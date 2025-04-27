@@ -95,7 +95,7 @@ export function ProductDetails(
 
                     <Flex direction="column" gap={ 2 }>
                         <Flex justify="space-between" mb={ 2 }>
-                            <Flex align="center">
+                            <Flex align="center" maw={ 350 }>
                                 <IconList size={ 20 }/>
                                 <Text span fw={ 700 } size="md" ms={ 9 } me={ 3 }>
                                     Category:

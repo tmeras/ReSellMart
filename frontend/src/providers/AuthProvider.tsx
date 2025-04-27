@@ -44,9 +44,8 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
                         console.log("Refresh success", response);
                         setAccessToken(response.data.accessToken)
 
-                        originalRequest._retry = true;
-
                         // Retry request with new access token
+                        originalRequest._retry = true;
                         originalRequest.headers.Authorization = "Bearer " + response.data.accessToken;
                         return api(originalRequest)
                     } catch (error) {
@@ -66,8 +65,6 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
     }, []);
 
     useLayoutEffect(() => {
-        console.log("Setting accessToken in header to", accessToken)
-
         const requestInterceptor = api.interceptors.request.use((config: AxiosRequestConfig) => {
             config.headers.Authorization =
                 !config._retry && accessToken

@@ -1,7 +1,12 @@
 import { getProductsByUserQueryOptions } from "@/features/app/products/api/getProductsByUser.ts";
 import { api } from "@/lib/apiClient.ts";
 import { ProductResponse } from "@/types/api.ts";
-import { MAX_PRODUCT_DESCRIPTION_LENGTH, MAX_PRODUCT_NAME_LENGTH, PRODUCT_CONDITION } from "@/utils/constants.ts";
+import {
+    MAX_PRODUCT_DESCRIPTION_LENGTH,
+    MAX_PRODUCT_NAME_LENGTH,
+    PRODUCT_CONDITION,
+    ProductConditionKeys
+} from "@/utils/constants.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { z } from "zod";
@@ -15,7 +20,7 @@ export const createProductInputSchema = z.object({
         .max(MAX_PRODUCT_DESCRIPTION_LENGTH, "Description must not exceed 5000 characters"),
     price: z.number().positive("Price must be a positive number"),
     availableQuantity: z.number().positive("Available quantity must be a positive number"),
-    productCondition: z.enum(Object.keys(PRODUCT_CONDITION) as [keyof typeof PRODUCT_CONDITION]),
+    productCondition: z.enum(Object.keys(PRODUCT_CONDITION) as [ProductConditionKeys]),
     categoryId: z.string().min(1, "Category is required")
 });
 
@@ -27,7 +32,7 @@ export function createProduct({ data }: { data: CreateProductInput }): Promise<A
 
 export type UseCreateProductOptions = {
     sellerId: number
-}
+};
 
 export function useCreateProduct({ sellerId }: UseCreateProductOptions) {
     const queryClient = useQueryClient();

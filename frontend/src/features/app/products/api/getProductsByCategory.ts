@@ -22,13 +22,14 @@ export function getProductsByCategory(
     return api.get(`/api/products/categories/${ categoryId }?${ params.toString() }`);
 }
 
+// @formatter:off
 export function getProductsByCategoryQueryOptions({
-                                                      categoryId,
-                                                      page,
-                                                      search,
-                                                      sortBy,
-                                                      sortDirection
-                                                  }: {
+    categoryId,
+    page,
+    search,
+    sortBy,
+    sortDirection
+}: {
     categoryId: string;
     page?: number;
     search?: string;
@@ -42,6 +43,7 @@ export function getProductsByCategoryQueryOptions({
         queryFn: () => getProductsByCategory(categoryId, page, search, sortBy, sortDirection)
     });
 }
+// @formatter:on
 
 export type UseGetProductsByCategoryOptions = {
     categoryId: string;

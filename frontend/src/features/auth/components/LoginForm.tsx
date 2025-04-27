@@ -52,7 +52,7 @@ export function LoginForm() {
     async function handleFormSubmit(values: typeof form.values) {
         try {
             const response =
-                await api.post("api/auth/login", values);
+                await api.post<AuthenticationResponse>("api/auth/login", values);
 
             if (response.data.mfaEnabled) {
                 setOtp({

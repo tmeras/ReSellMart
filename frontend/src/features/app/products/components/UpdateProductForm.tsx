@@ -24,6 +24,7 @@ import { notifications } from "@mantine/notifications";
 import { IconPhoto, IconX } from "@tabler/icons-react";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { z } from "zod";
 
 export type UpdateProductFormProps = {
     product: ProductResponse;
@@ -43,16 +44,9 @@ export function UpdateProductForm({ product }: UpdateProductFormProps) {
     const uploadProductImagesMutation = useUploadProductImages();
 
     const formInputSchema = updateProductInputSchema.merge(uploadProductImagesInputSchema);
+    type FormInput = z.infer<typeof formInputSchema>
 
-    const form = useForm<{
-        name: string;
-        description: string;
-        price: number;
-        availableQuantity: number;
-        productCondition: ProductConditionKeys;
-        categoryId: string;
-        images: File[];
-    }>({
+    const form = useForm<FormInput>({
         mode: "uncontrolled",
         initialValues: {
             name: "",
@@ -64,7 +58,7 @@ export function UpdateProductForm({ product }: UpdateProductFormProps) {
             images: []
         },
         validate: zodResolver(formInputSchema),
-        // Disable form if not yet initialised with product data received from API
+        // Disable form until initial data is fetched from API
         enhanceGetInputProps: (payload) => {
             if (!payload.form.initialized) {
                 return { disabled: true };
@@ -74,13 +68,13 @@ export function UpdateProductForm({ product }: UpdateProductFormProps) {
         }
     });
 
-    form.watch("images", ({ value: images }) => {
+    form.watch("images", ({ value: selectedImages }) => {
         if (!form.isValid("images")) {
             setImages([]);
             return;
         }
 
-        setImages(images);
+        setImages(selectedImages);
     });
 
     // Initialise form using product data received from API
@@ -194,7 +188,7 @@ export function UpdateProductForm({ product }: UpdateProductFormProps) {
 
     const conditionOptions = Object.keys(PRODUCT_CONDITION).map((condition) => {
         return {
-            label: PRODUCT_CONDITION[condition as keyof typeof PRODUCT_CONDITION],
+            label: PRODUCT_CONDITION[condition as ProductConditionKeys],
             value: condition
         };
     });

@@ -23,6 +23,7 @@ import { notifications } from "@mantine/notifications";
 import { IconPhoto, IconX } from "@tabler/icons-react";
 import { ChangeEvent, useState } from "react";
 import { useNavigate } from "react-router";
+import { z } from "zod";
 
 export function CreateProductForm() {
     const navigate = useNavigate();
@@ -35,16 +36,9 @@ export function CreateProductForm() {
     const uploadProductImagesMutation = useUploadProductImages();
 
     const formInputSchema = createProductInputSchema.merge(uploadProductImagesInputSchema);
+    type FormInput = z.infer<typeof formInputSchema>
 
-    const form = useForm<{
-        name: string;
-        description: string;
-        price: number;
-        availableQuantity: number;
-        productCondition: ProductConditionKeys;
-        categoryId: string;
-        images: File[];
-    }>({
+    const form = useForm<FormInput>({
         mode: "uncontrolled",
         initialValues: {
             name: "",
@@ -71,7 +65,9 @@ export function CreateProductForm() {
         try {
             // Submit images separately from remaining form
             const { images, ...formValues } = values;
-            const response = await createProductMutation.mutateAsync({ data: formValues });
+            const response = await createProductMutation.mutateAsync({
+                data: formValues
+            });
 
             const productId = response.data.id;
             await uploadProductImagesMutation.mutateAsync({
@@ -156,7 +152,7 @@ export function CreateProductForm() {
 
     const conditionOptions = Object.keys(PRODUCT_CONDITION).map((condition) => {
         return {
-            label: PRODUCT_CONDITION[condition as keyof typeof PRODUCT_CONDITION],
+            label: PRODUCT_CONDITION[condition as ProductConditionKeys],
             value: condition
         };
     });
@@ -212,6 +208,7 @@ export function CreateProductForm() {
                         { ...form.getInputProps("availableQuantity") }
                     />
 
+                    {/*TODO: Replace with mantine select*/ }
                     <NativeSelect
                         mt="sm"
                         label="Condition" required withAsterisk={ false }
