@@ -30,7 +30,7 @@ export const RegistrationForm = () => {
     const [formComplete, setFormComplete] = useState(false);
     const [qrImageUri, setQrImageUri] = useState("");
 
-    const countries = useMemo(() => {
+    const countryOptions = useMemo(() => {
         const countries = Country.getAllCountries()
         return countries.map((country) => country.name)
     }, []);
@@ -183,7 +183,7 @@ export const RegistrationForm = () => {
                             mt="sm"
                             label="Home country" placeholder="Pick a country"
                             required withAsterisk={ false } searchable
-                            data={ countries }
+                            data={ countryOptions }
                             key={ form.key("homeCountry") }
                             { ...form.getInputProps("homeCountry") }
                         />

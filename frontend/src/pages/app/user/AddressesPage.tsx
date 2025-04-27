@@ -1,6 +1,6 @@
-import { useGetAddressesByUser } from "@/features/app/user/api/getAddressesByUser.ts";
-import { AddressesList } from "@/features/app/user/components/AddressesList.tsx";
-import { CreateAddressActionIcon } from "@/features/app/user/components/CreateAddressActionIcon.tsx";
+import { useGetAddressesByUser } from "@/features/app/addresses/api/getAddressesByUser.ts";
+import { AddressesList } from "@/features/app/addresses/components/AddressesList.tsx";
+import { CreateAddressActionIcon } from "@/features/app/addresses/components/CreateAddressActionIcon.tsx";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { Flex, Loader, Text, Title } from "@mantine/core";
 

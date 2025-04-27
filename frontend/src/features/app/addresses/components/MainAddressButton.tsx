@@ -1,4 +1,4 @@
-import { useMakeAddressMain } from "@/features/app/user/api/makeAddressMain.ts";
+import { useMakeAddressMain } from "@/features/app/addresses/api/makeAddressMain.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { Button } from "@mantine/core";
 import { notifications } from "@mantine/notifications";

@@ -1,5 +1,5 @@
 import { DeleteModal } from "@/components/ui/DeleteModal.tsx";
-import { useDeleteAddress } from "@/features/app/user/api/deleteAddress.ts";
+import { useDeleteAddress } from "@/features/app/addresses/api/deleteAddress.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { Button } from "@mantine/core";
 import { notifications } from "@mantine/notifications";

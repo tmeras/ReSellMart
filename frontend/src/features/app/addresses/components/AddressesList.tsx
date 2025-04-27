@@ -1,5 +1,5 @@
-import { DeleteAddressButton } from "@/features/app/user/components/DeleteAddressButton.tsx";
-import { UpdateAddressButton } from "@/features/app/user/components/UpdateAddressButton.tsx";
+import { DeleteAddressButton } from "@/features/app/addresses/components/DeleteAddressButton.tsx";
+import { UpdateAddressButton } from "@/features/app/addresses/components/UpdateAddressButton.tsx";
 import { AddressResponse } from "@/types/api.ts";
 import { ADDRESS_TYPE } from "@/utils/constants.ts";
 import { Badge, Card, Flex, Grid, Text } from "@mantine/core";

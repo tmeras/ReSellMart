@@ -1,30 +1,34 @@
 import {
-    CreateAddressInput,
-    createAddressInputSchema,
-    useCreateAddress
-} from "@/features/app/user/api/createAddress.ts";
+    UpdateAddressInput,
+    updateAddressInputSchema,
+    useUpdateAddress
+} from "@/features/app/addresses/api/updateAddress.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
+import { AddressResponse } from "@/types/api.ts";
 import { ADDRESS_TYPE, AddressTypeKeys } from "@/utils/constants.ts";
-import { ActionIcon, Button, Checkbox, Modal, Select, TextInput, Tooltip } from "@mantine/core";
+import { Button, Flex, Modal, Select, TextInput } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { IconCirclePlus, IconX } from "@tabler/icons-react";
+import { IconEdit, IconX } from "@tabler/icons-react";
 import { Country } from "country-state-city";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-// TODO: Restructure project further by feature
-export function CreateAddressActionIcon() {
+export type UpdateAddressButtonProps = {
+    address: AddressResponse;
+};
+
+export function UpdateAddressButton({ address }: UpdateAddressButtonProps) {
     const { user } = useAuth();
     const [modalOpened, setModalOpened] = useState(false);
 
-    const countries = useMemo(() => Country.getAllCountries(), []);
     const countryOptions = useMemo(() => {
+        const countries = Country.getAllCountries();
         return countries.map((country) => country.name);
-    }, [countries]);
+    }, []);
 
-    const createAddressMutation = useCreateAddress({ userId: user!.id.toString() });
+    const updateAddressMutation = useUpdateAddress({ userId: user!.id.toString() });
 
-    const form = useForm<CreateAddressInput>({
+    const form = useForm<UpdateAddressInput>({
         mode: "uncontrolled",
         initialValues: {
             name: user!.name,
@@ -34,11 +38,23 @@ export function CreateAddressActionIcon() {
             city: "",
             postalCode: "",
             phoneNumber: "",
-            main: false,
             addressType: "HOME"
         },
-        validate: zodResolver(createAddressInputSchema)
+        validate: zodResolver(updateAddressInputSchema),
+        // Disable form until initial data is fetched from API
+        enhanceGetInputProps: (payload) => {
+            if (!payload.form.initialized) {
+                return { disabled: true };
+            }
+
+            return {};
+        }
     });
+
+    // Initialise form using address data received from API
+    useEffect(() => {
+        if (!form.initialized) form.initialize({ ...address });
+    }, [address]);
 
     async function handleSubmit(values: typeof form.values) {
         try {
@@ -46,18 +62,20 @@ export function CreateAddressActionIcon() {
             if (values.phoneNumber === "")
                 values.phoneNumber = undefined;
 
-            await createAddressMutation.mutateAsync({ data: values });
+            await updateAddressMutation.mutateAsync({
+                addressId: address.id.toString(),
+                data: values
+            });
 
             setModalOpened(false);
-            form.reset();
             notifications.show({
-                title: "Address added successfully", message: "",
+                title: "Address updated successfully", message: "",
                 color: "teal", withBorder: true
             });
         } catch (error) {
-            console.log("Error creating address", error);
+            console.log("Error updating address", error);
             notifications.show({
-                title: "Something went wrong", message: "Please try adding the address again",
+                title: "Something went wrong", message: "Please try updating the address again",
                 color: "red", icon: <IconX/>, withBorder: true
             });
         }
@@ -73,10 +91,9 @@ export function CreateAddressActionIcon() {
     return (
         <>
             <Modal
-                opened={ modalOpened } title="Add New Address" centered
+                opened={ modalOpened } title="Update Address" centered
                 onClose={ () => {
                     setModalOpened(false);
-                    form.reset();
                 } }
                 size="sm"
             >
@@ -117,20 +134,22 @@ export function CreateAddressActionIcon() {
                         { ...form.getInputProps("street") }
                     />
 
-                    <TextInput
-                        mt="sm"
-                        label="Postal code" required withAsterisk={ false }
-                        key={ form.key("postalCode") }
-                        { ...form.getInputProps("postalCode") }
-                    />
+                    <Flex gap="xs">
+                        <TextInput
+                            mt="sm"
+                            label="Postal code" required withAsterisk={ false }
+                            key={ form.key("postalCode") }
+                            { ...form.getInputProps("postalCode") }
+                        />
 
-                    <Select
-                        mt="sm"
-                        label="Address type" required withAsterisk={ false }
-                        data={ typeOptions }
-                        key={ form.key("addressType") }
-                        { ...form.getInputProps("addressType") }
-                    />
+                        <Select
+                            mt="sm"
+                            label="Address type" required withAsterisk={ false }
+                            data={ typeOptions }
+                            key={ form.key("addressType") }
+                            { ...form.getInputProps("addressType") }
+                        />
+                    </Flex>
 
                     <TextInput
                         mt="sm"
@@ -139,29 +158,19 @@ export function CreateAddressActionIcon() {
                         { ...form.getInputProps("phoneNumber") }
                     />
 
-                    <Checkbox
-                        mt="lg"
-                        label="Primary address"
-                        key={ form.key("main") }
-                        { ...form.getInputProps("main") }
-                    />
-
                     <Button type="submit" mt="xl" fullWidth loading={ form.submitting }>
-                        Create address
+                        Update address
                     </Button>
                 </form>
             </Modal>
 
-            <Tooltip label="Add new address">
-                <ActionIcon
-                    variant="subtle" size="lg" mt={ 6 } ms={ 4 }
-                    onClick={ () => {
-                        setModalOpened(true);
-                    } }
-                >
-                    <IconCirclePlus size={ 30 }/>
-                </ActionIcon>
-            </Tooltip>
+            <Button
+                variant="light" size="compact-sm"
+                leftSection={ <IconEdit size={ 16 }/> }
+                onClick={ () => setModalOpened(true) }
+            >
+                Edit
+            </Button>
         </>
     );
 }

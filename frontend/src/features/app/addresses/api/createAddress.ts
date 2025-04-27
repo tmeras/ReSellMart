@@ -1,4 +1,4 @@
-import { getAddressesByUserQueryOptions } from "@/features/app/user/api/getAddressesByUser.ts";
+import { getAddressesByUserQueryOptions } from "@/features/app/addresses/api/getAddressesByUser.ts";
 import { api } from "@/lib/apiClient.ts";
 import { AddressResponse } from "@/types/api.ts";
 import { ADDRESS_TYPE, AddressTypeKeys } from "@/utils/constants.ts";
