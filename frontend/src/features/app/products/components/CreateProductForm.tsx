@@ -17,7 +17,18 @@ import {
     PRODUCT_CONDITION,
     ProductConditionKeys
 } from "@/utils/constants.ts";
-import { Button, FileInput, Flex, Loader, NativeSelect, NumberInput, Paper, Text, Textarea } from "@mantine/core";
+import {
+    Button,
+    FileInput,
+    Flex,
+    Loader,
+    NativeSelect,
+    NumberInput,
+    Paper,
+    Select,
+    Text,
+    Textarea
+} from "@mantine/core";
 import { FormErrors, useForm, zodResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconPhoto, IconX } from "@tabler/icons-react";
@@ -208,8 +219,7 @@ export function CreateProductForm() {
                         { ...form.getInputProps("availableQuantity") }
                     />
 
-                    {/*TODO: Replace with mantine select*/ }
-                    <NativeSelect
+                    <Select
                         mt="sm"
                         label="Condition" required withAsterisk={ false }
                         data={ conditionOptions }
@@ -217,10 +227,11 @@ export function CreateProductForm() {
                         { ...form.getInputProps("productCondition") }
                     />
 
-                    <NativeSelect
+                    <Select
                         mt="sm"
                         label="Category" required withAsterisk={ false }
-                        data={ categoryOptions }
+                        data={ categoryOptions } searchable
+                        nothingFoundMessage="Nothing found..."
                         key={ form.key("categoryId") }
                         { ...form.getInputProps("categoryId") }
                     />

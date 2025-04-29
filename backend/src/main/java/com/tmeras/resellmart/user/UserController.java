@@ -138,7 +138,6 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-
     @PatchMapping("/{user-id}/activation")
     public ResponseEntity<?> enableOrDisableUser(
             @Valid @RequestBody UserEnableRequest userEnableRequest,
@@ -152,5 +151,4 @@ public class UserController {
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
 }

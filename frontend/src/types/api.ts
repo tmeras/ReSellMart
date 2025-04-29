@@ -43,7 +43,7 @@ export type Role = {
 }
 
 export type UserResponse = {
-    id: string; //TODO: Change to string
+    id: string;
     name: string;
     email: string;
     homeCountry: string;

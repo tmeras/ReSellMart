@@ -23,19 +23,19 @@ export const MAX_PRODUCT_QUANTITY = 1000 as const;
 export const PRODUCT_SORT_OPTIONS = [
     {
         value: "listedAt desc",
-        label: "Newest first"
+        label: "Sort by: Date listed (descending)"
     },
     {
         value: "listedAt asc",
-        label: "Oldest first"
+        label: "Sort by: Date listed (ascending)"
     },
     {
         value: "price desc",
-        label: "Price (descending)"
+        label: "Sort by: Price (descending)"
     },
     {
         value: "price asc",
-        label: "Price (ascending)"
+        label: "Sort by: Price (ascending)"
     }
 ] as const;
 

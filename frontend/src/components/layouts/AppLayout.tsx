@@ -43,7 +43,6 @@ export function AppLayout() {
                         </Text>
                     </Flex>
 
-                    {/* TODO: Move to usermenu?*/ }
                     <DarkModeButton/>
                 </Flex>
             </AppShell.Header>
