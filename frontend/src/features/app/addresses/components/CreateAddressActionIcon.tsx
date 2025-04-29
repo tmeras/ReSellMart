@@ -12,7 +12,6 @@ import { IconCirclePlus, IconX } from "@tabler/icons-react";
 import { Country } from "country-state-city";
 import { useMemo, useState } from "react";
 
-// TODO: Restructure project further by feature
 export function CreateAddressActionIcon() {
     const { user } = useAuth();
     const [modalOpened, setModalOpened] = useState(false);

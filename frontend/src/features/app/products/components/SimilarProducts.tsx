@@ -14,12 +14,11 @@ export type SimilarProductsProps = {
 }
 
 // Returns a grid of similar products based on the category of the given product
-// Memo component
 export const SimilarProducts = memo(function SimilarProducts(
     { product, wishlistItems, cartItems, wishlistEnabled, cartEnabled }: SimilarProductsProps
 ) {
     const getProductsByCategoryQuery = useGetProductsByCategory({
-        categoryId: product.category.parentId ? product.category.parentId.toString() : product.category.id.toString(),
+        categoryId: product.category.parentId ? product.category.parentId : product.category.id,
         page: 0
     });
 

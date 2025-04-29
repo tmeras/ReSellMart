@@ -7,7 +7,7 @@ import { IconHeart, IconHeartFilled, IconX } from "@tabler/icons-react";
 
 type WishlistIconButtonProps = {
     inWishlist: boolean; // Used to determine if product is already in wishlist
-    productId: number;
+    productId: string;
     wishlistEnabled: boolean;
     size: number;
 }

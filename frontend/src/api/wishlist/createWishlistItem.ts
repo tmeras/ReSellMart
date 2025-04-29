@@ -4,8 +4,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 
 export const CreateWishlistItemInputSchema = z.object({
-    productId: z.number(),
-    userId: z.number()
+    productId: z.string().min(1, "Product ID is required"),
+    userId: z.string().min(1, "User ID is required")
 });
 
 export type CreateWishlistItemInput = z.infer<typeof CreateWishlistItemInputSchema>;
@@ -15,7 +15,7 @@ export function createWishlistItem({ data }: { data: CreateWishlistItemInput }) 
 }
 
 export type UseCreateWishlistItemOptions = {
-    userId: number;
+    userId: string;
 }
 
 export function useCreateWishlistItem({ userId }: UseCreateWishlistItemOptions) {

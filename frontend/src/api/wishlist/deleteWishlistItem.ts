@@ -3,13 +3,13 @@ import { api } from "@/lib/apiClient.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function deleteWishlistItem(
-    { productId, userId }: { productId: number, userId: number }
+    { productId, userId }: { productId: string, userId: string }
 ) {
     return api.delete(`/api/users/${ userId }/wishlist/products/${ productId }`);
 }
 
 export type UseDeleteWishlistItemOptions = {
-    userId: number;
+    userId: string;
 };
 
 export function useDeleteWishlistItem({ userId }: UseDeleteWishlistItemOptions) {

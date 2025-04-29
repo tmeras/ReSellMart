@@ -31,7 +31,7 @@ export function createProduct({ data }: { data: CreateProductInput }): Promise<A
 }
 
 export type UseCreateProductOptions = {
-    sellerId: number
+    sellerId: string;
 };
 
 export function useCreateProduct({ sellerId }: UseCreateProductOptions) {
