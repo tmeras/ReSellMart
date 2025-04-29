@@ -24,7 +24,7 @@ export function ProductDetails(
     const { colorScheme } = useMantineColorScheme();
     const { user } = useAuth();
 
-    const isProductAvailable = !product.deleted && product.availableQuantity > 0;
+    const isProductAvailable = !product.isDeleted && product.availableQuantity > 0;
 
     // Determine if product is sold by logged-in user
     const isAuthUserProduct = product.seller.id === user!.id;

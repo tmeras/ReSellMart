@@ -72,13 +72,13 @@ public class AuthenticationService {
                 .roles(Set.of(userRole))
                 .homeCountry(registrationRequest.getHomeCountry())
                 .registeredAt(LocalDate.now())
-                .enabled(false)
-                .mfaEnabled(registrationRequest.isMfaEnabled())
+                .isEnabled(false)
+                .isMfaEnabled(registrationRequest.getIsMfaEnabled())
                 .build();
 
         // Generate secret and QR code image if MFA is enabled
         String qrImageUri = null;
-        if (registrationRequest.isMfaEnabled()) {
+        if (registrationRequest.getIsMfaEnabled()) {
             user.setSecret(mfaService.generateSecret());
             qrImageUri = mfaService.generateQrCodeImageUri(user.getSecret(), user.getEmail());
         }
@@ -88,7 +88,7 @@ public class AuthenticationService {
 
         return AuthenticationResponse.builder()
                 .qrImageUri(qrImageUri)
-                .mfaEnabled(registrationRequest.isMfaEnabled())
+                .isMfaEnabled(registrationRequest.getIsMfaEnabled())
                 .build();
     }
 
@@ -110,7 +110,7 @@ public class AuthenticationService {
                 .tokenType(TokenType.ACTIVATION)
                 .createdAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plusMinutes(15))
-                .revoked(false)
+                .isRevoked(false)
                 .user(user)
                 .build()
         );
@@ -140,9 +140,9 @@ public class AuthenticationService {
         User user = (User) authentication.getPrincipal();
 
         // Client needs to send OTP
-        if (user.isMfaEnabled())
+        if (user.getIsMfaEnabled())
             return AuthenticationResponse.builder()
-                    .mfaEnabled(true)
+                    .isMfaEnabled(true)
                     .build();
 
         return generateTokens(user);
@@ -168,7 +168,7 @@ public class AuthenticationService {
         }
 
         User user = savedToken.getUser();
-        user.setEnabled(true);
+        user.setIsEnabled(true);
         userRepository.save(user);
 
         savedToken.setValidatedAt(LocalDateTime.now());
@@ -185,7 +185,7 @@ public class AuthenticationService {
                     .orElseThrow(() -> new UsernameNotFoundException("User with the email '" + userEmail + "' does not exist"));
 
             boolean isTokenRevoked = tokenRepository.findByToken(refreshToken)
-                    .map(Token::isRevoked)
+                    .map(Token::getIsRevoked)
                     .orElseThrow(() -> new ResourceNotFoundException("Refresh token was not found"));
 
             if (!isTokenRevoked && jwtService.isTokenValid(refreshToken, user)) {
@@ -231,7 +231,7 @@ public class AuthenticationService {
                 .tokenType(TokenType.BEARER)
                 .createdAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plus(refreshExpirationTime, ChronoUnit.MILLIS))
-                .revoked(false)
+                .isRevoked(false)
                 .user(user)
                 .build()
         );
@@ -248,7 +248,7 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
                 .accessToken(accessToken)
                 .refreshTokenCookie(refreshCookie.toString())
-                .mfaEnabled(user.isMfaEnabled())
+                .isMfaEnabled(user.getIsMfaEnabled())
                 .build();
     }
 }

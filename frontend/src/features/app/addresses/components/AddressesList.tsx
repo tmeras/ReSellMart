@@ -33,7 +33,7 @@ export function AddressesList({ addresses }: AddressesListProps) {
                 <Card withBorder radius="md" w={ 350 }>
                     <Card.Section inheritPadding withBorder>
                         <Flex align="center" mt="xs" mb="xs">
-                            { address.main &&
+                            { address.isMain &&
                                 <Badge variant="light" color="indigo" me="sm">
                                     Main Address
                                 </Badge>
@@ -63,7 +63,7 @@ export function AddressesList({ addresses }: AddressesListProps) {
 
                     <Card.Section inheritPadding withBorder>
                         <Flex gap="md" my="xs">
-                            { !address.main &&
+                            { !address.isMain &&
                                 <MainAddressButton addressId={ address.id.toString() }/>
                             }
 

@@ -39,12 +39,12 @@ public class AddressService {
         // if the user requested it
         List<Address> existingAddresses =
                 addressRepository.findAllByUserId(currentUser.getId());
-        if (existingAddresses.isEmpty() || addressRequest.isMain()) {
+        if (existingAddresses.isEmpty() || addressRequest.getIsMain()) {
             for (Address existingAddress : existingAddresses) {
-                existingAddress.setMain(false);
+                existingAddress.setIsMain(false);
             }
             addressRepository.saveAll(existingAddresses);
-            address.setMain(true);
+            address.setIsMain(true);
         }
 
         Address savedAddress = addressRepository.save(address);
@@ -93,13 +93,13 @@ public class AddressService {
 
         List<Address> currentUserAddresses = addressRepository.findAllWithAssociationsByUserId(currentUser.getId());
         for (Address address : currentUserAddresses)
-            address.setMain(false);
+            address.setIsMain(false);
 
         Address specifiedAddress = currentUserAddresses.stream()
                 .filter(address -> address.getId().equals(addressId))
                 .findFirst()
                 .orElseThrow(() -> new OperationNotPermittedException("The specified address is related to another user"));
-        specifiedAddress.setMain(true);
+        specifiedAddress.setIsMain(true);
 
         addressRepository.saveAll(currentUserAddresses);
         return addressMapper.toAddressResponse(specifiedAddress);

@@ -85,7 +85,7 @@ public class AuthenticationControllerIT {
                 .name("Test user")
                 .email("test@test.com")
                 .password("Pass123!")
-                .mfaEnabled(true)
+                .isMfaEnabled(true)
                 .homeCountry("Australia")
                 .build();
 
@@ -96,7 +96,7 @@ public class AuthenticationControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getQrImageUri()).isNotNull();
-        assertThat(response.getBody().getMfaEnabled()).isTrue();
+        assertThat(response.getBody().getIsMfaEnabled()).isTrue();
 
         Optional<User> createdUser = userRepository.findWithAssociationsByEmail(registrationRequest.getEmail());
         assertThat(createdUser).isNotEmpty();
@@ -115,7 +115,7 @@ public class AuthenticationControllerIT {
                 .name(null)
                 .email("test@test.com")
                 .password("Pass123!")
-                .mfaEnabled(true)
+                .isMfaEnabled(true)
                 .homeCountry("Australia")
                 .build();
         Map<String, String> expectedErrors = new HashMap<>();
@@ -139,7 +139,7 @@ public class AuthenticationControllerIT {
                 .name("Test user")
                 .email("test@test.com")
                 .password("Pass123!")
-                .mfaEnabled(true)
+                .isMfaEnabled(true)
                 .homeCountry("Australia")
                 .build();
 
@@ -158,7 +158,7 @@ public class AuthenticationControllerIT {
                 .name("Test user")
                 .email(userA.getEmail())
                 .password("Pass123!")
-                .mfaEnabled(true)
+                .isMfaEnabled(true)
                 .homeCountry("Australia")
                 .build();
 
@@ -209,7 +209,7 @@ public class AuthenticationControllerIT {
 
     @Test
     public void shouldNotLoginUserWhenUserIsDisabled() {
-        userA.setEnabled(false);
+        userA.setIsEnabled(false);
         userRepository.save(userA);
 
         AuthenticationRequest authenticationRequest = new AuthenticationRequest(userA.getEmail(), userPassword);
@@ -223,7 +223,7 @@ public class AuthenticationControllerIT {
 
     @Test
     public void shouldNotLoginUserWhenMfaIsEnabled() {
-        userA.setMfaEnabled(true);
+        userA.setIsMfaEnabled(true);
         userRepository.save(userA);
         AuthenticationRequest authenticationRequest = new AuthenticationRequest(userA.getEmail(), userPassword);
 
@@ -233,13 +233,13 @@ public class AuthenticationControllerIT {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getMfaEnabled()).isTrue();
+        assertThat(response.getBody().getIsMfaEnabled()).isTrue();
         assertThat(response.getBody().getAccessToken()).isNull();
     }
 
     @Test
     public void shouldActivateAccountWhenValidRequest() {
-        userA.setEnabled(false);
+        userA.setIsEnabled(false);
         userRepository.save(userA);
         // Manually save activation code
         tokenRepository.save(new Token(null, "code", TokenType.ACTIVATION, LocalDateTime.now().minusMinutes(2),
@@ -267,7 +267,7 @@ public class AuthenticationControllerIT {
 
     @Test
     public void shouldNotActivateAccountWhenTokenHasBeenValidated() {
-        userA.setEnabled(false);
+        userA.setIsEnabled(false);
         userRepository.save(userA);
         // Manually save activation code
         tokenRepository.save(new Token(null, "code", TokenType.ACTIVATION, LocalDateTime.now().minusMinutes(2),

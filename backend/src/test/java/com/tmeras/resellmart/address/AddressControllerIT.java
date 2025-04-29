@@ -87,7 +87,7 @@ public class AddressControllerIT {
 
         addressA = TestDataUtils.createAddressA(userA);
         addressA.setId(null);
-        addressA.setMain(true);
+        addressA.setIsMain(true);
         addressA = addressRepository.save(addressA);
         addressRequestA = TestDataUtils.createAddressRequestA();
 
@@ -112,6 +112,7 @@ public class AddressControllerIT {
                 .postalCode("SW1A 1AA")
                 .phoneNumber("+44 20 7946 0958")
                 .addressType("BILLING")
+                .isMain(false)
                 .build();
 
         ResponseEntity<AddressResponse> response =
@@ -128,7 +129,7 @@ public class AddressControllerIT {
         assertThat(response.getBody().getPostalCode()).isEqualTo(addressRequest.getPostalCode());
         assertThat(response.getBody().getPhoneNumber()).isEqualTo(addressRequest.getPhoneNumber());
         assertThat(response.getBody().getAddressType().toString()).isEqualTo(addressRequest.getAddressType());
-        assertThat(response.getBody().isMain()).isFalse();
+        assertThat(response.getBody().getIsMain()).isFalse();
         assertThat(response.getBody().getUserId()).isEqualTo(addressA.getUser().getId());
     }
 
@@ -219,8 +220,8 @@ public class AddressControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getStreet()).isEqualTo(newAddress.getStreet());
-        assertThat(addressRepository.findById(addressA.getId()).get().isMain()).isFalse();
-        assertThat(addressRepository.findById(newAddress.getId()).get().isMain()).isTrue();
+        assertThat(addressRepository.findById(addressA.getId()).get().getIsMain()).isFalse();
+        assertThat(addressRepository.findById(newAddress.getId()).get().getIsMain()).isTrue();
     }
 
     @Test

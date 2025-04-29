@@ -79,7 +79,7 @@ public class AddressServiceTests {
         AddressResponse addressResponse = addressService.save(addressRequestA, authentication);
 
         assertThat(addressResponse).isEqualTo(addressResponseA);
-        assertThat(addressA.isMain()).isTrue();
+        assertThat(addressA.getIsMain()).isTrue();
     }
 
     @Test
@@ -135,7 +135,7 @@ public class AddressServiceTests {
                 .city("London")
                 .postalCode("W1D 1BS")
                 .phoneNumber("+44 20 1234 5678")
-                .main(false)
+                .isMain(false)
                 .addressType(AddressType.WORK)
                 .user(addressA.getUser())
                 .build();
@@ -148,11 +148,11 @@ public class AddressServiceTests {
                 .city("London")
                 .postalCode("W1D 1BS")
                 .phoneNumber("+44 20 1234 5678")
-                .main(true)
+                .isMain(true)
                 .addressType(AddressType.WORK)
                 .userId(addressA.getUser().getId())
                 .build();
-        addressA.setMain(true);
+        addressA.setIsMain(true);
 
         when(addressRepository.existsById(addressC.getId())).thenReturn(true);
         when(addressRepository.findAllWithAssociationsByUserId(addressA.getUser().getId()))
@@ -162,8 +162,8 @@ public class AddressServiceTests {
         AddressResponse addressResponse = addressService.makeMain(addressC.getId(), authentication);
 
         assertThat(addressResponse).isEqualTo(addressResponseC);
-        assertThat(addressA.isMain()).isFalse();
-        assertThat(addressC.isMain()).isTrue();
+        assertThat(addressA.getIsMain()).isFalse();
+        assertThat(addressC.getIsMain()).isTrue();
     }
 
     @Test

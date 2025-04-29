@@ -19,7 +19,7 @@ public interface TokenRepository extends JpaRepository<Token, Integer> {
     Optional<Token> findActivationTokenByUserEmail(String email);
 
     @Query("""
-            SELECT t FROM Token t WHERE t.revoked = false
+            SELECT t FROM Token t WHERE t.isRevoked = false
             AND t.tokenType = 'BEARER' AND t.user.email = :email
     """)
     List<Token> findAllValidRefreshTokensByUserEmail(String email);

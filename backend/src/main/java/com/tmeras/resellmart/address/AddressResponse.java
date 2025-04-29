@@ -27,7 +27,7 @@ public class AddressResponse {
 
     private String phoneNumber;
 
-    private boolean main;
+    private Boolean isMain;
 
     private AddressType addressType;
 

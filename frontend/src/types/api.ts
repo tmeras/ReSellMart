@@ -23,17 +23,17 @@ export type PageResponse<T> = {
     pageSize: number;
     totalElements: number;
     totalPages: number;
-    first: boolean;
-    last: boolean;
+    isFirst: boolean;
+    isLast: boolean;
 }
 
 export type AuthenticationResponse = {
     accessToken: string;
-    mfaEnabled: boolean;
+    isMfaEnabled: boolean;
 }
 
 export type RegistrationResponse = {
-    mfaEnabled: boolean;
+    isMfaEnabled: boolean;
     qrImageUri?: string;
 }
 
@@ -48,7 +48,7 @@ export type UserResponse = {
     email: string;
     homeCountry: string;
     registeredAt: string;
-    mfaEnabled: boolean;
+    isMfaEnabled: boolean;
     profileImage?: string; //base64 string
     roles: Role[];
     qrImageUri?: string;
@@ -76,7 +76,7 @@ export type ProductResponse = {
     productCondition: ProductConditionKeys
     availableQuantity: number;
     listedAt: string; // UTC datetime string
-    deleted: boolean;
+    isDeleted: boolean;
     images: ProductImageResponse[];
     category: CategoryResponse;
     seller: UserResponse;
@@ -104,7 +104,7 @@ export type AddressResponse = {
     city: string;
     postalCode: string;
     phoneNumber: string;
-    main: boolean;
+    isMain: boolean;
     addressType: AddressTypeKeys;
     userId: number;
 }

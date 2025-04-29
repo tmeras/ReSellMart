@@ -94,7 +94,7 @@ public class LogoutServiceIT {
                         new HttpEntity<>(headers), Object.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(tokenRepository.findByToken(refreshToken.getToken()).get().isRevoked()).isTrue();
+        assertThat(tokenRepository.findByToken(refreshToken.getToken()).get().getIsRevoked()).isTrue();
     }
 
     @Test

@@ -44,7 +44,7 @@ public class ProductMapper {
                 .productCondition(product.getProductCondition())
                 .availableQuantity(product.getAvailableQuantity())
                 .listedAt(product.getListedAt())
-                .deleted(product.getIsDeleted())
+                .isDeleted(product.getIsDeleted())
                 .images(productImageResponses)
                 .category(categoryMapper.toCategoryResponse(product.getCategory()))
                 .seller(userMapper.toUserResponse(product.getSeller()))

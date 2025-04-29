@@ -40,9 +40,9 @@ public class User implements UserDetails, Principal {
     // Path pointing to the user's profile picture
     private String imagePath;
 
-    private boolean enabled;
+    private Boolean isEnabled;
 
-    private boolean mfaEnabled;
+    private Boolean isMfaEnabled;
 
     // Secret used for MFA
     private String secret;
@@ -94,7 +94,7 @@ public class User implements UserDetails, Principal {
 
     @Override
     public boolean isEnabled() {
-        return this.enabled;
+        return this.isEnabled;
     }
 
     @Override

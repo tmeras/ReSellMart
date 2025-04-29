@@ -37,7 +37,7 @@ public class AddressRequest {
     )
     private String phoneNumber;
 
-    private boolean main;
+    private Boolean isMain;
 
     @NotNull(message = "Address type must not be empty")
     @Pattern(

@@ -19,7 +19,7 @@ export const createAddressInputSchema = z.object({
             "Phone number must start with '+' and contain only digits, spaces, " +
             "parentheses, or dashes, and be between 7 and 25 characters."
         ),
-    main: z.boolean().default(false).optional(),
+    isMain: z.boolean().default(false).optional(),
     addressType: z.enum(Object.keys(ADDRESS_TYPE) as [AddressTypeKeys])
 });
 

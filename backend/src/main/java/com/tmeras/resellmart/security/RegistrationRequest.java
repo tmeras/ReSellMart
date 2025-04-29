@@ -31,5 +31,5 @@ public class RegistrationRequest {
     @NotBlank(message = "Home country must not be empty")
     private String homeCountry;
 
-    private boolean mfaEnabled;
+    private Boolean isMfaEnabled;
 }

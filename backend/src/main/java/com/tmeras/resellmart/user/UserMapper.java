@@ -19,7 +19,7 @@ public class UserMapper {
                 .email(user.getEmail())
                 .homeCountry(user.getHomeCountry())
                 .registeredAt(user.getRegisteredAt())
-                .mfaEnabled(user.isMfaEnabled())
+                .isMfaEnabled(user.getIsMfaEnabled())
                 .profileImage(profileImage)
                 .roles(user.getRoles())
                 .build();

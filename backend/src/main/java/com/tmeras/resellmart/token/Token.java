@@ -29,10 +29,9 @@ public class Token {
 
     private LocalDateTime validatedAt;
 
-    private boolean revoked;
+    private Boolean isRevoked;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private User user;
-
 }

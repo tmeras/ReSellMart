@@ -25,7 +25,7 @@ public class UserResponse {
 
     private LocalDate registeredAt;
 
-    private boolean mfaEnabled;
+    private boolean isMfaEnabled;
 
     private byte[] profileImage;
 

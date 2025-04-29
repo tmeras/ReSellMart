@@ -704,7 +704,7 @@ public class UserControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(userRepository.findById(userA.getId()).get().isEnabled()).isFalse();
         assertThat(productRepository.findAllBySellerId(userA.getId()).get(0).getIsDeleted()).isFalse();
-        assertThat(tokenRepository.findById(testToken.getId()).get().isRevoked()).isTrue();
+        assertThat(tokenRepository.findById(testToken.getId()).get().getIsRevoked()).isTrue();
     }
 
     @Test
@@ -750,7 +750,7 @@ public class UserControllerIT {
     @Test
     public void shouldEnableUserWhenValidRequest() {
         UserEnableRequest userEnableRequest = new UserEnableRequest(true);
-        userB.setEnabled(false);
+        userB.setIsEnabled(false);
         userRepository.save(userB);
 
         ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userB.getId() + "/activation",

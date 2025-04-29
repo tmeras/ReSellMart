@@ -15,7 +15,7 @@ public class AuthenticationResponse {
 
     private String refreshTokenCookie;
 
-    private Boolean mfaEnabled;
+    private Boolean isMfaEnabled;
 
     private String qrImageUri;
 }

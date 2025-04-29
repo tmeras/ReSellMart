@@ -187,7 +187,7 @@ public class UserServiceTests {
         assertThat(userResponse).isEqualTo(userResponseA);
         assertThat(userA.getRealName()).isEqualTo(userRequestA.getName());
         assertThat(userA.getHomeCountry()).isEqualTo(userRequestA.getHomeCountry());
-        assertThat(userA.isMfaEnabled()).isEqualTo(userRequestA.isMfaEnabled());
+        assertThat(userA.getIsMfaEnabled()).isEqualTo(userRequestA.isMfaEnabled());
         assertThat(userA.getSecret()).isEqualTo("secret");
     }
 
@@ -554,7 +554,7 @@ public class UserServiceTests {
         userService.disable(userA.getId(), authentication);
 
         assertThat(userA.isEnabled()).isFalse();
-        assertThat(testToken.isRevoked()).isTrue();
+        assertThat(testToken.getIsRevoked()).isTrue();
         assertThat(productA.getIsDeleted()).isFalse();
     }
 
@@ -588,7 +588,7 @@ public class UserServiceTests {
 
     @Test
     public void shouldEnableUserWhenValidRequest() {
-        userA.setEnabled(false);
+        userA.setIsEnabled(false);
 
         when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
 

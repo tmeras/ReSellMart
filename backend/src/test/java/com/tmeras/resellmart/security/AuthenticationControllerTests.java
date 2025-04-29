@@ -50,10 +50,10 @@ public class AuthenticationControllerTests {
                 .email("test@test.com")
                 .password("Pass123!")
                 .homeCountry("UK")
-                .mfaEnabled(true)
+                .isMfaEnabled(true)
                 .build();
         AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
-                .mfaEnabled(true)
+                .isMfaEnabled(true)
                 .qrImageUri("uri")
                 .build();
 
@@ -75,7 +75,7 @@ public class AuthenticationControllerTests {
                 .email("test@test.com")
                 .password("Pass1!")
                 .homeCountry("UK")
-                .mfaEnabled(true)
+                .isMfaEnabled(true)
                 .build();
         Map<String, String> expectedErrors = new java.util.HashMap<>();
         expectedErrors.put("name", "Name must not be empty");
@@ -152,7 +152,7 @@ public class AuthenticationControllerTests {
                 .build();
         AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
                 .accessToken("accessToken")
-                .mfaEnabled(false)
+                .isMfaEnabled(false)
                 .build();
 
         when(authenticationService.verifyOtp(any(VerificationRequest.class))).thenReturn(authenticationResponse);

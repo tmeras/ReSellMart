@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -94,14 +93,14 @@ public class UserService {
 
         // If enabling MFA, generate QR image
         String qrImageUri = null;
-        if (!currentUser.isMfaEnabled() && userRequest.isMfaEnabled()) {
+        if (!currentUser.getIsMfaEnabled() && userRequest.isMfaEnabled()) {
             currentUser.setSecret(mfaService.generateSecret());
             qrImageUri = mfaService.generateQrCodeImageUri(currentUser.getSecret(), currentUser.getEmail());
         }
 
         currentUser.setName(userRequest.getName());
         currentUser.setHomeCountry(userRequest.getHomeCountry());
-        currentUser.setMfaEnabled(userRequest.isMfaEnabled());
+        currentUser.setIsMfaEnabled(userRequest.isMfaEnabled());
 
         User updatedUser = userRepository.save(currentUser);
         UserResponse userResponse = userMapper.toUserResponse(updatedUser);
@@ -279,12 +278,12 @@ public class UserService {
             throw new APIException("You cannot disable an admin user");
 
         // Disable user
-        existingUser.setEnabled(false);
+        existingUser.setIsEnabled(false);
         userRepository.save(existingUser);
 
         // Revoke all refresh tokens belonging to the user
         List<Token> refreshToken = tokenRepository.findAllValidRefreshTokensByUserEmail(existingUser.getEmail());
-        refreshToken.forEach(token -> token.setRevoked(true));
+        refreshToken.forEach(token -> token.setIsRevoked(true));
         tokenRepository.saveAll(refreshToken);
 
         // Mark all user products as unavailable
@@ -299,7 +298,7 @@ public class UserService {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("No user found with ID: " + userId));
 
-        existingUser.setEnabled(true);
+        existingUser.setIsEnabled(true);
         userRepository.save(existingUser);
     }
 }

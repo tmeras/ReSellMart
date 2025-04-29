@@ -40,7 +40,8 @@ public final class TestDataUtils {
                 .email("testA@test.com")
                 .homeCountry("UK")
                 .registeredAt(LocalDate.now())
-                .enabled(true)
+                .isEnabled(true)
+                .isMfaEnabled(false)
                 .roles(roles)
                 .build();
     }
@@ -49,7 +50,7 @@ public final class TestDataUtils {
         return UserRequest.builder()
                 .name("Test User A")
                 .homeCountry("UK")
-                .mfaEnabled(false)
+                .isMfaEnabled(false)
                 .build();
     }
 
@@ -60,7 +61,7 @@ public final class TestDataUtils {
                 .email("testA@test.com")
                 .homeCountry("UK")
                 .registeredAt(LocalDate.now())
-                .mfaEnabled(false)
+                .isMfaEnabled(false)
                 .roles(roles)
                 .build();
     }
@@ -73,7 +74,8 @@ public final class TestDataUtils {
                 .email("testB@test.com")
                 .homeCountry("Greece")
                 .registeredAt(LocalDate.now())
-                .enabled(true)
+                .isEnabled(true)
+                .isMfaEnabled(false)
                 .roles(roles)
                 .build();
     }
@@ -85,7 +87,7 @@ public final class TestDataUtils {
                 .email("testB@test.com")
                 .homeCountry("Greece")
                 .registeredAt(LocalDate.now())
-                .mfaEnabled(false)
+                .isMfaEnabled(false)
                 .roles(roles)
                 .build();
     }
@@ -171,7 +173,7 @@ public final class TestDataUtils {
                 .productCondition(ProductCondition.NEW)
                 .availableQuantity(2)
                 .listedAt(CURRENT_TIME)
-                .deleted(false)
+                .isDeleted(false)
                 .category(categoryResponse)
                 .seller(userResponse)
                 .images(new ArrayList<>())
@@ -205,7 +207,7 @@ public final class TestDataUtils {
                 .productCondition(ProductCondition.LIKE_NEW)
                 .availableQuantity(3)
                 .listedAt(CURRENT_TIME)
-                .deleted(false)
+                .isDeleted(false)
                 .category(categoryResponse)
                 .seller(userResponse)
                 .images(new ArrayList<>())
@@ -222,7 +224,7 @@ public final class TestDataUtils {
                 .city("Sheffield")
                 .postalCode("S1 4DT")
                 .phoneNumber("+441234567890")
-                .main(false)
+                .isMain(false)
                 .addressType(AddressType.HOME)
                 .user(user)
                 .build();
@@ -237,7 +239,7 @@ public final class TestDataUtils {
                 .city("Sheffield")
                 .postalCode("S1 4DT")
                 .phoneNumber("+441234567890")
-                .main(false)
+                .isMain(false)
                 .addressType("HOME")
                 .build();
     }
@@ -252,7 +254,7 @@ public final class TestDataUtils {
                 .city("Sheffield")
                 .postalCode("S1 4DT")
                 .phoneNumber("+441234567890")
-                .main(false)
+                .isMain(false)
                 .addressType(AddressType.HOME)
                 .userId(userId)
                 .build();
@@ -268,7 +270,7 @@ public final class TestDataUtils {
                 .city("Athens")
                 .postalCode("10563")
                 .phoneNumber("+302112345678")
-                .main(false)
+                .isMain(false)
                 .addressType(AddressType.WORK)
                 .user(user)
                 .build();
@@ -284,7 +286,7 @@ public final class TestDataUtils {
                 .city("Athens")
                 .postalCode("10563")
                 .phoneNumber("+302112345678")
-                .main(false)
+                .isMain(false)
                 .addressType(AddressType.HOME)
                 .userId(userId)
                 .build();

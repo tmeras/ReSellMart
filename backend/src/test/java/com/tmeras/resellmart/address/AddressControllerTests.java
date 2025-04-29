@@ -129,7 +129,7 @@ public class AddressControllerTests {
 
     @Test
     public void shouldMakeAddressMain() throws Exception {
-        addressResponseA.setMain(true);
+        addressResponseA.setIsMain(true);
 
         when(addressService.makeMain(eq(addressResponseA.getId()), any(Authentication.class)))
                 .thenReturn(addressResponseA);

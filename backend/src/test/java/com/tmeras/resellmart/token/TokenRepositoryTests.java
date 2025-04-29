@@ -87,6 +87,6 @@ public class TokenRepositoryTests {
         assertThat(tokens.size()).isEqualTo(1);
         assertThat(tokens.get(0).getTokenType()).isEqualTo(TokenType.BEARER);
         assertThat(tokens.get(0).getToken()).isEqualTo(validRefreshToken.getToken());
-        assertThat(tokens.get(0).isRevoked()).isFalse();
+        assertThat(tokens.get(0).getIsRevoked()).isFalse();
     }
 }

@@ -30,7 +30,7 @@ public class Address {
 
     private String phoneNumber;
 
-    private boolean main;
+    private Boolean isMain;
 
     @Enumerated(EnumType.STRING)
     private AddressType addressType;
