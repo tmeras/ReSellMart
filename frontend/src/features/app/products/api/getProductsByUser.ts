@@ -4,14 +4,15 @@ import { DEFAULT_PAGE_SIZE, SORT_DIR, SORT_PRODUCTS_BY } from "@/utils/constants
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 
+// @formatter:off
 export function getProductsByUser({
-                                      userId,
+    userId,
     page = 0,
     search = "",
     sortBy = SORT_PRODUCTS_BY,
     sortDirection = SORT_DIR
-                                  }
-                                  : {
+}
+: {
     userId: string,
     page?: number,
     search?: string

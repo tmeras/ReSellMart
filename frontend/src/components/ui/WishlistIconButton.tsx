@@ -19,15 +19,16 @@ export function WishlistIconButton(
     const { colorScheme } = useMantineColorScheme();
     const { user } = useAuth();
 
-    const createWishlistItemMutation = useCreateWishlistItem({ userId: user!.id });
-    const deleteWishlistItemMutation = useDeleteWishlistItem({ userId: user!.id });
+    const userId = user!.id.toString();
+    const createWishlistItemMutation = useCreateWishlistItem({ userId });
+    const deleteWishlistItemMutation = useDeleteWishlistItem({ userId });
 
     async function addToWishlist() {
         try {
             await createWishlistItemMutation.mutateAsync({
                 data: {
                     productId,
-                    userId: user!.id
+                    userId
                 }
             });
         } catch (error) {
@@ -43,7 +44,7 @@ export function WishlistIconButton(
         try {
             await deleteWishlistItemMutation.mutateAsync({
                 productId,
-                userId: user!.id
+                userId
             });
         } catch (error) {
             console.log("Error deleting wishlist item", error);

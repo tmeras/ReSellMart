@@ -17,9 +17,10 @@ export function ProductDetailsPage() {
 
     const { user } = useAuth();
 
+    const userId = user!.id.toString();
     const getProductQuery = useGetProduct({ productId });
-    const getWishlistQuery = useGetWishlist({ userId: user!.id });
-    const getCartQuery = useGetCart({ userId: user!.id });
+    const getWishlistQuery = useGetWishlist({ userId });
+    const getCartQuery = useGetCart({ userId });
 
     useEffect(() => {
         if (getWishlistQuery.isError) {

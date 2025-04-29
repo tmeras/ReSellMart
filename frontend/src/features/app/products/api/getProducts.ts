@@ -4,13 +4,14 @@ import { DEFAULT_PAGE_SIZE, SORT_DIR, SORT_PRODUCTS_BY } from "@/utils/constants
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 
+// @formatter:off
 export function getProducts({
     page = 0,
     search = "",
     sortBy = SORT_PRODUCTS_BY,
     sortDirection = SORT_DIR
-                            }
-                            : {
+}
+: {
     page?: number,
     search?: string
     sortBy?: string,
@@ -27,7 +28,6 @@ export function getProducts({
     return api.get(`/api/products/others?${ params.toString() }`);
 }
 
-// @formatter:off
 export function getProductsQueryOptions({
     page,
     search,

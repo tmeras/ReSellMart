@@ -43,7 +43,7 @@ export type Role = {
 }
 
 export type UserResponse = {
-    id: string;
+    id: number;
     name: string;
     email: string;
     homeCountry: string;
@@ -55,20 +55,20 @@ export type UserResponse = {
 }
 
 export type CategoryResponse = {
-    id: string;
+    id: number;
     name: string;
-    parentId?: string;
+    parentId?: number;
 }
 
 export type ProductImageResponse = {
-    id: string;
+    id: number;
     image: string; //base64 string
     name: string;
     type: string;
 }
 
 export type ProductResponse = {
-    id: string;
+    id: number;
     name: string;
     description: string;
     price: number;
@@ -83,20 +83,20 @@ export type ProductResponse = {
 }
 
 export type CartItemResponse = {
-    id: string;
+    id: number;
     product: ProductResponse;
     quantity: number;
     addedAt: string;
 }
 
 export type WishlistItemResponse = {
-    id: string;
+    id: number;
     product: ProductResponse;
     addedAt: string;
 }
 
 export type AddressResponse = {
-    id: string;
+    id: number;
     name: string;
     country: string;
     street: string;
@@ -106,5 +106,5 @@ export type AddressResponse = {
     phoneNumber: string;
     main: boolean;
     addressType: AddressTypeKeys;
-    userId: string;
+    userId: number;
 }

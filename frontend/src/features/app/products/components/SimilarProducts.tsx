@@ -18,7 +18,7 @@ export const SimilarProducts = memo(function SimilarProducts(
     { product, wishlistItems, cartItems, wishlistEnabled, cartEnabled }: SimilarProductsProps
 ) {
     const getProductsByCategoryQuery = useGetProductsByCategory({
-        categoryId: product.category.parentId ? product.category.parentId : product.category.id,
+        categoryId: product.category.parentId ? product.category.parentId.toString() : product.category.id.toString(),
         page: 0
     });
 

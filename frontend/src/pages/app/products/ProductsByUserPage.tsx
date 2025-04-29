@@ -32,7 +32,7 @@ export function ProductsByUserPage() {
     const getUserQuery = useGetUser({ userId });
 
     // Redirect to seller's product page if user is the logged-in user
-    if (authUser!.id === userId) return <Navigate to={ paths.app.sellerProducts.getHref() }/>;
+    if (authUser!.id.toString() === userId) return <Navigate to={ paths.app.sellerProducts.getHref() }/>;
 
     if (getProductsByUserQuery.isError) {
         console.log("Error fetching products by user", getProductsByUserQuery.error);

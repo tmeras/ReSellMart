@@ -61,7 +61,7 @@ export function ProductDetails(
                         { !isAuthUserProduct &&
                             <WishlistIconButton
                                 inWishlist={ !!wishlistItems?.find(wishlistItem => wishlistItem.product.id === product.id) }
-                                productId={ product.id } wishlistEnabled={ wishlistEnabled } size={ 25 }
+                                productId={ product.id.toString() } wishlistEnabled={ wishlistEnabled } size={ 25 }
                             />
                         }
                     </Flex>

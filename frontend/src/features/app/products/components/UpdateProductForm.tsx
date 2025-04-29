@@ -49,7 +49,7 @@ export function UpdateProductForm({ product }: UpdateProductFormProps) {
 
     const getCategoriesQuery = useGetCategories();
     const updateProductMutation = useUpdateProduct({
-        sellerId: user!.id,
+        sellerId: user!.id.toString(),
         productId: product.id.toString()
     });
     const uploadProductImagesMutation = useUploadProductImages();
@@ -91,15 +91,13 @@ export function UpdateProductForm({ product }: UpdateProductFormProps) {
     // Initialise form using product data received from API
     useEffect(() => {
         if (!form.initialized) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { id, seller, deleted, images: imageResponses, category, ...rest } = product;
-            const images = imageResponses.map((imageResponse) => {
+            const images = product.images.map((imageResponse) => {
                 return base64ToFile(imageResponse.image, imageResponse.name, imageResponse.type);
             });
 
             form.initialize({
-                ...rest,
-                categoryId: category.id.toString(),
+                ...product,
+                categoryId: product.category.id.toString(),
                 images
             });
         }

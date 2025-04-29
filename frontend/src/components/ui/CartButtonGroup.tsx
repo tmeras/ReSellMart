@@ -18,17 +18,18 @@ export function CartButtonGroup({ cartItem, product, cartEnabled }: CartButtonGr
     const { colorScheme } = useMantineColorScheme();
     const { user } = useAuth();
 
-    const createCartItemMutation = useCreateCartItem({ userId: user!.id });
-    const updateCartItemMutation = useUpdateCartItem({ userId: user!.id });
-    const deleteCartItemMutation = useDeleteCartItem({ userId: user!.id });
+    const userId = user!.id.toString();
+    const createCartItemMutation = useCreateCartItem({ userId });
+    const updateCartItemMutation = useUpdateCartItem({ userId });
+    const deleteCartItemMutation = useDeleteCartItem({ userId });
 
     async function addToCart() {
         try {
             await createCartItemMutation.mutateAsync({
                 data: {
-                    productId: product.id,
+                    productId: product.id.toString(),
                     quantity: 1,
-                    userId: user!.id
+                    userId
                 }
             });
         } catch (error) {
@@ -45,15 +46,15 @@ export function CartButtonGroup({ cartItem, product, cartEnabled }: CartButtonGr
             if (quantity > 0) {
                 await updateCartItemMutation.mutateAsync({
                     data: {
-                        productId: product.id,
+                        productId: product.id.toString(),
                         quantity,
-                        userId: user!.id
+                        userId
                     }
                 });
             } else {
                 await deleteCartItemMutation.mutateAsync({
-                    productId: product.id,
-                    userId: user!.id
+                    productId: product.id.toString(),
+                    userId
                 });
             }
         } catch (error) {

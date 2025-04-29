@@ -92,7 +92,8 @@ export function ProductCard(
                     </div>
 
                     <WishlistIconButton
-                        inWishlist={ inWishlist } productId={ product.id } wishlistEnabled={ wishlistEnabled }
+                        inWishlist={ inWishlist } productId={ product.id.toString() }
+                        wishlistEnabled={ wishlistEnabled }
                         size={ 20 }
                     />
                 </Flex>

@@ -15,8 +15,9 @@ type ProductsListProps = {
 export function ProductsList({ products }: ProductsListProps) {
     const { user } = useAuth();
 
-    const getCartQuery = useGetCart({ userId: user!.id });
-    const getWishlistQuery = useGetWishlist({ userId: user!.id });
+    const userId = user!.id.toString();
+    const getCartQuery = useGetCart({ userId });
+    const getWishlistQuery = useGetWishlist({ userId });
 
     useEffect(() => {
         if (getWishlistQuery.isError) {
