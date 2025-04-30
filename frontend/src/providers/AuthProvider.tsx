@@ -72,7 +72,7 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
                     : config.headers.Authorization;
 
             return config;
-        })
+        });
 
         if (accessToken) {
             setIsLoadingUser(true);
@@ -91,8 +91,7 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
 
     const fetchMe = async () => {
         try {
-            const response = await api.get("api/users/me");
-            //console.log("Got user", response.data)
+            const response = await api.get<UserResponse>("api/users/me");
             setUser(response.data);
         } catch (error) {
             console.log("Error fetching user", error);

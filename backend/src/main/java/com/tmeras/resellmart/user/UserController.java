@@ -60,7 +60,7 @@ public class UserController {
     @PutMapping("/{user-id}/image")
     public ResponseEntity<UserResponse> uploadUserImage(
             @PathVariable(name = "user-id") Integer userId,
-            @RequestPart("image") MultipartFile image,
+            @RequestPart(value = "image", required = false) MultipartFile image,
             Authentication authentication
     ) throws IOException {
         UserResponse updatedUser = userService.uploadUserImage(image, userId, authentication);

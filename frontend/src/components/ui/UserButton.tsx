@@ -1,4 +1,3 @@
-import imgUrl from "@/assets/user.png";
 import { Avatar, Flex, Text, UnstyledButton } from "@mantine/core";
 import { IconChevronRight } from "@tabler/icons-react";
 import { ComponentPropsWithoutRef, forwardRef } from "react";
@@ -13,7 +12,11 @@ export const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
     ({ name, email, image, ...others }: UserButtonProps, ref) => (
         <UnstyledButton ref={ ref } w="100%" { ...others }>
             <Flex gap="xs" align="center">
-                <Avatar src={ image ? image : imgUrl } radius="xl" size={ 36 }/>
+                <Avatar
+                    src={ image ? image : null }
+                    radius="xl" size={ 36 }
+                    name={ name } color="initials"
+                />
 
                 <Flex direction="column">
                     <Text size="sm" fw={ 500 }>

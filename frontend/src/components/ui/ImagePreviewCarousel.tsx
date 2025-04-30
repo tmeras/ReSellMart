@@ -16,7 +16,7 @@ export function ImagePreviewCarousel({ images }: ImagePreviewCarouselProps) {
         setImagePreviewUrls(newUrls);
     }, [images]);
 
-    // Cleanup previous URLs
+    // Cleanup previous URL objects
     useEffect(() => {
         return () => {
             imagePreviewUrls.forEach((url) => URL.revokeObjectURL(url));

@@ -24,10 +24,11 @@ import { Link, useNavigate, useSearchParams } from "react-router";
 import { z } from "zod";
 
 export function LoginForm() {
-    const { setAccessToken, setIsLoadingUser } = useAuth();
-    const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const redirectTo = searchParams.get("redirectTo");
+
+    const { setAccessToken, setIsLoadingUser } = useAuth();
+    const navigate = useNavigate();
 
     const [otp, setOtp] = useState({
         value: "",
@@ -54,7 +55,7 @@ export function LoginForm() {
             const response =
                 await api.post<AuthenticationResponse>("api/auth/login", values);
 
-            if (response.data.mfaEnabled) {
+            if (response.data.isMfaEnabled) {
                 setOtp({
                     value: "",
                     showModal: true,
@@ -138,13 +139,15 @@ export function LoginForm() {
 
     if (otp.showModal)
         return (
-            <Modal opened={ otp.showModal } onClose={ () => setOtp({ ...otp, showModal: false }) }
-                   size="auto" title="Enter OTP" centered
+            <Modal
+                opened={ otp.showModal } onClose={ () => setOtp({ ...otp, showModal: false }) }
+                size="auto" title="Enter OTP" centered
             >
                 <form onSubmit={ handleOtpSubmit }>
-                    <PinInput size="md" type="number" length={ 6 }
-                              error={ otp.error } value={ otp.value }
-                              onChange={ (value) => setOtp({ ...otp, value: value }) }
+                    <PinInput
+                        size="md" type="number" length={ 6 } data-autofocus
+                        error={ otp.error } value={ otp.value }
+                        onChange={ (value) => setOtp({ ...otp, value: value }) }
                     />
 
                     <Button fullWidth mt="xl" type="submit">

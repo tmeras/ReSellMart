@@ -66,7 +66,10 @@ export function UserMenu({ closeNavBar }: UserMenuProps) {
 
                 <Menu.Item
                     leftSection={ <IconSettings size={ 16 }/> }
-                    onClick={ closeNavBar }
+                    onClick={ () => {
+                        closeNavBar();
+                        navigate(paths.app.updateUser.getHref());
+                    } }
                 >
                     Account Settings
                 </Menu.Item>

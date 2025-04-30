@@ -19,5 +19,5 @@ public class UserRequest {
     private String homeCountry;
 
     @NotNull(message = "MFA preference must be specified")
-    private boolean isMfaEnabled;
+    private Boolean isMfaEnabled;
 }

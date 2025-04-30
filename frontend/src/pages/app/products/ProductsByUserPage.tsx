@@ -1,5 +1,4 @@
 import { useGetUser } from "@/api/users/getUser.ts";
-import imgUrl from "@/assets/user.png";
 import { paths } from "@/config/paths.ts";
 import { useGetProductsByUser } from "@/features/app/products/api/getProductsByUser.ts";
 import { ProductsList } from "@/features/app/products/components/ProductsList.tsx";
@@ -56,8 +55,8 @@ export function ProductsByUserPage() {
                         Products by { user.name }
                     </Title>
                     <Avatar
-                        size={ 45 }
-                        src={ user.profileImage ? base64ToDataUri(user.profileImage) : imgUrl }
+                        size={ 45 } src={ user.profileImage ? base64ToDataUri(user.profileImage) : null }
+                        name={ user.name } color="initials"
                     />
                 </Flex>
             }

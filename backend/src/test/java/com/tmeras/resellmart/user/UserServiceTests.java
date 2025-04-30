@@ -173,7 +173,7 @@ public class UserServiceTests {
         userRequestA.setMfaEnabled(true);
         userResponseA.setName("Updated user name");
         userResponseA.setHomeCountry("Updated home country");
-        userResponseA.setMfaEnabled(true);
+        userResponseA.setIsMfaEnabled(true);
         userResponseA.setQrImageUri("uri");
 
         when(userRepository.findWithAssociationsById(userA.getId())).thenReturn(Optional.of(userA));

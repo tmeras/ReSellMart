@@ -46,6 +46,10 @@ export const paths = {
         addresses: {
             path: "/app/my-addresses",
             getHref: () => "/app/my-addresses"
+        },
+        updateUser: {
+            path: "/app/account-settings",
+            getHref: () => "/app/account-settings"
         }
     },
 } as const

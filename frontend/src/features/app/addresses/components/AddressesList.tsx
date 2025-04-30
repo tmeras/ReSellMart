@@ -27,6 +27,12 @@ export type AddressesListProps = {
 
 export function AddressesList({ addresses }: AddressesListProps) {
 
+    if (addresses.length === 0) {
+        return <Flex mt="lg">
+            No addresses to display. Please add one using the button above
+        </Flex>;
+    }
+
     const addressCards = addresses.map((address) =>
         <Grid.Col span={ { base: 12, sm: 6, md: 4 } } key={ address.id }>
             <Flex justify="center">

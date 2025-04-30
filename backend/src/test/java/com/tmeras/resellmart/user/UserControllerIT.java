@@ -229,7 +229,7 @@ public class UserControllerIT {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getName()).isEqualTo(userRequestA.getName());
         assertThat(response.getBody().getHomeCountry()).isEqualTo(userRequestA.getHomeCountry());
-        assertThat(response.getBody().isMfaEnabled()).isEqualTo(userRequestA.isMfaEnabled());
+        assertThat(response.getBody().getIsMfaEnabled()).isEqualTo(userRequestA.isMfaEnabled());
         assertThat(response.getBody().getQrImageUri()).isNotNull();
     }
 

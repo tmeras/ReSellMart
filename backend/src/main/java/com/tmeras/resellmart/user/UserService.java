@@ -93,14 +93,14 @@ public class UserService {
 
         // If enabling MFA, generate QR image
         String qrImageUri = null;
-        if (!currentUser.getIsMfaEnabled() && userRequest.isMfaEnabled()) {
+        if (!currentUser.getIsMfaEnabled() && userRequest.getIsMfaEnabled()) {
             currentUser.setSecret(mfaService.generateSecret());
             qrImageUri = mfaService.generateQrCodeImageUri(currentUser.getSecret(), currentUser.getEmail());
         }
 
         currentUser.setName(userRequest.getName());
         currentUser.setHomeCountry(userRequest.getHomeCountry());
-        currentUser.setIsMfaEnabled(userRequest.isMfaEnabled());
+        currentUser.setIsMfaEnabled(userRequest.getIsMfaEnabled());
 
         User updatedUser = userRepository.save(currentUser);
         UserResponse userResponse = userMapper.toUserResponse(updatedUser);
@@ -121,14 +121,18 @@ public class UserService {
         if (currentUser.getImagePath() != null)
             fileService.deleteFile(currentUser.getImagePath());
 
-        String fileName = image.getOriginalFilename();
-        String fileExtension = fileService.getFileExtension(fileName);
-        Set<String> validImageExtensions = Set.of("jpg", "jpeg", "png", "gif", "bmp", "tiff");
-        if (!validImageExtensions.contains(fileExtension))
-            throw new APIException("Only images can be uploaded");
+        if (image == null) {
+            currentUser.setImagePath(null);
+        } else {
+            String fileName = image.getOriginalFilename();
+            String fileExtension = fileService.getFileExtension(fileName);
+            Set<String> validImageExtensions = Set.of("jpg", "jpeg", "png", "gif", "bmp", "tiff");
+            if (!validImageExtensions.contains(fileExtension))
+                throw new APIException("Only images can be uploaded");
 
-        String filePath = fileService.saveUserImage(image, userId);
-        currentUser.setImagePath(filePath);
+            String filePath = fileService.saveUserImage(image, userId);
+            currentUser.setImagePath(filePath);
+        }
 
         currentUser = userRepository.save(currentUser);
         return userMapper.toUserResponse(currentUser);

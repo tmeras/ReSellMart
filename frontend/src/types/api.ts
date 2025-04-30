@@ -15,8 +15,6 @@ export const uploadImageInputSchema = z.instanceof(File)
         message: `File type must be one of ${ ACCEPTED_IMAGE_EXTENSIONS.join(", ") }`
     });
 
-export type UploadImageInput = z.infer<typeof uploadImageInputSchema>;
-
 export type PageResponse<T> = {
     content: T[];
     pageNumber: number;

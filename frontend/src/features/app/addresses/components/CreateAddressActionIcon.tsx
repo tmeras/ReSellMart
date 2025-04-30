@@ -33,7 +33,7 @@ export function CreateAddressActionIcon() {
             city: "",
             postalCode: "",
             phoneNumber: "",
-            main: false,
+            isMain: false,
             addressType: "HOME"
         },
         validate: zodResolver(createAddressInputSchema)
@@ -143,8 +143,8 @@ export function CreateAddressActionIcon() {
                     <Checkbox
                         mt="lg"
                         label="Primary address"
-                        key={ form.key("main") }
-                        { ...form.getInputProps("main") }
+                        key={ form.key("isMain") }
+                        { ...form.getInputProps("isMain", { type: 'checkbox' }) }
                     />
 
                     <Button type="submit" mt="xl" fullWidth loading={ form.submitting }>
