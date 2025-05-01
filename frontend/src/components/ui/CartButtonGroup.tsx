@@ -10,10 +10,11 @@ import { IconMinus, IconPlus, IconX } from "@tabler/icons-react";
 type CartButtonGroupProps = {
     cartItem: CartItemResponse | undefined; // Used to determine if product is already in cart
     product: ProductResponse;
-    cartEnabled: boolean
+    cartEnabled: boolean;
+    size?: "sm" | "md" | "lg";
 }
 
-export function CartButtonGroup({ cartItem, product, cartEnabled }: CartButtonGroupProps) {
+export function CartButtonGroup({ cartItem, product, cartEnabled, size = "md" }: CartButtonGroupProps) {
     const theme = useMantineTheme();
     const { colorScheme } = useMantineColorScheme();
     const { user } = useAuth();
@@ -71,17 +72,19 @@ export function CartButtonGroup({ cartItem, product, cartEnabled }: CartButtonGr
             { cartEnabled ? (
                 cartItem ? (
                     <Button.Group>
-                        <Button variant="default" radius="md" size="compact-md"
-                                onClick={ () => updateQuantityInCart(cartItem.quantity - 1) }
-                                loading={ updateCartItemMutation.isPending || deleteCartItemMutation.isPending }
+                        <Button
+                            variant="default" radius="md" size={ `compact-${ size }` }
+                            onClick={ () => updateQuantityInCart(cartItem.quantity - 1) }
+                            loading={ updateCartItemMutation.isPending || deleteCartItemMutation.isPending }
                         >
                             <IconMinus color={ theme.colors.red[6] } size={ 18 }/>
                         </Button>
-                        <Button.GroupSection variant="default" size="compact-md" bg="var(--mantine-color-body)">
+                        <Button.GroupSection variant="default" size={ `compact-${ size }` }
+                                             bg="var(--mantine-color-body)">
                             { cartItem.quantity }
                         </Button.GroupSection>
                         <Button
-                            variant="default" radius="md" size="compact-md"
+                            variant="default" radius="md" size={ `compact-${ size }` }
                             onClick={ () => updateQuantityInCart(cartItem.quantity + 1) }
                             loading={ updateCartItemMutation.isPending }
                             disabled={ cartItem.quantity == product.availableQuantity }

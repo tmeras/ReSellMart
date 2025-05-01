@@ -50,6 +50,10 @@ export const paths = {
         updateUser: {
             path: "/app/account-settings",
             getHref: () => "/app/account-settings"
+        },
+        wishlist: {
+            path: "/app/wishlist",
+            getHref: () => "/app/wishlist"
         }
     },
 } as const

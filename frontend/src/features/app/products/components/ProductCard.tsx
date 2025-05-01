@@ -1,6 +1,6 @@
 import { CartButtonGroup } from "@/components/ui/CartButtonGroup.tsx";
 import { CustomLink } from "@/components/ui/link/CustomLink.tsx";
-import { WishlistIconButton } from "@/components/ui/WishlistIconButton.tsx";
+import { WishlistActionIcon } from "@/components/ui/WishlistActionIcon.tsx";
 import { paths } from "@/config/paths.ts";
 import { CartItemResponse, ProductResponse } from "@/types/api.ts";
 import { PRODUCT_CONDITION } from "@/utils/constants.ts";
@@ -91,7 +91,7 @@ export function ProductCard(
                         }
                     </div>
 
-                    <WishlistIconButton
+                    <WishlistActionIcon
                         inWishlist={ inWishlist } productId={ product.id.toString() }
                         wishlistEnabled={ wishlistEnabled }
                         size={ 20 }

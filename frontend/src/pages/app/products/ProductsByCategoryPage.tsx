@@ -75,8 +75,26 @@ export function ProductsByCategoryPage() {
 
             { products && getProductsByCategoryQuery.isSuccess &&
                 <>
-                    <Flex justify={ { base: "center", sm: "flex-end" } } mb="sm">
+                    <Flex
+                        mb="sm"
+                        justify={ { base: "", sm: "space-between" } }
+                        align={ { base: "center", sm: "" } }
+                        direction={ { base: "column", sm: "row" } }
+                    >
+                        <Flex align="center">
+                            <Text size="lg" mb="xs" fw={ 600 }>
+                                { search &&
+                                    <>Results for "{ search }" | </>
+                                }
+                            </Text>
+
+                            <Text size="md" c="dimmed" ms="xs" mb="xs">
+                                { getProductsByCategoryQuery.data?.data.totalElements } items
+                            </Text>
+                        </Flex>
+
                         <NativeSelect
+                            w="fit-content"
                             data={ PRODUCT_SORT_OPTIONS }
                             value={ sort }
                             onChange={ (e) => {

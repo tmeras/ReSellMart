@@ -12,7 +12,7 @@ type WishlistIconButtonProps = {
     size: number;
 }
 
-export function WishlistIconButton(
+export function WishlistActionIcon(
     { inWishlist, productId, wishlistEnabled, size }: WishlistIconButtonProps
 ) {
     const theme = useMantineTheme();

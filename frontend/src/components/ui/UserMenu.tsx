@@ -49,7 +49,10 @@ export function UserMenu({ closeNavBar }: UserMenuProps) {
             <Menu.Dropdown>
                 <Menu.Item
                     leftSection={ <IconHeart size={ 16 } color={ theme.colors.red[4] }/> }
-                    onClick={ closeNavBar }
+                    onClick={ () => {
+                        closeNavBar();
+                        navigate(paths.app.wishlist.getHref());
+                    } }
                 >
                     Wishlist
                 </Menu.Item>
