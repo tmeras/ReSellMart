@@ -28,10 +28,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -188,7 +188,7 @@ public class UserControllerTests {
     @Test
     public void shouldSaveCartItemWhenValidRequest() throws Exception {
         CartItemRequest cartItemRequest = new CartItemRequest(productResponseA.getId(), 1, userA.getId());
-        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseA, 1, ZonedDateTime.now());
+        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseA, 1, productResponseA.getPrice(), ZonedDateTime.now());
 
         when(userService.saveCartItem(any(CartItemRequest.class), eq(userA.getId()), any(Authentication.class)))
                 .thenReturn(cartItemResponse);
@@ -220,7 +220,7 @@ public class UserControllerTests {
     @Test
     public void shouldFindALLCartItemsByUserId() throws Exception {
         List<CartItemResponse> cartItemResponses = List.of(
-                new CartItemResponse(1, productResponseA, 1, ZonedDateTime.now())
+                new CartItemResponse(1, productResponseA, 1, productResponseA.getPrice(), ZonedDateTime.now())
         );
 
         when(userService.findAllCartItemsByUserId(eq(userA.getId()), any(Authentication.class)))
@@ -235,9 +235,25 @@ public class UserControllerTests {
     }
 
     @Test
+    public void shouldCalculateCartTotal() throws Exception {
+        when(userService.calculateCartTotal(eq(userA.getId()), any(Authentication.class)))
+                .thenReturn(BigDecimal.ONE);
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/users/" + userA.getId() + "/cart/total"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(BigDecimal.ONE));
+    }
+
+    @Test
     public void shouldUpdateCartItemQuantityWhenValidRequest() throws  Exception {
         CartItemRequest cartItemRequest = new CartItemRequest(productResponseA.getId(), 5, userA.getId());
-        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseA, 5, ZonedDateTime.now());
+        CartItemResponse cartItemResponse =
+                new CartItemResponse(1, productResponseA, 5,
+                        productResponseA.getPrice().multiply(new BigDecimal(5)), ZonedDateTime.now()
+                );
 
         when(userService.updateCartItemQuantity(
                 any(CartItemRequest.class), eq(userA.getId()), eq(productResponseA.getId()), any(Authentication.class))

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -84,6 +85,15 @@ public class UserController {
     ) {
         List<CartItemResponse> foundCartItems = userService.findAllCartItemsByUserId(userId, authentication);
         return new ResponseEntity<>(foundCartItems, HttpStatus.OK);
+    }
+
+    @GetMapping("/{user-id}/cart/total")
+    public ResponseEntity<BigDecimal> calculateCartTotal(
+            @PathVariable(name = "user-id") Integer userId,
+            Authentication authentication
+    ) {
+        BigDecimal cartTotal = userService.calculateCartTotal(userId, authentication);
+        return new ResponseEntity<>(cartTotal, HttpStatus.OK);
     }
 
     @PatchMapping("/{user-id}/cart/products/{product-id}")

@@ -21,6 +21,7 @@ public class CartItemMapper {
                 .id(cartItem.getId())
                 .product(productMapper.toProductResponse(cartItem.getProduct()))
                 .quantity(cartItem.getQuantity())
+                .price(cartItem.getPrice())
                 .addedAt(cartItem.getAddedAt())
                 .build();
     }

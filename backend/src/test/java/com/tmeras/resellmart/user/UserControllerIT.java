@@ -41,6 +41,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -219,7 +220,7 @@ public class UserControllerIT {
     public void shouldUpdateUserWhenValidRequest() {
         userRequestA.setName("Updated user A");
         userRequestA.setHomeCountry("Updated home country");
-        userRequestA.setMfaEnabled(true);
+        userRequestA.setIsMfaEnabled(true);
 
         ResponseEntity<UserResponse> response =
                 restTemplate.exchange("/api/users/" + userA.getId(), HttpMethod.PUT,
@@ -229,7 +230,7 @@ public class UserControllerIT {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getName()).isEqualTo(userRequestA.getName());
         assertThat(response.getBody().getHomeCountry()).isEqualTo(userRequestA.getHomeCountry());
-        assertThat(response.getBody().getIsMfaEnabled()).isEqualTo(userRequestA.isMfaEnabled());
+        assertThat(response.getBody().getIsMfaEnabled()).isEqualTo(userRequestA.getIsMfaEnabled());
         assertThat(response.getBody().getQrImageUri()).isNotNull();
     }
 
@@ -318,6 +319,9 @@ public class UserControllerIT {
         assertThat(response.getBody().getId()).isNotNull();
         assertThat(response.getBody().getProduct().getId()).isEqualTo(productB.getId());
         assertThat(response.getBody().getQuantity()).isEqualTo(cartItemRequest.getQuantity());
+        assertThat(response.getBody().getPrice().compareTo(
+                productB.getPrice().multiply(BigDecimal.valueOf(cartItemRequest.getQuantity()))
+        )).isEqualTo(0);
         assertThat(response.getBody().getAddedAt()).isNotNull();
     }
 
@@ -446,6 +450,20 @@ public class UserControllerIT {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage())
                 .isEqualTo("You do not have permission to view this user's cart");
+    }
+
+    @Test
+    public void shouldCalculateCartTotal() {
+        cartItemRepository.save(new CartItem(null, productB, 2, userA, ZonedDateTime.now()));
+
+        ResponseEntity<BigDecimal> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/cart/total", HttpMethod.GET,
+                        new HttpEntity<>(headers), BigDecimal.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().compareTo(productB.getPrice().multiply(BigDecimal.valueOf(2))))
+                .isEqualTo(0);
     }
 
     @Test

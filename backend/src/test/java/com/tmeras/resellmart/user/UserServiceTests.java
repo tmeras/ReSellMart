@@ -32,6 +32,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -170,7 +171,7 @@ public class UserServiceTests {
     public void shouldUpdateUserWhenValidRequest() {
         userRequestA.setName("Updated user name");
         userRequestA.setHomeCountry("Updated home country");
-        userRequestA.setMfaEnabled(true);
+        userRequestA.setIsMfaEnabled(true);
         userResponseA.setName("Updated user name");
         userResponseA.setHomeCountry("Updated home country");
         userResponseA.setIsMfaEnabled(true);
@@ -187,7 +188,7 @@ public class UserServiceTests {
         assertThat(userResponse).isEqualTo(userResponseA);
         assertThat(userA.getRealName()).isEqualTo(userRequestA.getName());
         assertThat(userA.getHomeCountry()).isEqualTo(userRequestA.getHomeCountry());
-        assertThat(userA.getIsMfaEnabled()).isEqualTo(userRequestA.isMfaEnabled());
+        assertThat(userA.getIsMfaEnabled()).isEqualTo(userRequestA.getIsMfaEnabled());
         assertThat(userA.getSecret()).isEqualTo("secret");
     }
 
@@ -249,7 +250,7 @@ public class UserServiceTests {
     public void shouldSaveCartItemWhenValidRequest() {
         CartItem cartItem = new CartItem(1, productB, 1, userA, ZonedDateTime.now());
         CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 1, userA.getId());
-        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseB, 1, ZonedDateTime.now());
+        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseB, 1, cartItem.getPrice(), ZonedDateTime.now());
 
         when(cartItemRepository.existsByUserIdAndProductId(userA.getId(), productB.getId())).thenReturn(false);
         when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
@@ -337,7 +338,7 @@ public class UserServiceTests {
     @Test
     public void shouldFindAllCartItemsByUserIdWhenValidRequest() {
         CartItem cartItem = new CartItem(1, productB, 1, userA, ZonedDateTime.now());
-        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseB, 1, ZonedDateTime.now());
+        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseB, 1, cartItem.getPrice(), ZonedDateTime.now());
 
         when(cartItemRepository.findAllWithProductDetailsByUserId(userA.getId()))
                 .thenReturn(List.of(cartItem));
@@ -357,10 +358,23 @@ public class UserServiceTests {
     }
 
     @Test
+    public void shouldCalculateCartTotal() {
+        CartItem cartItem = new CartItem(1, productB, 2, userA, ZonedDateTime.now());
+
+        when(cartItemRepository.findAllWithProductDetailsByUserId(userA.getId()))
+                .thenReturn(List.of(cartItem));
+
+        BigDecimal result = userService.calculateCartTotal(userA.getId(), authentication);
+
+        assertThat(result.compareTo(productB.getPrice().multiply(BigDecimal.valueOf(2))))
+                .isEqualTo(0);
+    }
+
+    @Test
     public void shouldUpdateCartItemQuantityWhenValidRequest() {
         CartItem cartItem = new CartItem(1, productB, 1, userA, ZonedDateTime.now());
         CartItemRequest cartItemRequest = new CartItemRequest(productB.getId(), 2, userA.getId());
-        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseB, 2, ZonedDateTime.now());
+        CartItemResponse cartItemResponse = new CartItemResponse(1, productResponseB, 2, cartItem.getPrice(), ZonedDateTime.now());
 
         when(cartItemRepository.findWithProductDetailsByUserIdAndProductId(userA.getId(), productB.getId()))
                 .thenReturn(Optional.of(cartItem));

@@ -25,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -181,6 +183,20 @@ public class UserService {
         return cartItems.stream()
                 .map(cartItemMapper::toCartItemResponse)
                 .toList();
+    }
+
+    public BigDecimal calculateCartTotal(Integer userId, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+
+        if (!Objects.equals(currentUser.getId(), userId))
+            throw new OperationNotPermittedException("You do not have permission to view this user's cart total");
+
+        List<CartItem> cartItems = cartItemRepository.findAllWithProductDetailsByUserId(userId);
+
+        return cartItems.stream()
+                .map(CartItem::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
     public CartItemResponse updateCartItemQuantity(
