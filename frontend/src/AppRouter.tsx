@@ -7,6 +7,7 @@ import { ProductsPage } from "@/pages/app/products/ProductsPage.tsx";
 import { SellerProductsPage } from "@/pages/app/products/SellerProductsPage.tsx";
 import { UpdateProductPage } from "@/pages/app/products/UpdateProductPage.tsx";
 import { AddressesPage } from "@/pages/app/user/AddressesPage.tsx";
+import { CartPage } from "@/pages/app/user/CartPage.tsx";
 import { UpdateUserPage } from "@/pages/app/user/UpdateUserPage.tsx";
 import { WishlistPage } from "@/pages/app/user/WishlistPage.tsx";
 import { useMemo } from "react";
@@ -96,6 +97,10 @@ const createAppRouter = () =>
                 {
                     path: paths.app.wishlist.path,
                     element: <WishlistPage/>
+                },
+                {
+                    path: paths.app.cart.path,
+                    element: <CartPage/>
                 }
             ]
         },

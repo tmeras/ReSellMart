@@ -6,7 +6,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { z } from "zod";
 
-// TODO: Update when API booleans are renamed
 export const createAddressInputSchema = z.object({
     name: z.string().min(1, "Name is required"),
     country: z.string().min(1, "Country is required"),

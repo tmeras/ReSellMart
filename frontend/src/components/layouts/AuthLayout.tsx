@@ -1,7 +1,7 @@
 import { DarkModeButton } from "@/components/ui/DarkModeButton.tsx";
 import { paths } from "@/config/paths.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
-import { AppShell, Button, Flex, Image, Text } from "@mantine/core";
+import { AppShell, Button, Flex, Image, Loader, Text } from "@mantine/core";
 import { useEffect } from "react";
 import { Link, Outlet, useNavigate, useSearchParams } from "react-router";
 import imgUrl from "../../assets/logo.png";
@@ -10,15 +10,16 @@ export function AuthLayout() {
     const [searchParams] = useSearchParams();
     const redirectTo = searchParams.get('redirectTo');
 
-    const { user } = useAuth();
+    const { user, isLoadingUser } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (user)
+        if (user) {
             if (redirectTo)
                 navigate(redirectTo, { replace: true });
             else
                 navigate(paths.app.products.path, { replace: true });
+        }
     }, [user, navigate, redirectTo]);
 
     return (
@@ -29,7 +30,7 @@ export function AuthLayout() {
             <AppShell.Header p="md">
                 <Flex align="center" justify="space-between">
                     <Flex>
-                        <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
+                        <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me={ 5 }/>
                         <Text
                             size="lg" variant="gradient" fw={ 700 }
                             gradient={ { from: "paleIndigo.8", to: "paleIndigo.4", deg: 150 } }
@@ -49,13 +50,19 @@ export function AuthLayout() {
             </AppShell.Header>
 
             <AppShell.Main>
-                <Outlet/>
+                { isLoadingUser || user ? (
+                    <Flex align="center" justify="center" h="100vh" w="100%">
+                        <Loader type="bars" size="md"/>
+                    </Flex>
+                ) : (
+                    <Outlet/>
+                ) }
             </AppShell.Main>
 
             <AppShell.Footer p="md" style={ { position: "relative" } }>
                 <Flex direction="column" justify="center" align="center">
                     <Flex justify="center" align="center" mb="sm">
-                        <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
+                        <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me={ 5 }/>
                         <Text
                             size="lg" variant="gradient" fw={ 700 }
                             gradient={ { from: "paleIndigo.8", to: "paleIndigo.4", deg: 150 } }

@@ -1,7 +1,7 @@
 import { CustomLink } from "@/components/ui/link/CustomLink.tsx";
 import { WishlistActionIcon } from "@/components/ui/WishlistActionIcon.tsx";
 import { paths } from "@/config/paths.ts";
-import { ProductQuantitySelect } from "@/features/app/products/components/ProductQuantitySelect.tsx";
+import { ProductQuantityInput } from "@/features/app/products/components/ProductQuantityInput.tsx";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { CartItemResponse, ProductResponse, WishlistItemResponse } from "@/types/api.ts";
 import { PRODUCT_CONDITION } from "@/utils/constants.ts";
@@ -145,7 +145,7 @@ export function ProductDetails(
                                 ) }
 
                                 { isProductAvailable && !isAuthUserProduct &&
-                                    <ProductQuantitySelect
+                                    <ProductQuantityInput
                                         product={ product }
                                         cartItem={ cartItems?.find(cartItem => cartItem.product.id === product.id) }
                                         cartEnabled={ cartEnabled }

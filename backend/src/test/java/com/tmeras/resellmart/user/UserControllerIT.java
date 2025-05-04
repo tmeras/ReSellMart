@@ -634,22 +634,6 @@ public class UserControllerIT {
     }
 
     @Test
-    public void shouldNotSaveWishListItemWhenProductIsUnavailable() {
-        productB.setIsDeleted(true);
-        productRepository.save(productB);
-        WishListItemRequest wishListItemRequest = new WishListItemRequest(productB.getId(), userA.getId());
-
-        ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/users/" + userA.getId() + "/wishlist/products", HttpMethod.POST,
-                        new HttpEntity<>(wishListItemRequest, headers), ExceptionResponse.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getMessage())
-                .isEqualTo("Deleted products cannot be added to the wishlist");
-    }
-
-    @Test
     public void shouldFindAllWishlistItemsByUserIdWhenValidUserId() {
         wishListItemRepository.save(new WishListItem(null, ZonedDateTime.now(), productB, userA));
 

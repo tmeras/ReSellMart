@@ -161,9 +161,12 @@ export function LoginForm() {
         <Flex justify="center" align="center" h="80vh">
             <Container size={ 420 }>
                 <Paper withBorder shadow="lg" p={ 30 } radius="md">
-                    <Title ta="center">
+                    <Text
+                        ta="center" variant="gradient" fw={ 700 } component={ Title }
+                        gradient={ { from: "paleIndigo.8", to: "paleIndigo.4", deg: 150 } }
+                    >
                         ReSellMart
-                    </Title>
+                    </Text>
 
                     <form onSubmit={ form.onSubmit(handleFormSubmit) }>
                         <TextInput

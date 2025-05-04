@@ -1,6 +1,8 @@
 import { getCartQueryOptions } from "@/api/cart/getCart.ts";
 import { api } from "@/lib/apiClient.ts";
+import { CartItemResponse } from "@/types/api.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosResponse } from "axios";
 import { z } from "zod";
 
 export const UpdateCartItemInputSchema = z.object({
@@ -13,7 +15,7 @@ export type UpdateCartItemInput = z.infer<typeof UpdateCartItemInputSchema>;
 
 export function updateCartItem(
     { data }: { data: UpdateCartItemInput }
-) {
+): Promise<AxiosResponse<CartItemResponse>> {
     return api.patch(`/api/users/${ data.userId }/cart/products/${ data.productId }`, data);
 }
 

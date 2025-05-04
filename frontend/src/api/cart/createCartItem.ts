@@ -1,6 +1,8 @@
 import { getCartQueryOptions } from "@/api/cart/getCart.ts";
 import { api } from "@/lib/apiClient.ts";
+import { CartItemResponse } from "@/types/api.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosResponse } from "axios";
 import { z } from "zod";
 
 export const CreateCartItemInputSchema = z.object({
@@ -11,7 +13,9 @@ export const CreateCartItemInputSchema = z.object({
 
 export type CreateCartItemInput = z.infer<typeof CreateCartItemInputSchema>;
 
-export function createCartItem({ data }: { data: CreateCartItemInput }) {
+export function createCartItem(
+    { data }: { data: CreateCartItemInput }
+): Promise<AxiosResponse<CartItemResponse>> {
     return api.post(`/api/users/${ data.userId }/cart/products`, data);
 }
 

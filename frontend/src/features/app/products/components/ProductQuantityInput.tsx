@@ -14,7 +14,7 @@ export type ProductQuantitySelectProps = {
     cartEnabled: boolean;
 }
 
-export function ProductQuantitySelect(
+export function ProductQuantityInput(
     { product, cartItem, cartEnabled }: ProductQuantitySelectProps
 ) {
     const { colorScheme } = useMantineColorScheme();
@@ -64,7 +64,7 @@ export function ProductQuantitySelect(
         } catch (error) {
             console.log("Error updating cart item", error);
             notifications.show({
-                title: "Something went wrong", message: "Please try updating product quantity again",
+                title: "Something went wrong", message: "Please refresh and try updating product quantity again",
                 color: "red", icon: <IconX/>, withBorder: true
             });
         }
@@ -115,8 +115,9 @@ export function ProductQuantitySelect(
             } }>
                 <NumberInput
                     mt="sm" maw="70%"
-                    label="Quantity" required withAsterisk={ false }
+                    label="Quantity"
                     description={ `Max ${ product.availableQuantity }` }
+                    placeholder={ `${ quantity }` }
                     min={ 1 } max={ product.availableQuantity }
                     allowNegative={ false } allowDecimal={ false } value={ quantity }
                     onChange={ (value) => typeof value === "number" && setQuantity(value) }

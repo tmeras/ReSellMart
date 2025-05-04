@@ -5,7 +5,7 @@ import { DarkModeButton } from "@/components/ui/DarkModeButton.tsx";
 import { UserMenu } from "@/components/ui/UserMenu.tsx";
 import { paths } from "@/config/paths.ts";
 import { AppShell, Burger, Button, Divider, Flex, Image, NavLink, ScrollArea, Text } from "@mantine/core";
-import { IconCirclePlus, IconGridDots, IconPackage } from "@tabler/icons-react";
+import { IconCirclePlus, IconGridDots, IconPackage, IconShoppingCart } from "@tabler/icons-react";
 import { useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Link, NavLink as RouterNavLink, Outlet, useNavigate } from "react-router";
@@ -32,7 +32,7 @@ export function AppLayout() {
                             opened={ navBarOpened } onClick={ () => setNavBarOpened(!navBarOpened) }
                         />
 
-                        <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
+                        <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me={ 5 }/>
                         <Text
                             size="lg" variant="gradient" fw={ 700 }
                             gradient={ { from: "paleIndigo.8", to: "paleIndigo.4", deg: 150 } }
@@ -66,6 +66,13 @@ export function AppLayout() {
 
                     <CategoryNavLinks closeNavBar={ () => setNavBarOpened(false) }/>
 
+                    <NavLink
+                        label="Cart"
+                        leftSection={ <IconShoppingCart size={ 18 }/> }
+                        component={ RouterNavLink } onClick={ () => setNavBarOpened(false) }
+                        to={ paths.app.cart.path } end
+                    />
+
                     <Text size="xl" fw={ 700 } c="paleIndigo.5">
                         Sell
                     </Text>
@@ -78,14 +85,13 @@ export function AppLayout() {
                     />
 
                     <Button
-                        size="compact-md" variant="light" mt="sm" ms="sm"
+                        size="compact-md" variant="light" mt="sm" mb="md" ms="sm"
                         leftSection={ <IconCirclePlus size={ 18 }/> }
                         onClick={ () => setNavBarOpened(false) }
                         component={ Link } to={ paths.app.createProduct.path }
                     >
                         Create product listing
                     </Button>
-
                 </AppShell.Section>
 
                 <AppShell.Section>
@@ -105,7 +111,7 @@ export function AppLayout() {
 
                             <Flex direction="column" justify="center" align="center" w="100%">
                                 <Flex mb="sm">
-                                    <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me="sm"/>
+                                    <Image radius="md" src={ imgUrl } h={ 30 } w={ 30 } me={ 5 }/>
                                     <Text
                                         size="lg" variant="gradient" fw={ 700 }
                                         gradient={ { from: "paleIndigo.8", to: "paleIndigo.4", deg: 150 } }

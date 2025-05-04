@@ -504,20 +504,6 @@ public class UserServiceTests {
     }
 
     @Test
-    public void shouldNotSaveWishListItemWhenProductIsDeleted() {
-        productB.setIsDeleted(true);
-        WishListItemRequest wishListItemRequest = new WishListItemRequest(productB.getId(), userA.getId());
-
-        when(wishListItemRepository.existsByUserIdAndProductId(userA.getId(), productB.getId())).thenReturn(false);
-        when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
-        when(productRepository.findWithAssociationsById(productB.getId())).thenReturn(Optional.of(productB));
-
-        assertThatThrownBy(() -> userService.saveWishListItem(wishListItemRequest, userA.getId(), authentication))
-                .isInstanceOf(APIException.class)
-                .hasMessage("Deleted products cannot be added to the wishlist");
-    }
-
-    @Test
     public void shouldFindAllWishListItemsByUserIdWhenValidRequest() {
         WishListItem wishListItem = new WishListItem(1, ZonedDateTime.now(), productB, userA);
         WishListItemResponse wishListItemResponse = new WishListItemResponse(1, productResponseB, ZonedDateTime.now());

@@ -54,6 +54,10 @@ export const paths = {
         wishlist: {
             path: "/app/wishlist",
             getHref: () => "/app/wishlist"
+        },
+        cart: {
+            path: "/app/cart",
+            getHref: () => "/app/cart"
         }
     },
 } as const

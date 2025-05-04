@@ -61,7 +61,7 @@ export function CartButtonGroup({ cartItem, product, cartEnabled, size = "md" }:
         } catch (error) {
             console.log("Error updating cart item", error);
             notifications.show({
-                title: "Something went wrong", message: "Please try updating product quantity again",
+                title: "Something went wrong", message: "Please refresh and try updating product quantity again",
                 color: "red", icon: <IconX/>, withBorder: true
             });
         }
@@ -74,7 +74,10 @@ export function CartButtonGroup({ cartItem, product, cartEnabled, size = "md" }:
                     <Button.Group>
                         <Button
                             variant="default" radius="md" size={ `compact-${ size }` }
-                            onClick={ () => updateQuantityInCart(cartItem.quantity - 1) }
+                            onClick={ () => (cartItem.quantity > product.availableQuantity) ?
+                                updateQuantityInCart(product.availableQuantity)
+                                : updateQuantityInCart(cartItem.quantity - 1)
+                            }
                             loading={ updateCartItemMutation.isPending || deleteCartItemMutation.isPending }
                         >
                             <IconMinus color={ theme.colors.red[6] } size={ 18 }/>
@@ -87,7 +90,7 @@ export function CartButtonGroup({ cartItem, product, cartEnabled, size = "md" }:
                             variant="default" radius="md" size={ `compact-${ size }` }
                             onClick={ () => updateQuantityInCart(cartItem.quantity + 1) }
                             loading={ updateCartItemMutation.isPending }
-                            disabled={ cartItem.quantity == product.availableQuantity }
+                            disabled={ cartItem.quantity >= product.availableQuantity }
                         >
                             <IconPlus color={ theme.colors.teal[6] } size={ 18 }/>
                         </Button>

@@ -84,6 +84,7 @@ export type CartItemResponse = {
     id: number;
     product: ProductResponse;
     quantity: number;
+    price: number;
     addedAt: string;
 }
 

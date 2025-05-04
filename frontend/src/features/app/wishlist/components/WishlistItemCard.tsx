@@ -20,7 +20,6 @@ export function WishlistItemCard({ wishlistItem, cartItem, cartEnabled }: Wishli
     const product = wishlistItem.product;
     const displayedImage = product.images[0];
     const addedAt = new Date(wishlistItem.addedAt);
-
     const isProductAvailable = !product.isDeleted && product.availableQuantity > 0;
 
     return (
@@ -35,14 +34,20 @@ export function WishlistItemCard({ wishlistItem, cartItem, cartEnabled }: Wishli
                         src={ base64ToDataUri(displayedImage.image, displayedImage.type) } alt="Product Image"
                         fit="contain" h={ 170 } bg={ colorScheme === "dark" ? "dark.4" : "gray.2" }
                         miw={ { base: 110, xs: 150, md: 200 } } maw={ { base: 110, xs: 150, md: 200 } }
-                        style={ { cursor: "pointer" } }
+                        style={ isProductAvailable ? {
+                            cursor: "pointer"
+                        } : {
+                            cursor: "pointer",
+                            filter: "blur(2px) grayscale(50%) brightness(70%)",
+                            opacity: 0.7
+                        } }
                         onClick={ () => navigate(paths.app.productDetails.getHref(product.id.toString())) }
                     />
                 </Flex>
 
                 <Flex direction="column" maw="45%" justify="center">
                     <Anchor
-                        size="xl" fw={ 700 }
+                        size="xl" fw={ 700 } lineClamp={ 2 }
                         c="var(--mantine-color-text)"
                         component={ Link } to={ paths.app.productDetails.getHref(product.id.toString()) }
                     >

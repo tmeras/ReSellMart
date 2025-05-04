@@ -1,6 +1,8 @@
 import { getWishlistQueryOptions } from "@/api/wishlist/getWishlist.ts";
 import { api } from "@/lib/apiClient.ts";
+import { WishlistItemResponse } from "@/types/api.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosResponse } from "axios";
 import { z } from "zod";
 
 export const CreateWishlistItemInputSchema = z.object({
@@ -10,7 +12,9 @@ export const CreateWishlistItemInputSchema = z.object({
 
 export type CreateWishlistItemInput = z.infer<typeof CreateWishlistItemInputSchema>;
 
-export function createWishlistItem({ data }: { data: CreateWishlistItemInput }) {
+export function createWishlistItem(
+    { data }: { data: CreateWishlistItemInput }
+): Promise<AxiosResponse<WishlistItemResponse>> {
     return api.post(`/api/users/${ data.userId }/wishlist/products`, data);
 }
 

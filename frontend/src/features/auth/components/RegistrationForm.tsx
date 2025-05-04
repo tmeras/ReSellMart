@@ -144,9 +144,12 @@ export const RegistrationForm = () => {
         <Flex justify="center" align="center" h="100vh">
             <Container size="400">
                 <Paper withBorder shadow="lg" p={ 30 } radius="md">
-                    <Title ta="center" order={ 2 }>
-                        ReSellMart {/*TODO: Change to gradient logo?*/ }
-                    </Title>
+                    <Text
+                        ta="center" variant="gradient" fw={ 700 } component={ Title }
+                        gradient={ { from: "paleIndigo.8", to: "paleIndigo.4", deg: 150 } }
+                    >
+                        ReSellMart
+                    </Text>
                     <Text size="md" c="dimmed" ta="center" mt="xs">
                         Register to begin browsing and selling second-hand goods
                     </Text>

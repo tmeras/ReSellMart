@@ -1,7 +1,7 @@
 import { api } from "@/lib/apiClient.ts";
 import { UserResponse } from "@/types/api.ts";
 import { InternalAxiosRequestConfig } from "axios";
-import { createContext, ReactNode, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { createContext, ReactNode, useLayoutEffect, useMemo, useState } from "react";
 
 
 type AuthContext = {
@@ -84,7 +84,7 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
         }
     }, [accessToken]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         setIsLoadingUser(true);
         fetchMe().then(() => setIsLoadingUser(false));
     }, []);

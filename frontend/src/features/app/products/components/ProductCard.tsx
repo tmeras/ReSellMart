@@ -46,8 +46,12 @@ export function ProductCard(
                 >
                     { product.name }
                 </Anchor>
-                <Text c="dimmed" size="xs" mb="sm">
-                    Product #{ product.id }
+
+                <Text size="xs" c="dimmed" mb="xs">
+                    Sold by { " " }
+                    <CustomLink to={ paths.app.productsByUser.getHref(product.seller.id.toString()) }>
+                        { product.seller.name }
+                    </CustomLink>
                 </Text>
             </Card.Section>
 
@@ -103,11 +107,8 @@ export function ProductCard(
                         cartItem={ cartItem } product={ product } cartEnabled={ cartEnabled }
                     />
 
-                    <Text size="xs" c="dimmed">
-                        Sold by { " " }
-                        <CustomLink to={ paths.app.productsByUser.getHref(product.seller.id.toString()) }>
-                            { product.seller.name }
-                        </CustomLink>
+                    <Text c="dimmed" size="xs">
+                        Product #{ product.id }
                     </Text>
                 </Flex>
             </Card.Section>

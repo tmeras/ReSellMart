@@ -247,9 +247,6 @@ public class UserService {
         if (Objects.equals(existingProduct.getSeller().getId(), currentUser.getId()))
             throw new APIException("You cannot add your own items to your wishlist");
 
-        if (Boolean.TRUE.equals(existingProduct.getIsDeleted()))
-            throw new APIException("Deleted products cannot be added to the wishlist");
-
         WishListItem wishListItem = new WishListItem();
         wishListItem.setProduct(existingProduct);
         wishListItem.setUser(currentUser);
