@@ -22,7 +22,7 @@ INSERT IGNORE INTO role(id, name)
 VALUES (1, 'ADMIN'),
        (2, 'USER');
 
-INSERT IGNORE INTO user(id, name, email, password, home_country, image_path, enabled, mfa_enabled, secret,
+INSERT IGNORE INTO user(id, name, email, password, home_country, image_path, is_enabled, is_mfa_enabled, secret,
                         registered_at)
 VALUES (1, 'Theodore Meras', 'tmeras@yahoo.gr', '$2a$10$h2UMOIQGcBEjM0Dc3if4BuRBLzKKhnGy8i.vesnGwphl0BmTI/yMi',
         'Greece', './uploads/flyway-user-images/user_image.png', true, false, null, CURDATE()),
@@ -36,13 +36,13 @@ VALUES (1, 2),
        (2, 1),
        (3, 2);
 
-INSERT IGNORE INTO address(id, country, street, state, city, postal_code, main, deleted, address_type, user_id)
+INSERT IGNORE INTO address(id, country, street, state, city, postal_code, is_main, address_type, user_id, name, phone_number)
 VALUES (1, 'Greece', 'Ermou Street', 'Attica', 'Athens', '10563',
-        true, false, 'HOME', 1),
-       (2, 'UK', 'Mappin Street', 'South Yorkshire', 'Sheffield', 'S1 4DT',
-        true, false, 'WORK', 2),
-       (3, 'UK', 'Oxford Road', 'Greater Manchester', 'Manchester', 'M13 9PL',
-        true, false, 'HOME', 3);
+        true, 'HOME', 1, 'Theodore Meras', '+302101234567'),
+       (2, 'United Kingdom', 'Mappin Street', 'South Yorkshire', 'Sheffield', 'S1 4DT',
+        true, 'WORK', 2, 'Edmund Smith', '+441234567890'),
+       (3, 'United Kingdom', 'Oxford Road', 'Greater Manchester', 'Manchester', 'M13 9PL',
+        true, 'HOME', 3, 'Mary Cole', '+441612345678');
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id, listed_at)

@@ -89,11 +89,11 @@ public class AuthenticationServiceTests {
                 .email("test@test.com")
                 .password("pass")
                 .homeCountry("UK")
-                .mfaEnabled(true)
+                .isMfaEnabled(true)
                 .build();
         AuthenticationResponse expectedResponse = AuthenticationResponse.builder()
                 .qrImageUri("uri")
-                .mfaEnabled(true)
+                .isMfaEnabled(true)
                 .build();
 
         when(roleRepository.findByName("USER")).thenReturn(Optional.of(new Role(1, "USER")));
@@ -105,7 +105,7 @@ public class AuthenticationServiceTests {
         AuthenticationResponse response = authenticationService.register(registrationRequest);
 
         assertThat(response.getQrImageUri()).isEqualTo(expectedResponse.getQrImageUri());
-        assertThat(response.getMfaEnabled()).isEqualTo(expectedResponse.getMfaEnabled());
+        assertThat(response.getIsMfaEnabled()).isEqualTo(expectedResponse.getIsMfaEnabled());
         verify(emailService, times(1)).sendActivationEmail(
                 eq(registrationRequest.getEmail()), eq(registrationRequest.getName()),
                 startsWith(ACTIVATION_URL), any(String.class)
@@ -120,7 +120,7 @@ public class AuthenticationServiceTests {
                 .email("test@test.com")
                 .password("pass")
                 .homeCountry("UK")
-                .mfaEnabled(true)
+                .isMfaEnabled(true)
                 .build();
 
         when(roleRepository.findByName("USER")).thenReturn(Optional.empty());
@@ -137,7 +137,7 @@ public class AuthenticationServiceTests {
                 .email("test@test.com")
                 .password("pass")
                 .homeCountry("UK")
-                .mfaEnabled(true)
+                .isMfaEnabled(true)
                 .build();
 
         when(roleRepository.findByName("USER")).thenReturn(Optional.of(new Role(1, "USER")));
@@ -167,7 +167,7 @@ public class AuthenticationServiceTests {
         AuthenticationResponse expectedResponse = AuthenticationResponse.builder()
                 .accessToken("accessToken")
                 .refreshTokenCookie(refreshCookie.toString())
-                .mfaEnabled(false)
+                .isMfaEnabled(false)
                 .build();
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
@@ -180,14 +180,14 @@ public class AuthenticationServiceTests {
 
         assertThat(response.getAccessToken()).isEqualTo(expectedResponse.getAccessToken());
         assertThat(response.getRefreshTokenCookie()).isEqualTo(expectedResponse.getRefreshTokenCookie());
-        assertThat(response.getMfaEnabled()).isEqualTo(expectedResponse.getMfaEnabled());
+        assertThat(response.getIsMfaEnabled()).isEqualTo(expectedResponse.getIsMfaEnabled());
         verify(tokenRepository, times(1)).save(any(Token.class));
     }
 
     @Test
     public void shouldNotLoginUserWhenMfaIsEnabled() {
         User user = TestDataUtils.createUserA(Set.of(new Role(1, "USER")));
-        user.setMfaEnabled(true);
+        user.setIsMfaEnabled(true);
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(user, "pass", user.getAuthorities());
         AuthenticationRequest authenticationRequest = AuthenticationRequest.builder()
@@ -202,13 +202,13 @@ public class AuthenticationServiceTests {
 
         assertThat(response.getAccessToken()).isNull();
         assertThat(response.getRefreshTokenCookie()).isNull();
-        assertThat(response.getMfaEnabled()).isTrue();
+        assertThat(response.getIsMfaEnabled()).isTrue();
     }
 
     @Test
     public void shouldActivateAccountWhenValidRequest() throws MessagingException {
         User user = TestDataUtils.createUserA(Set.of(new Role(1, "USER")));
-        user.setEnabled(false);
+        user.setIsEnabled(false);
         Token token = new Token(null, "code", TokenType.ACTIVATION, LocalDateTime.now().minusMinutes(2),
                 LocalDateTime.now().plusMinutes(2), null, false, user);
 
@@ -223,7 +223,7 @@ public class AuthenticationServiceTests {
     @Test
     public void shouldNotActivateAccountWhenTokenHasBeenValidated() throws MessagingException {
         User user = TestDataUtils.createUserA(Set.of(new Role(1, "USER")));
-        user.setEnabled(false);
+        user.setIsEnabled(false);
         Token token = new Token(null, "code", TokenType.ACTIVATION, LocalDateTime.now().minusMinutes(2),
                 LocalDateTime.now().plusMinutes(2), LocalDateTime.now(), false, user);
 
@@ -237,7 +237,7 @@ public class AuthenticationServiceTests {
     @Test
     public void shouldNotActivateAccountWhenTokenHasExpired() {
         User user = TestDataUtils.createUserA(Set.of(new Role(1, "USER")));
-        user.setEnabled(false);
+        user.setIsEnabled(false);
         Token token = new Token(null, "code", TokenType.ACTIVATION, LocalDateTime.now().minusMinutes(2),
                 LocalDateTime.now().minusMinutes(1), null, false, user);
 
@@ -336,7 +336,7 @@ public class AuthenticationServiceTests {
     public void shouldVerifyOtpWhenValidRequest() {
         User user = TestDataUtils.createUserA(Set.of(new Role(1, "USER")));
         user.setSecret("secret");
-        user.setMfaEnabled(true);
+        user.setIsMfaEnabled(true);
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(user, "pass", user.getAuthorities());
         VerificationRequest verificationRequest = VerificationRequest.builder()
@@ -346,7 +346,7 @@ public class AuthenticationServiceTests {
                 .build();
         AuthenticationResponse expectedResponse = AuthenticationResponse.builder()
                 .accessToken("accessToken")
-                .mfaEnabled(true)
+                .isMfaEnabled(true)
                 .build();
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
@@ -359,14 +359,14 @@ public class AuthenticationServiceTests {
         AuthenticationResponse response  = authenticationService.verifyOtp(verificationRequest);
 
         assertThat(response.getAccessToken()).isEqualTo(expectedResponse.getAccessToken());
-        assertThat(response.getMfaEnabled()).isEqualTo(expectedResponse.getMfaEnabled());
+        assertThat(response.getIsMfaEnabled()).isEqualTo(expectedResponse.getIsMfaEnabled());
     }
 
     @Test
     public void shouldNotVerifyOtpWhenInvalidOtp() {
         User user = TestDataUtils.createUserA(Set.of(new Role(1, "USER")));
         user.setSecret("secret");
-        user.setMfaEnabled(true);
+        user.setIsMfaEnabled(true);
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(user, "pass", user.getAuthorities());
         VerificationRequest verificationRequest = VerificationRequest.builder()

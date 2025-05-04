@@ -17,12 +17,24 @@ import {
     PRODUCT_CONDITION,
     ProductConditionKeys
 } from "@/utils/constants.ts";
-import { Button, FileInput, Flex, Loader, NativeSelect, NumberInput, Paper, Text, Textarea } from "@mantine/core";
+import {
+    Button,
+    FileInput,
+    Flex,
+    Loader,
+    NativeSelect,
+    NumberInput,
+    Paper,
+    Select,
+    Text,
+    Textarea
+} from "@mantine/core";
 import { FormErrors, useForm, zodResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconPhoto, IconX } from "@tabler/icons-react";
 import { ChangeEvent, useState } from "react";
 import { useNavigate } from "react-router";
+import { z } from "zod";
 
 export function CreateProductForm() {
     const navigate = useNavigate();
@@ -31,20 +43,13 @@ export function CreateProductForm() {
     const [mainImageValue, setMainImageValue] = useState("0");
 
     const getCategoriesQuery = useGetCategories();
-    const createProductMutation = useCreateProduct({ sellerId: user!.id });
+    const createProductMutation = useCreateProduct({ sellerId: user!.id.toString() });
     const uploadProductImagesMutation = useUploadProductImages();
 
     const formInputSchema = createProductInputSchema.merge(uploadProductImagesInputSchema);
+    type FormInput = z.infer<typeof formInputSchema>
 
-    const form = useForm<{
-        name: string;
-        description: string;
-        price: number;
-        availableQuantity: number;
-        productCondition: ProductConditionKeys;
-        categoryId: string;
-        images: File[];
-    }>({
+    const form = useForm<FormInput>({
         mode: "uncontrolled",
         initialValues: {
             name: "",
@@ -71,7 +76,9 @@ export function CreateProductForm() {
         try {
             // Submit images separately from remaining form
             const { images, ...formValues } = values;
-            const response = await createProductMutation.mutateAsync({ data: formValues });
+            const response = await createProductMutation.mutateAsync({
+                data: formValues
+            });
 
             const productId = response.data.id;
             await uploadProductImagesMutation.mutateAsync({
@@ -156,7 +163,7 @@ export function CreateProductForm() {
 
     const conditionOptions = Object.keys(PRODUCT_CONDITION).map((condition) => {
         return {
-            label: PRODUCT_CONDITION[condition as keyof typeof PRODUCT_CONDITION],
+            label: PRODUCT_CONDITION[condition as ProductConditionKeys],
             value: condition
         };
     });
@@ -212,7 +219,7 @@ export function CreateProductForm() {
                         { ...form.getInputProps("availableQuantity") }
                     />
 
-                    <NativeSelect
+                    <Select
                         mt="sm"
                         label="Condition" required withAsterisk={ false }
                         data={ conditionOptions }
@@ -220,10 +227,11 @@ export function CreateProductForm() {
                         { ...form.getInputProps("productCondition") }
                     />
 
-                    <NativeSelect
+                    <Select
                         mt="sm"
                         label="Category" required withAsterisk={ false }
-                        data={ categoryOptions }
+                        data={ categoryOptions } searchable
+                        nothingFoundMessage="Nothing found..."
                         key={ form.key("categoryId") }
                         { ...form.getInputProps("categoryId") }
                     />

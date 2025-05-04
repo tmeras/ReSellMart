@@ -3,13 +3,13 @@ import { api } from "@/lib/apiClient.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function deleteCartItem(
-    { productId, userId }: { productId: number, userId: number }
+    { productId, userId }: { productId: string, userId: string }
 ) {
     return api.delete(`/api/users/${ userId }/cart/products/${ productId }`);
 }
 
 export type UseDeleteCartItemOptions = {
-    userId: number;
+    userId: string;
 };
 
 export function useDeleteCartItem({ userId }: UseDeleteCartItemOptions) {

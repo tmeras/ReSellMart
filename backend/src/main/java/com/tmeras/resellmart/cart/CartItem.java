@@ -6,7 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
@@ -33,6 +34,12 @@ public class CartItem {
     private User user;
 
     private ZonedDateTime addedAt;
+
+    public BigDecimal getPrice() {
+        return product.getPrice()
+                .multiply(BigDecimal.valueOf(quantity))
+                .setScale(2, RoundingMode.HALF_UP);
+    }
 
     @Override
     public final boolean equals(Object o) {

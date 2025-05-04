@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -60,7 +61,7 @@ public class UserController {
     @PutMapping("/{user-id}/image")
     public ResponseEntity<UserResponse> uploadUserImage(
             @PathVariable(name = "user-id") Integer userId,
-            @RequestPart("image") MultipartFile image,
+            @RequestPart(value = "image", required = false) MultipartFile image,
             Authentication authentication
     ) throws IOException {
         UserResponse updatedUser = userService.uploadUserImage(image, userId, authentication);
@@ -84,6 +85,15 @@ public class UserController {
     ) {
         List<CartItemResponse> foundCartItems = userService.findAllCartItemsByUserId(userId, authentication);
         return new ResponseEntity<>(foundCartItems, HttpStatus.OK);
+    }
+
+    @GetMapping("/{user-id}/cart/total")
+    public ResponseEntity<BigDecimal> calculateCartTotal(
+            @PathVariable(name = "user-id") Integer userId,
+            Authentication authentication
+    ) {
+        BigDecimal cartTotal = userService.calculateCartTotal(userId, authentication);
+        return new ResponseEntity<>(cartTotal, HttpStatus.OK);
     }
 
     @PatchMapping("/{user-id}/cart/products/{product-id}")
@@ -138,7 +148,6 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-
     @PatchMapping("/{user-id}/activation")
     public ResponseEntity<?> enableOrDisableUser(
             @Valid @RequestBody UserEnableRequest userEnableRequest,
@@ -152,5 +161,4 @@ public class UserController {
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
 }

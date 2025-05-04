@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.tmeras.resellmart.product.ProductResponse;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 
 @Getter
@@ -20,6 +20,8 @@ public class CartItemResponse {
     private ProductResponse product;
 
     private Integer quantity;
+
+    private BigDecimal price;
 
     private ZonedDateTime addedAt;
 }

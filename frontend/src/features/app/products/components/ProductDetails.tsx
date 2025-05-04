@@ -1,7 +1,7 @@
 import { CustomLink } from "@/components/ui/link/CustomLink.tsx";
-import { WishlistIconButton } from "@/components/ui/WishlistIconButton.tsx";
+import { WishlistActionIcon } from "@/components/ui/WishlistActionIcon.tsx";
 import { paths } from "@/config/paths.ts";
-import { ProductQuantitySelect } from "@/features/app/products/components/ProductQuantitySelect.tsx";
+import { ProductQuantityInput } from "@/features/app/products/components/ProductQuantityInput.tsx";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { CartItemResponse, ProductResponse, WishlistItemResponse } from "@/types/api.ts";
 import { PRODUCT_CONDITION } from "@/utils/constants.ts";
@@ -24,10 +24,9 @@ export function ProductDetails(
     const { colorScheme } = useMantineColorScheme();
     const { user } = useAuth();
 
-    const isProductAvailable = !product.deleted && product.availableQuantity > 0;
-
     // Determine if product is sold by logged-in user
     const isAuthUserProduct = product.seller.id === user!.id;
+    const isProductAvailable = !product.isDeleted && product.availableQuantity > 0;
 
     return (
             <Flex
@@ -59,9 +58,9 @@ export function ProductDetails(
                         <Title> { product.name }</Title>
 
                         { !isAuthUserProduct &&
-                            <WishlistIconButton
+                            <WishlistActionIcon
                                 inWishlist={ !!wishlistItems?.find(wishlistItem => wishlistItem.product.id === product.id) }
-                                productId={ product.id } wishlistEnabled={ wishlistEnabled } size={ 25 }
+                                productId={ product.id.toString() } wishlistEnabled={ wishlistEnabled } size={ 25 }
                             />
                         }
                     </Flex>
@@ -95,7 +94,7 @@ export function ProductDetails(
 
                     <Flex direction="column" gap={ 2 }>
                         <Flex justify="space-between" mb={ 2 }>
-                            <Flex align="center">
+                            <Flex align="center" maw={ 350 }>
                                 <IconList size={ 20 }/>
                                 <Text span fw={ 700 } size="md" ms={ 9 } me={ 3 }>
                                     Category:
@@ -146,7 +145,7 @@ export function ProductDetails(
                                 ) }
 
                                 { isProductAvailable && !isAuthUserProduct &&
-                                    <ProductQuantitySelect
+                                    <ProductQuantityInput
                                         product={ product }
                                         cartItem={ cartItems?.find(cartItem => cartItem.product.id === product.id) }
                                         cartEnabled={ cartEnabled }

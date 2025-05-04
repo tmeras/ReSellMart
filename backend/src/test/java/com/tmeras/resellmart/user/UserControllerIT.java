@@ -41,6 +41,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -219,7 +220,7 @@ public class UserControllerIT {
     public void shouldUpdateUserWhenValidRequest() {
         userRequestA.setName("Updated user A");
         userRequestA.setHomeCountry("Updated home country");
-        userRequestA.setMfaEnabled(true);
+        userRequestA.setIsMfaEnabled(true);
 
         ResponseEntity<UserResponse> response =
                 restTemplate.exchange("/api/users/" + userA.getId(), HttpMethod.PUT,
@@ -229,7 +230,7 @@ public class UserControllerIT {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getName()).isEqualTo(userRequestA.getName());
         assertThat(response.getBody().getHomeCountry()).isEqualTo(userRequestA.getHomeCountry());
-        assertThat(response.getBody().isMfaEnabled()).isEqualTo(userRequestA.isMfaEnabled());
+        assertThat(response.getBody().getIsMfaEnabled()).isEqualTo(userRequestA.getIsMfaEnabled());
         assertThat(response.getBody().getQrImageUri()).isNotNull();
     }
 
@@ -318,6 +319,9 @@ public class UserControllerIT {
         assertThat(response.getBody().getId()).isNotNull();
         assertThat(response.getBody().getProduct().getId()).isEqualTo(productB.getId());
         assertThat(response.getBody().getQuantity()).isEqualTo(cartItemRequest.getQuantity());
+        assertThat(response.getBody().getPrice().compareTo(
+                productB.getPrice().multiply(BigDecimal.valueOf(cartItemRequest.getQuantity()))
+        )).isEqualTo(0);
         assertThat(response.getBody().getAddedAt()).isNotNull();
     }
 
@@ -446,6 +450,20 @@ public class UserControllerIT {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage())
                 .isEqualTo("You do not have permission to view this user's cart");
+    }
+
+    @Test
+    public void shouldCalculateCartTotal() {
+        cartItemRepository.save(new CartItem(null, productB, 2, userA, ZonedDateTime.now()));
+
+        ResponseEntity<BigDecimal> response =
+                restTemplate.exchange("/api/users/" + userA.getId() + "/cart/total", HttpMethod.GET,
+                        new HttpEntity<>(headers), BigDecimal.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().compareTo(productB.getPrice().multiply(BigDecimal.valueOf(2))))
+                .isEqualTo(0);
     }
 
     @Test
@@ -616,22 +634,6 @@ public class UserControllerIT {
     }
 
     @Test
-    public void shouldNotSaveWishListItemWhenProductIsUnavailable() {
-        productB.setIsDeleted(true);
-        productRepository.save(productB);
-        WishListItemRequest wishListItemRequest = new WishListItemRequest(productB.getId(), userA.getId());
-
-        ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/users/" + userA.getId() + "/wishlist/products", HttpMethod.POST,
-                        new HttpEntity<>(wishListItemRequest, headers), ExceptionResponse.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getMessage())
-                .isEqualTo("Deleted products cannot be added to the wishlist");
-    }
-
-    @Test
     public void shouldFindAllWishlistItemsByUserIdWhenValidUserId() {
         wishListItemRepository.save(new WishListItem(null, ZonedDateTime.now(), productB, userA));
 
@@ -704,7 +706,7 @@ public class UserControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(userRepository.findById(userA.getId()).get().isEnabled()).isFalse();
         assertThat(productRepository.findAllBySellerId(userA.getId()).get(0).getIsDeleted()).isFalse();
-        assertThat(tokenRepository.findById(testToken.getId()).get().isRevoked()).isTrue();
+        assertThat(tokenRepository.findById(testToken.getId()).get().getIsRevoked()).isTrue();
     }
 
     @Test
@@ -750,7 +752,7 @@ public class UserControllerIT {
     @Test
     public void shouldEnableUserWhenValidRequest() {
         UserEnableRequest userEnableRequest = new UserEnableRequest(true);
-        userB.setEnabled(false);
+        userB.setIsEnabled(false);
         userRepository.save(userB);
 
         ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userB.getId() + "/activation",

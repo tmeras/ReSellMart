@@ -25,7 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -94,14 +95,14 @@ public class UserService {
 
         // If enabling MFA, generate QR image
         String qrImageUri = null;
-        if (!currentUser.isMfaEnabled() && userRequest.isMfaEnabled()) {
+        if (!currentUser.getIsMfaEnabled() && userRequest.getIsMfaEnabled()) {
             currentUser.setSecret(mfaService.generateSecret());
             qrImageUri = mfaService.generateQrCodeImageUri(currentUser.getSecret(), currentUser.getEmail());
         }
 
         currentUser.setName(userRequest.getName());
         currentUser.setHomeCountry(userRequest.getHomeCountry());
-        currentUser.setMfaEnabled(userRequest.isMfaEnabled());
+        currentUser.setIsMfaEnabled(userRequest.getIsMfaEnabled());
 
         User updatedUser = userRepository.save(currentUser);
         UserResponse userResponse = userMapper.toUserResponse(updatedUser);
@@ -122,14 +123,18 @@ public class UserService {
         if (currentUser.getImagePath() != null)
             fileService.deleteFile(currentUser.getImagePath());
 
-        String fileName = image.getOriginalFilename();
-        String fileExtension = fileService.getFileExtension(fileName);
-        Set<String> validImageExtensions = Set.of("jpg", "jpeg", "png", "gif", "bmp", "tiff");
-        if (!validImageExtensions.contains(fileExtension))
-            throw new APIException("Only images can be uploaded");
+        if (image == null) {
+            currentUser.setImagePath(null);
+        } else {
+            String fileName = image.getOriginalFilename();
+            String fileExtension = fileService.getFileExtension(fileName);
+            Set<String> validImageExtensions = Set.of("jpg", "jpeg", "png", "gif", "bmp", "tiff");
+            if (!validImageExtensions.contains(fileExtension))
+                throw new APIException("Only images can be uploaded");
 
-        String filePath = fileService.saveUserImage(image, userId);
-        currentUser.setImagePath(filePath);
+            String filePath = fileService.saveUserImage(image, userId);
+            currentUser.setImagePath(filePath);
+        }
 
         currentUser = userRepository.save(currentUser);
         return userMapper.toUserResponse(currentUser);
@@ -180,6 +185,20 @@ public class UserService {
                 .toList();
     }
 
+    public BigDecimal calculateCartTotal(Integer userId, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+
+        if (!Objects.equals(currentUser.getId(), userId))
+            throw new OperationNotPermittedException("You do not have permission to view this user's cart total");
+
+        List<CartItem> cartItems = cartItemRepository.findAllWithProductDetailsByUserId(userId);
+
+        return cartItems.stream()
+                .map(CartItem::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+    }
+
     public CartItemResponse updateCartItemQuantity(
             CartItemRequest cartItemRequest, Integer userId, Integer productId, Authentication authentication
     ) {
@@ -227,9 +246,6 @@ public class UserService {
 
         if (Objects.equals(existingProduct.getSeller().getId(), currentUser.getId()))
             throw new APIException("You cannot add your own items to your wishlist");
-
-        if (Boolean.TRUE.equals(existingProduct.getIsDeleted()))
-            throw new APIException("Deleted products cannot be added to the wishlist");
 
         WishListItem wishListItem = new WishListItem();
         wishListItem.setProduct(existingProduct);
@@ -279,12 +295,12 @@ public class UserService {
             throw new APIException("You cannot disable an admin user");
 
         // Disable user
-        existingUser.setEnabled(false);
+        existingUser.setIsEnabled(false);
         userRepository.save(existingUser);
 
         // Revoke all refresh tokens belonging to the user
         List<Token> refreshToken = tokenRepository.findAllValidRefreshTokensByUserEmail(existingUser.getEmail());
-        refreshToken.forEach(token -> token.setRevoked(true));
+        refreshToken.forEach(token -> token.setIsRevoked(true));
         tokenRepository.saveAll(refreshToken);
 
         // Mark all user products as unavailable
@@ -299,7 +315,7 @@ public class UserService {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("No user found with ID: " + userId));
 
-        existingUser.setEnabled(true);
+        existingUser.setIsEnabled(true);
         userRepository.save(existingUser);
     }
 }

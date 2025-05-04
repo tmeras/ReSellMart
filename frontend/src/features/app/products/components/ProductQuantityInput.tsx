@@ -14,16 +14,17 @@ export type ProductQuantitySelectProps = {
     cartEnabled: boolean;
 }
 
-export function ProductQuantitySelect(
+export function ProductQuantityInput(
     { product, cartItem, cartEnabled }: ProductQuantitySelectProps
 ) {
     const { colorScheme } = useMantineColorScheme();
     const { user } = useAuth();
     const [quantity, setQuantity] = useState(1);
 
-    const createCartItemMutation = useCreateCartItem({ userId: user!.id });
-    const updateCartItemMutation = useUpdateCartItem({ userId: user!.id });
-    const deleteCartItemMutation = useDeleteCartItem({ userId: user!.id });
+    const userId = user!.id.toString();
+    const createCartItemMutation = useCreateCartItem({ userId });
+    const updateCartItemMutation = useUpdateCartItem({ userId });
+    const deleteCartItemMutation = useDeleteCartItem({ userId });
 
     useEffect(() => {
         if (cartEnabled && cartItem) {
@@ -37,9 +38,9 @@ export function ProductQuantitySelect(
         try {
             await createCartItemMutation.mutateAsync({
                 data: {
-                    productId: product.id,
+                    productId: product.id.toString(),
                     quantity,
-                    userId: user!.id
+                    userId
                 }
             });
         } catch (error) {
@@ -55,15 +56,15 @@ export function ProductQuantitySelect(
         try {
             await updateCartItemMutation.mutateAsync({
                 data: {
-                    productId: product.id,
+                    productId: product.id.toString(),
                     quantity,
-                    userId: user!.id
+                    userId
                 }
             });
         } catch (error) {
             console.log("Error updating cart item", error);
             notifications.show({
-                title: "Something went wrong", message: "Please try updating product quantity again",
+                title: "Something went wrong", message: "Please refresh and try updating product quantity again",
                 color: "red", icon: <IconX/>, withBorder: true
             });
         }
@@ -72,8 +73,8 @@ export function ProductQuantitySelect(
     async function deleteFromCart() {
         try {
             await deleteCartItemMutation.mutateAsync({
-                productId: product.id,
-                userId: user!.id
+                productId: product.id.toString(),
+                userId
             });
             setQuantity(1);
         } catch (error) {
@@ -114,8 +115,9 @@ export function ProductQuantitySelect(
             } }>
                 <NumberInput
                     mt="sm" maw="70%"
-                    label="Quantity" required withAsterisk={ false }
+                    label="Quantity"
                     description={ `Max ${ product.availableQuantity }` }
+                    placeholder={ `${ quantity }` }
                     min={ 1 } max={ product.availableQuantity }
                     allowNegative={ false } allowDecimal={ false } value={ quantity }
                     onChange={ (value) => typeof value === "number" && setQuantity(value) }

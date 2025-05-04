@@ -48,6 +48,7 @@ export function DeleteProductButton({ productId, sellerId }: DeleteProductButton
                 variant="light" size="sm" color="red.5"
                 leftSection={ <IconTrash size={ 18 }/> }
                 onClick={ () => setModalOpened(true) }
+                loading={ softDeleteProductMutation.isPending }
             >
                 Delete product
             </Button>

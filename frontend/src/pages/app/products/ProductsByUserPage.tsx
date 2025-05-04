@@ -1,5 +1,4 @@
 import { useGetUser } from "@/api/users/getUser.ts";
-import imgUrl from "@/assets/user.png";
 import { paths } from "@/config/paths.ts";
 import { useGetProductsByUser } from "@/features/app/products/api/getProductsByUser.ts";
 import { ProductsList } from "@/features/app/products/components/ProductsList.tsx";
@@ -32,7 +31,7 @@ export function ProductsByUserPage() {
     const getUserQuery = useGetUser({ userId });
 
     // Redirect to seller's product page if user is the logged-in user
-    if (authUser!.id === parseInt(userId)) return <Navigate to={ paths.app.sellerProducts.getHref() }/>;
+    if (authUser!.id.toString() === userId) return <Navigate to={ paths.app.sellerProducts.getHref() }/>;
 
     if (getProductsByUserQuery.isError) {
         console.log("Error fetching products by user", getProductsByUserQuery.error);
@@ -56,8 +55,8 @@ export function ProductsByUserPage() {
                         Products by { user.name }
                     </Title>
                     <Avatar
-                        size={ 45 }
-                        src={ user.profileImage ? base64ToDataUri(user.profileImage) : imgUrl }
+                        size={ 45 } src={ user.profileImage ? base64ToDataUri(user.profileImage) : null }
+                        name={ user.name } color="initials"
                     />
                 </Flex>
             }
@@ -88,8 +87,26 @@ export function ProductsByUserPage() {
 
             { products && getProductsByUserQuery.isSuccess &&
                 <>
-                    <Flex justify={ { base: "center", sm: "flex-end" } } mb="sm">
+                    <Flex
+                        mb="sm"
+                        justify={ { base: "", sm: "space-between" } }
+                        align={ { base: "center", sm: "" } }
+                        direction={ { base: "column", sm: "row" } }
+                    >
+                        <Flex align="center">
+                            <Text size="lg" mb="xs" fw={ 600 }>
+                                { search &&
+                                    <>Results for "{ search }" | </>
+                                }
+                            </Text>
+
+                            <Text size="md" c="dimmed" ms="xs" mb="xs">
+                                { getProductsByUserQuery.data?.data.totalElements } items
+                            </Text>
+                        </Flex>
+
                         <NativeSelect
+                            w="fit-content"
                             data={ PRODUCT_SORT_OPTIONS }
                             value={ sort }
                             onChange={ (e) => {

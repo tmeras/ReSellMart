@@ -12,6 +12,9 @@ import lombok.*;
 @Builder
 public class AddressRequest {
 
+    @NotBlank(message = "Name must not be empty")
+    private String name;
+
     @NotBlank(message = "Country must not be empty")
     private String country;
 
@@ -27,9 +30,14 @@ public class AddressRequest {
     @NotBlank(message = "Postal code must not be empty")
     private String postalCode;
 
-    private boolean main;
+    @Pattern(
+            regexp = "^\\+[0-9 ()-]{7,25}$",
+            message = "Phone number must start with '+' and contain" +
+                    " only digits, spaces, parentheses, or dashes"
+    )
+    private String phoneNumber;
 
-    private boolean deleted;
+    private Boolean isMain;
 
     @NotNull(message = "Address type must not be empty")
     @Pattern(

@@ -85,6 +85,7 @@ export function CategoryNavLinks({ closeNavBar }: CategoryNavLinksProps) {
         <NavLink
             label="Product Categories"
             leftSection={ <IconList size={ 18 }/> }
+            defaultOpened
         >
             { navLinks }
         </NavLink>

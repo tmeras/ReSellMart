@@ -1,6 +1,6 @@
 import { CartButtonGroup } from "@/components/ui/CartButtonGroup.tsx";
 import { CustomLink } from "@/components/ui/link/CustomLink.tsx";
-import { WishlistIconButton } from "@/components/ui/WishlistIconButton.tsx";
+import { WishlistActionIcon } from "@/components/ui/WishlistActionIcon.tsx";
 import { paths } from "@/config/paths.ts";
 import { CartItemResponse, ProductResponse } from "@/types/api.ts";
 import { PRODUCT_CONDITION } from "@/utils/constants.ts";
@@ -26,7 +26,6 @@ export function ProductCard(
     // Find the product image that should be displayed as front cover
     const displayedImage = product.images[0];
 
-    // TODO: Consistent height
     return (
         <Card withBorder radius="md" w={ 300 }>
             <Card.Section>
@@ -47,8 +46,12 @@ export function ProductCard(
                 >
                     { product.name }
                 </Anchor>
-                <Text c="dimmed" size="xs" mb="sm">
-                    Product #{ product.id }
+
+                <Text size="xs" c="dimmed" mb="xs">
+                    Sold by { " " }
+                    <CustomLink to={ paths.app.productsByUser.getHref(product.seller.id.toString()) }>
+                        { product.seller.name }
+                    </CustomLink>
                 </Text>
             </Card.Section>
 
@@ -92,8 +95,9 @@ export function ProductCard(
                         }
                     </div>
 
-                    <WishlistIconButton
-                        inWishlist={ inWishlist } productId={ product.id } wishlistEnabled={ wishlistEnabled }
+                    <WishlistActionIcon
+                        inWishlist={ inWishlist } productId={ product.id.toString() }
+                        wishlistEnabled={ wishlistEnabled }
                         size={ 20 }
                     />
                 </Flex>
@@ -103,11 +107,8 @@ export function ProductCard(
                         cartItem={ cartItem } product={ product } cartEnabled={ cartEnabled }
                     />
 
-                    <Text size="xs" c="dimmed">
-                        Sold by { " " }
-                        <CustomLink to={ paths.app.productsByUser.getHref(product.seller.id.toString()) }>
-                            { product.seller.name }
-                        </CustomLink>
+                    <Text c="dimmed" size="xs">
+                        Product #{ product.id }
                     </Text>
                 </Flex>
             </Card.Section>

@@ -58,7 +58,7 @@ public class LogoutServiceTests {
 
         logoutService.logout(request, response, authentication);
 
-        assertThat(refreshToken.isRevoked()).isTrue();
+        assertThat(refreshToken.getIsRevoked()).isTrue();
     }
 
     @Test

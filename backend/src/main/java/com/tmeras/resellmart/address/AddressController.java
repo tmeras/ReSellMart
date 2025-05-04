@@ -48,15 +48,6 @@ public class AddressController {
         return new ResponseEntity<>(foundAddresses, HttpStatus.OK);
     }
 
-    @GetMapping("/users/{user-id}/addresses/non-deleted")
-    public ResponseEntity<List<AddressResponse>> findAllNonDeletedByUserId(
-            @PathVariable(name = "user-id") Integer userId,
-            Authentication authentication
-    ) {
-        List<AddressResponse> foundAddresses = addressService.findAllNonDeletedByUserId(userId, authentication);
-        return new ResponseEntity<>(foundAddresses, HttpStatus.OK);
-    }
-
     @PatchMapping("/addresses/{address-id}/main")
     public ResponseEntity<AddressResponse> makeMain(
             @PathVariable(name = "address-id") Integer addressId,

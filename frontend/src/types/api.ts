@@ -1,6 +1,7 @@
 import {
     ACCEPTED_IMAGE_EXTENSIONS,
     ACCEPTED_IMAGE_TYPES,
+    AddressTypeKeys,
     MAX_FILE_SIZE,
     ProductConditionKeys
 } from "@/utils/constants.ts";
@@ -14,25 +15,23 @@ export const uploadImageInputSchema = z.instanceof(File)
         message: `File type must be one of ${ ACCEPTED_IMAGE_EXTENSIONS.join(", ") }`
     });
 
-export type UploadImageInput = z.infer<typeof uploadImageInputSchema>;
-
 export type PageResponse<T> = {
     content: T[];
     pageNumber: number;
     pageSize: number;
     totalElements: number;
     totalPages: number;
-    first: boolean;
-    last: boolean;
+    isFirst: boolean;
+    isLast: boolean;
 }
 
 export type AuthenticationResponse = {
     accessToken: string;
-    mfaEnabled: boolean;
+    isMfaEnabled: boolean;
 }
 
 export type RegistrationResponse = {
-    mfaEnabled: boolean;
+    isMfaEnabled: boolean;
     qrImageUri?: string;
 }
 
@@ -47,7 +46,7 @@ export type UserResponse = {
     email: string;
     homeCountry: string;
     registeredAt: string;
-    mfaEnabled: boolean;
+    isMfaEnabled: boolean;
     profileImage?: string; //base64 string
     roles: Role[];
     qrImageUri?: string;
@@ -75,7 +74,7 @@ export type ProductResponse = {
     productCondition: ProductConditionKeys
     availableQuantity: number;
     listedAt: string; // UTC datetime string
-    deleted: boolean;
+    isDeleted: boolean;
     images: ProductImageResponse[];
     category: CategoryResponse;
     seller: UserResponse;
@@ -85,6 +84,7 @@ export type CartItemResponse = {
     id: number;
     product: ProductResponse;
     quantity: number;
+    price: number;
     addedAt: string;
 }
 
@@ -92,4 +92,18 @@ export type WishlistItemResponse = {
     id: number;
     product: ProductResponse;
     addedAt: string;
+}
+
+export type AddressResponse = {
+    id: number;
+    name: string;
+    country: string;
+    street: string;
+    state: string;
+    city: string;
+    postalCode: string;
+    phoneNumber: string;
+    isMain: boolean;
+    addressType: AddressTypeKeys;
+    userId: number;
 }

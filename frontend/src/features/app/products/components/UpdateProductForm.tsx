@@ -1,13 +1,13 @@
 import { useGetCategories } from "@/api/categories/getCategories.ts";
 import { FileInputValueComponent } from "@/components/form/FileInputValueComponent.tsx";
 import { ImagePreviewCarousel } from "@/components/ui/ImagePreviewCarousel.tsx";
-import { useGetProduct } from "@/features/app/products/api/getProduct.ts";
 import { updateProductInputSchema, useUpdateProduct } from "@/features/app/products/api/updateProduct.ts";
 import {
     uploadProductImagesInputSchema,
     useUploadProductImages
 } from "@/features/app/products/api/uploadProductImages.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
+import { ProductResponse } from "@/types/api.ts";
 import {
     ACCEPTED_IMAGE_TYPES,
     MAX_FILE_SIZE,
@@ -18,43 +18,46 @@ import {
     ProductConditionKeys
 } from "@/utils/constants.ts";
 import { base64ToFile } from "@/utils/fileUtils.ts";
-import { Button, FileInput, Flex, Loader, NativeSelect, NumberInput, Paper, Text, Textarea } from "@mantine/core";
+import {
+    Button,
+    FileInput,
+    Flex,
+    Loader,
+    NativeSelect,
+    NumberInput,
+    Paper,
+    Select,
+    Text,
+    Textarea
+} from "@mantine/core";
 import { FormErrors, useForm, zodResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconPhoto, IconX } from "@tabler/icons-react";
 import { ChangeEvent, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate } from "react-router";
+import { z } from "zod";
 
-export function UpdateProductForm() {
-    const params = useParams();
-    const productId = params.productId as string;
+export type UpdateProductFormProps = {
+    product: ProductResponse;
+}
 
-    // TODO: Authorization component??
-
+export function UpdateProductForm({ product }: UpdateProductFormProps) {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [images, setImages] = useState<File[]>([]);
     const [mainImageValue, setMainImageValue] = useState("0");
 
     const getCategoriesQuery = useGetCategories();
-    const getProductQuery = useGetProduct({ productId });
     const updateProductMutation = useUpdateProduct({
-        sellerId: user!.id,
-        productId
+        sellerId: user!.id.toString(),
+        productId: product.id.toString()
     });
     const uploadProductImagesMutation = useUploadProductImages();
 
     const formInputSchema = updateProductInputSchema.merge(uploadProductImagesInputSchema);
+    type FormInput = z.infer<typeof formInputSchema>
 
-    const form = useForm<{
-        name: string;
-        description: string;
-        price: number;
-        availableQuantity: number;
-        productCondition: ProductConditionKeys;
-        categoryId: string;
-        images: File[];
-    }>({
+    const form = useForm<FormInput>({
         mode: "uncontrolled",
         initialValues: {
             name: "",
@@ -66,7 +69,7 @@ export function UpdateProductForm() {
             images: []
         },
         validate: zodResolver(formInputSchema),
-        // Disable form if not yet initialised with product data received from API
+        // Disable form until initial data is fetched from API
         enhanceGetInputProps: (payload) => {
             if (!payload.form.initialized) {
                 return { disabled: true };
@@ -76,43 +79,41 @@ export function UpdateProductForm() {
         }
     });
 
-    form.watch("images", ({ value: images }) => {
+    form.watch("images", ({ value: selectedImages }) => {
         if (!form.isValid("images")) {
             setImages([]);
             return;
         }
 
-        setImages(images);
+        setImages(selectedImages);
     });
 
     // Initialise form using product data received from API
     useEffect(() => {
-        const data = getProductQuery.data?.data;
-        if (data && !form.initialized) {
-            const { id, seller, deleted, images: imageResponses, category, ...rest } = data;
-            const images = imageResponses.map((imageResponse) => {
+        if (!form.initialized) {
+            const images = product.images.map((imageResponse) => {
                 return base64ToFile(imageResponse.image, imageResponse.name, imageResponse.type);
             });
 
             form.initialize({
-                ...rest,
-                categoryId: category.id.toString(),
+                ...product,
+                categoryId: product.category.id.toString(),
                 images
             });
         }
-    }, [getProductQuery.data]);
+    }, [product]);
 
     async function handleSubmit(values: typeof form.values) {
         try {
             // Submit images separately from remaining form
             const { images, ...formValues } = values;
             await updateProductMutation.mutateAsync({
-                productId,
+                productId: product.id.toString(),
                 data: formValues
             });
 
             await uploadProductImagesMutation.mutateAsync({
-                productId,
+                productId: product.id.toString(),
                 data: {
                     images
                 }
@@ -122,6 +123,7 @@ export function UpdateProductForm() {
                 title: "Product listing successfully updated", message: "",
                 color: "teal", withBorder: true
             });
+
             // Navigate back, previous page should be seller's products page
             navigate(-1);
         } catch (error) {
@@ -151,7 +153,7 @@ export function UpdateProductForm() {
         setMainImageValue("0");
     }
 
-    if (getCategoriesQuery.isPending || getProductQuery.isPending) {
+    if (getCategoriesQuery.isPending) {
         return (
             <Flex w="100%" h="100vh" align="center" justify="center">
                 <Loader size="md"/>
@@ -159,8 +161,8 @@ export function UpdateProductForm() {
         );
     }
 
-    if (getCategoriesQuery.isError || getProductQuery.isError) {
-        console.log("Product error", getProductQuery.error);
+    if (getCategoriesQuery.isError) {
+        console.log("Product error", getCategoriesQuery.error);
         return (
             <Text c="red.5">
                 There was an error when fetching the product details. Please refresh and try again.
@@ -195,7 +197,7 @@ export function UpdateProductForm() {
 
     const conditionOptions = Object.keys(PRODUCT_CONDITION).map((condition) => {
         return {
-            label: PRODUCT_CONDITION[condition as keyof typeof PRODUCT_CONDITION],
+            label: PRODUCT_CONDITION[condition as ProductConditionKeys],
             value: condition
         };
     });
@@ -251,7 +253,7 @@ export function UpdateProductForm() {
                         { ...form.getInputProps("availableQuantity") }
                     />
 
-                    <NativeSelect
+                    <Select
                         mt="sm"
                         label="Condition" required withAsterisk={ false }
                         data={ conditionOptions }
@@ -259,10 +261,11 @@ export function UpdateProductForm() {
                         { ...form.getInputProps("productCondition") }
                     />
 
-                    <NativeSelect
+                    <Select
                         mt="sm"
                         label="Category" required withAsterisk={ false }
-                        data={ categoryOptions }
+                        data={ categoryOptions } searchable
+                        nothingFoundMessage="Nothing found..."
                         key={ form.key("categoryId") }
                         { ...form.getInputProps("categoryId") }
                     />

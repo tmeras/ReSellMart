@@ -34,14 +34,18 @@ public class AddressService {
 
         Address address = addressMapper.toAddress(addressRequest);
         address.setUser(currentUser);
-        address.setDeleted(false);
 
         // Mark the address as main if it is the user's first address or
-        // if it is the only non-deleted address of the user
+        // if the user requested it
         List<Address> existingAddresses =
-                addressRepository.findAllNonDeletedWithAssociationsByUserId(currentUser.getId());
-        if (existingAddresses.isEmpty())
-            address.setMain(true);
+                addressRepository.findAllByUserId(currentUser.getId());
+        if (existingAddresses.isEmpty() || addressRequest.getIsMain()) {
+            for (Address existingAddress : existingAddresses) {
+                existingAddress.setIsMain(false);
+            }
+            addressRepository.saveAll(existingAddresses);
+            address.setIsMain(true);
+        }
 
         Address savedAddress = addressRepository.save(address);
         return addressMapper.toAddressResponse(savedAddress);
@@ -81,19 +85,6 @@ public class AddressService {
                 .toList();
     }
 
-    public List<AddressResponse> findAllNonDeletedByUserId(Integer userId, Authentication authentication) {
-        User currentUser = (User) authentication.getPrincipal();
-
-        if (!currentUser.getId().equals(userId))
-            throw new OperationNotPermittedException("You do not have permission to view the addresses of this user");
-
-        List<Address> addresses = addressRepository.findAllNonDeletedWithAssociationsByUserId(userId);
-
-        return addresses.stream()
-                .map(addressMapper::toAddressResponse)
-                .toList();
-    }
-
     public AddressResponse makeMain(Integer addressId, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
 
@@ -102,13 +93,13 @@ public class AddressService {
 
         List<Address> currentUserAddresses = addressRepository.findAllWithAssociationsByUserId(currentUser.getId());
         for (Address address : currentUserAddresses)
-            address.setMain(false);
+            address.setIsMain(false);
 
         Address specifiedAddress = currentUserAddresses.stream()
                 .filter(address -> address.getId().equals(addressId))
                 .findFirst()
                 .orElseThrow(() -> new OperationNotPermittedException("The specified address is related to another user"));
-        specifiedAddress.setMain(true);
+        specifiedAddress.setIsMain(true);
 
         addressRepository.saveAll(currentUserAddresses);
         return addressMapper.toAddressResponse(specifiedAddress);
@@ -126,11 +117,13 @@ public class AddressService {
         if (!isCurrentUserAdmin && !existingAddress.getUser().getId().equals(currentUser.getId()))
             throw new OperationNotPermittedException("You do not have permission to update the address of this user");
 
+        existingAddress.setName(addressRequest.getName());
         existingAddress.setCountry(addressRequest.getCountry());
         existingAddress.setStreet(addressRequest.getStreet());
         existingAddress.setCity(addressRequest.getCity());
         existingAddress.setState(addressRequest.getState());
         existingAddress.setPostalCode(addressRequest.getPostalCode());
+        existingAddress.setPhoneNumber(addressRequest.getPhoneNumber());
         existingAddress.setAddressType(AddressType.valueOf(addressRequest.getAddressType()));
 
         Address updatedAddress = addressRepository.save(existingAddress);
@@ -149,8 +142,6 @@ public class AddressService {
         if (!isCurrentUserAdmin && !existingAddress.getUser().getId().equals(currentUser.getId()))
             throw new OperationNotPermittedException("You do not have permission to delete the address of this user");
 
-        // Soft delete only
-        existingAddress.setDeleted(true);
-        addressRepository.save(existingAddress);
+        addressRepository.deleteById(addressId);
     }
 }

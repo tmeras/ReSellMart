@@ -10,25 +10,27 @@ import { IconMinus, IconPlus, IconX } from "@tabler/icons-react";
 type CartButtonGroupProps = {
     cartItem: CartItemResponse | undefined; // Used to determine if product is already in cart
     product: ProductResponse;
-    cartEnabled: boolean
+    cartEnabled: boolean;
+    size?: "sm" | "md" | "lg";
 }
 
-export function CartButtonGroup({ cartItem, product, cartEnabled }: CartButtonGroupProps) {
+export function CartButtonGroup({ cartItem, product, cartEnabled, size = "md" }: CartButtonGroupProps) {
     const theme = useMantineTheme();
     const { colorScheme } = useMantineColorScheme();
     const { user } = useAuth();
 
-    const createCartItemMutation = useCreateCartItem({ userId: user!.id });
-    const updateCartItemMutation = useUpdateCartItem({ userId: user!.id });
-    const deleteCartItemMutation = useDeleteCartItem({ userId: user!.id });
+    const userId = user!.id.toString();
+    const createCartItemMutation = useCreateCartItem({ userId });
+    const updateCartItemMutation = useUpdateCartItem({ userId });
+    const deleteCartItemMutation = useDeleteCartItem({ userId });
 
     async function addToCart() {
         try {
             await createCartItemMutation.mutateAsync({
                 data: {
-                    productId: product.id,
+                    productId: product.id.toString(),
                     quantity: 1,
-                    userId: user!.id
+                    userId
                 }
             });
         } catch (error) {
@@ -45,21 +47,21 @@ export function CartButtonGroup({ cartItem, product, cartEnabled }: CartButtonGr
             if (quantity > 0) {
                 await updateCartItemMutation.mutateAsync({
                     data: {
-                        productId: product.id,
+                        productId: product.id.toString(),
                         quantity,
-                        userId: user!.id
+                        userId
                     }
                 });
             } else {
                 await deleteCartItemMutation.mutateAsync({
-                    productId: product.id,
-                    userId: user!.id
+                    productId: product.id.toString(),
+                    userId
                 });
             }
         } catch (error) {
             console.log("Error updating cart item", error);
             notifications.show({
-                title: "Something went wrong", message: "Please try updating product quantity again",
+                title: "Something went wrong", message: "Please refresh and try updating product quantity again",
                 color: "red", icon: <IconX/>, withBorder: true
             });
         }
@@ -70,20 +72,25 @@ export function CartButtonGroup({ cartItem, product, cartEnabled }: CartButtonGr
             { cartEnabled ? (
                 cartItem ? (
                     <Button.Group>
-                        <Button variant="default" radius="md" size="compact-md"
-                                onClick={ () => updateQuantityInCart(cartItem.quantity - 1) }
-                                loading={ updateCartItemMutation.isPending || deleteCartItemMutation.isPending }
+                        <Button
+                            variant="default" radius="md" size={ `compact-${ size }` }
+                            onClick={ () => (cartItem.quantity > product.availableQuantity) ?
+                                updateQuantityInCart(product.availableQuantity)
+                                : updateQuantityInCart(cartItem.quantity - 1)
+                            }
+                            loading={ updateCartItemMutation.isPending || deleteCartItemMutation.isPending }
                         >
                             <IconMinus color={ theme.colors.red[6] } size={ 18 }/>
                         </Button>
-                        <Button.GroupSection variant="default" size="compact-md" bg="var(--mantine-color-body)">
+                        <Button.GroupSection variant="default" size={ `compact-${ size }` }
+                                             bg="var(--mantine-color-body)">
                             { cartItem.quantity }
                         </Button.GroupSection>
                         <Button
-                            variant="default" radius="md" size="compact-md"
+                            variant="default" radius="md" size={ `compact-${ size }` }
                             onClick={ () => updateQuantityInCart(cartItem.quantity + 1) }
                             loading={ updateCartItemMutation.isPending }
-                            disabled={ cartItem.quantity == product.availableQuantity }
+                            disabled={ cartItem.quantity >= product.availableQuantity }
                         >
                             <IconPlus color={ theme.colors.teal[6] } size={ 18 }/>
                         </Button>

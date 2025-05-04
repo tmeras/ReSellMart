@@ -6,8 +6,6 @@ import com.tmeras.resellmart.user.UserResponse;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -35,8 +33,7 @@ public class ProductResponse {
 
     private ZonedDateTime listedAt;
 
-    //TODO: Refactor by enforcing consistent boolean naming
-    private Boolean deleted;
+    private Boolean isDeleted;
 
     private List<ProductImageResponse> images;
 

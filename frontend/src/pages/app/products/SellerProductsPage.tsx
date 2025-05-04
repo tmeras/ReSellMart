@@ -12,7 +12,7 @@ export function SellerProductsPage() {
         <>
             <title>{ `My Products | ReSellMart` }</title>
 
-            <Title ta="center" mt="lg">
+            <Title ta="center">
                 My Products
             </Title>
 

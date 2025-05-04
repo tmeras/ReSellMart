@@ -50,7 +50,7 @@ export function SellerProductsList({ sellerId }: SellerProductsListProps) {
         if (!getProductsByUserQuery.isFetching && page !== 0 && products?.length === 0) {
             setSearchParams((prev) => new URLSearchParams({
                 page: (page - 1).toString(),
-                sortBy: prev.get("sortBy") || "listedAt",
+                sortBy: prev.get("sortBy") || SORT_PRODUCTS_BY,
                 sortDirection: prev.get("sortDirection") || "desc"
             }));
         }
@@ -88,7 +88,7 @@ export function SellerProductsList({ sellerId }: SellerProductsListProps) {
 
     const productCards = products!.map((product) => {
         const displayedImage = product.images[0];
-        const listedDateTime = new Date(product.listedAt);
+        const listedAt = new Date(product.listedAt);
 
         return (
             <Paper
@@ -128,7 +128,7 @@ export function SellerProductsList({ sellerId }: SellerProductsListProps) {
 
                         <Text c="dimmed" size="sm" mt="xs">
                             { product.availableQuantity } Remaining ·
-                            Listed On { listedDateTime.toLocaleDateString() }
+                            Listed On { listedAt.toLocaleDateString() }
                         </Text>
 
                         <Flex mt="xl" gap="sm">

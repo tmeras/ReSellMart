@@ -1,7 +1,7 @@
 import { api } from "@/lib/apiClient.ts";
 import { UserResponse } from "@/types/api.ts";
 import { InternalAxiosRequestConfig } from "axios";
-import { createContext, ReactNode, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { createContext, ReactNode, useLayoutEffect, useMemo, useState } from "react";
 
 
 type AuthContext = {
@@ -44,9 +44,8 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
                         console.log("Refresh success", response);
                         setAccessToken(response.data.accessToken)
 
-                        originalRequest._retry = true;
-
                         // Retry request with new access token
+                        originalRequest._retry = true;
                         originalRequest.headers.Authorization = "Bearer " + response.data.accessToken;
                         return api(originalRequest)
                     } catch (error) {
@@ -66,8 +65,6 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
     }, []);
 
     useLayoutEffect(() => {
-        console.log("Setting accessToken in header to", accessToken)
-
         const requestInterceptor = api.interceptors.request.use((config: AxiosRequestConfig) => {
             config.headers.Authorization =
                 !config._retry && accessToken
@@ -75,7 +72,7 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
                     : config.headers.Authorization;
 
             return config;
-        })
+        });
 
         if (accessToken) {
             setIsLoadingUser(true);
@@ -87,15 +84,14 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
         }
     }, [accessToken]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         setIsLoadingUser(true);
         fetchMe().then(() => setIsLoadingUser(false));
     }, []);
 
     const fetchMe = async () => {
         try {
-            const response = await api.get("api/users/me");
-            //console.log("Got user", response.data)
+            const response = await api.get<UserResponse>("api/users/me");
             setUser(response.data);
         } catch (error) {
             console.log("Error fetching user", error);

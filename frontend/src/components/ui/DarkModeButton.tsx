@@ -1,26 +1,27 @@
-import { ActionIcon, Tooltip, useMantineColorScheme } from "@mantine/core";
-import { IconBrightnessDown, IconMoon } from "@tabler/icons-react";
+import { ActionIcon, Tooltip, useMantineColorScheme, useMantineTheme } from "@mantine/core";
+import { IconMoonStars, IconSun } from "@tabler/icons-react";
 
 export function DarkModeButton() {
     const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+    const theme = useMantineTheme();
 
     return (
         colorScheme === "dark" ? (
-            <Tooltip label="Light Mode">
+            <Tooltip label="Toggle Appearance">
                 <ActionIcon
-                    aria-label="Light Mode" onClick={ () => toggleColorScheme() }
-                    variant="filled" ms="sm" size="md" mt={ 2 }
+                    aria-label="Dark Mode" onClick={ () => toggleColorScheme() }
+                    variant="subtle" ms="sm" size="md"
                 >
-                    <IconBrightnessDown size={ 60 }/>
+                    <IconMoonStars color={ theme.colors.blue[6] }/>
                 </ActionIcon>
             </Tooltip>
         ) : (
-            <Tooltip label="Dark Mode">
+            <Tooltip label="Toggle Appearance">
                 <ActionIcon
-                    aria-label="Dark Mode" onClick={ () => toggleColorScheme() }
-                    variant="outline" ms="sm" size="md" mt={ 2 }
+                    aria-label="Light Mode" onClick={ () => toggleColorScheme() }
+                    variant="subtle" ms="sm" size="md"
                 >
-                    <IconMoon size={ 50 }/>
+                    <IconSun size={ 20 } stroke={ 2.5 } color={ theme.colors.yellow[4] }/>
                 </ActionIcon>
             </Tooltip>
         )

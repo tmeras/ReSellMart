@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.math.RoundingMode;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -47,6 +47,7 @@ public class Order {
     @JoinColumn(name = "orderId", nullable = false)
     private List<OrderItem> orderItems;
 
+    // TODO: Return in response + in cart???
     public BigDecimal getTotalPrice() {
         BigDecimal totalPrice = BigDecimal.ZERO;
 
@@ -57,6 +58,6 @@ public class Order {
             totalPrice = totalPrice.add(productPrice.multiply(BigDecimal.valueOf(productQuantity)));
         }
 
-        return totalPrice;
+        return totalPrice.setScale(2, RoundingMode.HALF_UP);
     }
 }

@@ -25,8 +25,8 @@ export function updateProduct({ productId, data }: { productId: string, data: Up
 }
 
 export type UseUpdateProductOptions = {
-    productId: string,
-    sellerId: number
+    productId: string;
+    sellerId: string;
 }
 
 export function useUpdateProduct({ productId, sellerId }: UseUpdateProductOptions) {

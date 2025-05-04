@@ -7,27 +7,28 @@ import { IconHeart, IconHeartFilled, IconX } from "@tabler/icons-react";
 
 type WishlistIconButtonProps = {
     inWishlist: boolean; // Used to determine if product is already in wishlist
-    productId: number;
+    productId: string;
     wishlistEnabled: boolean;
     size: number;
 }
 
-export function WishlistIconButton(
+export function WishlistActionIcon(
     { inWishlist, productId, wishlistEnabled, size }: WishlistIconButtonProps
 ) {
     const theme = useMantineTheme();
     const { colorScheme } = useMantineColorScheme();
     const { user } = useAuth();
 
-    const createWishlistItemMutation = useCreateWishlistItem({ userId: user!.id });
-    const deleteWishlistItemMutation = useDeleteWishlistItem({ userId: user!.id });
+    const userId = user!.id.toString();
+    const createWishlistItemMutation = useCreateWishlistItem({ userId });
+    const deleteWishlistItemMutation = useDeleteWishlistItem({ userId });
 
     async function addToWishlist() {
         try {
             await createWishlistItemMutation.mutateAsync({
                 data: {
                     productId,
-                    userId: user!.id
+                    userId
                 }
             });
         } catch (error) {
@@ -43,7 +44,7 @@ export function WishlistIconButton(
         try {
             await deleteWishlistItemMutation.mutateAsync({
                 productId,
-                userId: user!.id
+                userId
             });
         } catch (error) {
             console.log("Error deleting wishlist item", error);

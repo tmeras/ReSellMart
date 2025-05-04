@@ -14,7 +14,6 @@ export type SimilarProductsProps = {
 }
 
 // Returns a grid of similar products based on the category of the given product
-// Memo component
 export const SimilarProducts = memo(function SimilarProducts(
     { product, wishlistItems, cartItems, wishlistEnabled, cartEnabled }: SimilarProductsProps
 ) {

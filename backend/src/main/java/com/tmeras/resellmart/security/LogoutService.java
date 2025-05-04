@@ -41,7 +41,7 @@ public class LogoutService implements LogoutHandler {
             try {
                 String userEmail = jwtService.extractUsername(accessToken);
                 List<Token> tokens = tokenRepository.findAllValidRefreshTokensByUserEmail(userEmail);
-                tokens.forEach(token -> token.setRevoked(true));
+                tokens.forEach(token -> token.setIsRevoked(true));
                 tokenRepository.saveAll(tokens);
             }
             catch (JwtException ex) {

@@ -42,6 +42,22 @@ export const paths = {
         sellerProducts: {
             path: "/app/my-products",
             getHref: () => "/app/my-products"
+        },
+        addresses: {
+            path: "/app/my-addresses",
+            getHref: () => "/app/my-addresses"
+        },
+        updateUser: {
+            path: "/app/account-settings",
+            getHref: () => "/app/account-settings"
+        },
+        wishlist: {
+            path: "/app/wishlist",
+            getHref: () => "/app/wishlist"
+        },
+        cart: {
+            path: "/app/cart",
+            getHref: () => "/app/cart"
         }
     },
 } as const

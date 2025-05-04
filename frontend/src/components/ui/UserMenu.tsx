@@ -5,7 +5,7 @@ import { api } from "@/lib/apiClient.ts";
 import { base64ToDataUri } from "@/utils/fileUtils.ts";
 import { Menu, useMantineTheme } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconHeart, IconLogout, IconSettings, IconX } from "@tabler/icons-react";
+import { IconHeart, IconHome2, IconLogout, IconSettings, IconX } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 
@@ -15,7 +15,7 @@ type UserMenuProps = {
 
 export function UserMenu({ closeNavBar }: UserMenuProps) {
     const theme = useMantineTheme();
-    useNavigate();
+    const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { user } = useAuth();
 
@@ -48,17 +48,33 @@ export function UserMenu({ closeNavBar }: UserMenuProps) {
 
             <Menu.Dropdown>
                 <Menu.Item
-                    leftSection={ <IconSettings size={ 16 }/> }
-                    onClick={ closeNavBar }
+                    leftSection={ <IconHeart size={ 16 } color={ theme.colors.red[4] }/> }
+                    onClick={ () => {
+                        closeNavBar();
+                        navigate(paths.app.wishlist.getHref());
+                    } }
                 >
-                    Account Settings
+                    Wishlist
                 </Menu.Item>
 
                 <Menu.Item
-                    leftSection={ <IconHeart size={ 16 } color={ theme.colors.red[4] }/> }
-                    onClick={ closeNavBar }
+                    leftSection={ <IconHome2 size={ 16 }/> }
+                    onClick={ () => {
+                        closeNavBar();
+                        navigate(paths.app.addresses.getHref());
+                    } }
                 >
-                    Wishlist
+                    Addresses
+                </Menu.Item>
+
+                <Menu.Item
+                    leftSection={ <IconSettings size={ 16 }/> }
+                    onClick={ () => {
+                        closeNavBar();
+                        navigate(paths.app.updateUser.getHref());
+                    } }
+                >
+                    Account Settings
                 </Menu.Item>
 
                 <Menu.Item

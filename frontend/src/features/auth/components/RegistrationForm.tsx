@@ -1,6 +1,7 @@
 import { PasswordInputWithStrength } from "@/components/form/PasswordInputWithStrength.tsx";
 import { paths } from "@/config/paths.ts";
 import { api } from "@/lib/apiClient.ts";
+import { RegistrationResponse } from "@/types/api.ts";
 import {
     Anchor,
     Button,
@@ -29,7 +30,7 @@ export const RegistrationForm = () => {
     const [formComplete, setFormComplete] = useState(false);
     const [qrImageUri, setQrImageUri] = useState("");
 
-    const countries = useMemo(() => {
+    const countryOptions = useMemo(() => {
         const countries = Country.getAllCountries()
         return countries.map((country) => country.name)
     }, []);
@@ -44,7 +45,7 @@ export const RegistrationForm = () => {
                 "Password must contain at least one uppercase letter, one lowercase letter, and one special character."
             ),
         homeCountry: z.string().min(1, "Home country is required"),
-        mfaEnabled: z.boolean().default(false)
+        isMfaEnabled: z.boolean().default(false)
     });
 
     const form = useForm({
@@ -55,7 +56,7 @@ export const RegistrationForm = () => {
             password: "",
             confirmPassword: "",
             homeCountry: "",
-            mfaEnabled: false,
+            isMfaEnabled: false
         },
         validate: zodResolver(registerInputSchema),
         onValuesChange: (values) => {
@@ -72,10 +73,10 @@ export const RegistrationForm = () => {
             }
 
             const response =
-                await api.post("api/auth/registration", values);
+                await api.post<RegistrationResponse>("api/auth/registration", values);
             console.log("Registration result", response.data);
 
-            if (response.data.mfaEnabled)
+            if (response.data.isMfaEnabled)
                 setQrImageUri(response.data.qrImageUri!);
 
             setFormComplete(true);
@@ -111,10 +112,12 @@ export const RegistrationForm = () => {
                                             IMPORTANT
                                         </Text>
                                     </Flex>
+
                                     <Text size="lg" ta="center" mt="xs">
                                         Please scan the following QR code using your preferred authenticator app
                                         to be able to sign in using MFA
                                     </Text>
+
                                     <Image src={ qrImageUri } w={ 250 } h={ 250 }/>
                                 </>
                             }
@@ -141,9 +144,12 @@ export const RegistrationForm = () => {
         <Flex justify="center" align="center" h="100vh">
             <Container size="400">
                 <Paper withBorder shadow="lg" p={ 30 } radius="md">
-                    <Title ta="center" order={ 2 }>
+                    <Text
+                        ta="center" variant="gradient" fw={ 700 } component={ Title }
+                        gradient={ { from: "paleIndigo.8", to: "paleIndigo.4", deg: 150 } }
+                    >
                         ReSellMart
-                    </Title>
+                    </Text>
                     <Text size="md" c="dimmed" ta="center" mt="xs">
                         Register to begin browsing and selling second-hand goods
                     </Text>
@@ -182,7 +188,7 @@ export const RegistrationForm = () => {
                             mt="sm"
                             label="Home country" placeholder="Pick a country"
                             required withAsterisk={ false } searchable
-                            data={ countries }
+                            data={ countryOptions }
                             key={ form.key("homeCountry") }
                             { ...form.getInputProps("homeCountry") }
                         />
@@ -195,8 +201,8 @@ export const RegistrationForm = () => {
                                     <IconShieldLock size={ 22 } style={ { marginLeft: 5 } }/>
                                 </span>
                             }
-                            key={ form.key("mfaEnabled") }
-                            { ...form.getInputProps("mfaEnabled") }
+                            key={ form.key("isMfaEnabled") }
+                            { ...form.getInputProps("isMfaEnabled") }
                         />
 
                         <Button fullWidth mt="xl" type="submit" loading={ form.submitting }>

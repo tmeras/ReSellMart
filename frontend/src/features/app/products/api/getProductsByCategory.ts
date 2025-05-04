@@ -4,13 +4,21 @@ import { DEFAULT_PAGE_SIZE, SORT_DIR, SORT_PRODUCTS_BY } from "@/utils/constants
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 
-export function getProductsByCategory(
-    categoryId: string,
+// @formatter:off
+export function getProductsByCategory({
+    categoryId,
     page = 0,
     search = "",
     sortBy = SORT_PRODUCTS_BY,
     sortDirection = SORT_DIR
-): Promise<AxiosResponse<PageResponse<ProductResponse>>> {
+}
+: {
+    categoryId: string,
+    page?: number,
+    search?: string
+    sortBy?: string,
+    sortDirection?: string
+}): Promise<AxiosResponse<PageResponse<ProductResponse>>> {
     const params = new URLSearchParams({
         pageSize: DEFAULT_PAGE_SIZE.toString(),
         pageNumber: page.toString(),
@@ -23,12 +31,12 @@ export function getProductsByCategory(
 }
 
 export function getProductsByCategoryQueryOptions({
-                                                      categoryId,
-                                                      page,
-                                                      search,
-                                                      sortBy,
-                                                      sortDirection
-                                                  }: {
+    categoryId,
+    page,
+    search,
+    sortBy,
+    sortDirection
+}: {
     categoryId: string;
     page?: number;
     search?: string;
@@ -39,27 +47,27 @@ export function getProductsByCategoryQueryOptions({
         queryKey: (page || page === 0 || search || sortBy || sortDirection)
             ? ["products", `category ${ categoryId }`, { page, search, sortBy, sortDirection }]
             : ["products", `category ${ categoryId }`],
-        queryFn: () => getProductsByCategory(categoryId, page, search, sortBy, sortDirection)
+        queryFn: () => getProductsByCategory({categoryId, page, search, sortBy, sortDirection})
     });
 }
 
 export type UseGetProductsByCategoryOptions = {
     categoryId: string;
-    page: number;
-    search: string;
-    sortBy: string;
-    sortDirection: string;
+    page?: number;
+    search?: string;
+    sortBy?: string;
+    sortDirection?: string;
 };
 
 export function useGetProductsByCategory({
-                                             categoryId,
-                                             page,
-                                             search,
-                                             sortBy,
-                                             sortDirection
-                                         }: UseGetProductsByCategoryOptions) {
+     categoryId,
+     page,
+     search,
+     sortBy,
+     sortDirection
+}: UseGetProductsByCategoryOptions) {
     return useQuery({
         ...getProductsByCategoryQueryOptions({ categoryId, page, search, sortBy, sortDirection })
     });
 }
-
+// @formatter:on

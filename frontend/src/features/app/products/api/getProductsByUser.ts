@@ -4,13 +4,21 @@ import { DEFAULT_PAGE_SIZE, SORT_DIR, SORT_PRODUCTS_BY } from "@/utils/constants
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 
-export function getProductsByUser(
-    userId: string,
+// @formatter:off
+export function getProductsByUser({
+    userId,
     page = 0,
     search = "",
     sortBy = SORT_PRODUCTS_BY,
     sortDirection = SORT_DIR
-): Promise<AxiosResponse<PageResponse<ProductResponse>>> {
+}
+: {
+    userId: string,
+    page?: number,
+    search?: string
+    sortBy?: string,
+    sortDirection?: string
+}): Promise<AxiosResponse<PageResponse<ProductResponse>>> {
     const params = new URLSearchParams({
         pageSize: DEFAULT_PAGE_SIZE.toString(),
         pageNumber: page.toString(),
@@ -22,13 +30,14 @@ export function getProductsByUser(
     return api.get(`/api/products/users/${ userId }?${ params.toString() }`);
 }
 
+// @formatter:off
 export function getProductsByUserQueryOptions({
-                                                  userId,
-                                                  page,
-                                                  search,
-                                                  sortBy,
-                                                  sortDirection
-                                              }: {
+    userId,
+    page,
+    search,
+    sortBy,
+    sortDirection
+}: {
     userId: string;
     page?: number;
     search?: string;
@@ -39,9 +48,10 @@ export function getProductsByUserQueryOptions({
         queryKey: (page || page === 0 || search || sortBy || sortDirection)
             ? ["products", `user ${ userId }`, { page, search, sortBy, sortDirection }]
             : ["products", `user ${ userId }`],
-        queryFn: () => getProductsByUser(userId, page, search, sortBy, sortDirection)
+        queryFn: () => getProductsByUser({userId, page, search, sortBy, sortDirection})
     });
 }
+// @formatter:on
 
 export type UseGetProductsByUserOptions = {
     userId: string;

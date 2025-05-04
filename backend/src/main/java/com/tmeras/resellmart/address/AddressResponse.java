@@ -11,6 +11,8 @@ import lombok.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AddressResponse {
 
+    private String name;
+
     private Integer id;
 
     private String country;
@@ -23,9 +25,9 @@ public class AddressResponse {
 
     private String postalCode;
 
-    private boolean main;
+    private String phoneNumber;
 
-    private boolean deleted;
+    private Boolean isMain;
 
     private AddressType addressType;
 
