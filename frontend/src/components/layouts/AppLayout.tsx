@@ -43,7 +43,13 @@ export function AppLayout() {
                         </Text>
                     </Flex>
 
-                    <DarkModeButton/>
+                    <Button
+                        variant="outline" size="compact-md" me={ 5 }
+                        leftSection={ <IconShoppingCart size={ 18 }/> }
+                        component={ Link } to={ paths.app.cart.path }
+                    >
+                        Cart
+                    </Button>
                 </Flex>
             </AppShell.Header>
 
@@ -65,13 +71,6 @@ export function AppLayout() {
                     />
 
                     <CategoryNavLinks closeNavBar={ () => setNavBarOpened(false) }/>
-
-                    <NavLink
-                        label="Cart"
-                        leftSection={ <IconShoppingCart size={ 18 }/> }
-                        component={ RouterNavLink } onClick={ () => setNavBarOpened(false) }
-                        to={ paths.app.cart.path } end
-                    />
 
                     <Text size="xl" fw={ 700 } c="paleIndigo.5">
                         Sell
@@ -95,7 +94,11 @@ export function AppLayout() {
                 </AppShell.Section>
 
                 <AppShell.Section>
-                    <UserMenu closeNavBar={ () => setNavBarOpened(false) }/>
+                    <Flex justify="space-between" align="center">
+                        <UserMenu closeNavBar={ () => setNavBarOpened(false) }/>
+
+                        <DarkModeButton/>
+                    </Flex>
                 </AppShell.Section>
             </AppShell.Navbar>
 

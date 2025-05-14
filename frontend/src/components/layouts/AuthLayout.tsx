@@ -39,7 +39,7 @@ export function AuthLayout() {
                         </Text>
                     </Flex>
 
-                    <Flex>
+                    <Flex align="center">
                         <Button size="xs" component={ Link } to={ paths.auth.login.path }>
                             Sign in
                         </Button>

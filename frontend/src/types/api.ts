@@ -7,6 +7,7 @@ import {
 } from "@/utils/constants.ts";
 import { z } from "zod";
 
+// TODO: Move to schemas folder?
 export const uploadImageInputSchema = z.instanceof(File)
     .refine(file => file.size <= MAX_FILE_SIZE, {
         message: `File size must be no greater than ${ MAX_FILE_SIZE / (1024 * 1024) }MB`

@@ -10,7 +10,7 @@ export function DarkModeButton() {
             <Tooltip label="Toggle Appearance">
                 <ActionIcon
                     aria-label="Dark Mode" onClick={ () => toggleColorScheme() }
-                    variant="subtle" ms="sm" size="md"
+                    variant="subtle" ms="sm" size={ 25 }
                 >
                     <IconMoonStars color={ theme.colors.blue[6] }/>
                 </ActionIcon>
@@ -19,9 +19,9 @@ export function DarkModeButton() {
             <Tooltip label="Toggle Appearance">
                 <ActionIcon
                     aria-label="Light Mode" onClick={ () => toggleColorScheme() }
-                    variant="subtle" ms="sm" size="md"
+                    variant="subtle" ms="sm" size={ 25 }
                 >
-                    <IconSun size={ 20 } stroke={ 2.5 } color={ theme.colors.yellow[4] }/>
+                    <IconSun color={ theme.colors.yellow[4] }/>
                 </ActionIcon>
             </Tooltip>
         )
