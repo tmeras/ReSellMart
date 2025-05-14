@@ -25,7 +25,8 @@ public class ProductImage {
 
     private String type;
 
-    private String filePath;
+    // Path to the product image stored on the server
+    private String imagePath;
 
     @Override
     public final boolean equals(Object o) {

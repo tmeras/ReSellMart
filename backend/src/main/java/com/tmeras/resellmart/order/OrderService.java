@@ -9,6 +9,7 @@ import com.tmeras.resellmart.email.EmailService;
 import com.tmeras.resellmart.exception.APIException;
 import com.tmeras.resellmart.exception.OperationNotPermittedException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
+import com.tmeras.resellmart.file.FileService;
 import com.tmeras.resellmart.product.Product;
 import com.tmeras.resellmart.product.ProductRepository;
 import com.tmeras.resellmart.user.User;
@@ -24,7 +25,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +42,9 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final OrderMapper orderMapper;
     private final EmailService emailService;
+    private final FileService fileService;
 
-    public OrderResponse save(OrderRequest orderRequest, Authentication authentication) throws MessagingException {
+    public OrderResponse save(OrderRequest orderRequest, Authentication authentication) throws MessagingException, IOException {
         User currentUser = (User) authentication.getPrincipal();
 
         // User is logged in, so already exists => just call .get() on optional to retrieve Hibernate-managed entity
@@ -56,13 +58,6 @@ public class OrderService {
                 !deliveryAddress.getUser().getId().equals(currentUser.getId()))
             throw new APIException("One or both of the specified addresses are related to another user");
 
-        Order order = new Order();
-        order.setPlacedAt(ZonedDateTime.now());
-        order.setPaymentMethod(PaymentMethod.valueOf(orderRequest.getPaymentMethod()));
-        order.setBuyer(currentUser);
-        order.setBillingAddress(billingAddress);
-        order.setDeliveryAddress(deliveryAddress);
-
         // Fetch the user's cart items and create corresponding order items
         List<CartItem> cartItems = cartItemRepository.findAllWithProductDetailsByUserId(currentUser.getId());
         List<Product> cartProducts = new ArrayList<>();
@@ -70,21 +65,35 @@ public class OrderService {
         if (cartItems.isEmpty())
             throw new APIException("You do not have any items in your cart");
 
-        for (CartItem cartItem : cartItems) {
-            // TODO: Check if product is deleted
+        // TODO: Stripe integration
 
-            // Reduce product's available quantity by the requested quantity
+        for (CartItem cartItem : cartItems) {
             Product cartProduct = cartItem.getProduct();
             if (cartProduct.getAvailableQuantity() < cartItem.getQuantity())
                 throw new APIException("Requested quantity of product with ID '" + cartProduct.getId() +
                         "' cannot be larger than available quantity");
+            if (cartProduct.getIsDeleted())
+                throw new APIException("Product with ID '" + cartProduct.getId() +
+                        "' is no longer available for sale");
+
+            // Reduce product's available quantity by the requested quantity
             cartProduct.setAvailableQuantity(cartProduct.getAvailableQuantity() - cartItem.getQuantity());
             cartProducts.add(cartProduct);
 
             // Create corresponding order item
             OrderItem orderItem = new OrderItem();
-            orderItem.setProduct(cartProduct);
+            orderItem.setStatus(OrderItemStatus.PENDING_PAYMENT);
+            orderItem.setProductId(cartProduct.getId());
             orderItem.setProductQuantity(cartItem.getQuantity());
+            orderItem.setProductName(cartProduct.getName());
+            orderItem.setProductPrice(cartProduct.getPrice());
+            orderItem.setProductCondition(cartProduct.getCondition());
+            orderItem.setProductSeller(cartProduct.getSeller());
+            byte[] primaryProductImageBytes = fileService.readFileFromPath(cartProduct.getImages().get(0).getImagePath());
+            String primaryProductImageName = cartProduct.getImages().get(0).getName();
+            orderItem.setProductImagePath(
+                    fileService.saveOrderItemImage(primaryProductImageBytes, primaryProductImageName, cartProduct.getId())
+            );
             orderItems.add(orderItem);
         }
 
@@ -93,11 +102,18 @@ public class OrderService {
         productRepository.saveAll(cartProducts);
 
         // Save order
+        Order order = new Order();
+        order.setPlacedAt(ZonedDateTime.now());
+        order.setStatus(OrderStatus.PENDING_PAYMENT);
+        order.setBuyer(currentUser);
+        order.setBillingAddress(billingAddress);
+        order.setDeliveryAddress(deliveryAddress);
         order.setOrderItems(orderItems);
         order = orderRepository.save(order);
 
+        // TODO: Update thymeleaf template
         // Send order confirmation mail
-        emailService.sendOrderConfirmationEmail(currentUser.getEmail(), order);
+        //emailService.sendOrderConfirmationEmail(currentUser.getEmail(), order);
 
         return orderMapper.toOrderResponse(order);
     }
@@ -115,8 +131,7 @@ public class OrderService {
             order.getOrderItems().size();
             order.getBuyer().getRoles().size();
             for (OrderItem orderItem : order.getOrderItems()) {
-                orderItem.getProduct().getSeller().getRoles().size();
-                orderItem.getProduct().getImages().size();
+                orderItem.getProductSeller().getRoles().size();
             }
         }
         List<OrderResponse> orderResponses = orders.stream()
@@ -151,8 +166,7 @@ public class OrderService {
             order.getOrderItems().size();
             order.getBuyer().getRoles().size();
             for (OrderItem orderItem : order.getOrderItems()) {
-                orderItem.getProduct().getSeller().getRoles().size();
-                orderItem.getProduct().getImages().size();
+                orderItem.getProductSeller().getRoles().size();
             }
         }
         List<OrderResponse> orderResponses = orders.stream()
@@ -172,6 +186,8 @@ public class OrderService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public void delete(Integer orderId) {
+        // TODO: Delete image if not inserted during Flyway migration
+
         orderRepository.deleteById(orderId);
     }
 }

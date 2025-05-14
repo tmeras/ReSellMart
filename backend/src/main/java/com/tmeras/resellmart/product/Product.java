@@ -6,8 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +31,8 @@ public class Product {
     private BigDecimal previousPrice;
 
     @Enumerated(EnumType.STRING)
-    private ProductCondition productCondition;
+    @Column(name = "product_condition")
+    private ProductCondition condition;
 
     private Integer availableQuantity;
 

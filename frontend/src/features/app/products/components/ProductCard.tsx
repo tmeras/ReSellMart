@@ -68,7 +68,7 @@ export function ProductCard(
                         <Flex align="center">
                             <IconTool size={ 16 }/>
                             <Text span size="sm" ms={ 5 }>
-                                { PRODUCT_CONDITION[product.productCondition] }
+                                { PRODUCT_CONDITION[product.condition] }
                             </Text>
                         </Flex>
                     </Flex>

@@ -396,7 +396,7 @@ public class ProductServiceTests {
 
         assertThat(productResponse).isEqualTo(productResponseA);
         assertThat(productA.getImages().size()).isEqualTo(1);
-        assertThat(productA.getImages().get(0).getFilePath()).isEqualTo("/uploads/test_image_1.jpeg");
+        assertThat(productA.getImages().get(0).getImagePath()).isEqualTo("/uploads/test_image_1.jpeg");
     }
 
     @Test
@@ -472,7 +472,7 @@ public class ProductServiceTests {
         productService.delete(productA.getId());
 
         verify(productRepository, times(1)).deleteById(productA.getId());
-        verify(fileService, times(1)).deleteFile(productImageA.getFilePath());
+        verify(fileService, times(1)).deleteFile(productImageA.getImagePath());
     }
 
     @Test

@@ -57,3 +57,4 @@ application:
     upload:
       product-images-path: ./uploads/product-images
       user-images-path: ./uploads/user-images
+      order-item-images-path: ./uploads/order-item-images

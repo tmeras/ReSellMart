@@ -4,7 +4,6 @@ import com.tmeras.resellmart.address.AddressResponse;
 import com.tmeras.resellmart.user.UserResponse;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -20,6 +19,10 @@ public class OrderResponse {
     private ZonedDateTime placedAt;
 
     private PaymentMethod paymentMethod;
+
+    private OrderStatus status;
+
+    private String stripeCheckoutId;
 
     private AddressResponse billingAddress;
 

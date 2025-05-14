@@ -65,3 +65,4 @@ application:
     upload:
       product-images-path: ./test-uploads/product-images
       user-images-path: ./test-uploads/user-images
+      order-item-images-path: ./test-uploads/order-item-images

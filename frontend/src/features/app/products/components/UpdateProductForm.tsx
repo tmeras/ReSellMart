@@ -64,7 +64,7 @@ export function UpdateProductForm({ product }: UpdateProductFormProps) {
             description: "",
             price: 0,
             availableQuantity: 0,
-            productCondition: "NEW",
+            condition: "NEW",
             categoryId: "1",
             images: []
         },
@@ -257,8 +257,8 @@ export function UpdateProductForm({ product }: UpdateProductFormProps) {
                         mt="sm"
                         label="Condition" required withAsterisk={ false }
                         data={ conditionOptions }
-                        key={ form.key("productCondition") }
-                        { ...form.getInputProps("productCondition") }
+                        key={ form.key("condition") }
+                        { ...form.getInputProps("condition") }
                     />
 
                     <Select

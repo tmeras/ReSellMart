@@ -37,7 +37,7 @@ public class User implements UserDetails, Principal {
 
     private LocalDate registeredAt;
 
-    // Path pointing to the user's profile picture
+    // Path to the user's profile picture stored on the server
     private String imagePath;
 
     private Boolean isEnabled;
@@ -48,6 +48,11 @@ public class User implements UserDetails, Principal {
     private String secret;
 
     @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_role",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
     private Set<Role> roles;
 
     public String getRealName() {

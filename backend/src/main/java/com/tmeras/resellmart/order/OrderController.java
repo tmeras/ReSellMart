@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -21,7 +23,7 @@ public class OrderController {
     public ResponseEntity<OrderResponse> save(
             @Valid @RequestBody OrderRequest orderRequest,
             Authentication authentication
-    ) throws MessagingException {
+    ) throws MessagingException, IOException {
         OrderResponse orderResponse = orderService.save(orderRequest, authentication);
         return new ResponseEntity<>(orderResponse, HttpStatus.CREATED);
     }

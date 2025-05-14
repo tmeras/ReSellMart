@@ -42,7 +42,9 @@ export function CartPage() {
     const cartTotal = getCartTotalQuery.data?.data;
     const totalItems =
         cartItems.reduce((acc, item) => acc + item.quantity, 0);
-    const cartValid = isCartValid(cartItems);
+    const cartValid = cartItems.every((item) =>
+        !item.product.isDeleted && (item.quantity <= item.product.availableQuantity)
+    );
     const cartEmpty = cartItems.length === 0;
 
     return (

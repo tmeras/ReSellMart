@@ -1,9 +1,7 @@
 package com.tmeras.resellmart.product;
 
-import com.tmeras.resellmart.common.AppConstants;
 import jakarta.validation.constraints.*;
 import lombok.*;
-import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
 
@@ -32,8 +30,8 @@ public class ProductRequest {
     @Digits(integer = 5, fraction = 2, message = "Price must be a decimal number with up to 2 decimal places")
     private BigDecimal price;
 
-    @NotNull(message = "Product condition must not be empty ")
-    private ProductCondition productCondition;
+    @NotNull(message = "Condition must not be empty ")
+    private ProductCondition condition;
 
     @NotNull(message = "Quantity must not be empty")
     @PositiveOrZero(message = "Quantity must be a non-negative value")

@@ -20,7 +20,7 @@ export const createProductInputSchema = z.object({
         .max(MAX_PRODUCT_DESCRIPTION_LENGTH, "Description must not exceed 5000 characters"),
     price: z.number().positive("Price must be a positive number"),
     availableQuantity: z.number().positive("Available quantity must be a positive number"),
-    productCondition: z.enum(Object.keys(PRODUCT_CONDITION) as [ProductConditionKeys]),
+    condition: z.enum(Object.keys(PRODUCT_CONDITION) as [ProductConditionKeys]),
     categoryId: z.string().min(1, "Category is required")
 });
 

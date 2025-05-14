@@ -167,7 +167,7 @@ public class ProductControllerIT {
         assertThat(response.getBody().getName()).isEqualTo(productRequest.getName());
         assertThat(response.getBody().getDescription()).isEqualTo(productRequest.getDescription());
         assertThat(response.getBody().getPrice()).isEqualTo(productRequest.getPrice());
-        assertThat(response.getBody().getProductCondition()).isEqualTo(productRequest.getProductCondition());
+        assertThat(response.getBody().getCondition()).isEqualTo(productRequest.getCondition());
         assertThat(response.getBody().getCategory().getName()).isEqualTo(productA.getCategory().getName());
         assertThat(response.getBody().getSeller().getEmail()).isEqualTo(productA.getSeller().getEmail());
     }
@@ -233,7 +233,7 @@ public class ProductControllerIT {
         assertThat(response.getBody().getDescription()).isEqualTo(productA.getDescription());
         assertThat(response.getBody().getPrice().compareTo(productA.getPrice())).isEqualTo(0);
         assertThat(response.getBody().getPreviousPrice().compareTo(productA.getPreviousPrice())).isEqualTo(0);
-        assertThat(response.getBody().getProductCondition()).isEqualTo(productA.getProductCondition());
+        assertThat(response.getBody().getCondition()).isEqualTo(productA.getCondition());
         assertThat(response.getBody().getCategory().getName()).isEqualTo(productA.getCategory().getName());
         assertThat(response.getBody().getSeller().getEmail()).isEqualTo(productA.getSeller().getEmail());
     }

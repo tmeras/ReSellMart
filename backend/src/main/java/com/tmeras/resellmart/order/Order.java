@@ -26,7 +26,13 @@ public class Order {
     private ZonedDateTime placedAt;
 
     @Enumerated(EnumType.STRING)
-    private PaymentMethod paymentMethod;
+    private PaymentMethod paymentMethod; //TODO: Modify after Stripe integration
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
+    // ID of the associated Stripe Checkout session
+    private String stripeCheckoutId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
@@ -53,7 +59,7 @@ public class Order {
 
         // TODO: Verify correctness
         for (OrderItem orderItem : orderItems) {
-            BigDecimal productPrice = orderItem.getProduct().getPrice();
+            BigDecimal productPrice = orderItem.getProductPrice();
             Integer productQuantity = orderItem.getProductQuantity();
             totalPrice = totalPrice.add(productPrice.multiply(BigDecimal.valueOf(productQuantity)));
         }

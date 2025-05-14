@@ -1,8 +1,11 @@
 package com.tmeras.resellmart.order;
 
-import com.tmeras.resellmart.product.Product;
+import com.tmeras.resellmart.product.ProductCondition;
+import com.tmeras.resellmart.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.math.BigDecimal;
 
 @Entity
 @Getter
@@ -16,11 +19,24 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Product product;
+    @Enumerated(EnumType.STRING)
+    private OrderItemStatus status;
 
-    // TODO: Add status and replace product reference
-    //  with id and product snapshot (without images)
+    private Integer productId;
 
     private Integer productQuantity;
+
+    private String productName;
+
+    private BigDecimal productPrice;
+
+    @Enumerated(EnumType.STRING)
+    private ProductCondition productCondition;
+
+    // Path to the product image stored on the server
+    private String productImagePath;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
+    private User productSeller;
 }

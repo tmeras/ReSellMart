@@ -71,7 +71,7 @@ export type ProductResponse = {
     description: string;
     price: number;
     previousPrice: number;
-    productCondition: ProductConditionKeys
+    condition: ProductConditionKeys
     availableQuantity: number;
     listedAt: string; // UTC datetime string
     isDeleted: boolean;
