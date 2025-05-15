@@ -1,6 +1,5 @@
 package com.tmeras.resellmart.order;
 
-import com.tmeras.resellmart.address.AddressResponse;
 import com.tmeras.resellmart.user.UserResponse;
 import lombok.*;
 
@@ -24,9 +23,9 @@ public class OrderResponse {
 
     private String stripeCheckoutId;
 
-    private AddressResponse billingAddress;
+    private String billingAddress;
 
-    private AddressResponse deliveryAddress;
+    private String deliveryAddress;
 
     private UserResponse buyer;
 

@@ -1,6 +1,5 @@
 package com.tmeras.resellmart.order;
 
-import com.tmeras.resellmart.address.Address;
 import com.tmeras.resellmart.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,13 +33,9 @@ public class Order {
     // ID of the associated Stripe Checkout session
     private String stripeCheckoutId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    private Address billingAddress;
+    private String billingAddress;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    private Address deliveryAddress;
+    private String deliveryAddress;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)

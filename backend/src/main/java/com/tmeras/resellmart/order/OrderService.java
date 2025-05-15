@@ -106,8 +106,8 @@ public class OrderService {
         order.setPlacedAt(ZonedDateTime.now());
         order.setStatus(OrderStatus.PENDING_PAYMENT);
         order.setBuyer(currentUser);
-        order.setBillingAddress(billingAddress);
-        order.setDeliveryAddress(deliveryAddress);
+        order.setBillingAddress(billingAddress.getFullAddress());
+        order.setDeliveryAddress(deliveryAddress.getFullAddress());
         order.setOrderItems(orderItems);
         order = orderRepository.save(order);
 

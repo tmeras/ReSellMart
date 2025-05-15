@@ -29,8 +29,8 @@ public class OrderMapper {
                 .paymentMethod(order.getPaymentMethod())
                 .status(order.getStatus())
                 .stripeCheckoutId(order.getStripeCheckoutId())
-                .billingAddress(addressMapper.toAddressResponse(order.getBillingAddress()))
-                .deliveryAddress(addressMapper.toAddressResponse(order.getDeliveryAddress()))
+                .billingAddress(order.getBillingAddress())
+                .deliveryAddress(order.getDeliveryAddress())
                 .buyer(userMapper.toUserResponse(order.getBuyer()))
                 .orderItems(orderItemResponses)
                 .build();

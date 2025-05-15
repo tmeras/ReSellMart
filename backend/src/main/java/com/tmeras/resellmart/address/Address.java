@@ -38,4 +38,11 @@ public class Address {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private User user;
+
+    public String getFullAddress() {
+        if (phoneNumber == null || phoneNumber.isEmpty())
+            return String.format("%s, %s, %s, %s, %s, %s", name, street, state, city, postalCode, country);
+
+        return String.format("%s, %s, %s, %s, %s, %s, %s", name, street, state, city, postalCode, country, phoneNumber);
+    }
 }

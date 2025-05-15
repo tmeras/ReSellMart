@@ -1,4 +1,10 @@
 ALTER TABLE customer_order
+    DROP COLUMN delivery_address_id,
+    DROP COLUMN billing_address_id,
+    DROP FOREIGN KEY FK_ORDER_ON_DELIVERYADDRESS,
+    DROP FOREIGN KEY FK_ORDER_ON_BILLINGADDRESS,
+    ADD COLUMN delivery_address VARCHAR(255) NULL,
+    ADD COLUMN billing_address VARCHAR(255) NULL,
     ADD COLUMN status VARCHAR(255) NULL,
     ADD COLUMN stripe_checkout_id VARCHAR(255) NULL;
 

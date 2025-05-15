@@ -193,40 +193,45 @@ VALUES
 (32, './uploads/flyway-product-images/witcher3_1.jpeg', 'witcher3_1.jpeg', 'image/jpeg', 17),
 (33, './uploads/flyway-product-images/witcher3_2.jpeg', 'witcher3_2.jpeg', 'image/jpeg', 17);
 
-INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address_id,
-                                 delivery_address_id, buyer_id, status, stripe_checkout_id)
-VALUES (1, NOW(), 'CASH', 3, 3, 3, "PAID", NULL);
+INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address,
+                                 delivery_address, buyer_id, status, stripe_checkout_id)
+VALUES (1, NOW(), 'CASH', "Mary Cole, Oxford Road, Greater Manchester, Manchester, M13 9PL, United Kingdom, +441612345678",
+        "Mary Cole, Oxford Road, Greater Manchester, Manchester, M13 9PL, United Kingdom, +441612345678", 3, "PAID", NULL);
 INSERT IGNORE INTO order_item(id, product_id, product_quantity, order_id, status, product_name, product_price,
                              product_condition, product_image_path, product_seller_id)
 VALUES (1, 8, 2, 1, 'SHIPPED', 'Nike T-shirt', 25, 'NEW', './uploads/flyway-order-item-images/nike_shirt_1.png', 2),
        (2, 9, 3, 1, 'DELIVERED', 'Levi\'s Jeans', 60, 'FAIR', './uploads/flyway-order-item-images/levis_jeans_1.png', 2);
 
-INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address_id,
-                                 delivery_address_id, buyer_id, status, stripe_checkout_id)
-VALUES (2, NOW(), 'CARD', 1, 1, 1, "PAID", NULL);
+INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address,
+                                 delivery_address, buyer_id, status, stripe_checkout_id)
+VALUES (2, NOW(), 'CARD', "Theodore Meras, Ermou Street, Attica, Athens, 10563, Greece, +302101234567",
+        "Theodore Meras, Ermou Street, Attica, Athens, 10563, Greece, +302101234567", 1, "PAID", NULL);
 INSERT IGNORE INTO order_item(id, product_id, product_quantity, order_id, status, product_name, product_price,
                              product_condition, product_image_path, product_seller_id)
 VALUES (3, 11, 1, 2, 'PENDING_SHIPMENT', 'Canon EOS 5D Mark IV', 1000, 'LIKE_NEW', './uploads/flyway-order-item-images/canon_1.png', 2);
 
-INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address_id,
-                                 delivery_address_id, buyer_id, status, stripe_checkout_id)
-VALUES (3, NOW(), 'CARD', 1, 1, 1, "PAID", NULL);
+INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address,
+                                 delivery_address, buyer_id, status, stripe_checkout_id)
+VALUES (3, NOW(), 'CARD', "Theodore Meras, Ermou Street, Attica, Athens, 10563, Greece, +302101234567",
+        "Theodore Meras, Ermou Street, Attica, Athens, 10563, Greece, +302101234567", 1, "PAID", NULL);
 INSERT IGNORE INTO order_item(id, product_id, product_quantity, order_id, status, product_name, product_price,
                              product_condition, product_image_path, product_seller_id)
 VALUES (4, 12, 1, 3, 'DELIVERED', 'Nintendo Switch OLED', 35, 'NEW', './uploads/flyway-order-item-images/switch_1.png', 2),
        (5, 13, 1, 3, 'DELIVERED', 'Harry Potter Book Set', 150, 'LIKE_NEW', './uploads/flyway-order-item-images/harry_1.png', 3);
 
-INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address_id,
-                                 delivery_address_id, buyer_id, status, stripe_checkout_id)
-VALUES (4, NOW(), 'CARD', 2, 2, 2, "PAID", NULL);
+INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address,
+                                 delivery_address, buyer_id, status, stripe_checkout_id)
+VALUES (4, NOW(), 'CARD', "Edmund Smith, Mappin Street, South Yorkshire, Sheffield, S1 4DT, United Kingdom, +441234567890",
+        "Edmund Smith, Mappin Street, South Yorkshire, Sheffield, S1 4DT, United Kingdom, +441234567890", 2, "PAID", NULL);
 INSERT IGNORE INTO order_item(id, product_id, product_quantity, order_id, status, product_name, product_price,
                              product_condition, product_image_path, product_seller_id)
 VALUES (6, 15, 1, 4, 'SHIPPED', 'Assassin\'s Creed Valhalla PS4', 60, 'NEW', './uploads/flyway-order-item-images/ac_1.jpeg', 3),
        (7, 16 ,2, 4, 'DELIVERED', 'Xbox Series X 1TB', 450, 'DAMAGED', './uploads/flyway-order-item-images/xbox_1.jpeg', 3);
 
-INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address_id,
-                                 delivery_address_id, buyer_id, status, stripe_checkout_id)
-VALUES (5, NOW(), 'CARD', 3, 3, 3, "PAID", NULL);
+INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address,
+                                 delivery_address, buyer_id, status, stripe_checkout_id)
+VALUES (5, NOW(), 'CARD', "Mary Cole, Oxford Road, Greater Manchester, Manchester, M13 9PL, United Kingdom, +441612345678",
+        "Mary Cole, Oxford Road, Greater Manchester, Manchester, M13 9PL, United Kingdom, +441612345678", 3, "PAID", NULL);
 INSERT IGNORE INTO order_item(id, product_id, product_quantity, order_id, status, product_name, product_price,
                              product_condition, product_image_path, product_seller_id)
 VALUES (8, 4, 2, 5, 'SHIPPED', 'Sony WH-1000XM4', 350, 'LIKE_NEW', './uploads/flyway-order-item-images/xm4_1.png', 1),
