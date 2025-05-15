@@ -58,6 +58,10 @@ export const paths = {
         cart: {
             path: "/app/cart",
             getHref: () => "/app/cart"
+        },
+        checkout: {
+            path: "/app/checkout",
+            getHref: () => "/app/checkout"
         }
     },
 } as const

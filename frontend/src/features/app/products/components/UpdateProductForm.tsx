@@ -63,7 +63,7 @@ export function UpdateProductForm({ product }: UpdateProductFormProps) {
             name: "",
             description: "",
             price: 0,
-            availableQuantity: 0,
+            availableQuantity: 1,
             condition: "NEW",
             categoryId: "1",
             images: []
@@ -98,7 +98,8 @@ export function UpdateProductForm({ product }: UpdateProductFormProps) {
             form.initialize({
                 ...product,
                 categoryId: product.category.id.toString(),
-                images
+                images,
+                availableQuantity: product.availableQuantity > 0 ? product.availableQuantity : 1
             });
         }
     }, [product]);

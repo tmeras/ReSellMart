@@ -115,6 +115,13 @@ export function UpdateAddressButton({ address }: UpdateAddressButtonProps) {
 
                     <TextInput
                         mt="sm"
+                        label="Street" required withAsterisk={ false }
+                        key={ form.key("street") }
+                        { ...form.getInputProps("street") }
+                    />
+
+                    <TextInput
+                        mt="sm"
                         label="State" required withAsterisk={ false }
                         key={ form.key("state") }
                         { ...form.getInputProps("state") }
@@ -125,13 +132,6 @@ export function UpdateAddressButton({ address }: UpdateAddressButtonProps) {
                         label="City" required withAsterisk={ false }
                         key={ form.key("city") }
                         { ...form.getInputProps("city") }
-                    />
-
-                    <TextInput
-                        mt="sm"
-                        label="Street" required withAsterisk={ false }
-                        key={ form.key("street") }
-                        { ...form.getInputProps("street") }
                     />
 
                     <Flex gap="xs">

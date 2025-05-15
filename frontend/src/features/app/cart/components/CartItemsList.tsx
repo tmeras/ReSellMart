@@ -9,14 +9,13 @@ type CartItemsListProps = {
     cartTotal: number;
     totalItems: number;
     cartValid: boolean;
+    cartEmpty: boolean;
     title?: ReactNode
 }
 
 export function CartItemsList({
-    cartItems, cartTotal, totalItems, cartValid, title = <Title>Cart</Title>
+                                  cartItems, cartTotal, totalItems, cartValid, cartEmpty, title = <Title>Cart</Title>
 }: CartItemsListProps) {
-    const cartEmpty = cartItems.length === 0;
-
     return (
         <Paper
             p="md" radius="sm"

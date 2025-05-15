@@ -1,18 +1,14 @@
-import {
-    CreateAddressInput,
-    createAddressInputSchema,
-    useCreateAddress
-} from "@/features/app/addresses/api/createAddress.ts";
+import { CreateAddressInput, createAddressInputSchema, useCreateAddress } from "@/api/addresses/createAddress.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { ADDRESS_TYPE, AddressTypeKeys } from "@/utils/constants.ts";
-import { ActionIcon, Button, Checkbox, Flex, Modal, Select, TextInput, Tooltip } from "@mantine/core";
+import { ActionIcon, ActionIconProps, Button, Checkbox, Flex, Modal, Select, TextInput, Tooltip } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconCirclePlus, IconX } from "@tabler/icons-react";
 import { Country } from "country-state-city";
 import { useMemo, useState } from "react";
 
-export function CreateAddressActionIcon() {
+export function CreateAddressActionIcon({ ...props }: ActionIconProps) {
     const { user } = useAuth();
     const [modalOpened, setModalOpened] = useState(false);
 
@@ -97,6 +93,13 @@ export function CreateAddressActionIcon() {
 
                     <TextInput
                         mt="sm"
+                        label="Street" required withAsterisk={ false }
+                        key={ form.key("street") }
+                        { ...form.getInputProps("street") }
+                    />
+
+                    <TextInput
+                        mt="sm"
                         label="State" required withAsterisk={ false }
                         key={ form.key("state") }
                         { ...form.getInputProps("state") }
@@ -107,13 +110,6 @@ export function CreateAddressActionIcon() {
                         label="City" required withAsterisk={ false }
                         key={ form.key("city") }
                         { ...form.getInputProps("city") }
-                    />
-
-                    <TextInput
-                        mt="sm"
-                        label="Street" required withAsterisk={ false }
-                        key={ form.key("street") }
-                        { ...form.getInputProps("street") }
                     />
 
                     <Flex gap="xs">
@@ -155,10 +151,11 @@ export function CreateAddressActionIcon() {
 
             <Tooltip label="Add new address">
                 <ActionIcon
-                    variant="subtle" size="lg" mt={ 6 } ms={ 4 }
+                    variant="subtle" mt={ 6 } ms={ 4 }
                     onClick={ () => {
                         setModalOpened(true);
                     } }
+                    { ...props }
                 >
                     <IconCirclePlus size={ 30 }/>
                 </ActionIcon>
