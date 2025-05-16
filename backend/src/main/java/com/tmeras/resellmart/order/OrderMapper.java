@@ -31,6 +31,7 @@ public class OrderMapper {
                 .stripeCheckoutId(order.getStripeCheckoutId())
                 .billingAddress(order.getBillingAddress())
                 .deliveryAddress(order.getDeliveryAddress())
+                .total(order.getTotalPrice())
                 .buyer(userMapper.toUserResponse(order.getBuyer()))
                 .orderItems(orderItemResponses)
                 .build();

@@ -62,6 +62,14 @@ export const paths = {
         checkout: {
             path: "/app/checkout",
             getHref: () => "/app/checkout"
+        },
+        purchases: {
+            path: "/app/my-purchases",
+            getHref: () => "/app/my-purchases"
+        },
+        sales: {
+            path: "/app/my-sales",
+            getHref: () => "/app/my-sales"
         }
     },
 } as const

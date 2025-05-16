@@ -165,45 +165,43 @@ export function SellerProductsList({ sellerId }: SellerProductsListProps) {
     });
 
     return (
-        <>
-            <Flex direction="column">
-                <Flex justify="flex-end">
-                    <NativeSelect
-                        data={ sortOptions }
-                        value={ sort }
-                        onChange={ (e) => {
-                            const selectedSort = e.currentTarget.value;
-                            const [sortBy, sortDirection] = selectedSort.split(" ");
+        <Flex direction="column">
+            <Flex justify="flex-end">
+                <NativeSelect
+                    data={ sortOptions }
+                    value={ sort }
+                    onChange={ (e) => {
+                        const selectedSort = e.currentTarget.value;
+                        const [sortBy, sortDirection] = selectedSort.split(" ");
 
+                        setSearchParams({
+                            page: "0",
+                            sortBy,
+                            sortDirection
+                        });
+                    } }
+                />
+            </Flex>
+
+            <Flex direction="column" gap="xl" mt="sm">
+                { productCards }
+            </Flex>
+
+            { totalPages! > 1 &&
+                <Flex align="center" justify="center" mt="xl">
+                    <Pagination
+                        total={ totalPages! } value={ page + 1 }
+                        onChange={ (p) => {
                             setSearchParams({
-                                page: "0",
+                                page: (p - 1).toString(),
                                 sortBy,
                                 sortDirection
                             });
+                            window.scrollTo({ top: 0 });
                         } }
                     />
                 </Flex>
-
-                <Flex direction="column" gap="xl" mt="sm">
-                    { productCards }
-                </Flex>
-
-                { totalPages! > 1 &&
-                    <Flex align="center" justify="center" mt="xl">
-                        <Pagination
-                            total={ totalPages! } value={ page + 1 }
-                            onChange={ (p) => {
-                                setSearchParams({
-                                    page: (p - 1).toString(),
-                                    sortBy,
-                                    sortDirection
-                                });
-                                window.scrollTo({ top: 0 });
-                            } }
-                        />
-                    </Flex>
-                }
-            </Flex>
-        </>
+            }
+        </Flex>
     );
 }

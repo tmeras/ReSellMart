@@ -19,8 +19,10 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
             </Flex>
         );
 
+    const redirectTo = encodeURIComponent(`${ location.pathname }${ location.search }`);
+
     if (!user)
-        return <Navigate to={ `${ paths.auth.login.path }?redirectTo=${ location.pathname }` } replace/>;
+        return <Navigate to={ `${ paths.auth.login.path }?redirectTo=${ redirectTo }` } replace/>;
 
     return children;
 }

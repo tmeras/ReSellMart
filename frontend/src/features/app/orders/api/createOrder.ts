@@ -1,4 +1,5 @@
 import { getCartQueryOptions } from "@/api/cart/getCart.ts";
+import { getPurchasesByUserQueryOptions } from "@/features/app/orders/api/getPurchasesByUser.ts";
 import { api } from "@/lib/apiClient.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
@@ -20,12 +21,16 @@ export type UseCreateOrderOptions = {
 
 export function useCreateOrder({ userId }: UseCreateOrderOptions) {
     const queryClient = useQueryClient();
-    // TODO: Invalidate user order queries and admin order queries
+    // TODO: Invalidate admin order queries (also in other products queries etc.)
 
     return useMutation({
         onSuccess: async () => {
             await queryClient.invalidateQueries({
                 queryKey: getCartQueryOptions({ userId }).queryKey
+            });
+
+            await queryClient.invalidateQueries({
+                queryKey: getPurchasesByUserQueryOptions({ userId }).queryKey
             });
         },
         mutationFn: createOrder

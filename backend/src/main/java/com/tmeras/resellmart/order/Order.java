@@ -48,11 +48,9 @@ public class Order {
     @JoinColumn(name = "orderId", nullable = false)
     private List<OrderItem> orderItems;
 
-    // TODO: Return in response + in cart???
     public BigDecimal getTotalPrice() {
         BigDecimal totalPrice = BigDecimal.ZERO;
 
-        // TODO: Verify correctness
         for (OrderItem orderItem : orderItems) {
             BigDecimal productPrice = orderItem.getProductPrice();
             Integer productQuantity = orderItem.getProductQuantity();

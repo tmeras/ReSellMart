@@ -22,6 +22,7 @@ public class OrderItem {
     @Enumerated(EnumType.STRING)
     private OrderItemStatus status;
 
+    // Below fields make up a snapshot of product details at time of order
     private Integer productId;
 
     private Integer productQuantity;

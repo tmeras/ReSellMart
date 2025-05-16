@@ -3,6 +3,8 @@ import {
     ACCEPTED_IMAGE_TYPES,
     AddressTypeKeys,
     MAX_FILE_SIZE,
+    OrderItemStatusKeys,
+    OrderStatusKeys,
     ProductConditionKeys
 } from "@/utils/constants.ts";
 import { z } from "zod";
@@ -107,4 +109,29 @@ export type AddressResponse = {
     isMain: boolean;
     addressType: AddressTypeKeys;
     userId: number;
+}
+
+export type OrderItemResponse = {
+    id: number;
+    status: OrderItemStatusKeys;
+    productId: number;
+    productQuantity: number;
+    productName: string
+    productPrice: number;
+    productCondition: ProductConditionKeys;
+    productImage: string; //base64 string
+    productSeller: UserResponse;
+}
+
+export type OrderResponse = {
+    id: number;
+    placedAt: string; // UTC datetime string
+    paymentMethod: string;
+    status: OrderStatusKeys;
+    stripeCheckoutId: string;
+    billingAddress: string;
+    deliveryAddress: string;
+    total: number;
+    buyer: UserResponse;
+    orderItems: OrderItemResponse[];
 }

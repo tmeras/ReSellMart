@@ -3,6 +3,7 @@ package com.tmeras.resellmart.order;
 import com.tmeras.resellmart.user.UserResponse;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -26,6 +27,8 @@ public class OrderResponse {
     private String billingAddress;
 
     private String deliveryAddress;
+
+    private BigDecimal total;
 
     private UserResponse buyer;
 

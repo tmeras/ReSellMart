@@ -39,7 +39,7 @@ public class OrderController {
         return new ResponseEntity<>(foundOrders, HttpStatus.OK);
     }
 
-    @GetMapping("/users/{user-id}/orders")
+    @GetMapping("/users/{user-id}/purchases")
     public ResponseEntity<PageResponse<OrderResponse>> findAllByBuyerId(
             @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
