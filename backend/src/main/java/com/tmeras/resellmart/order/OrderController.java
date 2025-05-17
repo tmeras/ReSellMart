@@ -53,6 +53,20 @@ public class OrderController {
         return new ResponseEntity<>(foundOrders, HttpStatus.OK);
     }
 
+    @GetMapping("/users/{user-id}/sales")
+    public ResponseEntity<PageResponse<OrderResponse>> findAllByProductSellerId(
+            @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
+            @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_ORDERS_BY, required = false) String sortBy,
+            @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection,
+            @PathVariable(name = "user-id") Integer productSellerId,
+            Authentication authentication
+    ) {
+        PageResponse<OrderResponse> foundOrders =
+                orderService.findAllByProductSellerId(pageNumber, pageSize, sortBy, sortDirection, productSellerId, authentication);
+        return new ResponseEntity<>(foundOrders, HttpStatus.OK);
+    }
+
     @DeleteMapping("/orders/{order-id}")
     public ResponseEntity<OrderResponse> delete(@PathVariable(name = "order-id") Integer orderId) {
         orderService.delete(orderId);

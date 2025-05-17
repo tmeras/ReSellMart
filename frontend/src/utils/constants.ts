@@ -80,14 +80,6 @@ export const ORDER_ITEM_STATUS = {
 
 export type OrderItemStatusKeys = keyof typeof ORDER_ITEM_STATUS;
 
-// Map order item status to step for stepper component
-export const ORDER_ITEM_STATUS_STEP = {
-    PENDING_PAYMENT: 0,
-    PENDING_SHIPMENT: 1,
-    SHIPPED: 2,
-    DELIVERED: 3
-} as const;
-
 // Order status
 export const ORDER_STATUS = {
     PENDING_PAYMENT: "Pending Payment",

@@ -65,7 +65,7 @@ public class OrderService {
         if (cartItems.isEmpty())
             throw new APIException("You do not have any items in your cart");
 
-        // TODO: Stripe integration
+        // TODO: Stripe integration + emails on placed to seller, on delivered to buyer
 
         for (CartItem cartItem : cartItems) {
             Product cartProduct = cartItem.getProduct();
@@ -172,6 +172,53 @@ public class OrderService {
         List<OrderResponse> orderResponses = orders.stream()
                 .map(orderMapper::toOrderResponse)
                 .toList();
+
+        return new PageResponse<>(
+                orderResponses,
+                orders.getNumber(),
+                orders.getSize(),
+                orders.getTotalElements(),
+                orders.getTotalPages(),
+                orders.isFirst(),
+                orders.isLast()
+        );
+    }
+
+    // Find all the orders that include products sold by the given seller
+    public PageResponse<OrderResponse> findAllByProductSellerId(
+            Integer pageNumber, Integer pageSize, String sortBy,
+            String sortDirection, Integer productSellerId, Authentication authentication
+    ) {
+        User currentUser = (User) authentication.getPrincipal();
+        if (!currentUser.getId().equals(productSellerId))
+            throw new OperationNotPermittedException("You do not have permission to view these orders");
+
+        Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        Page<Order> orders = orderRepository.findAllByProductSellerId(pageable, productSellerId);
+        // Initialise lazy associations
+        for (Order order : orders) {
+            order.getOrderItems().size();
+            order.getBuyer().getRoles().size();
+            for (OrderItem orderItem : order.getOrderItems()) {
+                orderItem.getProductSeller().getRoles().size();
+            }
+        }
+        List<OrderResponse> orderResponses = orders.stream()
+                .map(orderMapper::toOrderResponse)
+                .toList();
+
+        // Only return order items that are sold by the given seller
+        orderResponses.forEach(orderResponse -> {
+                orderResponse.setOrderItems(orderResponse.getOrderItems().stream()
+                        .filter(orderItem -> orderItem.getProductSeller().getId().equals(productSellerId))
+                        .toList()
+                );
+                orderResponse.setTotal(orderResponse.calculateTotalPrice());
+            }
+        );
+
 
         return new PageResponse<>(
                 orderResponses,

@@ -48,7 +48,7 @@ public class Order {
     @JoinColumn(name = "orderId", nullable = false)
     private List<OrderItem> orderItems;
 
-    public BigDecimal getTotalPrice() {
+    public BigDecimal calculateTotalPrice() {
         BigDecimal totalPrice = BigDecimal.ZERO;
 
         for (OrderItem orderItem : orderItems) {

@@ -1,28 +1,28 @@
-import { useGetPurchasesByUser } from "@/features/app/orders/api/getPurchasesByUser.ts";
-import { PurchaseCard } from "@/features/app/orders/components/PurchaseCard.tsx";
+import { useGetSalesByUser } from "@/features/app/orders/api/getSalesByUser.ts";
+import { SaleCard } from "@/features/app/orders/components/SaleCard.tsx";
 import { ORDER_SORT_OPTIONS, SORT_ORDERS_BY } from "@/utils/constants.ts";
 import { Flex, Loader, NativeSelect, Pagination, Text } from "@mantine/core";
 import { useSearchParams } from "react-router";
 
-export type PurchasesListProps = {
+export type SalesListProps = {
     userId: string;
 };
 
-export function PurchasesList({ userId }: PurchasesListProps) {
+export function SalesList({ userId }: SalesListProps) {
     const [searchParams, setSearchParams] = useSearchParams();
     const page = parseInt(searchParams.get("page") || "0", 10) || 0;
     const sortBy = searchParams.get("sortBy") || SORT_ORDERS_BY;
     const sortDirection = searchParams.get("sortDirection") || "desc";
     const sort = `${ sortBy } ${ sortDirection }`;
 
-    const getPurchasesByUserQuery = useGetPurchasesByUser({
+    const getSalesByUserQuery = useGetSalesByUser({
         userId,
         page,
         sortBy,
         sortDirection
     });
 
-    if (getPurchasesByUserQuery.isPending) {
+    if (getSalesByUserQuery.isPending) {
         return (
             <Flex align="center" justify="center" h="100vh">
                 <Loader type="bars" size="md"/>
@@ -30,19 +30,19 @@ export function PurchasesList({ userId }: PurchasesListProps) {
         );
     }
 
-    if (getPurchasesByUserQuery.isError) {
-        console.log("Error fetching purchases", getPurchasesByUserQuery.error);
+    if (getSalesByUserQuery.isError) {
+        console.log("Error fetching sales", getSalesByUserQuery.error);
         return (
             <Text c="red.5">
-                There was an error when fetching your purchases. Please refresh and try again.
+                There was an error when fetching your sales. Please refresh and try again.
             </Text>
         );
     }
 
-    const purchases = getPurchasesByUserQuery.data?.data.content;
-    const totalPages = getPurchasesByUserQuery.data?.data.totalPages;
+    const sales = getSalesByUserQuery.data?.data.content;
+    const totalPages = getSalesByUserQuery.data?.data.totalPages;
 
-    if (purchases.length == 0) return <div>No purchases to display</div>;
+    if (sales.length == 0) return <div>No sales to display</div>;
 
     return (
         <Flex direction="column">
@@ -66,8 +66,8 @@ export function PurchasesList({ userId }: PurchasesListProps) {
             </Flex>
 
             <Flex direction="column" gap="lg" align="center">
-                { purchases.map((purchase) =>
-                    <PurchaseCard key={ purchase.id } purchase={ purchase }/>
+                { sales.map((sale) =>
+                    <SaleCard key={ sale.id } sale={ sale }/>
                 ) }
             </Flex>
 

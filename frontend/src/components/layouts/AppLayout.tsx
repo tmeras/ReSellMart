@@ -5,7 +5,14 @@ import { DarkModeButton } from "@/components/ui/DarkModeButton.tsx";
 import { UserMenu } from "@/components/ui/UserMenu.tsx";
 import { paths } from "@/config/paths.ts";
 import { AppShell, Burger, Button, Divider, Flex, Image, NavLink, ScrollArea, Text } from "@mantine/core";
-import { IconCirclePlus, IconGridDots, IconPackage, IconReceipt, IconShoppingCart } from "@tabler/icons-react";
+import {
+    IconCash,
+    IconCirclePlus,
+    IconGridDots,
+    IconPackage,
+    IconReceipt,
+    IconShoppingCart
+} from "@tabler/icons-react";
 import { useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Link, NavLink as RouterNavLink, Outlet, useNavigate } from "react-router";
@@ -90,14 +97,19 @@ export function AppLayout() {
                         to={ paths.app.sellerProducts.path } end
                     />
 
-                    <Button
-                        size="compact-md" variant="light" mt="sm" mb="md" ms="sm"
+                    <NavLink
+                        label="My Sales"
+                        leftSection={ <IconCash size={ 18 }/> }
+                        component={ RouterNavLink } onClick={ () => setNavBarOpened(false) }
+                        to={ paths.app.sales.path } end
+                    />
+
+                    <NavLink
+                        label="New Product Listing"
                         leftSection={ <IconCirclePlus size={ 18 }/> }
-                        onClick={ () => setNavBarOpened(false) }
-                        component={ Link } to={ paths.app.createProduct.path }
-                    >
-                        Create product listing
-                    </Button>
+                        component={ RouterNavLink } onClick={ () => setNavBarOpened(false) }
+                        to={ paths.app.createProduct.path }
+                    />
                 </AppShell.Section>
 
                 <AppShell.Section>

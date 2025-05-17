@@ -73,7 +73,6 @@ public class FileService {
         return saveFile(file, fileName, orderItemImageUploadPath, fileUploadSubPath, 1);
     }
 
-
     public String saveFile(
             @NonNull MultipartFile file, @NonNull String fileUploadPath, @NonNull String fileUploadSubPath, @NonNull Integer fileId
     ) throws IOException{

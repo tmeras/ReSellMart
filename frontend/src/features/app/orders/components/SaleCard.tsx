@@ -1,5 +1,3 @@
-import { CustomLink } from "@/components/ui/link/CustomLink.tsx";
-import { paths } from "@/config/paths.ts";
 import { OrderItemStatusStepper } from "@/features/app/orders/components/OrderItemStatusStepper.tsx";
 import { OrderResponse } from "@/types/api.ts";
 import { base64ToDataUri } from "@/utils/fileUtils.ts";
@@ -7,15 +5,15 @@ import { Button, Card, Divider, Flex, Image, Popover, Text, useMantineColorSchem
 import { IconArrowDown } from "@tabler/icons-react";
 import { useState } from "react";
 
-export type PurchaseCardProps = {
-    purchase: OrderResponse;
+export type SaleCardProps = {
+    sale: OrderResponse;
 }
 
-export function PurchaseCard({ purchase }: PurchaseCardProps) {
+export function SaleCard({ sale }: SaleCardProps) {
     const { colorScheme } = useMantineColorScheme();
     const [popoverOpened, setPopoverOpened] = useState(false);
 
-    const placedAt = new Date(purchase.placedAt);
+    const placedAt = new Date(sale.placedAt);
 
     return (
         <Card
@@ -48,7 +46,7 @@ export function PurchaseCard({ purchase }: PurchaseCardProps) {
 
                 <Flex align="center" justify="space-between">
                     <Text>
-                        #{ purchase.id }
+                        #{ sale.id }
                     </Text>
 
                     <Popover opened={ popoverOpened } onChange={ setPopoverOpened } withArrow>
@@ -58,27 +56,27 @@ export function PurchaseCard({ purchase }: PurchaseCardProps) {
                                 rightSection={ <IconArrowDown size={ 20 }/> }
                                 onClick={ () => setPopoverOpened(!popoverOpened) }
                             >
-                                { purchase.deliveryAddress.split(',')[0] }
+                                { sale.deliveryAddress.split(',')[0] }
                             </Button>
                         </Popover.Target>
 
                         <Popover.Dropdown>
                             <Flex maw={ 250 }>
                                 <Text>
-                                    { purchase.deliveryAddress }
+                                    { sale.deliveryAddress }
                                 </Text>
                             </Flex>
                         </Popover.Dropdown>
                     </Popover>
 
                     <Text>
-                        £ { purchase.total }
+                        £ { sale.total }
                     </Text>
                 </Flex>
             </Card.Section>
 
             <Card.Section inheritPadding withBorder mt="sm">
-                { purchase.orderItems.map((orderItem, index) =>
+                { sale.orderItems.map((orderItem, index) =>
                     <div key={ orderItem.id }>
                         <Flex w="100%" gap="sm" mb="xs">
                             <Flex align="center">
@@ -94,30 +92,21 @@ export function PurchaseCard({ purchase }: PurchaseCardProps) {
                                     { orderItem.productName }
                                 </Text>
 
-                                <Text size="xs" c="dimmed">
-                                    Sold by { " " }
-                                    <CustomLink
-                                        to={ paths.app.productsByUser.getHref(orderItem.productSeller.id.toString()) }>
-                                        { orderItem.productSeller.name }
-                                    </CustomLink>
-                                </Text>
-
                                 <Text size="sm" mt="xs">
                                     Qty: { orderItem.productQuantity }
                                 </Text>
 
                                 <OrderItemStatusStepper status={ orderItem.status }/>
 
-                                { orderItem.status === "SHIPPED" &&
+                                { orderItem.status === "PENDING_SHIPMENT" &&
                                     <Button
                                         variant="light" w="fit-content"
                                         mt="md" size="sm"
                                     >
-                                        Mark as delivered
+                                        Mark as shipped
                                     </Button>
                                 }
                             </Flex>
-
 
                             <Flex align="center" ms="auto">
                                 <Text size="md">
@@ -126,7 +115,7 @@ export function PurchaseCard({ purchase }: PurchaseCardProps) {
                             </Flex>
                         </Flex>
 
-                        { index !== (purchase.orderItems.length - 1) &&
+                        { index !== (sale.orderItems.length - 1) &&
                             <Divider my="sm" size="md"/>
                         }
                     </div>
