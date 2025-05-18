@@ -50,7 +50,10 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final MfaService mfaService;
 
-    @Value("${application.mailing.frontend.activation-url}")
+    @Value("${application.frontend.base-url}")
+    private String frontendBaseUrl;
+
+    @Value("${application.mailing.activation-url}")
     private String activationUrl;
 
     @Value("${application.security.jwt.refresh-token.expiration}")
@@ -98,7 +101,7 @@ public class AuthenticationService {
         emailService.sendActivationEmail(
                 user.getEmail(),
                 user.getRealName(),
-                activationUrl + activationCode,
+                frontendBaseUrl + activationUrl + activationCode,
                 activationCode
         );
     }

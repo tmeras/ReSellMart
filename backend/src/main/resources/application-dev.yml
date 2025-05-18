@@ -49,9 +49,19 @@ application:
         expiration: 604800000 # 1 week
         #expiration: 120000 # 2 minutes
 
+  # TODO: Change for deployment
+  backend:
+    base-url: "http://localhost:8080"
+  frontend:
+    base-url: "http://localhost:5173"
+
   mailing:
-    frontend:
-      activation-url: "http://localhost:5173/auth/activation?code=" # TODO: Change for deployment
+    activation-url: "/auth/activation?code="
+
+  stripe:
+    secret-key: ${STRIPE_SECRET_KEY}
+    checkout-success-url: "/app/my-purchases"
+    checkout-cancel-url: "/app/checkout"
 
   file:
     upload:
