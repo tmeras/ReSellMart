@@ -1,5 +1,6 @@
 package com.tmeras.resellmart.order;
 
+import com.stripe.exception.StripeException;
 import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
 import jakarta.mail.MessagingException;
@@ -11,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -20,12 +22,32 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/orders")
-    public ResponseEntity<OrderResponse> save(
+    public ResponseEntity<Map<String, String>> save(
             @Valid @RequestBody OrderRequest orderRequest,
             Authentication authentication
-    ) throws MessagingException, IOException {
-        OrderResponse orderResponse = orderService.save(orderRequest, authentication);
-        return new ResponseEntity<>(orderResponse, HttpStatus.CREATED);
+    ) throws MessagingException, IOException, StripeException {
+        String redirectUrl = orderService.save(orderRequest, authentication);
+        Map<String, String> response = Map.of("redirectUrl", redirectUrl);
+
+        // Redirect to stripe checkout page
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/orders/stripe-webhook")
+    public ResponseEntity<String> handleStripeEvent(
+            @RequestBody String payload,
+            @RequestHeader("Stripe-Signature") String sigHeader
+    ) throws StripeException, MessagingException {
+        String response = orderService.handleStripeEvent(payload, sigHeader);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/orders/fulfill")
+    public ResponseEntity<?> fulfillOrder(
+            @RequestBody Map<String, String> body
+    ) throws MessagingException, StripeException {
+        orderService.fulfillOrder(body.get("stripeSessionId"));
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/orders")

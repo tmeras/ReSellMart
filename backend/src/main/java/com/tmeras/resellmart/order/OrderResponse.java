@@ -19,7 +19,7 @@ public class OrderResponse {
 
     private ZonedDateTime placedAt;
 
-    private PaymentMethod paymentMethod;
+    private String paymentMethod;
 
     private OrderStatus status;
 

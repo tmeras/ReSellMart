@@ -26,19 +26,21 @@ export function CheckoutTotalCard(
 
         try {
             setLoading(true);
-            await createOrderMutation.mutateAsync({
+            const response = await createOrderMutation.mutateAsync({
                 data: {
                     billingAddressId: billingAddress.id.toString(),
                     deliveryAddressId: deliveryAddress.id.toString()
                 }
             });
+
+            // Navigate to Stripe checkout page
+            window.location.href = response.data.redirectUrl;
         } catch (error) {
             console.log("Error creating order", error);
             notifications.show({
                 title: "Something went wrong", message: "Please try proceeding to payment again",
                 color: "red", icon: <IconX/>, withBorder: true
             });
-        } finally {
             setLoading(false);
         }
     }

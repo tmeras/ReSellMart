@@ -50,31 +50,18 @@
 </head>
 <body>
 <div class="container">
-    <h2>Order Confirmation</h2>
-    <p>Thank you for your order, <span th:text="${order.buyer.realName}"></span>!</p>
+    <h2>Sale Notification</h2>
+    <p><span th:text="${sellerName}">customer</span>, you have made new sales!</p>
 
-    <h3>Order Details</h3>
+    <h3>Sale Details</h3>
     <p><strong>Order ID:</strong> <span th:text="${order.id}"></span></p>
-    <p><strong>Placed At:</strong> <span th:text="${#temporals.format(order.placedAt, 'yyyy-MM-dd HH:mm')}"></span></p>     <!-- TODO: Specify time zone-->
-    <p><strong>Payment Method:</strong> <span th:text="${order.paymentMethod}"></span></p>
-
-    <h3>Billing Address</h3>
-    <p>
-        <span th:text="${order.billingAddress.street}"></span>,
-        <span th:text="${order.billingAddress.city}"></span>,
-        <span th:text="${order.billingAddress.state}"></span>,
-        <span th:text="${order.billingAddress.postalCode}"></span>
+    <p><strong>Placed At:</strong> <span th:text="${#temporals.format(order.placedAt, 'yyyy-MM-dd HH:mm')}"></span> UTC
     </p>
 
-    <h3>Delivery Address</h3>
-    <p>
-        <span th:text="${order.deliveryAddress.street}"></span>,
-        <span th:text="${order.deliveryAddress.city}"></span>,
-        <span th:text="${order.deliveryAddress.state}"></span>,
-        <span th:text="${order.deliveryAddress.postalCode}"></span>
-    </p>
+    <h3>Deliver To</h3>
+    <p th:text="${order.deliveryAddress}"></p>
 
-    <h3>Order Items</h3>
+    <h3>Items Sold</h3>
     <table>
         <thead>
         <tr>
@@ -84,15 +71,16 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="item : ${order.orderItems}">
-            <td th:text="${item.product.name}"></td>
+        <tr th:each="item : ${orderItems}">
+            <td th:text="${item.productName}"></td>
             <td th:text="${item.productQuantity}"></td>
-            <td th:text="${item.product.price}"></td>
+            <td th:text="${item.productPrice}"></td>
         </tr>
         </tbody>
     </table>
+    <p><strong>Total Price:</strong> <span th:text="'£' + ${saleTotal}"></span></p>
 
-    <p><strong>Total Price:</strong> <span th:text="'£' + ${order.getTotalPrice()}"></span></p>
+    <p>Login to ReSellMart to view further details and handle delivery.</p>
 
     <footer>
         <p>Best regards,<br>

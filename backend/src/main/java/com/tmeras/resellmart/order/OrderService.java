@@ -1,5 +1,13 @@
 package com.tmeras.resellmart.order;
 
+import com.stripe.exception.SignatureVerificationException;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Event;
+import com.stripe.model.PaymentIntent;
+import com.stripe.model.PaymentMethod;
+import com.stripe.model.checkout.Session;
+import com.stripe.net.Webhook;
+import com.stripe.param.checkout.SessionCreateParams;
 import com.tmeras.resellmart.address.Address;
 import com.tmeras.resellmart.address.AddressRepository;
 import com.tmeras.resellmart.cart.CartItem;
@@ -16,6 +24,7 @@ import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,8 +53,24 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final EmailService emailService;
     private final FileService fileService;
+    private final AsyncFulfillmentService asyncFulfillmentService;
 
-    public OrderResponse save(OrderRequest orderRequest, Authentication authentication) throws MessagingException, IOException {
+    @Value("${application.backend.base-https-url}")
+    private String backendBaseHttpsUrl;
+
+    @Value("${application.frontend.base-url}")
+    private String frontendBaseUrl;
+
+    @Value("${application.stripe.checkout-success-url}")
+    private String checkoutSuccessUrl;
+
+    @Value("${application.stripe.checkout-cancel-url}")
+    private String checkoutCancelUrl;
+
+    @Value("${application.stripe.webhook-secret}")
+    private String webhookSecret;
+
+    public String save(OrderRequest orderRequest, Authentication authentication) throws MessagingException, IOException, StripeException {
         User currentUser = (User) authentication.getPrincipal();
 
         // User is logged in, so already exists => just call .get() on optional to retrieve Hibernate-managed entity
@@ -60,12 +86,22 @@ public class OrderService {
 
         // Fetch the user's cart items and create corresponding order items
         List<CartItem> cartItems = cartItemRepository.findAllWithProductDetailsByUserId(currentUser.getId());
-        List<Product> cartProducts = new ArrayList<>();
         List<OrderItem> orderItems = new ArrayList<>();
         if (cartItems.isEmpty())
             throw new APIException("You do not have any items in your cart");
 
-        // TODO: Stripe integration + emails on placed to seller, on delivered to buyer
+        // Build Stripe checkout session parameters
+        SessionCreateParams.Builder sessionBuilder = SessionCreateParams.builder()
+                .setMode(SessionCreateParams.Mode.PAYMENT)
+                .setSuccessUrl(frontendBaseUrl + checkoutSuccessUrl + "?sessionId={CHECKOUT_SESSION_ID}")
+                .setCancelUrl(frontendBaseUrl + checkoutCancelUrl)
+                .setCustomerEmail(currentUser.getEmail())
+                // Capture funds later after order fulfilment
+                .setPaymentIntentData(
+                        SessionCreateParams.PaymentIntentData.builder()
+                                .setCaptureMethod(SessionCreateParams.PaymentIntentData.CaptureMethod.MANUAL)
+                                .build()
+                );
 
         for (CartItem cartItem : cartItems) {
             Product cartProduct = cartItem.getProduct();
@@ -76,14 +112,30 @@ public class OrderService {
                 throw new APIException("Product with ID '" + cartProduct.getId() +
                         "' is no longer available for sale");
 
-            // Reduce product's available quantity by the requested quantity
-            cartProduct.setAvailableQuantity(cartProduct.getAvailableQuantity() - cartItem.getQuantity());
-            cartProducts.add(cartProduct);
+            // Add product to Stripe checkout session
+            sessionBuilder.addLineItem(
+                    SessionCreateParams.LineItem.builder()
+                            .setQuantity(cartItem.getQuantity().longValue())
+                            .setPriceData(
+                                    SessionCreateParams.LineItem.PriceData.builder()
+                                            .setCurrency("gbp")
+                                            .setUnitAmountDecimal(cartProduct.getPrice().multiply(BigDecimal.valueOf(100)))
+                                            .setProductData(
+                                                    SessionCreateParams.LineItem.PriceData.ProductData.builder()
+                                                            .setName(cartProduct.getName())
+                                                            .addImage(backendBaseHttpsUrl + "/api/products/" + cartProduct.getId()
+                                                                    + "/images/primary")
+                                                            .build()
+                                            )
+                                            .build()
+                            )
+                            .build()
+            );
 
             // Create corresponding order item
             OrderItem orderItem = new OrderItem();
             orderItem.setStatus(OrderItemStatus.PENDING_PAYMENT);
-            orderItem.setProductId(cartProduct.getId());
+            orderItem.setProduct(cartProduct);
             orderItem.setProductQuantity(cartItem.getQuantity());
             orderItem.setProductName(cartProduct.getName());
             orderItem.setProductPrice(cartProduct.getPrice());
@@ -97,9 +149,9 @@ public class OrderService {
             orderItems.add(orderItem);
         }
 
-        // Empty user's cart and update available quantity of products
-        cartItemRepository.deleteAll(cartItems);
-        productRepository.saveAll(cartProducts);
+        // Finalise checkout session
+        SessionCreateParams sessionParams = sessionBuilder.build();
+        Session session = Session.create(sessionParams);
 
         // Save order
         Order order = new Order();
@@ -108,14 +160,81 @@ public class OrderService {
         order.setBuyer(currentUser);
         order.setBillingAddress(billingAddress.getFullAddress());
         order.setDeliveryAddress(deliveryAddress.getFullAddress());
+        order.setStripeCheckoutId(session.getId());
         order.setOrderItems(orderItems);
-        order = orderRepository.save(order);
+        orderRepository.save(order);
 
-        // TODO: Update thymeleaf template
-        // Send order confirmation mail
-        //emailService.sendOrderConfirmationEmail(currentUser.getEmail(), order);
+        // Return the URL to the Stripe checkout page
+        return session.getUrl();
+    }
 
-        return orderMapper.toOrderResponse(order);
+    public String handleStripeEvent(String payload, String sigHeader) throws StripeException, MessagingException {
+        Event event;
+
+        try {
+            event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
+        } catch (SignatureVerificationException e) {
+            throw new APIException("Invalid signature");
+        }
+
+        if ("checkout.session.completed".equals(event.getType())) {
+            Session sessionEvent = (Session) event.getDataObjectDeserializer().getObject().get();
+            fulfillOrder(sessionEvent.getId());
+        }
+        return "Ok";
+    }
+
+    public void fulfillOrder(String sessionId) throws StripeException, MessagingException {
+        System.out.println("Fulfilling order for checkout session ID: " + sessionId);
+        Order order = orderRepository.findWithProductsAndBuyerDetailsByStripeCheckoutId(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("No order found with Stripe session ID: " + sessionId));
+
+        // Ensure checkout hasn't already been fulfilled for this session
+        if (order.getStatus() == OrderStatus.PAID) {
+            System.out.println("Order has already been fulfilled for Stripe session ID: " + sessionId);
+            return;
+        }
+
+        // Retrieve stripe checkout session
+        Session checkoutSession = Session.retrieve(sessionId);
+
+        List<Product> orderProducts = new ArrayList<>();
+
+        // Update availability of products that were ordered
+        for (OrderItem orderItem : order.getOrderItems()) {
+            Product orderProduct = orderItem.getProduct();
+
+            if ((orderProduct.getAvailableQuantity() < orderItem.getProductQuantity())
+                    || orderProduct.getIsDeleted()
+            ) {
+                emailService.sendOrderCancellationEmail(
+                        order.getBuyer().getEmail(),
+                        order,
+                        orderProduct,
+                        orderItem.getProductQuantity()
+                );
+
+                throw new APIException("Product with ID '" + orderProduct.getId() +
+                        "' does not have the required stock");
+            }
+
+            orderProduct.setAvailableQuantity(orderProduct.getAvailableQuantity() - orderItem.getProductQuantity());
+            orderProducts.add(orderProduct);
+            orderItem.setStatus(OrderItemStatus.PENDING_SHIPMENT);
+        }
+        order.setStatus(OrderStatus.PAID);
+
+        // Capture funds that were previously authorised
+        String paymentIntendId = checkoutSession.getPaymentIntent();
+        PaymentIntent paymentIntent = PaymentIntent.retrieve(paymentIntendId);
+        paymentIntent.capture();
+
+        // Save payment method
+        PaymentMethod paymentMethod = PaymentMethod.retrieve(paymentIntent.getPaymentMethod());
+        order.setPaymentMethod(paymentMethod.getType());
+
+        // Run remaining logic asynchronously to quickly return 200 OK to Stripe
+        asyncFulfillmentService.finaliseOrder(order, orderProducts);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -211,14 +330,13 @@ public class OrderService {
 
         // Only return order items that are sold by the given seller
         orderResponses.forEach(orderResponse -> {
-                orderResponse.setOrderItems(orderResponse.getOrderItems().stream()
-                        .filter(orderItem -> orderItem.getProductSeller().getId().equals(productSellerId))
-                        .toList()
-                );
-                orderResponse.setTotal(orderResponse.calculateTotalPrice());
-            }
+                    orderResponse.setOrderItems(orderResponse.getOrderItems().stream()
+                            .filter(orderItem -> orderItem.getProductSeller().getId().equals(productSellerId))
+                            .toList()
+                    );
+                    orderResponse.setTotal(orderResponse.calculateTotalPrice());
+                }
         );
-
 
         return new PageResponse<>(
                 orderResponses,

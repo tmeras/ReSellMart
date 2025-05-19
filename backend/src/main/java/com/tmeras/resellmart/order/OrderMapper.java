@@ -1,6 +1,5 @@
 package com.tmeras.resellmart.order;
 
-import com.tmeras.resellmart.address.AddressMapper;
 import com.tmeras.resellmart.file.FileService;
 import com.tmeras.resellmart.user.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +12,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderMapper {
 
-    private final AddressMapper addressMapper;
     private final UserMapper userMapper;
     private final FileService fileService;
 
@@ -41,7 +39,7 @@ public class OrderMapper {
         return OrderItemResponse.builder()
                 .id(orderItem.getId())
                 .status(orderItem.getStatus())
-                .productId(orderItem.getProductId())
+                .productId(orderItem.getProduct().getId())
                 .productQuantity(orderItem.getProductQuantity())
                 .productName(orderItem.getProductName())
                 .productPrice(orderItem.getProductPrice())

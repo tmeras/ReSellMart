@@ -51,7 +51,7 @@ public class ProductMapper {
                 .build();
     }
 
-    private ProductImageResponse toProductImageResponse(ProductImage productImage) {
+    public ProductImageResponse toProductImageResponse(ProductImage productImage) {
         return ProductImageResponse.builder()
                 .id(productImage.getId())
                 .image(fileService.readFileFromPath(productImage.getImagePath()))

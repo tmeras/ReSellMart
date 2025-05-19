@@ -34,7 +34,10 @@ public class JwtFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         // No authentication required for these paths
-        if (request.getServletPath().contains("/api/auth")) {
+        if (request.getServletPath().contains("/api/auth") ||
+                request.getServletPath().matches("/api/products/\\d+/images/primary") ||
+                request.getServletPath().matches("/api/orders/stripe-webhook")
+        ) {
             filterChain.doFilter(request, response);
             return;
         }

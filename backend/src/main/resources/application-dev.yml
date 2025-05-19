@@ -51,7 +51,7 @@ application:
 
   # TODO: Change for deployment
   backend:
-    base-url: "http://localhost:8080"
+    base-https-url: "https://fe25-2a00-23c8-820e-701-b0fe-b493-9617-40ea.ngrok-free.app"
   frontend:
     base-url: "http://localhost:5173"
 
@@ -60,6 +60,7 @@ application:
 
   stripe:
     secret-key: ${STRIPE_SECRET_KEY}
+    webhook-secret: whsec_780cf386c668ec3edc857ffc04088d2f429692b2ec277d27c0b850ef530cde58 # TODO: Environment variable in prod
     checkout-success-url: "/app/my-purchases"
     checkout-cancel-url: "/app/checkout"
 

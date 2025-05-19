@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Issue Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f9f9f9;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #c0392b; /* red for error */
+        }
+
+        p.message {
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #e74c3c;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8f8f8;
+        }
+
+        footer {
+            margin-top: 25px;
+            font-size: 0.8em;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Order #<span th:text="${order.id}">12345</span> Could Not Be Completed</h2>
+    <p class="message">We are sorry <span th:text="${order.buyer.realName}">customer</span>, but your order could not be
+        completed due to product availability.</p>
+
+    <h3>Order Details</h3>
+    <p><strong>Order ID:</strong> <span th:text="${order.id}">12345</span></p>
+    <p><strong>Placed At:</strong> <span th:text="${#temporals.format(order.placedAt, 'yyyy-MM-dd HH:mm')}">2025-05-19 14:00</span>
+        UTC</p>
+
+    <h3>Unavailable Product</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>Product Name</th>
+            <th>Available Quantity</th>
+            <th>Requested Quantity</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td th:text="${product.name}">Product Name</td>
+            <td th:text="${product.availableQuantity}">available</td>
+            <td th:text="${requestedQuantity}">requested</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <footer>
+        <p>We apologize for the inconvenience.<br>
+            Best regards,<br>
+            The ReSellMart team</p>
+    </footer>
+</div>
+</body>
+</html>

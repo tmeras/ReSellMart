@@ -24,8 +24,7 @@ public class Order {
 
     private ZonedDateTime placedAt;
 
-    @Enumerated(EnumType.STRING)
-    private PaymentMethod paymentMethod; //TODO: Modify after Stripe integration
+    private String paymentMethod;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;

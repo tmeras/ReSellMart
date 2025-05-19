@@ -32,7 +32,6 @@ import org.springframework.data.domain.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -131,7 +130,7 @@ public class OrderServiceTests {
         assertThat(cartItemA.getProduct().getAvailableQuantity()).isEqualTo(originalProductQuantity - 1);
         verify(cartItemRepository, times(1)).deleteAll(List.of(cartItemA));
         verify(productRepository, times(1)).saveAll(List.of(cartItemA.getProduct()));
-        verify(emailService, times(1)).sendOrderConfirmationEmail(userA.getEmail(), orderA);
+        verify(emailService, times(1)).sendPurchaseConfirmationEmail(userA.getEmail(), orderA);
         assertThat(orderResponse).isEqualTo(orderResponseA);
     }
 

@@ -1,5 +1,6 @@
 package com.tmeras.resellmart.exception;
 
+import com.stripe.exception.StripeException;
 import io.jsonwebtoken.JwtException;
 import jakarta.mail.MessagingException;
 import org.springframework.http.HttpStatus;
@@ -40,6 +41,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MessagingException.class)
     public ResponseEntity<ExceptionResponse> handleMessagingException(MessagingException ex) {
+        ExceptionResponse response = new ExceptionResponse(ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(StripeException.class)
+    public ResponseEntity<ExceptionResponse> handleStripeException(StripeException ex) {
         ExceptionResponse response = new ExceptionResponse(ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }

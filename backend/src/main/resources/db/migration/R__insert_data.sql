@@ -195,7 +195,7 @@ VALUES
 
 INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address,
                                  delivery_address, buyer_id, status, stripe_checkout_id)
-VALUES (1, NOW(), 'CASH', "Mary Cole, Oxford Road, Greater Manchester, Manchester, M13 9PL, United Kingdom, +441612345678",
+VALUES (1, NOW(), 'card', "Mary Cole, Oxford Road, Greater Manchester, Manchester, M13 9PL, United Kingdom, +441612345678",
         "Mary Cole, Oxford Road, Greater Manchester, Manchester, M13 9PL, United Kingdom, +441612345678", 3, "PAID", NULL);
 INSERT IGNORE INTO order_item(id, product_id, product_quantity, order_id, status, product_name, product_price,
                              product_condition, product_image_path, product_seller_id)
@@ -204,7 +204,7 @@ VALUES (1, 8, 2, 1, 'SHIPPED', 'Nike T-shirt', 25, 'NEW', './uploads/flyway-orde
 
 INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address,
                                  delivery_address, buyer_id, status, stripe_checkout_id)
-VALUES (2, NOW(), 'CARD', "Theodore Meras, Ermou Street, Attica, Athens, 10563, Greece, +302101234567",
+VALUES (2, NOW(), 'card', "Theodore Meras, Ermou Street, Attica, Athens, 10563, Greece, +302101234567",
         "Theodore Meras, Ermou Street, Attica, Athens, 10563, Greece, +302101234567", 1, "PAID", NULL);
 INSERT IGNORE INTO order_item(id, product_id, product_quantity, order_id, status, product_name, product_price,
                              product_condition, product_image_path, product_seller_id)
@@ -212,7 +212,7 @@ VALUES (3, 11, 1, 2, 'PENDING_SHIPMENT', 'Canon EOS 5D Mark IV', 1000, 'LIKE_NEW
 
 INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address,
                                  delivery_address, buyer_id, status, stripe_checkout_id)
-VALUES (3, NOW(), 'CARD', "Theodore Meras, Ermou Street, Attica, Athens, 10563, Greece, +302101234567",
+VALUES (3, NOW(), 'card', "Theodore Meras, Ermou Street, Attica, Athens, 10563, Greece, +302101234567",
         "Theodore Meras, Ermou Street, Attica, Athens, 10563, Greece, +302101234567", 1, "PAID", NULL);
 INSERT IGNORE INTO order_item(id, product_id, product_quantity, order_id, status, product_name, product_price,
                              product_condition, product_image_path, product_seller_id)
@@ -221,7 +221,7 @@ VALUES (4, 12, 1, 3, 'DELIVERED', 'Nintendo Switch OLED', 35, 'NEW', './uploads/
 
 INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address,
                                  delivery_address, buyer_id, status, stripe_checkout_id)
-VALUES (4, NOW(), 'CARD', "Edmund Smith, Mappin Street, South Yorkshire, Sheffield, S1 4DT, United Kingdom, +441234567890",
+VALUES (4, NOW(), 'card', "Edmund Smith, Mappin Street, South Yorkshire, Sheffield, S1 4DT, United Kingdom, +441234567890",
         "Edmund Smith, Mappin Street, South Yorkshire, Sheffield, S1 4DT, United Kingdom, +441234567890", 2, "PAID", NULL);
 INSERT IGNORE INTO order_item(id, product_id, product_quantity, order_id, status, product_name, product_price,
                              product_condition, product_image_path, product_seller_id)
@@ -230,7 +230,7 @@ VALUES (6, 15, 1, 4, 'SHIPPED', 'Assassin\'s Creed Valhalla PS4', 60, 'NEW', './
 
 INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address,
                                  delivery_address, buyer_id, status, stripe_checkout_id)
-VALUES (5, NOW(), 'CARD', "Mary Cole, Oxford Road, Greater Manchester, Manchester, M13 9PL, United Kingdom, +441612345678",
+VALUES (5, NOW(), 'card', "Mary Cole, Oxford Road, Greater Manchester, Manchester, M13 9PL, United Kingdom, +441612345678",
         "Mary Cole, Oxford Road, Greater Manchester, Manchester, M13 9PL, United Kingdom, +441612345678", 3, "PAID", NULL);
 INSERT IGNORE INTO order_item(id, product_id, product_quantity, order_id, status, product_name, product_price,
                              product_condition, product_image_path, product_seller_id)

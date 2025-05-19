@@ -1,5 +1,6 @@
 import { OrderItemStatusStepper } from "@/features/app/orders/components/OrderItemStatusStepper.tsx";
 import { OrderResponse } from "@/types/api.ts";
+import { PRODUCT_CONDITION } from "@/utils/constants.ts";
 import { base64ToDataUri } from "@/utils/fileUtils.ts";
 import { Button, Card, Divider, Flex, Image, Popover, Text, useMantineColorScheme } from "@mantine/core";
 import { IconArrowDown } from "@tabler/icons-react";
@@ -92,9 +93,15 @@ export function SaleCard({ sale }: SaleCardProps) {
                                     { orderItem.productName }
                                 </Text>
 
-                                <Text size="sm" mt="xs">
-                                    Qty: { orderItem.productQuantity }
-                                </Text>
+                                <Flex gap={ 5 }>
+                                    <Text size="sm" mt="xs">
+                                        Qty: { orderItem.productQuantity },
+                                    </Text>
+
+                                    <Text size="sm" mt="xs">
+                                        Condition: {PRODUCT_CONDITION[orderItem.productCondition] }
+                                    </Text>
+                                </Flex>
 
                                 <OrderItemStatusStepper status={ orderItem.status }/>
 

@@ -36,9 +36,11 @@ public class SecurityConfiguration {
         http
                 .cors(c -> c.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(req ->
-                        req.requestMatchers(
-                                        "/api/auth/**"
+                .authorizeHttpRequests(req -> req
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/api/products/*/images/primary",
+                                "/api/orders/stripe-webhook"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

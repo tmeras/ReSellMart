@@ -1,5 +1,6 @@
 package com.tmeras.resellmart.order;
 
+import com.tmeras.resellmart.product.Product;
 import com.tmeras.resellmart.product.ProductCondition;
 import com.tmeras.resellmart.user.User;
 import jakarta.persistence.*;
@@ -22,9 +23,12 @@ public class OrderItem {
     @Enumerated(EnumType.STRING)
     private OrderItemStatus status;
 
-    // Below fields make up a snapshot of product details at time of order
-    private Integer productId;
+    // Reference to product with up-to-date details
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
+    private Product product;
 
+    // Below fields make up a snapshot of product details at time of order
     private Integer productQuantity;
 
     private String productName;

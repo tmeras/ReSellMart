@@ -2,6 +2,7 @@ import { getCartQueryOptions } from "@/api/cart/getCart.ts";
 import { getPurchasesByUserQueryOptions } from "@/features/app/orders/api/getPurchasesByUser.ts";
 import { api } from "@/lib/apiClient.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosResponse } from "axios";
 import { z } from "zod";
 
 export const createOrderInputSchema = z.object({
@@ -11,7 +12,8 @@ export const createOrderInputSchema = z.object({
 
 export type CreateOrderInput = z.infer<typeof createOrderInputSchema>;
 
-export function createOrder({ data }: { data: CreateOrderInput }) {
+export function createOrder({ data }: { data: CreateOrderInput })
+: Promise<AxiosResponse<{redirectUrl: string}>> {
     return api.post("/api/orders", data);
 }
 

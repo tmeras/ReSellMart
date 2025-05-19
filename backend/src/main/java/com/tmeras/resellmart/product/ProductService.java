@@ -344,6 +344,18 @@ public class ProductService {
         return productMapper.toProductResponse(updatedProduct);
     }
 
+    // TODO: Test this
+    public ProductImageResponse findPrimaryProductImage(Integer productId) {
+        Product product = productRepository.findWithAssociationsById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
+
+        if (product.getImages().isEmpty())
+            throw new ResourceNotFoundException("No images found for product with ID: " + productId);
+
+        ProductImage primaryImage = product.getImages().get(0);
+        return productMapper.toProductImageResponse(primaryImage);
+    }
+
     @PreAuthorize("hasRole('ADMIN')") // Deletion possible by admins only, users can only mark products as unavailable
     public void delete(Integer productId) throws IOException {
         Optional<Product> existingProduct = productRepository.findWithImagesById(productId);

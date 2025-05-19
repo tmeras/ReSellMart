@@ -42,8 +42,9 @@ export function PurchasesList({ userId }: PurchasesListProps) {
     const purchases = getPurchasesByUserQuery.data?.data.content;
     const totalPages = getPurchasesByUserQuery.data?.data.totalPages;
 
-    if (purchases.length == 0) return <div>No purchases to display</div>;
+    if (purchases.length == 0) return <Flex justify="center ">No purchases to display</Flex>;
 
+    // TODO: Display payment method?
     return (
         <Flex direction="column">
             <Flex justify="center" mb="sm">

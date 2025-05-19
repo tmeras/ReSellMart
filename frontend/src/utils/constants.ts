@@ -84,7 +84,6 @@ export type OrderItemStatusKeys = keyof typeof ORDER_ITEM_STATUS;
 export const ORDER_STATUS = {
     PENDING_PAYMENT: "Pending Payment",
     PAID: "Paid",
-    CANCELLED: "Cancelled"
 } as const;
 
 export type OrderStatusKeys = keyof typeof ORDER_STATUS;

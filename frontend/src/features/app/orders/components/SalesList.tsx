@@ -42,7 +42,7 @@ export function SalesList({ userId }: SalesListProps) {
     const sales = getSalesByUserQuery.data?.data.content;
     const totalPages = getSalesByUserQuery.data?.data.totalPages;
 
-    if (sales.length == 0) return <div>No sales to display</div>;
+    if (sales.length == 0) return <Flex justify="center">No sales to display</Flex>;
 
     return (
         <Flex direction="column">
