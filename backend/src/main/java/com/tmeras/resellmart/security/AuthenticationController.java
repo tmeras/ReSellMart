@@ -61,6 +61,12 @@ public class AuthenticationController {
             @Valid @RequestBody VerificationRequest verificationRequest
     ) {
         AuthenticationResponse authenticationResponse = authenticationService.verifyOtp(verificationRequest);
-        return new ResponseEntity<>(authenticationResponse, HttpStatus.OK);
+        String refreshCookie = authenticationResponse.getRefreshTokenCookie();
+        authenticationResponse.setRefreshTokenCookie(null);
+
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.SET_COOKIE, refreshCookie)
+                .body(authenticationResponse);
     }
 }

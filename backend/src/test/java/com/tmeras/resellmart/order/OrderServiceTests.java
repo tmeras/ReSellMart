@@ -80,6 +80,9 @@ public class OrderServiceTests {
     @Mock
     private FileService fileService;
 
+    @Mock
+    private AsyncFulfilmentService asyncFulfilmentService;
+
     @InjectMocks
     private OrderService orderService;
 
@@ -302,6 +305,8 @@ public class OrderServiceTests {
             String response = orderService.handleStripeEvent(payload, sigHeader);
 
             assertThat(response).isEqualTo("success");
+            verify(asyncFulfilmentService, times(1))
+                    .finaliseOrder(orderA, List.of(orderA.getOrderItems().get(0).getProduct()));
         }
 
         /*verify(orderRepository, times(1)).save(orderA);
