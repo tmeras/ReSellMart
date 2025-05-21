@@ -26,8 +26,7 @@ public class OrderController {
             @Valid @RequestBody OrderRequest orderRequest,
             Authentication authentication
     ) throws MessagingException, IOException, StripeException {
-        String redirectUrl = orderService.save(orderRequest, authentication);
-        Map<String, String> response = Map.of("redirectUrl", redirectUrl);
+        Map<String, String> response = orderService.save(orderRequest, authentication);
 
         // Redirect to stripe checkout page
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -87,11 +86,5 @@ public class OrderController {
         PageResponse<OrderResponse> foundOrders =
                 orderService.findAllByProductSellerId(pageNumber, pageSize, sortBy, sortDirection, productSellerId, authentication);
         return new ResponseEntity<>(foundOrders, HttpStatus.OK);
-    }
-
-    @DeleteMapping("/orders/{order-id}")
-    public ResponseEntity<OrderResponse> delete(@PathVariable(name = "order-id") Integer orderId) {
-        orderService.delete(orderId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

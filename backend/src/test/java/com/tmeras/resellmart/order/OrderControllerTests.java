@@ -34,7 +34,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(
@@ -86,7 +87,10 @@ public class OrderControllerTests {
 
     @Test
     public void shouldSaveOrderWhenValidRequest() throws Exception {
-        when(orderService.save(any(OrderRequest.class), any(Authentication.class))).thenReturn(orderResponseA);
+        Map<String, String> expectedResponse = new HashMap<>();
+        expectedResponse.put("redirectUrl", "url");
+
+        when(orderService.save(any(OrderRequest.class), any(Authentication.class))).thenReturn(expectedResponse);
 
         MvcResult mvcResult = mockMvc.perform(post("/api/orders")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -94,14 +98,14 @@ public class OrderControllerTests {
         ).andExpect(status().isCreated()).andReturn();
         String jsonResponse = mvcResult.getResponse().getContentAsString();
 
-        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(orderResponseA));
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(expectedResponse));
     }
 
     @Test
     public void shouldNotSaveOrderWhenInvalidRequest() throws Exception {
-        orderRequestA.setPaymentMethod(null);
+        orderRequestA.setBillingAddressId(null);
         Map<String, String> expectedErrors = new HashMap<>();
-        expectedErrors.put("paymentMethod", "Payment method must not be empty");
+        expectedErrors.put("billingAddressId", "Billing address ID must not be empty");
 
         MvcResult mvcResult = mockMvc.perform(post("/api/orders")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -110,6 +114,36 @@ public class OrderControllerTests {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
 
         assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(expectedErrors));
+    }
+
+    @Test
+    public void shouldHandleStripeEvent() throws Exception {
+        String payload = "payload";
+        String sigHeader = "sigHeader";
+
+        when(orderService.handleStripeEvent(payload, sigHeader)).thenReturn("success");
+
+        MvcResult mvcResult = mockMvc.perform(post("/api/orders/stripe-webhook")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload)
+                .header("Stripe-Signature", sigHeader)
+        ).andExpect(status().isOk()).andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo("success");
+    }
+
+    @Test
+    public void shouldFulfillOrder() throws Exception {
+        Map<String, String> body = new HashMap<>();
+        body.put("stripeSessionId", "sessionId");
+
+        mockMvc.perform(post("/api/orders/fulfill")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body))
+        ).andExpect(status().isOk());
+
+        verify(orderService, times(1)).fulfillOrder("sessionId");
     }
 
     @Test
@@ -149,7 +183,7 @@ public class OrderControllerTests {
                 eq(orderResponseA.getBuyer().getId()), any(Authentication.class)
         )).thenReturn(pageResponse);
 
-        MvcResult mvcResult = mockMvc.perform(get("/api/users/" + orderResponseA.getBuyer().getId() + "/orders"))
+        MvcResult mvcResult = mockMvc.perform(get("/api/users/" + orderResponseA.getBuyer().getId() + "/purchases"))
                 .andExpect(status().isOk())
                 .andReturn();
         String jsonResponse = mvcResult.getResponse().getContentAsString();
@@ -158,10 +192,25 @@ public class OrderControllerTests {
     }
 
     @Test
-    public void shouldDeleteOrder() throws Exception {
-        mockMvc.perform(delete("/api/orders/" + orderResponseA.getId()))
-                .andExpect(status().isNoContent());
+    public void shouldFindAllOrdersByProductSellerId() throws Exception {
+        PageResponse<OrderResponse> pageResponse = new PageResponse<>(
+                List.of(orderResponseB),
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                1, 1,
+                true, true
+        );
 
-        verify(orderService, times(1)).delete(orderResponseA.getId());
+        when(orderService.findAllByProductSellerId(
+                eq(AppConstants.PAGE_NUMBER_INT), eq(AppConstants.PAGE_SIZE_INT),
+                eq(AppConstants.SORT_ORDERS_BY), eq(AppConstants.SORT_DIR),
+                eq(orderResponseB.getOrderItems().get(0).getProductSeller().getId()), any(Authentication.class)
+        )).thenReturn(pageResponse);
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/users/" + orderResponseB.getOrderItems().get(0).getProductSeller().getId() + "/sales"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(pageResponse));
     }
 }

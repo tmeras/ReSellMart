@@ -59,5 +59,4 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     Optional<Product> findWithImagesById(Integer id);
 
     List<Product> findAllBySellerId(Integer sellerId);
-
 }

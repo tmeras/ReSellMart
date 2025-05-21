@@ -38,7 +38,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +55,7 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final EmailService emailService;
     private final FileService fileService;
-    private final AsyncFulfillmentService asyncFulfillmentService;
+    private final AsyncFulfilmentService asyncFulfilmentService;
 
     @Value("${application.backend.base-https-url}")
     private String backendBaseHttpsUrl;
@@ -70,7 +72,7 @@ public class OrderService {
     @Value("${application.stripe.webhook-secret}")
     private String webhookSecret;
 
-    public String save(OrderRequest orderRequest, Authentication authentication) throws MessagingException, IOException, StripeException {
+    public Map<String, String> save(OrderRequest orderRequest, Authentication authentication) throws MessagingException, IOException, StripeException {
         User currentUser = (User) authentication.getPrincipal();
 
         // User is logged in, so already exists => just call .get() on optional to retrieve Hibernate-managed entity
@@ -149,7 +151,7 @@ public class OrderService {
             orderItems.add(orderItem);
         }
 
-        // Finalise checkout session
+        // Create checkout session
         SessionCreateParams sessionParams = sessionBuilder.build();
         Session session = Session.create(sessionParams);
 
@@ -162,10 +164,13 @@ public class OrderService {
         order.setDeliveryAddress(deliveryAddress.getFullAddress());
         order.setStripeCheckoutId(session.getId());
         order.setOrderItems(orderItems);
-        orderRepository.save(order);
+        order = orderRepository.save(order);
 
-        // Return the URL to the Stripe checkout page
-        return session.getUrl();
+        // Return the URL to the Stripe checkout page and the order ID
+        Map<String, String> response = new HashMap<>();
+        response.put("redirectUrl", session.getUrl());
+        response.put("orderId", order.getId().toString());
+        return response;
     }
 
     public String handleStripeEvent(String payload, String sigHeader) throws StripeException, MessagingException {
@@ -181,7 +186,7 @@ public class OrderService {
             Session sessionEvent = (Session) event.getDataObjectDeserializer().getObject().get();
             fulfillOrder(sessionEvent.getId());
         }
-        return "Ok";
+        return "success";
     }
 
     public void fulfillOrder(String sessionId) throws StripeException, MessagingException {
@@ -198,9 +203,8 @@ public class OrderService {
         // Retrieve stripe checkout session
         Session checkoutSession = Session.retrieve(sessionId);
 
-        List<Product> orderProducts = new ArrayList<>();
-
         // Update availability of products that were ordered
+        List<Product> orderProducts = new ArrayList<>();
         for (OrderItem orderItem : order.getOrderItems()) {
             Product orderProduct = orderItem.getProduct();
 
@@ -234,7 +238,7 @@ public class OrderService {
         order.setPaymentMethod(paymentMethod.getType());
 
         // Run remaining logic asynchronously to quickly return 200 OK to Stripe
-        asyncFulfillmentService.finaliseOrder(order, orderProducts);
+        asyncFulfilmentService.finaliseOrder(order, orderProducts);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -279,7 +283,7 @@ public class OrderService {
         Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
-        Page<Order> orders = orderRepository.findAllByBuyerId(pageable, buyerId);
+        Page<Order> orders = orderRepository.findAllPaidByBuyerId(pageable, buyerId);
         // Initialise lazy associations
         for (Order order : orders) {
             order.getOrderItems().size();
@@ -315,7 +319,7 @@ public class OrderService {
         Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
-        Page<Order> orders = orderRepository.findAllByProductSellerId(pageable, productSellerId);
+        Page<Order> orders = orderRepository.findAllPaidByProductSellerId(pageable, productSellerId);
         // Initialise lazy associations
         for (Order order : orders) {
             order.getOrderItems().size();
@@ -347,12 +351,5 @@ public class OrderService {
                 orders.isFirst(),
                 orders.isLast()
         );
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    public void delete(Integer orderId) {
-        // TODO: Delete image if not inserted during Flyway migration
-
-        orderRepository.deleteById(orderId);
     }
 }

@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import static com.tmeras.resellmart.common.AppConstants.*;
 
@@ -344,9 +343,8 @@ public class ProductService {
         return productMapper.toProductResponse(updatedProduct);
     }
 
-    // TODO: Test this
     public ProductImageResponse findPrimaryProductImage(Integer productId) {
-        Product product = productRepository.findWithAssociationsById(productId)
+        Product product = productRepository.findWithImagesById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
 
         if (product.getImages().isEmpty())
@@ -356,19 +354,12 @@ public class ProductService {
         return productMapper.toProductImageResponse(primaryImage);
     }
 
-    @PreAuthorize("hasRole('ADMIN')") // Deletion possible by admins only, users can only mark products as unavailable
-    public void delete(Integer productId) throws IOException {
-        Optional<Product> existingProduct = productRepository.findWithImagesById(productId);
+    @PreAuthorize("hasRole('ADMIN')")
+    public void delete(Integer productId) {
+        Product existingProduct = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
 
-        // Delete images only if the product was not created using flyway script
-        if (productId > FLYWAY_PRODUCTS_NUMBER && existingProduct.isPresent() &&
-                existingProduct.get().getImages() != null
-        ) {
-            for (ProductImage productImage : existingProduct.get().getImages()) {
-                fileService.deleteFile(productImage.getImagePath());
-            }
-        }
-
-        productRepository.deleteById(productId);
+        existingProduct.setIsDeleted(true);
+        productRepository.save(existingProduct);
     }
 }

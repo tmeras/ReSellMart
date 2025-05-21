@@ -13,6 +13,7 @@ import java.util.List;
 public class OrderMapper {
 
     private final UserMapper userMapper;
+
     private final FileService fileService;
 
     public OrderResponse toOrderResponse(Order order) {
@@ -36,6 +37,9 @@ public class OrderMapper {
     }
 
     public OrderItemResponse toOrderItemResponse(OrderItem orderItem) {
+        byte[] image = orderItem.getProductImagePath() != null ?
+                fileService.readFileFromPath(orderItem.getProductImagePath()) : null;
+
         return OrderItemResponse.builder()
                 .id(orderItem.getId())
                 .status(orderItem.getStatus())
@@ -44,7 +48,7 @@ public class OrderMapper {
                 .productName(orderItem.getProductName())
                 .productPrice(orderItem.getProductPrice())
                 .productCondition(orderItem.getProductCondition())
-                .productImage(fileService.readFileFromPath(orderItem.getProductImagePath()))
+                .productImage(image)
                 .productSeller(userMapper.toUserResponse(orderItem.getProductSeller()))
                 .build();
     }

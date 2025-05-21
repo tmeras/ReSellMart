@@ -130,11 +130,11 @@ public class ProductController {
         return new ResponseEntity<>(productImage.getImage(), headers, HttpStatus.OK);
     }
 
-
+    // Soft-deletes the product
     @DeleteMapping("/{product-id}")
     public ResponseEntity<?> delete(
             @PathVariable(name = "product-id") Integer productId
-    ) throws IOException {
+    ) {
         productService.delete(productId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

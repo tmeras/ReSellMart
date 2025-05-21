@@ -11,35 +11,44 @@ import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.ExceptionResponse;
 import com.tmeras.resellmart.product.Product;
 import com.tmeras.resellmart.product.ProductCondition;
+import com.tmeras.resellmart.product.ProductImage;
 import com.tmeras.resellmart.product.ProductRepository;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.token.JwtService;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
+@ExtendWith(MockitoExtension.class)
 public class OrderControllerIT {
+
+    private static final ClassPathResource TEST_IMAGE_1 = new ClassPathResource("test_image_1.jpeg");
 
     @Container
     @ServiceConnection
@@ -61,6 +70,8 @@ public class OrderControllerIT {
 
     private Order orderA;
     private Order orderB;
+    private Address addressA;
+    private Address addressB;
 
     @Autowired
     public OrderControllerIT(
@@ -108,25 +119,25 @@ public class OrderControllerIT {
         userB = userRepository.save(userB);
 
         Category category = categoryRepository.save(Category.builder().name("category").build());
-        Product productA = TestDataUtils.createProductA(category, userB);
+        Product productA = TestDataUtils.createProductA(category, userA);
         productA.setId(null);
         productA = productRepository.save(productA);
-        Product productB = TestDataUtils.createProductB(category, userA);
+        Product productB = TestDataUtils.createProductB(category, userB);
         productB.setId(null);
         productB = productRepository.save(productB);
 
-        Address addressA = TestDataUtils.createAddressA(userA);
+        addressA = TestDataUtils.createAddressA(userA);
         addressA.setId(null);
         addressA = addressRepository.save(addressA);
-        Address addressB = TestDataUtils.createAddressB(userB);
+        addressB = TestDataUtils.createAddressB(userB);
         addressB.setId(null);
         addressB = addressRepository.save(addressB);
 
-        orderA = TestDataUtils.createOrderA(userA, addressA, productA);
+        orderA = TestDataUtils.createOrderA(userA, addressA, productB);
         orderA.setId(null);
         orderA.getOrderItems().get(0).setId(null);
         orderA = orderRepository.save(orderA);
-        orderB = TestDataUtils.createOrderB(userB, addressB, productB);
+        orderB = TestDataUtils.createOrderB(userB, addressB, productA);
         orderB.setId(null);
         orderB.getOrderItems().get(0).setId(null);
         orderB = orderRepository.save(orderB);
@@ -137,9 +148,22 @@ public class OrderControllerIT {
         headers.set("Authorization", "Bearer " + testJwt);
     }
 
+    @AfterAll
+    public static void tearDown() throws IOException {
+        File uploadsDirectory = new File("test-uploads");
+        if (uploadsDirectory.exists())
+            FileUtils.deleteDirectory(uploadsDirectory);
+    }
+
     @Test
-    public void shouldSaveOrderWhenValidRequest() {
+    public void shouldSaveOrderWhenValidRequest() throws IOException {
         // Add a product to the user's cart before placing order
+        File testFile = TEST_IMAGE_1.getFile();
+        ProductImage productImage = ProductImage.builder()
+                .name(testFile.getName())
+                .type("image/jpeg")
+                .imagePath(testFile.getAbsolutePath())
+                .build();
         Product orderProduct = Product.builder()
                 .name("Test Product")
                 .description("Test description")
@@ -149,6 +173,7 @@ public class OrderControllerIT {
                 .isDeleted(false)
                 .category(orderB.getOrderItems().get(0).getProduct().getCategory())
                 .seller(orderB.getBuyer())
+                .images(List.of(productImage))
                 .build();
         orderProduct = productRepository.save(orderProduct);
 
@@ -160,34 +185,50 @@ public class OrderControllerIT {
         cartItem = cartItemRepository.save(cartItem);
 
         OrderRequest orderRequest = OrderRequest.builder()
-                .paymentMethod("CASH")
-                .billingAddressId(orderA.getBillingAddress().getId())
-                .deliveryAddressId(orderA.getDeliveryAddress().getId())
+                .billingAddressId(addressA.getId())
+                .deliveryAddressId(addressA.getId())
                 .build();
 
-        ResponseEntity<OrderResponse> response =
+        ResponseEntity<Map<String, String>> response =
                 restTemplate.exchange("/api/orders", HttpMethod.POST,
-                        new HttpEntity<>(orderRequest, headers), OrderResponse.class);
+                        new HttpEntity<>(orderRequest, headers), new ParameterizedTypeReference<>() {
+                        });
 
+        System.out.println(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getPaymentMethod()).isEqualTo(PaymentMethod.CASH);
-        assertThat(response.getBody().getBillingAddress().getId()).isEqualTo(orderRequest.getBillingAddressId());
-        assertThat(response.getBody().getDeliveryAddress().getId()).isEqualTo(orderRequest.getDeliveryAddressId());
-        assertThat(response.getBody().getBuyer().getId()).isEqualTo(cartItem.getUser().getId());
-        assertThat(response.getBody().getOrderItems().size()).isEqualTo(1);
-        assertThat(response.getBody().getOrderItems().get(0).getProduct().getId()).isEqualTo(orderProduct.getId());
+        assertThat(response.getBody().get("redirectUrl")).isNotBlank();
+        assertThat(response.getBody().get("orderId")).isNotBlank();
+
+        Integer orderId = Integer.valueOf(response.getBody().get("orderId"));
+        Optional<Order> createdOrder = orderRepository.findWithProductsAndBuyerDetailsById(orderId);
+        assertThat(createdOrder).isPresent();
+        assertThat(createdOrder.get().getPlacedAt()).isNotNull();
+        assertThat(createdOrder.get().getStatus()).isEqualTo(OrderStatus.PENDING_PAYMENT);
+        assertThat(createdOrder.get().getStripeCheckoutId()).isNotBlank();
+        assertThat(createdOrder.get().getBillingAddress()).isNotBlank();
+        assertThat(createdOrder.get().getDeliveryAddress()).isNotBlank();
+        assertThat(createdOrder.get().getBuyer().getId()).isEqualTo(cartItem.getUser().getId());
+
+        assertThat(createdOrder.get().getOrderItems().size()).isEqualTo(1);
+        OrderItem orderItem = createdOrder.get().getOrderItems().get(0);
+        assertThat(orderItem.getStatus()).isEqualTo(OrderItemStatus.PENDING_PAYMENT);
+        assertThat(orderItem.getProduct().getId()).isEqualTo(orderProduct.getId());
+        assertThat(orderItem.getProductQuantity()).isEqualTo(cartItem.getQuantity());
+        assertThat(orderItem.getProductName()).isEqualTo(orderProduct.getName());
+        assertThat(orderItem.getProductPrice().compareTo(orderProduct.getPrice())).isEqualTo(0);
+        assertThat(orderItem.getProductCondition()).isEqualTo(orderProduct.getCondition());
+        assertThat(orderItem.getProductImagePath()).isNotBlank();
     }
 
     @Test
     public void shouldNotSaveOrderWhenInvalidRequest() {
         OrderRequest orderRequest = OrderRequest.builder()
-                .paymentMethod(null)
-                .billingAddressId(orderA.getBillingAddress().getId())
-                .deliveryAddressId(orderA.getDeliveryAddress().getId())
+                .billingAddressId(addressA.getId())
+                .deliveryAddressId(null)
                 .build();
         Map<String, String> expectedErrors = new HashMap<>();
-        expectedErrors.put("paymentMethod", "Payment method must not be empty");
+        expectedErrors.put("deliveryAddressId", "Delivery address ID must not be empty");
 
         ResponseEntity<Map<String, String>> response =
                 restTemplate.exchange("/api/orders", HttpMethod.POST,
@@ -202,9 +243,8 @@ public class OrderControllerIT {
     @Test
     public void shouldNotSaveOrderWhenInvalidBillingAddressId() {
         OrderRequest orderRequest = OrderRequest.builder()
-                .paymentMethod("CASH")
                 .billingAddressId(99)
-                .deliveryAddressId(orderA.getDeliveryAddress().getId())
+                .deliveryAddressId(addressA.getId())
                 .build();
 
         ResponseEntity<ExceptionResponse> response =
@@ -220,8 +260,7 @@ public class OrderControllerIT {
     @Test
     public void shouldNotSaveOrderWhenInvalidDeliveryAddressId() {
         OrderRequest orderRequest = OrderRequest.builder()
-                .paymentMethod("CASH")
-                .billingAddressId(orderA.getBillingAddress().getId())
+                .billingAddressId(addressA.getId())
                 .deliveryAddressId(99)
                 .build();
 
@@ -238,9 +277,8 @@ public class OrderControllerIT {
     @Test
     public void shouldNotSaveOrderWhenAddressBelongsToDifferentUser() {
         OrderRequest orderRequest = OrderRequest.builder()
-                .paymentMethod("CASH")
-                .billingAddressId(orderB.getBillingAddress().getId())
-                .deliveryAddressId(orderA.getDeliveryAddress().getId())
+                .billingAddressId(addressB.getId())
+                .deliveryAddressId(addressA.getId())
                 .build();
 
         ResponseEntity<ExceptionResponse> response =
@@ -256,9 +294,8 @@ public class OrderControllerIT {
     @Test
     public void shouldNotSaveOrderWhenUserCartIsEmpty() {
         OrderRequest orderRequest = OrderRequest.builder()
-                .paymentMethod("CASH")
-                .billingAddressId(orderA.getBillingAddress().getId())
-                .deliveryAddressId(orderA.getDeliveryAddress().getId())
+                .billingAddressId(addressA.getId())
+                .deliveryAddressId(addressA.getId())
                 .build();
 
         ResponseEntity<ExceptionResponse> response =
@@ -293,9 +330,8 @@ public class OrderControllerIT {
         cartItemRepository.save(cartItem);
 
         OrderRequest orderRequest = OrderRequest.builder()
-                .paymentMethod("CASH")
-                .billingAddressId(orderA.getBillingAddress().getId())
-                .deliveryAddressId(orderA.getDeliveryAddress().getId())
+                .billingAddressId(addressA.getId())
+                .deliveryAddressId(addressA.getId())
                 .build();
 
         ResponseEntity<ExceptionResponse> response =
@@ -310,12 +346,49 @@ public class OrderControllerIT {
     }
 
     @Test
+    public void shouldNotSaveOrderWhenCartItemIsDeleted() {
+        // Add a product to the user's cart before placing order
+        Product orderProduct = Product.builder()
+                .name("Test Product")
+                .description("Test description")
+                .price(BigDecimal.valueOf(10.0))
+                .condition(ProductCondition.NEW)
+                .availableQuantity(5)
+                .isDeleted(true)
+                .category(orderB.getOrderItems().get(0).getProduct().getCategory())
+                .seller(orderB.getBuyer())
+                .build();
+        orderProduct = productRepository.save(orderProduct);
+
+        CartItem cartItem = CartItem.builder()
+                .product(orderProduct)
+                .quantity(2)
+                .user(orderA.getBuyer())
+                .build();
+        cartItemRepository.save(cartItem);
+
+        OrderRequest orderRequest = OrderRequest.builder()
+                .billingAddressId(addressA.getId())
+                .deliveryAddressId(addressA.getId())
+                .build();
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/orders", HttpMethod.POST,
+                        new HttpEntity<>(orderRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("Product with ID '" + orderProduct.getId() +
+                        "' is no longer available for sale");
+    }
+
+    @Test
     public void shouldFindAllOrdersWhenValidRequest() {
         ResponseEntity<PageResponse<OrderResponse>> response =
                 restTemplate.exchange("/api/orders", HttpMethod.GET,
                         new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
                         });
-
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getContent()).hasSize(2);
@@ -338,7 +411,7 @@ public class OrderControllerIT {
     @Test
     public void shouldFindAllOrdersByBuyerIdWhenValidRequest() {
         ResponseEntity<PageResponse<OrderResponse>> response =
-                restTemplate.exchange("/api/users/" + orderA.getBuyer().getId() + "/orders", HttpMethod.GET,
+                restTemplate.exchange("/api/users/" + orderA.getBuyer().getId() + "/purchases", HttpMethod.GET,
                         new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
                         });
 
@@ -351,7 +424,7 @@ public class OrderControllerIT {
     @Test
     public void shouldNotFindAllOrdersByBuyerIdWhenBuyerIsNotLoggedIn() {
         ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/users/" + orderB.getBuyer().getId() + "/orders", HttpMethod.GET,
+                restTemplate.exchange("/api/users/" + orderB.getBuyer().getId() + "/purchases", HttpMethod.GET,
                         new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
                         });
 
@@ -362,24 +435,27 @@ public class OrderControllerIT {
     }
 
     @Test
-    public void shouldDeleteOrderWhenValidRequest() {
-        ResponseEntity<?> response =
-                restTemplate.exchange("/api/orders/" + orderA.getId(), HttpMethod.DELETE,
-                        new HttpEntity<>(headers), Object.class);
+    public void shouldFindAllOrderByProductSellerIdWhenValidRequest() {
+        ResponseEntity<PageResponse<OrderResponse>> response =
+                restTemplate.exchange("/api/users/" + orderB.getOrderItems().get(0).getProductSeller().getId() + "/sales", HttpMethod.GET,
+                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
+                        });
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-        assertThat(orderRepository.findById(orderA.getId())).isEmpty();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getContent()).hasSize(1);
+        assertThat(response.getBody().getContent().get(0).getId()).isEqualTo(orderB.getId());
     }
 
     @Test
-    public void shouldNotDeleteOrderWhenNonAdminUser() {
-        String testJwt = jwtService.generateAccessToken(new HashMap<>(), orderB.getBuyer());
-        headers.set("Authorization", "Bearer " + testJwt);
-
+    public void shouldNotFindAllOrderByProductSellerIdWhenSellerIsNotLoggedIn() {
         ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/orders/" + orderA.getId(), HttpMethod.DELETE,
+                restTemplate.exchange("/api/users/" + orderA.getOrderItems().get(0).getProductSeller().getId() + "/sales", HttpMethod.GET,
                         new HttpEntity<>(headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("You do not have permission to view these orders");
     }
 }

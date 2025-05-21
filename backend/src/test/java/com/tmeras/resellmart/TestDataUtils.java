@@ -295,16 +295,23 @@ public final class TestDataUtils {
     public static Order createOrderA(User buyer, Address address, Product orderProduct) {
         OrderItem orderItem = OrderItem.builder()
                 .id(1)
+                .status(OrderItemStatus.PENDING_SHIPMENT)
                 .product(orderProduct)
-                .productQuantity(1)
+                .productQuantity(orderProduct.getAvailableQuantity())
+                .productName(orderProduct.getName())
+                .productPrice(orderProduct.getPrice())
+                .productCondition(orderProduct.getCondition())
+                .productSeller(orderProduct.getSeller())
                 .build();
 
         return Order.builder()
                 .id(1)
                 .placedAt(CURRENT_TIME)
-                .billingAddress(address)
-                .deliveryAddress(address)
-                .paymentMethod(PaymentMethod.CASH)
+                .paymentMethod("cash")
+                .status(OrderStatus.PAID)
+                .stripeCheckoutId("stripe-id")
+                .billingAddress(address.getFullAddress())
+                .deliveryAddress(address.getFullAddress())
                 .buyer(buyer)
                 .orderItems(List.of(orderItem))
                 .build();
@@ -312,27 +319,35 @@ public final class TestDataUtils {
 
     public static OrderRequest createOrderRequestA(Integer addressId) {
         return OrderRequest.builder()
-                .paymentMethod(String.valueOf(PaymentMethod.CASH))
                 .billingAddressId(addressId)
                 .deliveryAddressId(addressId)
                 .build();
     }
 
     public static OrderResponse createOrderResponseA(
-            AddressResponse addressResponse, UserResponse userResponse, ProductResponse productResponse
+            AddressResponse addressResponse, UserResponse userResponse, ProductResponse orderProduct
     ) {
         OrderItemResponse orderItemResponse = OrderItemResponse.builder()
                 .id(1)
-                .product(productResponse)
-                .productQuantity(1)
+                .status(OrderItemStatus.PENDING_SHIPMENT)
+                .productId(orderProduct.getId())
+                .productQuantity(orderProduct.getAvailableQuantity())
+                .productName(orderProduct.getName())
+                .productPrice(orderProduct.getPrice())
+                .productCondition(orderProduct.getCondition())
+                .productSeller(orderProduct.getSeller())
                 .build();
 
         return OrderResponse.builder()
                 .id(1)
                 .placedAt(CURRENT_TIME)
-                .paymentMethod(PaymentMethod.CASH)
-                .deliveryAddress(addressResponse)
-                .billingAddress(addressResponse)
+                .paymentMethod("cash")
+                .status(OrderStatus.PAID)
+                .stripeCheckoutId("stripe-id")
+                .billingAddress(addressResponse.getFullAddress())
+                .deliveryAddress(addressResponse.getFullAddress())
+                .total(orderProduct.getPrice()
+                        .multiply(BigDecimal.valueOf(orderProduct.getAvailableQuantity())))
                 .buyer(userResponse)
                 .orderItems(List.of(orderItemResponse))
                 .build();
@@ -341,36 +356,52 @@ public final class TestDataUtils {
     public static Order createOrderB(User buyer, Address address, Product orderProduct) {
         OrderItem orderItem = OrderItem.builder()
                 .id(2)
+                .status(OrderItemStatus.PENDING_SHIPMENT)
                 .product(orderProduct)
-                .productQuantity(2)
+                .productQuantity(orderProduct.getAvailableQuantity())
+                .productName(orderProduct.getName())
+                .productPrice(orderProduct.getPrice())
+                .productCondition(orderProduct.getCondition())
+                .productSeller(orderProduct.getSeller())
                 .build();
 
         return Order.builder()
                 .id(2)
                 .placedAt(CURRENT_TIME)
-                .billingAddress(address)
-                .deliveryAddress(address)
-                .paymentMethod(PaymentMethod.CARD)
+                .paymentMethod("cash")
+                .status(OrderStatus.PAID)
+                .stripeCheckoutId("stripe-id-2")
+                .billingAddress(address.getFullAddress())
+                .deliveryAddress(address.getFullAddress())
                 .buyer(buyer)
                 .orderItems(List.of(orderItem))
                 .build();
     }
 
     public static OrderResponse createOrderResponseB(
-            AddressResponse addressResponse, UserResponse userResponse, ProductResponse productResponse
+            AddressResponse addressResponse, UserResponse userResponse, ProductResponse orderProduct
     ) {
         OrderItemResponse orderItemResponse = OrderItemResponse.builder()
                 .id(2)
-                .product(productResponse)
-                .productQuantity(2)
+                .status(OrderItemStatus.PENDING_SHIPMENT)
+                .productId(orderProduct.getId())
+                .productQuantity(orderProduct.getAvailableQuantity())
+                .productName(orderProduct.getName())
+                .productPrice(orderProduct.getPrice())
+                .productCondition(orderProduct.getCondition())
+                .productSeller(orderProduct.getSeller())
                 .build();
 
         return OrderResponse.builder()
                 .id(2)
                 .placedAt(CURRENT_TIME)
-                .paymentMethod(PaymentMethod.CARD)
-                .deliveryAddress(addressResponse)
-                .billingAddress(addressResponse)
+                .paymentMethod("cash")
+                .status(OrderStatus.PAID)
+                .stripeCheckoutId("stripe-id-2")
+                .billingAddress(addressResponse.getFullAddress())
+                .deliveryAddress(addressResponse.getFullAddress())
+                .total(orderProduct.getPrice()
+                        .multiply(BigDecimal.valueOf(orderProduct.getAvailableQuantity())))
                 .buyer(userResponse)
                 .orderItems(List.of(orderItemResponse))
                 .build();

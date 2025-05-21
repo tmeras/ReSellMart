@@ -10,17 +10,26 @@ import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Integer> {
 
-    // TODO: Orders for both  must be paid
-    Page<Order> findAllByBuyerId(Pageable pageable, Integer buyerId);
+    @Query("""
+                    SELECT o
+                    FROM Order o
+                    WHERE o.buyer.id = :buyerId
+                    AND o.status = 'PAID'
+            """)
+    Page<Order> findAllPaidByBuyerId(Pageable pageable, Integer buyerId);
 
     @Query("""
             SELECT distinct o
             FROM Order o
             JOIN o.orderItems oi
             WHERE oi.productSeller.id = :productSellerId
+                            AND o.status = 'PAID'
     """)
-    Page<Order> findAllByProductSellerId(Pageable pageable, Integer productSellerId);
+    Page<Order> findAllPaidByProductSellerId(Pageable pageable, Integer productSellerId);
 
     @EntityGraph(attributePaths = {"buyer", "orderItems.product", "orderItems.productSeller"})
     Optional<Order> findWithProductsAndBuyerDetailsByStripeCheckoutId(String stripeCheckoutId);
+
+    @EntityGraph(attributePaths = {"buyer", "orderItems.product", "orderItems.productSeller"})
+    Optional<Order> findWithProductsAndBuyerDetailsById(Integer orderId);
 }

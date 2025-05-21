@@ -19,7 +19,7 @@ import java.util.Map;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class AsyncFulfillmentService {
+public class AsyncFulfilmentService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
