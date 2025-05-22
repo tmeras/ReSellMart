@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Order Cancellation</title>
+    <title>Shipping Confirmation</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -22,13 +22,7 @@
         }
 
         h2 {
-            color: #c0392b; /* red for error */
-        }
-
-        p.message {
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #e74c3c;
+            color: #2c3e50;
         }
 
         table {
@@ -56,36 +50,45 @@
 </head>
 <body>
 <div class="container">
-    <h2>Order #<span th:text="${order.id}">12345</span> Could Not Be Completed</h2>
-    <p class="message">We are sorry <span th:text="${order.buyer.realName}">customer</span>, but your order could not be
-        completed due to product availability.</p>
+    <h2>Order Shipping Confirmation</h2>
+    <p><span th:text="${order.buyer.realName}"></span>, all products for your
+        order have been shipped!
+    </p>
 
     <h3>Order Details</h3>
-    <p><strong>Order ID:</strong> <span th:text="${order.id}">12345</span></p>
-    <p><strong>Placed At:</strong> <span th:text="${#temporals.format(order.placedAt, 'yyyy-MM-dd HH:mm')}">2025-05-19 14:00</span>
-        UTC</p>
+    <p><strong>Order ID:</strong> <span th:text="${order.id}"></span></p>
+    <p><strong>Placed At:</strong> <span th:text="${#temporals.format(order.placedAt, 'yyyy-MM-dd HH:mm')}"></span> UTC
+    </p>
 
-    <h3>Unavailable Product</h3>
+    <h3>Billing Address</h3>
+    <p th:text="${order.billingAddress}"></p>
+
+    <h3>Delivery Address</h3>
+    <p th:text="${order.deliveryAddress}"></p>
+
+    <h3>Order Items</h3>
     <table>
         <thead>
         <tr>
-            <th>Product Name</th>
-            <th>Available Quantity</th>
-            <th>Requested Quantity</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price (£)</th>
         </tr>
         </thead>
         <tbody>
-        <tr>
-            <td th:text="${product.name}">Product Name</td>
-            <td th:text="${product.availableQuantity}">available</td>
-            <td th:text="${requestedQuantity}">requested</td>
+        <tr th:each="item : ${order.orderItems}">
+            <td th:text="${item.productName}"></td>
+            <td th:text="${item.productQuantity}"></td>
+            <td th:text="${item.productPrice}"></td>
         </tr>
         </tbody>
     </table>
+    <p><strong>Total Price:</strong> <span th:text="'£' + ${order.calculateTotalPrice()}"></span></p>
+
+    <p>Please login to ReSellMart and confirm when all your items have been delivered, via the "My purchases" page.</p>
 
     <footer>
-        <p>We apologize for the inconvenience.<br>
-            Best regards,<br>
+        <p>Best regards,<br>
             The ReSellMart team</p>
     </footer>
 </div>

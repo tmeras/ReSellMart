@@ -129,12 +129,12 @@ export function UpdateUserForm() {
                 <Flex direction="column" align="center" justify="center">
                     <Flex gap="xs" mt="sm" align="center" justify="center">
                         <IconAlertCircle color="red" size={ 25 }/>
-                        <Text size="lg" c="red" fw="bold">
+                        <Text size="lg" c="red.8" fw="bold">
                             IMPORTANT
                         </Text>
                     </Flex>
 
-                    <Text size="lg" ta="center" mt="xs" mb="sm">
+                    <Text size="lg" ta="center" my="xs" mb="sm">
                         Please scan the following QR code using your preferred authenticator app
                         to be able to sign in using MFA
                     </Text>

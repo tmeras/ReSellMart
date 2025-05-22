@@ -139,4 +139,29 @@ public class EmailService {
 
         mailSender.send(mimeMessage);
     }
+
+    public void sendShippingConfirmationEmail(
+            String to,
+            Order order
+    ) throws MessagingException {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(
+                mimeMessage,
+                MimeMessageHelper.MULTIPART_MODE_MIXED,
+                StandardCharsets.UTF_8.name()
+        );
+
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("order", order);
+        Context context = new Context();
+        context.setVariables(variables);
+        String template = templateEngine.process(AppConstants.SHIPPING_CONFIRMATION_TEMPLATE, context);
+
+        mimeMessageHelper.setFrom("resellmart@gmail.com");
+        mimeMessageHelper.setTo(to);
+        mimeMessageHelper.setSubject("ReSellMart Shipping Notification");
+        mimeMessageHelper.setText(template, true);
+
+        mailSender.send(mimeMessage);
+    }
 }

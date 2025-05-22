@@ -352,4 +352,49 @@ public class OrderService {
                 orders.isLast()
         );
     }
+
+    public void markOrderItemAsShipped(Integer orderId, Integer productId, Authentication authentication) throws MessagingException {
+        User currentUser = (User) authentication.getPrincipal();
+
+        Order order = orderRepository.findWithProductsAndBuyerDetailsById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("No order found with ID: " + orderId));
+        if (order.getStatus() != OrderStatus.PAID)
+            throw new APIException("Order with ID: " + orderId + " has not been paid yet");
+
+        OrderItem orderItem = order.getOrderItems().stream()
+                .filter((oi) -> oi.getProduct().getId().equals(productId)).findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("The order does not include a product with ID: " + productId));
+        if (!orderItem.getProduct().getSeller().getId().equals(currentUser.getId()))
+            throw new OperationNotPermittedException("You do not have permission to mark this product as shipped");
+
+        orderItem.setStatus(OrderItemStatus.SHIPPED);
+
+        boolean allShipped = order.getOrderItems().stream()
+                .allMatch(item -> item.getStatus() == OrderItemStatus.SHIPPED);
+        if (allShipped)
+            emailService.sendShippingConfirmationEmail(order.getBuyer().getEmail(), order);
+
+
+        orderRepository.save(order);
+    }
+
+    public void markOrderItemAsDelivered(Integer orderId, Integer productId, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+
+        Order order = orderRepository.findWithProductsAndBuyerDetailsById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("No order found with ID: " + orderId));
+        if (order.getStatus() != OrderStatus.PAID)
+            throw new APIException("Order with ID: " + orderId + " has not been paid yet");
+
+        OrderItem orderItem = order.getOrderItems().stream()
+                .filter((oi) -> oi.getProduct().getId().equals(productId)).findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("The order does not include a product with ID: " + productId));
+        if (orderItem.getStatus() != OrderItemStatus.SHIPPED)
+            throw new APIException("Product with ID: " + orderItem.getProduct().getId() + " has not been shipped yet");
+        if (!order.getBuyer().getId().equals(currentUser.getId()))
+            throw new OperationNotPermittedException("You do not have permission to mark this product as delivered");
+
+        orderItem.setStatus(OrderItemStatus.DELIVERED);
+        orderRepository.save(order);
+    }
 }

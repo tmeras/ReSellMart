@@ -46,7 +46,7 @@ public class OrderController {
             @RequestBody Map<String, String> body
     ) throws MessagingException, StripeException {
         orderService.fulfillOrder(body.get("stripeSessionId"));
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/orders")
@@ -86,5 +86,25 @@ public class OrderController {
         PageResponse<OrderResponse> foundOrders =
                 orderService.findAllByProductSellerId(pageNumber, pageSize, sortBy, sortDirection, productSellerId, authentication);
         return new ResponseEntity<>(foundOrders, HttpStatus.OK);
+    }
+
+    @PatchMapping("/orders/{order-id}/products/{product-id}/ship")
+    public ResponseEntity<?> markOrderItemAsShipped(
+            @PathVariable(name = "order-id") Integer orderId,
+            @PathVariable(name = "product-id") Integer productId,
+            Authentication authentication
+    ) throws MessagingException {
+        orderService.markOrderItemAsShipped(orderId, productId, authentication);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PatchMapping("/orders/{order-id}/products/{product-id}/deliver")
+    public ResponseEntity<?> markOrderItemAsDelivered(
+            @PathVariable(name = "order-id") Integer orderId,
+            @PathVariable(name = "product-id") Integer productId,
+            Authentication authentication
+    ) {
+        orderService.markOrderItemAsDelivered(orderId, productId, authentication);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

@@ -1,8 +1,6 @@
 import { PurchasesList } from "@/features/app/orders/components/PurchasesList.tsx";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { Title } from "@mantine/core";
-import { useEffect } from "react";
-import { useSearchParams } from "react-router";
 
 export function PurchasesPage() {
     const { user } = useAuth();

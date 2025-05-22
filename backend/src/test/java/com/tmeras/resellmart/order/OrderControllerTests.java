@@ -34,8 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(
@@ -141,7 +140,7 @@ public class OrderControllerTests {
         mockMvc.perform(post("/api/orders/fulfill")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(body))
-        ).andExpect(status().isOk());
+        ).andExpect(status().isNoContent());
 
         verify(orderService, times(1)).fulfillOrder("sessionId");
     }
@@ -212,5 +211,27 @@ public class OrderControllerTests {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
 
         assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(pageResponse));
+    }
+
+    @Test
+    public void shouldMarkOrderItemAsShipped() throws Exception {
+        mockMvc.perform(patch("/api/orders/" + orderResponseB.getId() + "/products/" +
+                orderResponseB.getOrderItems().get(0).getProductId() + "/ship")
+        ).andExpect(status().isNoContent());
+
+        verify(orderService, times(1)).markOrderItemAsShipped(
+                eq(orderResponseB.getId()), eq(orderResponseB.getOrderItems().get(0).getProductId()), any(Authentication.class)
+        );
+    }
+
+    @Test
+    public void shouldMarkOrderItemAsDelivered() throws Exception {
+        mockMvc.perform(patch("/api/orders/" + orderResponseA.getId() + "/products/" +
+                orderResponseA.getOrderItems().get(0).getProductId() + "/deliver")
+        ).andExpect(status().isNoContent());
+
+        verify(orderService, times(1)).markOrderItemAsDelivered(
+                eq(orderResponseA.getId()), eq(orderResponseA.getOrderItems().get(0).getProductId()), any(Authentication.class)
+        );
     }
 }

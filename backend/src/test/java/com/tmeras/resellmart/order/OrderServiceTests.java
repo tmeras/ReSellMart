@@ -309,21 +309,6 @@ public class OrderServiceTests {
                     .finaliseOrder(orderA, List.of(orderA.getOrderItems().get(0).getProduct()));
         }
 
-        /*verify(orderRepository, times(1)).save(orderA);
-        verify(productRepository, times(1)).save(orderA.getOrderItems().get(0).getProduct());
-        verify(cartItemRepository, times(1))
-                .deleteAllByUserIdAndProductIdIn(userA.getId(),
-                        List.of(orderA.getOrderItems().get(0).getProduct().getId()));
-        verify(emailService, times(1))
-                .sendPurchaseConfirmationEmail(orderA.getBuyer().getEmail(), orderA);
-        verify(emailService, times(1))
-                .sendSaleConfirmationEmail(
-                        orderA.getOrderItems().get(0).getProductSeller().getEmail(),
-                        orderA.getOrderItems().get(0).getProductSeller().getRealName(),
-                        orderA,
-                        orderA.getOrderItems(),
-                        orderA.calculateTotalPrice());*/
-
         verify(paymentIntent, times(1)).capture();
         assertThat(orderA.getOrderItems().get(0).getProduct().getAvailableQuantity())
                 .isEqualTo(initialQuantity - orderA.getOrderItems().get(0).getProductQuantity());
@@ -458,5 +443,144 @@ public class OrderServiceTests {
                         AppConstants.SORT_ORDERS_BY, AppConstants.SORT_DIR, orderA.getOrderItems().get(0).getProductSeller().getId(), authentication)
         ).isInstanceOf(OperationNotPermittedException.class)
                 .hasMessage("You do not have permission to view these orders");
+    }
+
+    @Test
+    public void shouldMarkOrderItemAsShippedWhenValidRequest() throws MessagingException {
+        when(orderRepository.findWithProductsAndBuyerDetailsById(orderB.getId()))
+                .thenReturn(Optional.of(orderB));
+
+        orderService.markOrderItemAsShipped(
+                orderB.getId(), orderB.getOrderItems().get(0).getProduct().getId(), authentication
+        );
+
+
+        assertThat(orderB.getOrderItems().get(0).getStatus()).isEqualTo(OrderItemStatus.SHIPPED);
+        verify(emailService, times(1))
+                .sendShippingConfirmationEmail(orderB.getBuyer().getEmail(), orderB);
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsShippedWhenInvalidOrderId() {
+        when(orderRepository.findWithProductsAndBuyerDetailsById(99))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(
+                () -> orderService.markOrderItemAsShipped(
+                        99, orderB.getOrderItems().get(0).getProduct().getId(), authentication)
+        ).isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No order found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsShippedWhenOrderIsNotPaid() {
+        orderB.setStatus(OrderStatus.PENDING_PAYMENT);
+        when(orderRepository.findWithProductsAndBuyerDetailsById(orderB.getId()))
+                .thenReturn(Optional.of(orderB));
+
+        assertThatThrownBy(
+                () -> orderService.markOrderItemAsShipped(
+                        orderB.getId(), orderB.getOrderItems().get(0).getProduct().getId(), authentication)
+        ).isInstanceOf(APIException.class)
+                .hasMessage("Order with ID: " + orderB.getId() + " has not been paid yet");
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsShippedWhenInvalidProductId() {
+        when(orderRepository.findWithProductsAndBuyerDetailsById(orderB.getId()))
+                .thenReturn(Optional.of(orderB));
+
+        assertThatThrownBy(() -> orderService.markOrderItemAsShipped(orderB.getId(), 99, authentication))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("The order does not include a product with ID: 99");
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsShippedWhenProductSellerIsNotLoggedIn() {
+        when(orderRepository.findWithProductsAndBuyerDetailsById(orderA.getId()))
+                .thenReturn(Optional.of(orderA));
+
+        assertThatThrownBy(
+                () -> orderService.markOrderItemAsShipped(
+                        orderA.getId(), orderA.getOrderItems().get(0).getProduct().getId(), authentication)
+        ).isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to mark this product as shipped");
+    }
+
+    @Test
+    public void shouldMarkOrderItemAsDeliveredWhenValidRequest() {
+        orderA.getOrderItems().get(0).setStatus(OrderItemStatus.SHIPPED);
+
+        when(orderRepository.findWithProductsAndBuyerDetailsById(orderA.getId()))
+                .thenReturn(Optional.of(orderA));
+
+        orderService.markOrderItemAsDelivered(
+                orderA.getId(), orderA.getOrderItems().get(0).getProduct().getId(), authentication
+        );
+
+        assertThat(orderA.getOrderItems().get(0).getStatus()).isEqualTo(OrderItemStatus.DELIVERED);
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsDeliveredWhenInvalidOrderId() {
+        when(orderRepository.findWithProductsAndBuyerDetailsById(99))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(
+                () -> orderService.markOrderItemAsDelivered(
+                        99, orderA.getOrderItems().get(0).getProduct().getId(), authentication)
+        ).isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No order found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsDeliveredWhenOrderIsNotPaid() {
+        orderA.setStatus(OrderStatus.PENDING_PAYMENT);
+
+        when(orderRepository.findWithProductsAndBuyerDetailsById(orderA.getId()))
+                .thenReturn(Optional.of(orderA));
+
+        assertThatThrownBy(
+                () -> orderService.markOrderItemAsDelivered(
+                        orderA.getId(), orderA.getOrderItems().get(0).getProduct().getId(), authentication)
+        ).isInstanceOf(APIException.class)
+                .hasMessage("Order with ID: " + orderA.getId() + " has not been paid yet");
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsDeliveredWhenInvalidProductId() {
+        when(orderRepository.findWithProductsAndBuyerDetailsById(orderA.getId()))
+                .thenReturn(Optional.of(orderA));
+
+        assertThatThrownBy(() -> orderService.markOrderItemAsDelivered(orderA.getId(), 99, authentication))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("The order does not include a product with ID: 99");
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsDeliveredWhenOrderItemIsNotShipped() {
+        when(orderRepository.findWithProductsAndBuyerDetailsById(orderA.getId()))
+                .thenReturn(Optional.of(orderA));
+
+        assertThatThrownBy(
+                () -> orderService.markOrderItemAsDelivered(
+                        orderA.getId(), orderA.getOrderItems().get(0).getProduct().getId(), authentication)
+        ).isInstanceOf(APIException.class)
+                .hasMessage("Product with ID: " + orderA.getOrderItems().get(0).getId() +
+                        " has not been shipped yet");
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsDeliveredWhenBuyerIsNotLoggedIn() {
+        orderB.getOrderItems().get(0).setStatus(OrderItemStatus.SHIPPED);
+
+        when(orderRepository.findWithProductsAndBuyerDetailsById(orderB.getId()))
+                .thenReturn(Optional.of(orderB));
+
+        assertThatThrownBy(
+                () -> orderService.markOrderItemAsDelivered(
+                        orderB.getId(), orderB.getOrderItems().get(0).getProduct().getId(), authentication)
+        ).isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to mark this product as delivered");
     }
 }

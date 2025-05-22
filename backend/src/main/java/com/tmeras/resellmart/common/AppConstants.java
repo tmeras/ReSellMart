@@ -35,6 +35,7 @@ public final class AppConstants {
     public static final String PURCHASE_CONFIRMATION_TEMPLATE = "purchase_confirmation";
     public static final String SALE_CONFIRMATION_TEMPLATE = "sale_confirmation";
     public static final String ORDER_CANCELLATION_TEMPLATE = "order_cancellation";
+    public static final String SHIPPING_CONFIRMATION_TEMPLATE = "shipping_confirmation";
 
     // Number of entities manually created using flyway
     // used to prevent deletion of related images       TODO: Update when more data is added

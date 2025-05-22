@@ -1,9 +1,12 @@
+import { useShipOrderItem } from "@/features/app/orders/api/shipOrderItem.ts";
 import { OrderItemStatusStepper } from "@/features/app/orders/components/OrderItemStatusStepper.tsx";
+import { useAuth } from "@/hooks/useAuth.ts";
 import { OrderResponse } from "@/types/api.ts";
 import { PRODUCT_CONDITION } from "@/utils/constants.ts";
 import { base64ToDataUri } from "@/utils/fileUtils.ts";
 import { Button, Card, Divider, Flex, Image, Popover, Text, useMantineColorScheme } from "@mantine/core";
-import { IconArrowDown } from "@tabler/icons-react";
+import { notifications } from "@mantine/notifications";
+import { IconArrowDown, IconX } from "@tabler/icons-react";
 import { useState } from "react";
 
 export type SaleCardProps = {
@@ -11,8 +14,23 @@ export type SaleCardProps = {
 }
 
 export function SaleCard({ sale }: SaleCardProps) {
+    const {user} = useAuth();
     const { colorScheme } = useMantineColorScheme();
     const [popoverOpened, setPopoverOpened] = useState(false);
+
+    const shipOrderItemMutation = useShipOrderItem({userId: user!.id.toString()});
+
+    async function shipOrderItem(orderId: string, productId: string) {
+        try {
+            await shipOrderItemMutation.mutateAsync({ orderId, productId });
+        } catch (error) {
+            console.error("Error marking order item as shipped:", error);
+            notifications.show({
+                title: "Something went wrong", message: "Please try marking the product as shipped again",
+                color: "red", icon: <IconX/>, withBorder: true
+            });
+        }
+    }
 
     const placedAt = new Date(sale.placedAt);
 
@@ -109,6 +127,10 @@ export function SaleCard({ sale }: SaleCardProps) {
                                     <Button
                                         variant="light" w="fit-content"
                                         mt="md" size="sm"
+                                        loading={shipOrderItemMutation.isPending}
+                                        onClick={() =>
+                                            shipOrderItem(sale.id.toString(), orderItem.productId.toString())
+                                        }
                                     >
                                         Mark as shipped
                                     </Button>

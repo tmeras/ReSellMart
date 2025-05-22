@@ -108,12 +108,12 @@ export const RegistrationForm = () => {
                                 <>
                                     <Flex gap="xs" mt="sm" align="center" justify="center">
                                         <IconAlertCircle color="red" size={ 25 }/>
-                                        <Text size="lg" c="red" fw="bold">
+                                        <Text size="lg" c="red.8" fw="bold">
                                             IMPORTANT
                                         </Text>
                                     </Flex>
 
-                                    <Text size="lg" ta="center" mt="xs">
+                                    <Text size="lg" ta="center" my="xs">
                                         Please scan the following QR code using your preferred authenticator app
                                         to be able to sign in using MFA
                                     </Text>

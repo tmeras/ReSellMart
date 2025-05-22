@@ -458,4 +458,163 @@ public class OrderControllerIT {
         assertThat(response.getBody().getMessage())
                 .isEqualTo("You do not have permission to view these orders");
     }
+
+    @Test
+    public void shouldMarkOrderItemAsShippedWhenValidRequest() {
+        ResponseEntity<?> response =
+                restTemplate.exchange("/api/orders/" + orderB.getId() + "/products/" +
+                                orderB.getOrderItems().get(0).getProduct().getId() + "/ship",
+                        HttpMethod.PATCH, new HttpEntity<>(headers), Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        Optional<Order> updatedOrder = orderRepository.findWithProductsAndBuyerDetailsById(orderB.getId());
+        assertThat(updatedOrder).isPresent();
+        assertThat(updatedOrder.get().getOrderItems().get(0).getStatus())
+                .isEqualTo(OrderItemStatus.SHIPPED);
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsShippedWhenInvalidOrderId() {
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/orders/99/products/" +
+                                orderB.getOrderItems().get(0).getProduct().getId() + "/ship",
+                        HttpMethod.PATCH, new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("No order found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsShippedWhenOrderIsNotPaid() {
+        orderB.setStatus(OrderStatus.PENDING_PAYMENT);
+        orderRepository.save(orderB);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/orders/" + orderB.getId() + "/products/" +
+                                orderB.getOrderItems().get(0).getProduct().getId() + "/ship",
+                        HttpMethod.PATCH, new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("Order with ID: " + orderB.getId() + " has not been paid yet");
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsShippedWhenInvalidProductId() {
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/orders/" + orderB.getId() + "/products/99/ship",
+                        HttpMethod.PATCH, new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("The order does not include a product with ID: 99");
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsShippedWhenProductSellerIsNotLoggedIn() {
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/orders/" + orderA.getId() + "/products/" +
+                                orderA.getOrderItems().get(0).getProduct().getId() + "/ship",
+                        HttpMethod.PATCH, new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("You do not have permission to mark this product as shipped");
+    }
+
+    @Test
+    public void shouldMarkOrderItemAsDeliveredWhenValidRequest() {
+        orderA.getOrderItems().get(0).setStatus(OrderItemStatus.SHIPPED);
+        orderRepository.save(orderA);
+
+        ResponseEntity<?> response =
+                restTemplate.exchange("/api/orders/" + orderA.getId() + "/products/" +
+                                orderA.getOrderItems().get(0).getProduct().getId() + "/deliver",
+                        HttpMethod.PATCH, new HttpEntity<>(headers), Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        Optional<Order> updatedOrder = orderRepository.findWithProductsAndBuyerDetailsById(orderA.getId());
+        assertThat(updatedOrder).isPresent();
+        assertThat(updatedOrder.get().getOrderItems().get(0).getStatus())
+                .isEqualTo(OrderItemStatus.DELIVERED);
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsDeliveredWhenInvalidOrderId() {
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/orders/99/products/" +
+                                orderA.getOrderItems().get(0).getProduct().getId() + "/deliver",
+                        HttpMethod.PATCH, new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("No order found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsDeliveredWhenOrderIsNotPaid() {
+        orderA.setStatus(OrderStatus.PENDING_PAYMENT);
+        orderRepository.save(orderA);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/orders/" + orderA.getId() + "/products/" +
+                                orderA.getOrderItems().get(0).getProduct().getId() + "/deliver",
+                        HttpMethod.PATCH, new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("Order with ID: " + orderA.getId() + " has not been paid yet");
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsDeliveredWhenInvalidProductId() {
+        orderA.getOrderItems().get(0).setStatus(OrderItemStatus.SHIPPED);
+        orderRepository.save(orderA);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/orders/" + orderA.getId() + "/products/99/deliver",
+                        HttpMethod.PATCH, new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("The order does not include a product with ID: 99");
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsDeliveredWhenOrderItemIsNotShipped() {
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/orders/" + orderA.getId() + "/products/" +
+                                orderA.getOrderItems().get(0).getProduct().getId() + "/deliver",
+                        HttpMethod.PATCH, new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("Product with ID: " + orderA.getOrderItems().get(0).getProduct().getId() +
+                        " has not been shipped yet");
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsDeliveredWhenBuyerIsNotLoggedIn() {
+        orderB.getOrderItems().get(0).setStatus(OrderItemStatus.SHIPPED);
+        orderRepository.save(orderB);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/orders/" + orderB.getId() + "/products/" +
+                                orderB.getOrderItems().get(0).getProduct().getId() + "/deliver",
+                        HttpMethod.PATCH, new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("You do not have permission to mark this product as delivered");
+    }
 }
