@@ -4,6 +4,7 @@ import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -117,10 +118,23 @@ public class ProductController {
         return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
     }
 
+    // Fetches the primary product image
+    @GetMapping("/{product-id}/images/primary")
+    public ResponseEntity<byte[]> findPrimaryProductImage(
+            @PathVariable(name = "product-id") Integer productId
+    ) {
+        ProductImageResponse productImage = productService.findPrimaryProductImage(productId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", productImage.getType());
+
+        return new ResponseEntity<>(productImage.getImage(), headers, HttpStatus.OK);
+    }
+
+    // Soft-deletes the product
     @DeleteMapping("/{product-id}")
     public ResponseEntity<?> delete(
             @PathVariable(name = "product-id") Integer productId
-    ) throws IOException {
+    ) {
         productService.delete(productId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

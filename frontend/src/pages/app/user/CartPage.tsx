@@ -3,7 +3,6 @@ import { useGetCartTotal } from "@/api/cart/getCartTotal.ts";
 import { CartItemsList } from "@/features/app/cart/components/CartItemsList.tsx";
 import { CartTotalCard } from "@/features/app/cart/components/CartTotalCard.tsx";
 import { useAuth } from "@/hooks/useAuth.ts";
-import { isCartValid } from "@/utils/generalUtils.ts";
 import { Flex, Loader, Text } from "@mantine/core";
 
 export function CartPage() {
@@ -33,7 +32,7 @@ export function CartPage() {
         console.log("Error fetching cart total", getCartTotalQuery.error);
         return (
             <Text c="red.5">
-                There was an error when fetching your cart. Please refresh and try again.
+                There was an error when calculating your cart total. Please refresh and try again.
             </Text>
         );
     }
@@ -42,7 +41,9 @@ export function CartPage() {
     const cartTotal = getCartTotalQuery.data?.data;
     const totalItems =
         cartItems.reduce((acc, item) => acc + item.quantity, 0);
-    const cartValid = isCartValid(cartItems);
+    const cartValid = cartItems.every((item) =>
+        !item.product.isDeleted && (item.quantity <= item.product.availableQuantity)
+    );
     const cartEmpty = cartItems.length === 0;
 
     return (
@@ -58,6 +59,7 @@ export function CartPage() {
                 <CartItemsList
                     cartItems={ cartItems } cartTotal={ cartTotal }
                     totalItems={ totalItems } cartValid={ cartValid }
+                    cartEmpty={ cartEmpty }
                 />
 
                 { !cartEmpty &&

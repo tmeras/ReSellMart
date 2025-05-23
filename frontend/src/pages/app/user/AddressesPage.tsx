@@ -1,6 +1,6 @@
-import { useGetAddressesByUser } from "@/features/app/addresses/api/getAddressesByUser.ts";
+import { useGetAddressesByUser } from "@/api/addresses/getAddressesByUser.ts";
+import { CreateAddressActionIcon } from "@/components/ui/CreateAddressActionIcon.tsx";
 import { AddressesList } from "@/features/app/addresses/components/AddressesList.tsx";
-import { CreateAddressActionIcon } from "@/features/app/addresses/components/CreateAddressActionIcon.tsx";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { Flex, Loader, Text, Title } from "@mantine/core";
 
@@ -37,7 +37,7 @@ export function AddressesPage() {
                     My Addresses
                 </Title>
 
-                <CreateAddressActionIcon/>
+                <CreateAddressActionIcon size="lg"/>
             </Flex>
 
             <AddressesList addresses={ addresses }/>

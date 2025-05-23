@@ -355,9 +355,29 @@ public class ProductControllerTests {
     }
 
     @Test
+    public void shouldFindPrimaryProductImage() throws Exception {
+        ProductImageResponse productImageResponse = new ProductImageResponse(
+                1,
+                TEST_IMAGE_1.getOriginalFilename(),
+                TEST_IMAGE_1.getContentType(),
+                TEST_IMAGE_1.getBytes()
+        );
+
+        when(productService.findPrimaryProductImage(productRequestA.getId())).thenReturn(productImageResponse);
+
+        MvcResult result = mockMvc.perform(get("/api/products/" + productRequestA.getId() + "/images/primary"))
+                .andExpect(status().isOk())
+                .andReturn();
+        byte[] imageBytes = result.getResponse().getContentAsByteArray();
+
+        assertThat(imageBytes).isEqualTo(TEST_IMAGE_1.getBytes());
+    }
+
+    @Test
     public void shouldDeleteProduct() throws Exception {
         mockMvc.perform(delete("/api/products/" + productRequestA.getId()))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent())
+                .andReturn();
 
         verify(productService, times(1)).delete(productRequestA.getId());
     }

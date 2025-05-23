@@ -7,11 +7,9 @@ import com.tmeras.resellmart.category.CategoryResponse;
 import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.APIException;
-import com.tmeras.resellmart.exception.ForeignKeyConstraintException;
 import com.tmeras.resellmart.exception.OperationNotPermittedException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.file.FileService;
-import com.tmeras.resellmart.order.OrderItemRepository;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
@@ -40,7 +38,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductServiceTests {
@@ -74,9 +72,6 @@ public class ProductServiceTests {
 
     @Mock
     private CategoryRepository categoryRepository;
-
-    @Mock
-    private OrderItemRepository orderItemRepository;
 
     @Mock
     private ProductMapper productMapper;
@@ -396,11 +391,11 @@ public class ProductServiceTests {
 
         assertThat(productResponse).isEqualTo(productResponseA);
         assertThat(productA.getImages().size()).isEqualTo(1);
-        assertThat(productA.getImages().get(0).getFilePath()).isEqualTo("/uploads/test_image_1.jpeg");
+        assertThat(productA.getImages().get(0).getImagePath()).isEqualTo("/uploads/test_image_1.jpeg");
     }
 
     @Test
-    public void shouldNotUploadProductImagesWhenInvalidProductId() throws IOException {
+    public void shouldNotUploadProductImagesWhenInvalidProductId() {
         List<MultipartFile> images = List.of(TEST_IMAGE_1);
 
         when(productRepository.findWithAssociationsById(99)).thenReturn(Optional.empty());
@@ -411,7 +406,7 @@ public class ProductServiceTests {
     }
 
     @Test
-    public void shouldNotUploadProductImagesWhenSellerIsNotLoggedIn() throws IOException {
+    public void shouldNotUploadProductImagesWhenSellerIsNotLoggedIn() {
         List<MultipartFile> images = List.of(TEST_IMAGE_1);
 
         authentication = new UsernamePasswordAuthenticationToken(
@@ -428,7 +423,7 @@ public class ProductServiceTests {
     }
 
     @Test
-    public void shouldNotUploadProductImagesWhenImageLimitExceeded() throws IOException {
+    public void shouldNotUploadProductImagesWhenImageLimitExceeded() {
         List<MultipartFile> images = Collections.nCopies(6, TEST_IMAGE_1);
 
         when(productRepository.findWithAssociationsById(productA.getId())).thenReturn(Optional.of(productA));
@@ -455,32 +450,63 @@ public class ProductServiceTests {
                 .hasMessage("Only images can be uploaded");
     }
 
-
     @Test
-    public void shouldDeleteProduct() throws IOException {
-        ProductImage productImageA = new ProductImage(
+    public void shouldFindPrimaryProductImageWhenValidRequest() throws IOException {
+        ProductImage productImage = new ProductImage(
                 1,
                 TEST_IMAGE_1.getOriginalFilename(),
                 TEST_IMAGE_1.getContentType(),
-                "/uploads/test_image_1.jpeg"
+                "src/test/resources/test_image_1.jpeg"
         );
-        productA.setId(99); // To ensure fileService.deleteFile() is called
-        productA.getImages().add(productImageA);
+        productA.getImages().add(productImage);
+        ProductImageResponse productImageResponse = new ProductImageResponse(
+                1,
+                TEST_IMAGE_1.getOriginalFilename(),
+                TEST_IMAGE_1.getContentType(),
+                TEST_IMAGE_1.getBytes()
+        );
 
         when(productRepository.findWithImagesById(productA.getId())).thenReturn(Optional.of(productA));
+        when(productMapper.toProductImageResponse(productImage)).thenReturn(productImageResponse);
 
-        productService.delete(productA.getId());
+        ProductImageResponse response = productService.findPrimaryProductImage(productA.getId());
 
-        verify(productRepository, times(1)).deleteById(productA.getId());
-        verify(fileService, times(1)).deleteFile(productImageA.getFilePath());
+        assertThat(response).isEqualTo(productImageResponse);
     }
 
     @Test
-    public void shouldNotDeleteProductWhenForeignKeyConstraint() {
-        when(orderItemRepository.existsByProductId(productA.getId())).thenReturn(true);
+    public void shouldNotFindPrimaryProductImageWhenInvalidProductId() {
+        when(productRepository.findWithImagesById(99)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> productService.findPrimaryProductImage(99))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No product found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotFindPrimaryProductImageWhenEmptyImagesList() {
+        when(productRepository.findWithImagesById(productA.getId())).thenReturn(Optional.of(productA));
+
+        assertThatThrownBy(() -> productService.findPrimaryProductImage(productA.getId()))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No images found for product with ID: " + productA.getId());
+    }
+
+    @Test
+    public void shouldDeleteProduct() {
+        when(productRepository.findById(productA.getId())).thenReturn(Optional.of(productA));
+
+        productService.delete(productA.getId());
+
+        assertThat(productA.getIsDeleted()).isTrue();
+    }
+
+    @Test
+    public void shouldNotDeleteProductWhenInvalidProductId() {
+        when(productRepository.findById(productA.getId())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> productService.delete(productA.getId()))
-                .isInstanceOf(ForeignKeyConstraintException.class)
-                .hasMessage("Cannot delete product due to existing orders that reference it");
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No product found with ID: " + productA.getId());
     }
 }

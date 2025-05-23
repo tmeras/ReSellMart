@@ -2,18 +2,21 @@ package com.tmeras.resellmart.email;
 
 import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.order.Order;
+import com.tmeras.resellmart.order.OrderItem;
+import com.tmeras.resellmart.product.Product;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -52,7 +55,7 @@ public class EmailService {
         mailSender.send(mimeMessage);
     }
 
-    public void sendOrderConfirmationEmail(
+    public void sendPurchaseConfirmationEmail(
             String to,
             Order order
     ) throws MessagingException {
@@ -67,11 +70,96 @@ public class EmailService {
         variables.put("order", order);
         Context context = new Context();
         context.setVariables(variables);
-        String template = templateEngine.process(AppConstants.ORDER_CONFIRMATION_TEMPLATE, context);
+        String template = templateEngine.process(AppConstants.PURCHASE_CONFIRMATION_TEMPLATE, context);
 
         mimeMessageHelper.setFrom("resellmart@gmail.com");
         mimeMessageHelper.setTo(to);
         mimeMessageHelper.setSubject("ReSellMart Order Confirmation");
+        mimeMessageHelper.setText(template, true);
+
+        mailSender.send(mimeMessage);
+    }
+
+    public void sendOrderCancellationEmail(
+            String to,
+            Order order,
+            Product product,
+            Integer requestedQuantity
+    ) throws MessagingException {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(
+                mimeMessage,
+                MimeMessageHelper.MULTIPART_MODE_MIXED,
+                StandardCharsets.UTF_8.name()
+        );
+
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("order", order);
+        variables.put("product", product);
+        variables.put("requestedQuantity", requestedQuantity);
+        Context context = new Context();
+        context.setVariables(variables);
+        String template = templateEngine.process(AppConstants.ORDER_CANCELLATION_TEMPLATE, context);
+
+        mimeMessageHelper.setFrom("resellmart@gmail.com");
+        mimeMessageHelper.setTo(to);
+        mimeMessageHelper.setSubject("ReSellMart Order Cancellation");
+        mimeMessageHelper.setText(template, true);
+
+        mailSender.send(mimeMessage);
+    }
+
+    public void sendSaleConfirmationEmail(
+            String to,
+            String sellerName,
+            Order order,
+            List<OrderItem> orderItems,
+            BigDecimal saleTotal
+    ) throws MessagingException {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(
+                mimeMessage,
+                MimeMessageHelper.MULTIPART_MODE_MIXED,
+                StandardCharsets.UTF_8.name()
+        );
+
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("order", order);
+        variables.put("sellerName", sellerName);
+        variables.put("orderItems", orderItems);
+        variables.put("saleTotal", saleTotal);
+        Context context = new Context();
+        context.setVariables(variables);
+        String template = templateEngine.process(AppConstants.SALE_CONFIRMATION_TEMPLATE, context);
+
+        mimeMessageHelper.setFrom("resellmart@gmail.com");
+        mimeMessageHelper.setTo(to);
+        mimeMessageHelper.setSubject("ReSellMart Sale Notification");
+        mimeMessageHelper.setText(template, true);
+
+        mailSender.send(mimeMessage);
+    }
+
+    public void sendShippingConfirmationEmail(
+            String to,
+            Order order
+    ) throws MessagingException {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(
+                mimeMessage,
+                MimeMessageHelper.MULTIPART_MODE_MIXED,
+                StandardCharsets.UTF_8.name()
+        );
+
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("order", order);
+        Context context = new Context();
+        context.setVariables(variables);
+        String template = templateEngine.process(AppConstants.SHIPPING_CONFIRMATION_TEMPLATE, context);
+
+        mimeMessageHelper.setFrom("resellmart@gmail.com");
+        mimeMessageHelper.setTo(to);
+        mimeMessageHelper.setSubject("ReSellMart Shipping Notification");
         mimeMessageHelper.setText(template, true);
 
         mailSender.send(mimeMessage);

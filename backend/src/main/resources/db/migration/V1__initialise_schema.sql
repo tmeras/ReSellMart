@@ -109,11 +109,11 @@ CREATE TABLE user
     CONSTRAINT pk_user PRIMARY KEY (id)
 );
 
-CREATE TABLE user_roles
+CREATE TABLE user_role
 (
     user_id  INT NOT NULL,
-    roles_id INT NOT NULL,
-    CONSTRAINT pk_user_roles PRIMARY KEY (user_id, roles_id)
+    role_id INT NOT NULL,
+    CONSTRAINT pk_user_roles PRIMARY KEY (user_id, role_id)
 );
 
 CREATE TABLE wish_list_item
@@ -126,10 +126,10 @@ CREATE TABLE wish_list_item
 );
 
 ALTER TABLE `role`
-    ADD CONSTRAINT uc_role_name UNIQUE (name);
+    ADD CONSTRAINT UC_ROLE_NAME UNIQUE (name);
 
 ALTER TABLE user
-    ADD CONSTRAINT uc_user_email UNIQUE (email);
+    ADD CONSTRAINT UC_USER_EMAIL UNIQUE (email);
 
 ALTER TABLE address
     ADD CONSTRAINT FK_ADDRESS_ON_USER FOREIGN KEY (user_id) REFERENCES user (id);
@@ -144,7 +144,7 @@ ALTER TABLE category
     ADD CONSTRAINT FK_CATEGORY_ON_PARENT FOREIGN KEY (parent_id) REFERENCES category (id);
 
 ALTER TABLE order_item
-    ADD CONSTRAINT FK_ORDERITEM_ON_ORDERID FOREIGN KEY (order_id) REFERENCES customer_order (id);
+    ADD CONSTRAINT FK_ORDERITEM_ON_ORDER FOREIGN KEY (order_id) REFERENCES customer_order (id);
 
 ALTER TABLE order_item
     ADD CONSTRAINT FK_ORDERITEM_ON_PRODUCT FOREIGN KEY (product_id) REFERENCES product (id);
@@ -176,8 +176,8 @@ ALTER TABLE wish_list_item
 ALTER TABLE wish_list_item
     ADD CONSTRAINT FK_WISHLISTITEM_ON_USER FOREIGN KEY (user_id) REFERENCES user (id);
 
-ALTER TABLE user_roles
-    ADD CONSTRAINT fk_userol_on_role FOREIGN KEY (roles_id) REFERENCES `role` (id);
+ALTER TABLE user_role
+    ADD CONSTRAINT FK_USERROLE_ON_ROLE FOREIGN KEY (role_id) REFERENCES `role` (id);
 
-ALTER TABLE user_roles
-    ADD CONSTRAINT fk_userol_on_user FOREIGN KEY (user_id) REFERENCES user (id);
+ALTER TABLE user_role
+    ADD CONSTRAINT FK_USERROLE_ONE_USER FOREIGN KEY (user_id) REFERENCES user (id);

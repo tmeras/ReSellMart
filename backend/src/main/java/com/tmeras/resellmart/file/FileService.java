@@ -25,6 +25,26 @@ public class FileService {
     @Value("${application.file.upload.user-images-path}")
     private String userImageUploadPath;
 
+    @Value("${application.file.upload.order-item-images-path}")
+    private String orderItemImageUploadPath;
+
+    public byte[] readFileFromPath(String filePath) {
+        if (filePath.isBlank())
+            return null;
+        try {
+            // Handle OS differences
+            if (File.separatorChar == '/')
+                filePath = filePath.replace('\\', '/');
+            else if (File.separatorChar == '\\')
+                filePath = filePath.replace('/', '\\');
+
+            Path path = new File(filePath).toPath();
+            return Files.readAllBytes(path);
+        } catch (IOException ex) {
+            throw new FileException("No file could be read from path: \"" + filePath + "\"");
+        }
+    }
+
     public List<String> saveProductImages(
             @NonNull List<MultipartFile> images, @NonNull Integer productId
     ) throws IOException {
@@ -40,19 +60,24 @@ public class FileService {
             @NonNull MultipartFile image, @NonNull Integer productId, @NonNull Integer fileNo
     ) throws IOException {
         final String fileUploadSubPath = "products" + File.separator + productId;
-        return uploadFile(image, productImageUploadPath, fileUploadSubPath, fileNo);
+        return saveFile(image, productImageUploadPath, fileUploadSubPath, fileNo);
     }
 
     public String saveUserImage(@NonNull MultipartFile image, @NonNull Integer userId) throws IOException {
         final String fileUploadSubPath = "users" + File.separator + userId;
-        return uploadFile(image, userImageUploadPath, fileUploadSubPath, 1);
+        return saveFile(image, userImageUploadPath, fileUploadSubPath, 1);
     }
 
-    public String uploadFile(
+    public String saveOrderItemImage(byte[] file, @NonNull String fileName, @NonNull Integer productId) throws IOException {
+        final String fileUploadSubPath = "order-items" + File.separator + productId;
+        return saveFile(file, fileName, orderItemImageUploadPath, fileUploadSubPath, 1);
+    }
+
+    public String saveFile(
             @NonNull MultipartFile file, @NonNull String fileUploadPath, @NonNull String fileUploadSubPath, @NonNull Integer fileId
     ) throws IOException{
         final String finalUploadPath = fileUploadPath + File.separator + fileUploadSubPath;
-        Path targetFolder =  Path.of(finalUploadPath);
+        Path targetFolder = Path.of(finalUploadPath);
         if (!Files.exists(targetFolder))
             Files.createDirectories(targetFolder);
 
@@ -64,12 +89,29 @@ public class FileService {
         return targetFilePath;
     }
 
+    public String saveFile(
+            byte[] file, @NonNull String fileName, @NonNull String fileUploadPath,
+            @NonNull String fileUploadSubPath, @NonNull Integer fileId
+    ) throws IOException {
+        final String finalUploadPath = fileUploadPath + File.separator + fileUploadSubPath;
+        Path targetFolder = Path.of(finalUploadPath);
+        if (!Files.exists(targetFolder))
+            Files.createDirectories(targetFolder);
+
+        final String fileExtension = getFileExtension(fileName);
+        String targetFilePath = finalUploadPath + File.separator + System.currentTimeMillis() + "F" + fileId + "." + fileExtension;
+        Path targetPath = Paths.get(targetFilePath);
+        Files.write(targetPath, file);
+        System.out.println("Created file: " + targetFilePath);
+        return targetFilePath;
+    }
+
     public String getFileExtension(String fileName) {
         if (fileName == null || fileName.isEmpty())
             return "";
 
         int lastDotIndex = fileName.lastIndexOf(".");
-        if (lastDotIndex == -1)
+        if (lastDotIndex == -1 || lastDotIndex == fileName.length() - 1)
             return "";
 
         return fileName.substring(lastDotIndex + 1).toLowerCase();

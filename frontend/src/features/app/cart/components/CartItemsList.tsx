@@ -2,17 +2,20 @@ import { CartItem } from "@/features/app/cart/components/CartItem.tsx";
 import { CartItemResponse } from "@/types/api.ts";
 import { Alert, Divider, Flex, Paper, Text, Title } from "@mantine/core";
 import { IconInfoCircle } from "@tabler/icons-react";
+import { ReactNode } from "react";
 
 type CartItemsListProps = {
     cartItems: CartItemResponse[];
     cartTotal: number;
     totalItems: number;
     cartValid: boolean;
+    cartEmpty: boolean;
+    title?: ReactNode
 }
 
-export function CartItemsList({ cartItems, cartTotal, totalItems, cartValid }: CartItemsListProps) {
-    const cartEmpty = cartItems.length === 0;
-
+export function CartItemsList({
+                                  cartItems, cartTotal, totalItems, cartValid, cartEmpty, title = <Title>Cart</Title>
+}: CartItemsListProps) {
     return (
         <Paper
             p="md" radius="sm"
@@ -30,9 +33,7 @@ export function CartItemsList({ cartItems, cartTotal, totalItems, cartValid }: C
             }
 
             <Flex align="center" gap="xs">
-                <Title>
-                    Cart
-                </Title>
+                { title }
 
                 <Text size="xl" mt={ 5 }>
                     ({ totalItems } items)
@@ -56,7 +57,7 @@ export function CartItemsList({ cartItems, cartTotal, totalItems, cartValid }: C
             ) : (
                 <>
                     <Flex direction="column">
-                        { cartItems?.map((item, index) =>
+                        { cartItems.map((item, index) =>
                             <div key={ item.id }>
                                 <CartItem cartItem={ item }/>
 

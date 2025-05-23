@@ -7,11 +7,3 @@ export function shuffleArray<T>(array: T[]): T[] {
     }
     return array;
 }
-
-// Check if the cart is valid; i.e. that all products must be available
-// and requested quantities must not exceed available stock
-export function isCartValid(cartItems: CartItemResponse[]) {
-    return cartItems.every((item) =>
-        !item.product.isDeleted && (item.quantity <= item.product.availableQuantity)
-    );
-}

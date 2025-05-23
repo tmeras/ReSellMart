@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Order Confirmation</title>
+    <title>Shipping Confirmation</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -50,29 +50,21 @@
 </head>
 <body>
 <div class="container">
-    <h2>Order Confirmation</h2>
-    <p>Thank you for your order, <span th:text="${order.buyer.realName}"></span>!</p>
+    <h2>Order Shipping Confirmation</h2>
+    <p><span th:text="${order.buyer.realName}"></span>, all products for your
+        order have been shipped!
+    </p>
 
     <h3>Order Details</h3>
     <p><strong>Order ID:</strong> <span th:text="${order.id}"></span></p>
-    <p><strong>Placed At:</strong> <span th:text="${#temporals.format(order.placedAt, 'yyyy-MM-dd HH:mm')}"></span></p>     <!-- TODO: Specify time zone-->
-    <p><strong>Payment Method:</strong> <span th:text="${order.paymentMethod}"></span></p>
+    <p><strong>Placed At:</strong> <span th:text="${#temporals.format(order.placedAt, 'yyyy-MM-dd HH:mm')}"></span> UTC
+    </p>
 
     <h3>Billing Address</h3>
-    <p>
-        <span th:text="${order.billingAddress.street}"></span>,
-        <span th:text="${order.billingAddress.city}"></span>,
-        <span th:text="${order.billingAddress.state}"></span>,
-        <span th:text="${order.billingAddress.postalCode}"></span>
-    </p>
+    <p th:text="${order.billingAddress}"></p>
 
     <h3>Delivery Address</h3>
-    <p>
-        <span th:text="${order.deliveryAddress.street}"></span>,
-        <span th:text="${order.deliveryAddress.city}"></span>,
-        <span th:text="${order.deliveryAddress.state}"></span>,
-        <span th:text="${order.deliveryAddress.postalCode}"></span>
-    </p>
+    <p th:text="${order.deliveryAddress}"></p>
 
     <h3>Order Items</h3>
     <table>
@@ -85,14 +77,15 @@
         </thead>
         <tbody>
         <tr th:each="item : ${order.orderItems}">
-            <td th:text="${item.product.name}"></td>
+            <td th:text="${item.productName}"></td>
             <td th:text="${item.productQuantity}"></td>
-            <td th:text="${item.product.price}"></td>
+            <td th:text="${item.productPrice}"></td>
         </tr>
         </tbody>
     </table>
+    <p><strong>Total Price:</strong> <span th:text="'£' + ${order.calculateTotalPrice()}"></span></p>
 
-    <p><strong>Total Price:</strong> <span th:text="'£' + ${order.getTotalPrice()}"></span></p>
+    <p>Please login to ReSellMart and confirm when all your items have been delivered, via the "My purchases" page.</p>
 
     <footer>
         <p>Best regards,<br>

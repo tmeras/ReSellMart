@@ -45,7 +45,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class AuthenticationServiceTests {
 
-    private static final String ACTIVATION_URL = "ACTIVATION_URL";
+    private static final String ACTIVATION_URL = "/activation";
+    private static final String FRONTEND_BASE_URL = "/auth";
     private static final Integer REFRESH_TOKEN_EXPIRATION_TIME = 120000; // 2 minutes
 
     @Mock
@@ -78,6 +79,7 @@ public class AuthenticationServiceTests {
     @BeforeEach
     public void setUp() {
         // Mock external properties for fields annotated with @Value
+        ReflectionTestUtils.setField(authenticationService, "frontendBaseUrl", FRONTEND_BASE_URL);
         ReflectionTestUtils.setField(authenticationService, "activationUrl", ACTIVATION_URL);
         ReflectionTestUtils.setField(authenticationService, "refreshExpirationTime", REFRESH_TOKEN_EXPIRATION_TIME);
     }
@@ -107,8 +109,10 @@ public class AuthenticationServiceTests {
         assertThat(response.getQrImageUri()).isEqualTo(expectedResponse.getQrImageUri());
         assertThat(response.getIsMfaEnabled()).isEqualTo(expectedResponse.getIsMfaEnabled());
         verify(emailService, times(1)).sendActivationEmail(
-                eq(registrationRequest.getEmail()), eq(registrationRequest.getName()),
-                startsWith(ACTIVATION_URL), any(String.class)
+                eq(registrationRequest.getEmail()),
+                eq(registrationRequest.getName()),
+                startsWith(FRONTEND_BASE_URL + ACTIVATION_URL),
+                any(String.class)
         );
         verify(tokenRepository, times(1)).save(any(Token.class));
     }

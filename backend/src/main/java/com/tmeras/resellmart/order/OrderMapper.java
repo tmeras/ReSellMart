@@ -1,7 +1,6 @@
 package com.tmeras.resellmart.order;
 
-import com.tmeras.resellmart.address.AddressMapper;
-import com.tmeras.resellmart.product.ProductMapper;
+import com.tmeras.resellmart.file.FileService;
 import com.tmeras.resellmart.user.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,29 +12,44 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderMapper {
 
-    private final ProductMapper productMapper;
-    private final AddressMapper addressMapper;
     private final UserMapper userMapper;
+
+    private final FileService fileService;
 
     public OrderResponse toOrderResponse(Order order) {
         List<OrderItemResponse> orderItemResponses = new ArrayList<>();
         for (OrderItem orderItem : order.getOrderItems()) {
-            orderItemResponses.add(OrderItemResponse.builder()
-                    .id(orderItem.getId())
-                    .product(productMapper.toProductResponse(orderItem.getProduct()))
-                    .productQuantity(orderItem.getProductQuantity())
-                    .build()
-            );
+            orderItemResponses.add(toOrderItemResponse(orderItem));
         }
 
         return OrderResponse.builder()
                 .id(order.getId())
                 .placedAt(order.getPlacedAt())
                 .paymentMethod(order.getPaymentMethod())
-                .billingAddress(addressMapper.toAddressResponse(order.getBillingAddress()))
-                .deliveryAddress(addressMapper.toAddressResponse(order.getDeliveryAddress()))
+                .status(order.getStatus())
+                .stripeCheckoutId(order.getStripeCheckoutId())
+                .billingAddress(order.getBillingAddress())
+                .deliveryAddress(order.getDeliveryAddress())
+                .total(order.calculateTotalPrice())
                 .buyer(userMapper.toUserResponse(order.getBuyer()))
                 .orderItems(orderItemResponses)
+                .build();
+    }
+
+    public OrderItemResponse toOrderItemResponse(OrderItem orderItem) {
+        byte[] image = orderItem.getProductImagePath() != null ?
+                fileService.readFileFromPath(orderItem.getProductImagePath()) : null;
+
+        return OrderItemResponse.builder()
+                .id(orderItem.getId())
+                .status(orderItem.getStatus())
+                .productId(orderItem.getProduct().getId())
+                .productQuantity(orderItem.getProductQuantity())
+                .productName(orderItem.getProductName())
+                .productPrice(orderItem.getProductPrice())
+                .productCondition(orderItem.getProductCondition())
+                .productImage(image)
+                .productSeller(userMapper.toUserResponse(orderItem.getProductSeller()))
                 .build();
     }
 }

@@ -1,7 +1,7 @@
 package com.tmeras.resellmart.product;
 
 import com.tmeras.resellmart.category.CategoryMapper;
-import com.tmeras.resellmart.file.FileUtilities;
+import com.tmeras.resellmart.file.FileService;
 import com.tmeras.resellmart.user.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +15,7 @@ public class ProductMapper {
 
     private final CategoryMapper categoryMapper;
     private final UserMapper userMapper;
+    private final FileService fileService;
 
     public Product toProduct(ProductRequest productRequest) {
         return Product.builder()
@@ -22,7 +23,7 @@ public class ProductMapper {
                 .name(productRequest.getName())
                 .description(productRequest.getDescription())
                 .price(productRequest.getPrice())
-                .productCondition(productRequest.getProductCondition())
+                .condition(productRequest.getCondition())
                 .availableQuantity(productRequest.getAvailableQuantity())
                 .images(new ArrayList<>())
                 .build();
@@ -30,7 +31,6 @@ public class ProductMapper {
 
     public ProductResponse toProductResponse(Product product) {
         List<ProductImageResponse> productImageResponses = new ArrayList<>();
-        // TODO: Sort by ID if needed
         if (product.getImages() != null)
             for (ProductImage productImage : product.getImages())
                 productImageResponses.add(toProductImageResponse(productImage));
@@ -41,7 +41,7 @@ public class ProductMapper {
                 .description(product.getDescription())
                 .price(product.getPrice())
                 .previousPrice(product.getPreviousPrice())
-                .productCondition(product.getProductCondition())
+                .condition(product.getCondition())
                 .availableQuantity(product.getAvailableQuantity())
                 .listedAt(product.getListedAt())
                 .isDeleted(product.getIsDeleted())
@@ -51,10 +51,10 @@ public class ProductMapper {
                 .build();
     }
 
-    private ProductImageResponse toProductImageResponse(ProductImage productImage) {
+    public ProductImageResponse toProductImageResponse(ProductImage productImage) {
         return ProductImageResponse.builder()
                 .id(productImage.getId())
-                .image(FileUtilities.readFileFromPath(productImage.getFilePath()))
+                .image(fileService.readFileFromPath(productImage.getImagePath()))
                 .name(productImage.getName())
                 .type(productImage.getType())
                 .build();

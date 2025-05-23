@@ -1,4 +1,6 @@
+import { paths } from "@/config/paths.ts";
 import { Button, Paper, Text, Tooltip } from "@mantine/core";
+import { useNavigate } from "react-router";
 
 export type CartTotalCardProps = {
     cartTotal: number;
@@ -7,6 +9,8 @@ export type CartTotalCardProps = {
 }
 
 export function CartTotalCard({ cartTotal, totalItems, cartValid }: CartTotalCardProps) {
+    const navigate = useNavigate();
+
     return (
         <Paper
             p="md" radius="sm" miw={ 300 } maw={ 350 }
@@ -18,7 +22,10 @@ export function CartTotalCard({ cartTotal, totalItems, cartValid }: CartTotalCar
             </Text>
 
             { cartValid ? (
-                <Button fullWidth mt="sm">
+                <Button
+                    fullWidth mt="sm"
+                    onClick={ () => navigate(paths.app.checkout.getHref()) }
+                >
                     Proceed to checkout
                 </Button>
             ) : (
@@ -26,7 +33,7 @@ export function CartTotalCard({ cartTotal, totalItems, cartValid }: CartTotalCar
                     events={ { hover: true, focus: false, touch: true } }
                     position="bottom" multiline w={ 350 }
                     label="Cannot checkout. Your cart includes unavailable products or
-                                the requested quantities of some products exceed available stock"
+                         the requested quantity of some products exceed available stock"
                 >
                     <Button fullWidth mt="sm" disabled>
                         Proceed to checkout

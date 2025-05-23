@@ -37,7 +37,7 @@ export function getProductsByUserQueryOptions({
     search,
     sortBy,
     sortDirection
-}: {
+} : {
     userId: string;
     page?: number;
     search?: string;

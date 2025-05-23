@@ -23,6 +23,8 @@ jobs:
           distribution: 'corretto'
 
       - name: Run unit tests
+        env:
+          STRIPE_SECRET_KEY: ${{secrets.STRIPE_SECRET_KEY}}
         run: |
           cd backend
           ./mvnw clean test

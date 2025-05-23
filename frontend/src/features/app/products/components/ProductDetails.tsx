@@ -110,7 +110,7 @@ export function ProductDetails(
                                     Condition:
                                 </Text>
                                 <Text span size="md">
-                                    { PRODUCT_CONDITION[product.productCondition] }
+                                    { PRODUCT_CONDITION[product.condition] }
                                 </Text>
                             </Flex>
                         </Flex>

@@ -30,7 +30,9 @@ import java.math.RoundingMode;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
+
+import static com.tmeras.resellmart.common.AppConstants.ACCEPTED_IMAGE_EXTENSIONS;
+import static com.tmeras.resellmart.common.AppConstants.FLYWAY_USERS_NUMBER;
 
 @Service
 @RequiredArgsConstructor
@@ -119,8 +121,8 @@ public class UserService {
         // User is logged in, so already exists => just call .get() on optional to retrieve Hibernate-managed entity
         currentUser = userRepository.findWithAssociationsById(userId).get();
 
-        // Delete previous user image, if it exists
-        if (currentUser.getImagePath() != null)
+        // Delete previous user image, if it exists and if user wasn't created using flyway script
+        if (userId > FLYWAY_USERS_NUMBER && currentUser.getImagePath() != null)
             fileService.deleteFile(currentUser.getImagePath());
 
         if (image == null) {
@@ -128,8 +130,7 @@ public class UserService {
         } else {
             String fileName = image.getOriginalFilename();
             String fileExtension = fileService.getFileExtension(fileName);
-            Set<String> validImageExtensions = Set.of("jpg", "jpeg", "png", "gif", "bmp", "tiff");
-            if (!validImageExtensions.contains(fileExtension))
+            if (!ACCEPTED_IMAGE_EXTENSIONS.contains(fileExtension))
                 throw new APIException("Only images can be uploaded");
 
             String filePath = fileService.saveUserImage(image, userId);

@@ -102,6 +102,10 @@ export function SellerProductsList({ sellerId }: SellerProductsListProps) {
                             src={ base64ToDataUri(displayedImage.image, displayedImage.type) } alt="Product Image"
                             fit="contain" h={ 170 } bg={ colorScheme === "dark" ? "dark.4" : "gray.2" }
                             miw={ { base: 110, xs: 150, md: 200 } } maw={ { base: 110, xs: 150, md: 200 } }
+                            style={ product.availableQuantity > 0 ? {} : {
+                                filter: "blur(2px) grayscale(50%) brightness(70%)",
+                                opacity: 0.7
+                            } }
                         />
                     </Flex>
 
@@ -126,10 +130,20 @@ export function SellerProductsList({ sellerId }: SellerProductsListProps) {
                             </Tooltip>
                         </Flex>
 
-                        <Text c="dimmed" size="sm" mt="xs">
-                            { product.availableQuantity } Remaining ·
-                            Listed On { listedAt.toLocaleDateString() }
-                        </Text>
+                        <Flex mt="xs">
+                            { product.availableQuantity > 0 ? (
+                                <Text size="sm" c="dimmed">
+                                    { product.availableQuantity } remaining
+                                </Text>
+                            ) : (
+                                <Text c="red.5" size="sm">
+                                    Out of stock
+                                </Text>
+                            ) }
+                            <Text size="sm" c="dimmed" ms={ 5 }>
+                                · Listed On { listedAt.toLocaleDateString() }
+                            </Text>
+                        </Flex>
 
                         <Flex mt="xl" gap="sm">
                             <Button
@@ -151,45 +165,43 @@ export function SellerProductsList({ sellerId }: SellerProductsListProps) {
     });
 
     return (
-        <>
-            <Flex direction="column">
-                <Flex justify="flex-end">
-                    <NativeSelect
-                        data={ sortOptions }
-                        value={ sort }
-                        onChange={ (e) => {
-                            const selectedSort = e.currentTarget.value;
-                            const [sortBy, sortDirection] = selectedSort.split(" ");
+        <Flex direction="column">
+            <Flex justify="flex-end">
+                <NativeSelect
+                    data={ sortOptions }
+                    value={ sort }
+                    onChange={ (e) => {
+                        const selectedSort = e.currentTarget.value;
+                        const [sortBy, sortDirection] = selectedSort.split(" ");
 
+                        setSearchParams({
+                            page: "0",
+                            sortBy,
+                            sortDirection
+                        });
+                    } }
+                />
+            </Flex>
+
+            <Flex direction="column" gap="xl" mt="sm">
+                { productCards }
+            </Flex>
+
+            { totalPages! > 1 &&
+                <Flex align="center" justify="center" mt="xl">
+                    <Pagination
+                        total={ totalPages! } value={ page + 1 }
+                        onChange={ (p) => {
                             setSearchParams({
-                                page: "0",
+                                page: (p - 1).toString(),
                                 sortBy,
                                 sortDirection
                             });
+                            window.scrollTo({ top: 0 });
                         } }
                     />
                 </Flex>
-
-                <Flex direction="column" gap="xl" mt="sm">
-                    { productCards }
-                </Flex>
-
-                { totalPages! > 1 &&
-                    <Flex align="center" justify="center" mt="xl">
-                        <Pagination
-                            total={ totalPages! } value={ page + 1 }
-                            onChange={ (p) => {
-                                setSearchParams({
-                                    page: (p - 1).toString(),
-                                    sortBy,
-                                    sortDirection
-                                });
-                                window.scrollTo({ top: 0 });
-                            } }
-                        />
-                    </Flex>
-                }
-            </Flex>
-        </>
+            }
+        </Flex>
     );
 }

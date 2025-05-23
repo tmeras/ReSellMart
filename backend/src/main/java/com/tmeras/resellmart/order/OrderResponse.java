@@ -1,10 +1,10 @@
 package com.tmeras.resellmart.order;
 
-import com.tmeras.resellmart.address.AddressResponse;
 import com.tmeras.resellmart.user.UserResponse;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -19,13 +19,31 @@ public class OrderResponse {
 
     private ZonedDateTime placedAt;
 
-    private PaymentMethod paymentMethod;
+    private String paymentMethod;
 
-    private AddressResponse billingAddress;
+    private OrderStatus status;
 
-    private AddressResponse deliveryAddress;
+    private String stripeCheckoutId;
+
+    private String billingAddress;
+
+    private String deliveryAddress;
+
+    private BigDecimal total;
 
     private UserResponse buyer;
 
     private List<OrderItemResponse> orderItems;
+
+    public BigDecimal calculateTotalPrice() {
+        BigDecimal totalPrice = BigDecimal.ZERO;
+
+        for (OrderItemResponse orderItem : orderItems) {
+            BigDecimal productPrice = orderItem.getProductPrice();
+            Integer productQuantity = orderItem.getProductQuantity();
+            totalPrice = totalPrice.add(productPrice.multiply(BigDecimal.valueOf(productQuantity)));
+        }
+
+        return totalPrice.setScale(2, RoundingMode.HALF_UP);
+    }
 }

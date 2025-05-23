@@ -32,4 +32,11 @@ public class AddressResponse {
     private AddressType addressType;
 
     private Integer userId;
+
+    public String getFullAddress() {
+        if (phoneNumber == null || phoneNumber.isEmpty())
+            return String.format("%s, %s, %s, %s, %s, %s", name, street, state, city, postalCode, country);
+
+        return String.format("%s, %s, %s, %s, %s, %s, %s", name, street, state, city, postalCode, country, phoneNumber);
+    }
 }

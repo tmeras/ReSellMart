@@ -52,6 +52,7 @@ export function ProductsList({ products }: ProductsListProps) {
 
     if (products.length === 0) return <div>No products to display</div>;
 
+    // TODO: Handle product with quantity === 0
     const productCards = products.map((product: ProductResponse) => {
         // Determine if the product has been added to the cart
         const cartItem =

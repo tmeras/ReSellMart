@@ -40,6 +40,7 @@ spring:
 application:
   security:
     jwt:
+      # TODO: Environment variable in prod
       secret-key: 01bfe0fbbfff7e934e27fbcb8cfd5862077d4486bb4c44e335a20de8c044d766b1eaf2996a43b40bcdc5de5916241bb36ac3fcc4f863eba08ad0e5b110cf9add4773de0e5668408339b41235c0c402a2abde7ae06077be57db55cb987675bb8742c8b5efa046027428e3d55f4f51aa09e0cec61a232c0df5227b7c9d426487e797392bbb1a2953eeff8d15b3c2269e9a82ed196db349dd0b3093bdc224c796c2528bf002039dcc1dcc142212f965e34342cd4f38b8b52b929146d287b4e56a884051df68e8bb90c7eb3a2b0c39c3f69b7174727528fdac756838cd1f4a74f7171843147ec3586e60c8782a72b8ff2326e3802c5731964b818e47bd1e4783f8b8
       access-token:
         #expiration: 3600000 # 1 hour
@@ -49,11 +50,23 @@ application:
         expiration: 604800000 # 1 week
         #expiration: 120000 # 2 minutes
 
+  # TODO: Change for deployment
+  backend:
+    base-https-url: "https://fe25-2a00-23c8-820e-701-b0fe-b493-9617-40ea.ngrok-free.app"
+  frontend:
+    base-url: "http://localhost:5173"
+
   mailing:
-    frontend:
-      activation-url: "http://localhost:5173/auth/activation?code=" # TODO: Change for deployment
+    activation-url: "/auth/activation?code="
+
+  stripe:
+    secret-key: ${STRIPE_SECRET_KEY}
+    webhook-secret: whsec_780cf386c668ec3edc857ffc04088d2f429692b2ec277d27c0b850ef530cde58 # TODO: Environment variable in prod
+    checkout-success-url: "/app/my-purchases"
+    checkout-cancel-url: "/app/checkout"
 
   file:
     upload:
       product-images-path: ./uploads/product-images
       user-images-path: ./uploads/user-images
+      order-item-images-path: ./uploads/order-item-images

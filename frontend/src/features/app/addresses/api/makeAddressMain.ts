@@ -1,4 +1,4 @@
-import { getAddressesByUserQueryOptions } from "@/features/app/addresses/api/getAddressesByUser.ts";
+import { getAddressesByUserQueryOptions } from "@/api/addresses/getAddressesByUser.ts";
 import { api } from "@/lib/apiClient.ts";
 import { AddressResponse } from "@/types/api.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";

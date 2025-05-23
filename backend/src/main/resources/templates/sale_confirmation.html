@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Sale Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f9f9f9;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #2c3e50;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8f8f8;
+        }
+
+        footer {
+            margin-top: 25px;
+            font-size: 0.8em;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Sale Notification</h2>
+    <p><span th:text="${sellerName}">customer</span>, you have made new sales!</p>
+
+    <h3>Sale Details</h3>
+    <p><strong>Order ID:</strong> <span th:text="${order.id}"></span></p>
+    <p><strong>Placed At:</strong> <span th:text="${#temporals.format(order.placedAt, 'yyyy-MM-dd HH:mm')}"></span> UTC
+    </p>
+
+    <h3>Deliver To</h3>
+    <p th:text="${order.deliveryAddress}"></p>
+
+    <h3>Items Sold</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price (£)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${orderItems}">
+            <td th:text="${item.productName}"></td>
+            <td th:text="${item.productQuantity}"></td>
+            <td th:text="${item.productPrice}"></td>
+        </tr>
+        </tbody>
+    </table>
+    <p><strong>Total Price:</strong> <span th:text="'£' + ${saleTotal}"></span></p>
+
+    <p>Login to ReSellMart to view further details and confirm when you have arranged delivery in the "My Sales"
+        page.</p>
+
+    <footer>
+        <p>Best regards,<br>
+            The ReSellMart team</p>
+    </footer>
+</div>
+</body>
+</html>

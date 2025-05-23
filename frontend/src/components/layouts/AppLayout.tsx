@@ -5,7 +5,14 @@ import { DarkModeButton } from "@/components/ui/DarkModeButton.tsx";
 import { UserMenu } from "@/components/ui/UserMenu.tsx";
 import { paths } from "@/config/paths.ts";
 import { AppShell, Burger, Button, Divider, Flex, Image, NavLink, ScrollArea, Text } from "@mantine/core";
-import { IconCirclePlus, IconGridDots, IconPackage, IconShoppingCart } from "@tabler/icons-react";
+import {
+    IconCash,
+    IconCirclePlus,
+    IconGridDots,
+    IconPackage,
+    IconReceipt,
+    IconShoppingCart
+} from "@tabler/icons-react";
 import { useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Link, NavLink as RouterNavLink, Outlet, useNavigate } from "react-router";
@@ -43,7 +50,13 @@ export function AppLayout() {
                         </Text>
                     </Flex>
 
-                    <DarkModeButton/>
+                    <Button
+                        variant="outline" size="compact-md" me={ 5 }
+                        leftSection={ <IconShoppingCart size={ 18 }/> }
+                        component={ Link } to={ paths.app.cart.path }
+                    >
+                        Cart
+                    </Button>
                 </Flex>
             </AppShell.Header>
 
@@ -67,10 +80,10 @@ export function AppLayout() {
                     <CategoryNavLinks closeNavBar={ () => setNavBarOpened(false) }/>
 
                     <NavLink
-                        label="Cart"
-                        leftSection={ <IconShoppingCart size={ 18 }/> }
+                        label="My Purchases"
+                        leftSection={ <IconReceipt size={ 18 }/> }
                         component={ RouterNavLink } onClick={ () => setNavBarOpened(false) }
-                        to={ paths.app.cart.path } end
+                        to={ paths.app.purchases.path } end
                     />
 
                     <Text size="xl" fw={ 700 } c="paleIndigo.5">
@@ -84,18 +97,27 @@ export function AppLayout() {
                         to={ paths.app.sellerProducts.path } end
                     />
 
-                    <Button
-                        size="compact-md" variant="light" mt="sm" mb="md" ms="sm"
+                    <NavLink
+                        label="My Sales"
+                        leftSection={ <IconCash size={ 18 }/> }
+                        component={ RouterNavLink } onClick={ () => setNavBarOpened(false) }
+                        to={ paths.app.sales.path } end
+                    />
+
+                    <NavLink
+                        label="New Product Listing"
                         leftSection={ <IconCirclePlus size={ 18 }/> }
-                        onClick={ () => setNavBarOpened(false) }
-                        component={ Link } to={ paths.app.createProduct.path }
-                    >
-                        Create product listing
-                    </Button>
+                        component={ RouterNavLink } onClick={ () => setNavBarOpened(false) }
+                        to={ paths.app.createProduct.path }
+                    />
                 </AppShell.Section>
 
                 <AppShell.Section>
-                    <UserMenu closeNavBar={ () => setNavBarOpened(false) }/>
+                    <Flex justify="space-between" align="center">
+                        <UserMenu closeNavBar={ () => setNavBarOpened(false) }/>
+
+                        <DarkModeButton/>
+                    </Flex>
                 </AppShell.Section>
             </AppShell.Navbar>
 

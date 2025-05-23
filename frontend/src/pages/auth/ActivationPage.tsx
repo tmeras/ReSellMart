@@ -43,7 +43,7 @@ export function ActivationPage() {
         <>
             <title>{ `Activate Account | ReSellMart` }</title>
 
-            <Flex justify="center" align="center" h="100vh">
+            <Flex justify="center" align="center" h="80vh">
                 <Container size={ 420 }>
                     <Paper withBorder shadow="lg" p={ 30 } radius="md">
                         { loading &&

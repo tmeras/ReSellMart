@@ -81,7 +81,8 @@ export function LoginForm() {
             ) {
                 notifications.show({
                     title: "Account disabled",
-                    message: "Please access the activation email sent to your address to activate your account",
+                    message: "Your account has not yet been activated via the email that was sent to your address" +
+                        " or it has been disabled by an administrator.",
                     color: "red", icon: <IconX/>, withBorder: true
                 });
             } else {

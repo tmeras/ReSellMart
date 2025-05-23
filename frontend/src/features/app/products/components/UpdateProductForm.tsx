@@ -63,8 +63,8 @@ export function UpdateProductForm({ product }: UpdateProductFormProps) {
             name: "",
             description: "",
             price: 0,
-            availableQuantity: 0,
-            productCondition: "NEW",
+            availableQuantity: 1,
+            condition: "NEW",
             categoryId: "1",
             images: []
         },
@@ -98,7 +98,8 @@ export function UpdateProductForm({ product }: UpdateProductFormProps) {
             form.initialize({
                 ...product,
                 categoryId: product.category.id.toString(),
-                images
+                images,
+                availableQuantity: product.availableQuantity > 0 ? product.availableQuantity : 1
             });
         }
     }, [product]);
@@ -257,8 +258,8 @@ export function UpdateProductForm({ product }: UpdateProductFormProps) {
                         mt="sm"
                         label="Condition" required withAsterisk={ false }
                         data={ conditionOptions }
-                        key={ form.key("productCondition") }
-                        { ...form.getInputProps("productCondition") }
+                        key={ form.key("condition") }
+                        { ...form.getInputProps("condition") }
                     />
 
                     <Select

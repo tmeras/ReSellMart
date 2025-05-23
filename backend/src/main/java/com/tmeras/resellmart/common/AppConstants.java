@@ -2,7 +2,11 @@ package com.tmeras.resellmart.common;
 
 import java.util.Set;
 
-public class AppConstants {
+public final class AppConstants {
+
+    private AppConstants() {
+        throw new UnsupportedOperationException("This is a constants class and cannot be instantiated");
+    }
 
     // Product Constants
     public static final int MAX_PRODUCT_NAME_LENGTH = 100;
@@ -28,9 +32,14 @@ public class AppConstants {
 
     // Thymeleaf template names
     public static final String USER_ACTIVATION_TEMPLATE = "account_activation";
-    public static final String ORDER_CONFIRMATION_TEMPLATE = "order_confirmation";
+    public static final String PURCHASE_CONFIRMATION_TEMPLATE = "purchase_confirmation";
+    public static final String SALE_CONFIRMATION_TEMPLATE = "sale_confirmation";
+    public static final String ORDER_CANCELLATION_TEMPLATE = "order_cancellation";
+    public static final String SHIPPING_CONFIRMATION_TEMPLATE = "shipping_confirmation";
 
     // Number of entities manually created using flyway
     // used to prevent deletion of related images       TODO: Update when more data is added
     public static final Integer FLYWAY_PRODUCTS_NUMBER = 17;
+    public static final Integer FLYWAY_USERS_NUMBER = 3;
+    public static final Integer FLYWAY_ORDERS_NUMBER = 5;
 }

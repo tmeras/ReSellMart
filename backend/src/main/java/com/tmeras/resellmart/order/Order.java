@@ -1,6 +1,5 @@
 package com.tmeras.resellmart.order;
 
-import com.tmeras.resellmart.address.Address;
 import com.tmeras.resellmart.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,16 +24,17 @@ public class Order {
 
     private ZonedDateTime placedAt;
 
+    private String paymentMethod;
+
     @Enumerated(EnumType.STRING)
-    private PaymentMethod paymentMethod;
+    private OrderStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    private Address billingAddress;
+    // ID of the associated Stripe Checkout session
+    private String stripeCheckoutId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    private Address deliveryAddress;
+    private String billingAddress;
+
+    private String deliveryAddress;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
@@ -47,13 +47,11 @@ public class Order {
     @JoinColumn(name = "orderId", nullable = false)
     private List<OrderItem> orderItems;
 
-    // TODO: Return in response + in cart???
-    public BigDecimal getTotalPrice() {
+    public BigDecimal calculateTotalPrice() {
         BigDecimal totalPrice = BigDecimal.ZERO;
 
-        // TODO: Verify correctness
         for (OrderItem orderItem : orderItems) {
-            BigDecimal productPrice = orderItem.getProduct().getPrice();
+            BigDecimal productPrice = orderItem.getProductPrice();
             Integer productQuantity = orderItem.getProductQuantity();
             totalPrice = totalPrice.add(productPrice.multiply(BigDecimal.valueOf(productQuantity)));
         }

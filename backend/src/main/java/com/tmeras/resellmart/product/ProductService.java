@@ -2,14 +2,11 @@ package com.tmeras.resellmart.product;
 
 import com.tmeras.resellmart.category.Category;
 import com.tmeras.resellmart.category.CategoryRepository;
-import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.APIException;
-import com.tmeras.resellmart.exception.ForeignKeyConstraintException;
 import com.tmeras.resellmart.exception.OperationNotPermittedException;
 import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.file.FileService;
-import com.tmeras.resellmart.order.OrderItemRepository;
 import com.tmeras.resellmart.user.User;
 import com.tmeras.resellmart.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import static com.tmeras.resellmart.common.AppConstants.*;
 
@@ -38,10 +33,8 @@ import static com.tmeras.resellmart.common.AppConstants.*;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final ProductImageRepository productImageRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
-    private final OrderItemRepository orderItemRepository;
     private final ProductMapper productMapper;
     private final FileService fileService;
 
@@ -128,7 +121,6 @@ public class ProductService {
                 products.isLast()
         );
     }
-
 
     public PageResponse<ProductResponse> findAllBySellerId(
             Integer pageNumber, Integer pageSize, String sortBy, String sortDirection, Integer sellerId
@@ -298,7 +290,7 @@ public class ProductService {
         }
 
         if (productRequest.getProductCondition() != null)
-            existingProduct.setProductCondition(productRequest.getProductCondition());
+            existingProduct.setCondition(productRequest.getProductCondition());
 
         if (productRequest.getAvailableQuantity() != null)
             existingProduct.setAvailableQuantity(productRequest.getAvailableQuantity());
@@ -333,7 +325,7 @@ public class ProductService {
         // Delete any previous images if product wasn't created using flyway script
         if (productId > FLYWAY_PRODUCTS_NUMBER)
             for (ProductImage productImage: existingProduct.getImages())
-                fileService.deleteFile(productImage.getFilePath());
+                fileService.deleteFile(productImage.getImagePath());
         existingProduct.getImages().clear();
 
         // Save images
@@ -342,7 +334,7 @@ public class ProductService {
             ProductImage productImage = ProductImage.builder()
                     .name(images.get(i).getOriginalFilename())
                     .type(images.get(i).getContentType())
-                    .filePath(filePaths.get(i))
+                    .imagePath(filePaths.get(i))
                     .build();
             existingProduct.getImages().add(productImage);
         }
@@ -351,22 +343,23 @@ public class ProductService {
         return productMapper.toProductResponse(updatedProduct);
     }
 
-    @PreAuthorize("hasRole('ADMIN')") // Deletion possible by admins only, users can only mark products as unavailable
-    public void delete(Integer productId) throws IOException {
-        if (orderItemRepository.existsByProductId(productId))
-            throw new ForeignKeyConstraintException("Cannot delete product due to existing orders that reference it");
+    public ProductImageResponse findPrimaryProductImage(Integer productId) {
+        Product product = productRepository.findWithImagesById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
 
-        Optional<Product> existingProduct = productRepository.findWithImagesById(productId);
+        if (product.getImages().isEmpty())
+            throw new ResourceNotFoundException("No images found for product with ID: " + productId);
 
-        // Delete images only if the product was not created using flyway script
-        if (productId > FLYWAY_PRODUCTS_NUMBER && existingProduct.isPresent() &&
-                existingProduct.get().getImages() != null
-        ) {
-            for (ProductImage productImage : existingProduct.get().getImages()) {
-                fileService.deleteFile(productImage.getFilePath());
-            }
-        }
+        ProductImage primaryImage = product.getImages().get(0);
+        return productMapper.toProductImageResponse(primaryImage);
+    }
 
-        productRepository.deleteById(productId);
+    @PreAuthorize("hasRole('ADMIN')")
+    public void delete(Integer productId) {
+        Product existingProduct = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
+
+        existingProduct.setIsDeleted(true);
+        productRepository.save(existingProduct);
     }
 }

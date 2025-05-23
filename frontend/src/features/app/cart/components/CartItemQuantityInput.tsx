@@ -32,7 +32,6 @@ export function CartItemQuantityInput({ cartItem, ...rest }: CartItemQuantityInp
 
     async function updateQuantity() {
         const latestQuantity = latestQuantityRef.current;
-        console.log("quantity in update", latestQuantity);
 
         if (latestQuantity >= 1 && latestQuantity <= product.availableQuantity) {
             try {

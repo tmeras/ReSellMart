@@ -26,7 +26,7 @@ type PasswordRequirementProps = {
     label: string;
 }
 
-export const PasswordRequirement = ({ meets, label }: PasswordRequirementProps) => {
+export function PasswordRequirement({ meets, label }: PasswordRequirementProps) {
     return (
         <Text
             c={ meets ? 'teal' : 'red' }

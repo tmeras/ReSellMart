@@ -27,7 +27,7 @@ public class ProductResponse {
 
     private BigDecimal previousPrice;
 
-    private ProductCondition productCondition;
+    private ProductCondition condition;
 
     private Integer availableQuantity;
 

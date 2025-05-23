@@ -1,14 +1,12 @@
 package com.tmeras.resellmart.product;
 
 import com.tmeras.resellmart.TestDataUtils;
-import com.tmeras.resellmart.address.Address;
 import com.tmeras.resellmart.address.AddressRepository;
 import com.tmeras.resellmart.category.Category;
 import com.tmeras.resellmart.category.CategoryRepository;
 import com.tmeras.resellmart.common.AppConstants;
 import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.exception.ExceptionResponse;
-import com.tmeras.resellmart.order.Order;
 import com.tmeras.resellmart.order.OrderRepository;
 import com.tmeras.resellmart.role.Role;
 import com.tmeras.resellmart.role.RoleRepository;
@@ -37,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -70,7 +69,6 @@ public class ProductControllerIT {
 
     private Product productA;
     private Product productB;
-    private ProductRequest productRequestA;
     private ProductUpdateRequest productUpdateRequestA;
 
     @Autowired
@@ -124,14 +122,13 @@ public class ProductControllerIT {
         productA = TestDataUtils.createProductA(category, userA);
         productA.setId(null);
         productA = productRepository.save(productA);
-        productRequestA = TestDataUtils.createProductRequestA(category.getId());
         productUpdateRequestA = ProductUpdateRequest.builder()
                 .name("Updated test product A")
                 .description("Updated description A")
                 .price(BigDecimal.valueOf(10.00))
                 .productCondition(ProductCondition.NEW)
                 .availableQuantity(2)
-                .categoryId(productRequestA.getCategoryId())
+                .categoryId(category.getId())
                 .isDeleted(false)
                 .build();
 
@@ -167,7 +164,7 @@ public class ProductControllerIT {
         assertThat(response.getBody().getName()).isEqualTo(productRequest.getName());
         assertThat(response.getBody().getDescription()).isEqualTo(productRequest.getDescription());
         assertThat(response.getBody().getPrice()).isEqualTo(productRequest.getPrice());
-        assertThat(response.getBody().getProductCondition()).isEqualTo(productRequest.getProductCondition());
+        assertThat(response.getBody().getCondition()).isEqualTo(productRequest.getCondition());
         assertThat(response.getBody().getCategory().getName()).isEqualTo(productA.getCategory().getName());
         assertThat(response.getBody().getSeller().getEmail()).isEqualTo(productA.getSeller().getEmail());
     }
@@ -233,7 +230,7 @@ public class ProductControllerIT {
         assertThat(response.getBody().getDescription()).isEqualTo(productA.getDescription());
         assertThat(response.getBody().getPrice().compareTo(productA.getPrice())).isEqualTo(0);
         assertThat(response.getBody().getPreviousPrice().compareTo(productA.getPreviousPrice())).isEqualTo(0);
-        assertThat(response.getBody().getProductCondition()).isEqualTo(productA.getProductCondition());
+        assertThat(response.getBody().getCondition()).isEqualTo(productA.getCondition());
         assertThat(response.getBody().getCategory().getName()).isEqualTo(productA.getCategory().getName());
         assertThat(response.getBody().getSeller().getEmail()).isEqualTo(productA.getSeller().getEmail());
     }
@@ -337,7 +334,7 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void shouldFindAllProductsByKeywordAndCategoryId() {
+    public void shouldFindAllProductsByCategoryIdAndKeyword() {
         ResponseEntity<PageResponse<ProductResponse>> response =
                 restTemplate.exchange("/api/products/categories/" + productA.getCategory().getId() + "?search=Test product",
                         HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
@@ -478,13 +475,40 @@ public class ProductControllerIT {
     }
 
     @Test
+    public void shouldFindPrimaryProductImageWhenValidRequest() throws IOException {
+        File testFile = TEST_IMAGE_1.getFile();
+        ProductImage productImage =
+                new ProductImage(null, testFile.getName(), "image/jpeg", testFile.getAbsolutePath());
+        productA.setImages(List.of(productImage));
+        productRepository.save(productA);
+
+        ResponseEntity<byte[]> response =
+                restTemplate.exchange("/api/products/" + productA.getId() + "/images/primary", HttpMethod.GET,
+                        new HttpEntity<>(headers), byte[].class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+    }
+
+    @Test
+    public void shouldNotFindPrimaryProductImageWhenEmptyImageList() {
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/products/" + productA.getId() + "/images/primary", HttpMethod.GET,
+                        new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("No images found for product with ID: " + productA.getId());
+    }
+
+    @Test
     public void shouldDeleteProduct() {
         ResponseEntity<?> response =
                 restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.DELETE,
                         new HttpEntity<>(headers), Object.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-        assertThat(productRepository.findById(productA.getId())).isEmpty();
+        assertThat(productRepository.findById(productA.getId()).get().getIsDeleted()).isTrue();
     }
 
     @Test
@@ -501,23 +525,14 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void shouldNotDeleteProductWhenForeignKeyConstraint() {
-        // Create order that references productA
-        Address address = TestDataUtils.createAddressA(productA.getSeller());
-        address.setId(null);
-        address = addressRepository.save(address);
-        Order order = TestDataUtils.createOrderA(productA.getSeller(), address, productA);
-        order.setId(null);
-        order.getOrderItems().get(0).setId(null);
-        orderRepository.save(order);
-
+    public void shouldNotDeleteProductWhenInvalidProductId() {
         ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.DELETE,
+                restTemplate.exchange("/api/products/99", HttpMethod.DELETE,
                         new HttpEntity<>(headers), ExceptionResponse.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage())
-                .isEqualTo("Cannot delete product due to existing orders that reference it");
+                .isEqualTo("No product found with ID: 99");
     }
 }

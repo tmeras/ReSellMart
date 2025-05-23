@@ -3,10 +3,13 @@ import {
     ACCEPTED_IMAGE_TYPES,
     AddressTypeKeys,
     MAX_FILE_SIZE,
+    OrderItemStatusKeys,
+    OrderStatusKeys,
     ProductConditionKeys
 } from "@/utils/constants.ts";
 import { z } from "zod";
 
+// TODO: Move to schemas folder?
 export const uploadImageInputSchema = z.instanceof(File)
     .refine(file => file.size <= MAX_FILE_SIZE, {
         message: `File size must be no greater than ${ MAX_FILE_SIZE / (1024 * 1024) }MB`
@@ -71,7 +74,7 @@ export type ProductResponse = {
     description: string;
     price: number;
     previousPrice: number;
-    productCondition: ProductConditionKeys
+    condition: ProductConditionKeys
     availableQuantity: number;
     listedAt: string; // UTC datetime string
     isDeleted: boolean;
@@ -106,4 +109,29 @@ export type AddressResponse = {
     isMain: boolean;
     addressType: AddressTypeKeys;
     userId: number;
+}
+
+export type OrderItemResponse = {
+    id: number;
+    status: OrderItemStatusKeys;
+    productId: number;
+    productQuantity: number;
+    productName: string
+    productPrice: number;
+    productCondition: ProductConditionKeys;
+    productImage: string; //base64 string
+    productSeller: UserResponse;
+}
+
+export type OrderResponse = {
+    id: number;
+    placedAt: string; // UTC datetime string
+    paymentMethod: string;
+    status: OrderStatusKeys;
+    stripeCheckoutId: string;
+    billingAddress: string;
+    deliveryAddress: string;
+    total: number;
+    buyer: UserResponse;
+    orderItems: OrderItemResponse[];
 }

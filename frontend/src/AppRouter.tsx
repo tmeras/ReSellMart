@@ -1,4 +1,7 @@
 import { ScrollToTop } from "@/components/ScrollToTop.tsx";
+import { CheckoutPage } from "@/pages/app/orders/CheckoutPage.tsx";
+import { PurchasesPage } from "@/pages/app/orders/PurchasesPage.tsx";
+import { SalesPage } from "@/pages/app/orders/SalesPage.tsx";
 import { CreateProductPage } from "@/pages/app/products/CreateProductPage.tsx";
 import { ProductDetailsPage } from "@/pages/app/products/ProductDetailsPage.tsx";
 import { ProductsByCategoryPage } from "@/pages/app/products/ProductsByCategoryPage.tsx";
@@ -101,6 +104,18 @@ const createAppRouter = () =>
                 {
                     path: paths.app.cart.path,
                     element: <CartPage/>
+                },
+                {
+                    path: paths.app.checkout.path,
+                    element: <CheckoutPage/>
+                },
+                {
+                    path: paths.app.purchases.path,
+                    element: <PurchasesPage/>
+                },
+                {
+                    path: paths.app.sales.path,
+                    element: <SalesPage/>
                 }
             ]
         },
