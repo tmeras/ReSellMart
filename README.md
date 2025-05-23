@@ -5,7 +5,7 @@ A full-stack E-commerce application for buying and selling second-hand goods. De
 ## 📋 Features
 ### Products
 - Browse products with pagination, filtering, and sorting functionality
-- Add products to the cart or wishlist
+- Add products to the shopping cart or wishlist
 - View products by category and by seller
 - List products for sale by specifying product details including name, category, price, condition, images etc.
 
@@ -49,7 +49,7 @@ A full-stack E-commerce application for buying and selling second-hand goods. De
 
 
 ## 🔐 Security 
-- Implemented access & refresh token flow with JSON Web Tokens (JWTs)
+-  Access & refresh token flow with JSON Web Tokens (JWTs)
  - Role-Based Access Control (RBAC) to distinguish between user and admin responsibilities
 - Account activation via email upon registration
 - MFA using One-Time Passwords (OTPs)
