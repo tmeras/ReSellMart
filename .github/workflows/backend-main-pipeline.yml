@@ -34,6 +34,8 @@ jobs:
           distribution: 'corretto'
 
       - name: Run unit and integration tests
+        env:
+          STRIPE_SECRET_KEY: ${{secrets.STRIPE_SECRET_KEY}}
         run: |
           cd backend
           ./mvnw clean verify
