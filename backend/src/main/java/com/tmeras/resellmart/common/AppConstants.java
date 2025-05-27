@@ -40,6 +40,8 @@ public final class AppConstants {
     // Number of entities manually created using flyway
     // used to prevent deletion of related images       TODO: Update when more data is added
     public static final Integer FLYWAY_PRODUCTS_NUMBER = 17;
-    public static final Integer FLYWAY_USERS_NUMBER = 3;
+    public static final Integer FLYWAY_USERS_NUMBER = 4;
     public static final Integer FLYWAY_ORDERS_NUMBER = 5;
+    public static final Integer FLYWAY_CATEGORIES_NUMBER = 16;
+
 }

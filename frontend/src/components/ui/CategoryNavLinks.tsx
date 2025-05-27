@@ -17,7 +17,7 @@ type CategoryNavLinksProps = {
 }
 
 export function CategoryNavLinks({ closeNavBar }: CategoryNavLinksProps) {
-    const getCategoriesQuery = useGetCategories();
+    const getCategoriesQuery = useGetCategories({});
 
     if (getCategoriesQuery.isPending) {
         return (

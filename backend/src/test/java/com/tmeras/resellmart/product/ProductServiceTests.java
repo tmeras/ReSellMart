@@ -161,7 +161,7 @@ public class ProductServiceTests {
 
         assertThatThrownBy(() -> productService.save(productRequestA, authentication))
                 .isInstanceOf(APIException.class)
-                .hasMessage("Quantity of newly created product must be greater than be 0");
+                .hasMessage("Quantity of newly created product must be greater than 0");
     }
 
     @Test
@@ -315,7 +315,6 @@ public class ProductServiceTests {
     @Test
     public void shouldUpdateProductWhenValidRequest() {
         productResponseA.setName("Updated test product A");
-        productRequestA.setDescription("Updated description A");
 
         when(categoryRepository.findWithAssociationsById(productA.getCategory().getId()))
                 .thenReturn(Optional.ofNullable(productA.getCategory()));

@@ -3,7 +3,6 @@ package com.tmeras.resellmart.category;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tmeras.resellmart.TestDataUtils;
 import com.tmeras.resellmart.common.AppConstants;
-import com.tmeras.resellmart.common.PageResponse;
 import com.tmeras.resellmart.configuration.TestConfig;
 import com.tmeras.resellmart.token.JwtFilter;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,49 +45,46 @@ public class CategoryControllerTests {
     @MockitoBean
     private CategoryService categoryService;
 
-    private CategoryRequest parentCategoryRequest;
-    private CategoryResponse parentCategoryResponse;
-    private CategoryResponse childCategoryResponse;
+    private CategoryRequest categoryRequestA;
+    private CategoryResponse categoryResponseA;
+    private CategoryResponse categoryResponseB;
 
     @BeforeEach
     public void setUp() {
         // Initialise test objects
-        parentCategoryRequest = TestDataUtils.createCategoryRequestA();
-        parentCategoryResponse = TestDataUtils.createCategoryResponseA();
-        childCategoryResponse = TestDataUtils.createCategoryResponseB();
-        childCategoryResponse.setParentId(parentCategoryResponse.getId());
-
-        /*User testUser = TestDataUtils.createUserA(Set.of(new Role(1,"ADMIN")));
-        Authentication auth = new UsernamePasswordAuthenticationToken(
-                testUser, null, testUser.getAuthorities()
-        );
-
-        // Set the authentication into SecurityContext
-        SecurityContextHolder.getContext().setAuthentication(auth);*/
+        categoryRequestA = TestDataUtils.createCategoryRequestA();
+        categoryRequestA.setParentId(1);
+        categoryResponseA = TestDataUtils.createCategoryResponseA();
+        categoryResponseB = TestDataUtils.createCategoryResponseB();
+        categoryResponseB.setParentId(categoryResponseA.getId());
     }
 
     @Test
     public void shouldSaveCategoryWhenValidRequest() throws Exception {
-        when(categoryService.save(any(CategoryRequest.class))).thenReturn(parentCategoryResponse);
+
+
+        when(categoryService.save(any(CategoryRequest.class))).thenReturn(categoryResponseA);
 
         MvcResult mvcResult = mockMvc.perform(post("/api/categories")
                 .contentType("application/json")
-                .content(objectMapper.writeValueAsString(parentCategoryRequest))
+                .content(objectMapper.writeValueAsString(categoryRequestA))
         ).andExpect(status().isCreated()).andReturn();
         String jsonResponse = mvcResult.getResponse().getContentAsString();
 
-        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(parentCategoryResponse));
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(categoryResponseA));
     }
 
     @Test
     public void shouldNotSaveCategoryWhenInvalidRequest() throws Exception {
-        parentCategoryRequest.setName(null);
+        categoryRequestA.setName(null);
+        categoryRequestA.setParentId(null);
         Map<String, String> expectedErrors = new HashMap<>();
         expectedErrors.put("name", "Name must not be empty");
+        expectedErrors.put("parentId", "Parent category ID must not be empty");
 
         MvcResult mvcResult = mockMvc.perform(post("/api/categories")
                 .contentType("application/json")
-                .content(objectMapper.writeValueAsString(parentCategoryRequest))
+                .content(objectMapper.writeValueAsString(categoryRequestA))
         ).andExpect(status().isBadRequest()).andReturn();
         String jsonResponse = mvcResult.getResponse().getContentAsString();
 
@@ -97,22 +93,24 @@ public class CategoryControllerTests {
 
     @Test
     public void shouldFindCategoryById() throws Exception {
-        when(categoryService.findById(parentCategoryResponse.getId())).thenReturn(parentCategoryResponse);
+        when(categoryService.findById(categoryResponseA.getId())).thenReturn(categoryResponseA);
 
-        MvcResult mvcResult = mockMvc.perform(get("/api/categories/" + parentCategoryResponse.getId()))
+        MvcResult mvcResult = mockMvc.perform(get("/api/categories/" + categoryResponseA.getId()))
                 .andExpect(status().isOk())
                 .andReturn();
         String jsonResponse = mvcResult.getResponse().getContentAsString();
 
-        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(parentCategoryResponse));
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(categoryResponseA));
     }
 
     @Test
     public void shouldFindAllCategories() throws Exception {
         List<CategoryResponse> categoryResponses =
-                List.of(parentCategoryResponse, childCategoryResponse);
+                List.of(categoryResponseA, categoryResponseB);
 
-        when(categoryService.findAll()).thenReturn(categoryResponses);
+        when(categoryService.findAll(
+                AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR
+        )).thenReturn(categoryResponses);
 
         MvcResult mvcResult = mockMvc.perform(get("/api/categories"))
                 .andExpect(status().isOk())
@@ -123,13 +121,15 @@ public class CategoryControllerTests {
     }
 
     @Test
-    public void shouldFindAllCategoriesByParentId() throws Exception {
+    public void shouldFindAllCategoriesByKeyword() throws Exception {
         List<CategoryResponse> categoryResponses =
-                List.of(childCategoryResponse);
+                List.of(categoryResponseA, categoryResponseB);
 
-        when(categoryService.findAllByParentId(parentCategoryRequest.getId())).thenReturn(categoryResponses);
+        when(categoryService.findAllByKeyword(
+                AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR, "test product"
+        )).thenReturn(categoryResponses);
 
-        MvcResult mvcResult = mockMvc.perform(get("/api/categories/parents/" + parentCategoryRequest.getId()))
+        MvcResult mvcResult = mockMvc.perform(get("/api/categories?search=test product"))
                 .andExpect(status().isOk())
                 .andReturn();
         String jsonResponse = mvcResult.getResponse().getContentAsString();
@@ -139,7 +139,7 @@ public class CategoryControllerTests {
 
     @Test
     public void shouldFindAllParentCategories() throws Exception {
-        List<CategoryResponse> categoryResponses = List.of(parentCategoryResponse);
+        List<CategoryResponse> categoryResponses = List.of(categoryResponseA);
         when(categoryService.findAllParents()).thenReturn(categoryResponses);
 
         MvcResult mvcResult = mockMvc.perform(get("/api/categories/parents"))
@@ -152,25 +152,42 @@ public class CategoryControllerTests {
 
     @Test
     public void shouldUpdateCategory() throws Exception {
-        parentCategoryRequest.setName("Updated category name");
-        parentCategoryResponse.setName("Updated category name");
+        categoryRequestA.setName("Updated category name");
+        categoryResponseA.setName("Updated category name");
 
-        when(categoryService.update(any(CategoryRequest.class), eq(parentCategoryRequest.getId()))).thenReturn(parentCategoryResponse);
+        when(categoryService.update(any(CategoryRequest.class), eq(categoryRequestA.getId()))).thenReturn(categoryResponseA);
 
-        MvcResult mvcResult = mockMvc.perform(put("/api/categories/" + parentCategoryRequest.getId())
+        MvcResult mvcResult = mockMvc.perform(put("/api/categories/" + categoryRequestA.getId())
                 .contentType("application/json")
-                .content(objectMapper.writeValueAsString(parentCategoryRequest))
+                .content(objectMapper.writeValueAsString(categoryRequestA))
         ).andExpect(status().isOk()).andReturn();
         String jsonResponse = mvcResult.getResponse().getContentAsString();
 
-        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(parentCategoryResponse));
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(categoryResponseA));
+    }
+
+    @Test
+    public void shouldNotUpdateCategoryWhenInvalidRequest() throws Exception {
+        categoryRequestA.setName(null);
+        categoryRequestA.setParentId(null);
+        Map<String, String> expectedErrors = new HashMap<>();
+        expectedErrors.put("name", "Name must not be empty");
+        expectedErrors.put("parentId", "Parent category ID must not be empty");
+
+        MvcResult mvcResult = mockMvc.perform(put("/api/categories/" + categoryRequestA.getId())
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(categoryRequestA))
+        ).andExpect(status().isBadRequest()).andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(expectedErrors));
     }
 
     @Test
     public void shouldDeleteCategory() throws Exception {
-        mockMvc.perform(delete("/api/categories/" + parentCategoryRequest.getId()))
+        mockMvc.perform(delete("/api/categories/" + categoryRequestA.getId()))
                 .andExpect(status().isNoContent());
 
-        verify(categoryService, times(1)).delete(parentCategoryRequest.getId());
+        verify(categoryService, times(1)).delete(categoryRequestA.getId());
     }
 }

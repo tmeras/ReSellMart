@@ -1,4 +1,6 @@
+import { Authorisation } from "@/components/Authorisation.tsx";
 import { ScrollToTop } from "@/components/ScrollToTop.tsx";
+import { CategoriesPage } from "@/pages/admin/CategoriesPage.tsx";
 import { CheckoutPage } from "@/pages/app/orders/CheckoutPage.tsx";
 import { PurchasesPage } from "@/pages/app/orders/PurchasesPage.tsx";
 import { SalesPage } from "@/pages/app/orders/SalesPage.tsx";
@@ -116,6 +118,24 @@ const createAppRouter = () =>
                 {
                     path: paths.app.sales.path,
                     element: <SalesPage/>
+                }
+            ]
+        },
+        {
+            element: (
+                <ErrorBoundary FallbackComponent={ MainErrorBoundary }>
+                    <ScrollToTop/>
+                    <ProtectedRoute>
+                        <Authorisation requiresAdminRole={ true }>
+                            <AppLayout/>
+                        </Authorisation>
+                    </ProtectedRoute>
+                </ErrorBoundary>
+            ),
+            children: [
+                {
+                    path: paths.admin.categories.path,
+                    element: <CategoriesPage/>
                 }
             ]
         },

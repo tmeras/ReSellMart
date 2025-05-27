@@ -191,10 +191,8 @@ public class OrderControllerIT {
 
         ResponseEntity<Map<String, String>> response =
                 restTemplate.exchange("/api/orders", HttpMethod.POST,
-                        new HttpEntity<>(orderRequest, headers), new ParameterizedTypeReference<>() {
-                        });
+                        new HttpEntity<>(orderRequest, headers), new ParameterizedTypeReference<>() {});
 
-        System.out.println(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().get("redirectUrl")).isNotBlank();
@@ -206,8 +204,8 @@ public class OrderControllerIT {
         assertThat(createdOrder.get().getPlacedAt()).isNotNull();
         assertThat(createdOrder.get().getStatus()).isEqualTo(OrderStatus.PENDING_PAYMENT);
         assertThat(createdOrder.get().getStripeCheckoutId()).isNotBlank();
-        assertThat(createdOrder.get().getBillingAddress()).isNotBlank();
-        assertThat(createdOrder.get().getDeliveryAddress()).isNotBlank();
+        assertThat(createdOrder.get().getBillingAddress()).isEqualTo(addressA.getFullAddress());
+        assertThat(createdOrder.get().getDeliveryAddress()).isEqualTo(addressA.getFullAddress());
         assertThat(createdOrder.get().getBuyer().getId()).isEqualTo(cartItem.getUser().getId());
 
         assertThat(createdOrder.get().getOrderItems().size()).isEqualTo(1);

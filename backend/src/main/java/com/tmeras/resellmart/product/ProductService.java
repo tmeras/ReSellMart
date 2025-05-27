@@ -48,7 +48,7 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("No category found with ID: " + productRequest.getCategoryId()));
 
         if (productRequest.getAvailableQuantity() == 0)
-            throw new APIException("Quantity of newly created product must be greater than be 0");
+            throw new APIException("Quantity of newly created product must be greater than 0");
 
         Product product = productMapper.toProduct(productRequest);
         product.setSeller(currentUser);

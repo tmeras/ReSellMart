@@ -214,7 +214,7 @@ public class ProductControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage())
-                .isEqualTo("Quantity of newly created product must be greater than be 0");
+                .isEqualTo("Quantity of newly created product must be greater than 0");
     }
 
     @Test
@@ -288,8 +288,7 @@ public class ProductControllerIT {
     public void shouldFindAllProductsByKeywordExceptSellerProducts() {
         ResponseEntity<PageResponse<ProductResponse>> response =
                 restTemplate.exchange("/api/products/others?search=Test product", HttpMethod.GET,
-                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
-                        });
+                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -407,6 +406,7 @@ public class ProductControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getImages().size()).isEqualTo(2);
+        assertThat(response.getBody().getImages().get(0).getName()).isEqualTo(TEST_IMAGE_1.getFilename());
     }
 
     @Test
@@ -508,6 +508,7 @@ public class ProductControllerIT {
                         new HttpEntity<>(headers), Object.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(productRepository.findById(productA.getId())).isPresent();
         assertThat(productRepository.findById(productA.getId()).get().getIsDeleted()).isTrue();
     }
 

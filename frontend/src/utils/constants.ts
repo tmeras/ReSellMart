@@ -43,6 +43,9 @@ export const ACCEPTED_IMAGE_TYPES =
 export const ACCEPTED_IMAGE_EXTENSIONS =
     [".jpeg", ".jpg", ".png", ".webp"] as const;
 
+// Categories
+export const MAX_CATEGORY_NAME_LENGTH = 50 as const;
+export const FLYWAY_CATEGORIES_NUMBER = 16; // TODO: Update when more categories are added
 // Products
 export const MAX_PRODUCT_NAME_LENGTH = 100 as const;
 export const MAX_PRODUCT_DESCRIPTION_LENGTH = 5000 as const;

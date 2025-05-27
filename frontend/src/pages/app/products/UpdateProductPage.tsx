@@ -1,4 +1,4 @@
-import { Authorization } from "@/components/Authorization.tsx";
+import { Authorisation } from "@/components/Authorisation.tsx";
 import { useGetProduct } from "@/features/app/products/api/getProduct.ts";
 import { UpdateProductForm } from "@/features/app/products/components/UpdateProductForm.tsx";
 import { useAuth } from "@/hooks/useAuth.ts";
@@ -36,9 +36,10 @@ export function UpdateProductPage() {
         <>
             <title>{ `Update Product | ReSellMart` }</title>
 
-            <Authorization
-                isAuthorized={ user!.id === product.seller.id }
-                unauthorizedMessage="You are not allowed to modify products sold by other users."
+            <Authorisation
+                requiresAdminRole={ false }
+                isAuthorised={ user!.id === product.seller.id }
+                unauthorisedMessage="You are not allowed to modify products sold by other users."
             >
                 <Title ta="center" mt="xl">
                     Update Product Listing
@@ -47,7 +48,7 @@ export function UpdateProductPage() {
                 <Flex justify="center" align="center" mih="100vh" mt="sm">
                     <UpdateProductForm product={ product }/>
                 </Flex>
-            </Authorization>
+            </Authorisation>
         </>
     );
 }

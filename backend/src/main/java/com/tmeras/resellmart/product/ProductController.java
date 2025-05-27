@@ -60,7 +60,7 @@ public class ProductController {
             Authentication authentication
     ) {
         // Get all products excluding those sold by the logged-in user
-        PageResponse<ProductResponse> foundProducts = (search == null || search.isEmpty()) ?
+        PageResponse<ProductResponse> foundProducts = (search == null || search.isBlank()) ?
                 productService.findAllExceptSellerProducts(pageNumber, pageSize, sortBy, sortDirection, authentication)
                 : productService.findAllByKeyword(pageNumber, pageSize, sortBy, sortDirection, search, authentication);
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
@@ -75,7 +75,7 @@ public class ProductController {
             @PathVariable(name = "seller-id") Integer sellerId,
             @RequestParam(name = "search", required = false) String search
     ) {
-        PageResponse<ProductResponse> foundProducts = (search == null || search.isEmpty()) ?
+        PageResponse<ProductResponse> foundProducts = (search == null || search.isBlank()) ?
                 productService.findAllBySellerId(pageNumber, pageSize, sortBy, sortDirection, sellerId)
                 : productService.findAllBySellerIdAndKeyword(pageNumber, pageSize, sortBy, sortDirection, sellerId, search);
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
@@ -92,7 +92,7 @@ public class ProductController {
             Authentication authentication
     ) {
         // Get all products belonging to the specified category excluding those sold by the logged-in user
-        PageResponse<ProductResponse> foundProducts = (search == null || search.isEmpty()) ?
+        PageResponse<ProductResponse> foundProducts = (search == null || search.isBlank()) ?
                 productService.findAllByCategoryId(pageNumber, pageSize, sortBy, sortDirection, categoryId, authentication)
                 : productService.findAllByCategoryIdAndKeyword(pageNumber, pageSize, sortBy, sortDirection, categoryId, search, authentication);
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);

@@ -36,7 +36,7 @@ export function ProductsPage() {
             <SearchProducts
                 handleSearch={ (search) => {
                     setSearchParams({
-                        search,
+                        search: search.trim(),
                         page: "0",
                         sortBy,
                         sortDirection

@@ -55,21 +55,24 @@ public class CategoryRepositoryTests {
     }
 
     @Test
-    public void shouldFindCategoryByName() {
-        Optional<Category> category = categoryRepository.findByName(parentCategory.getName());
+    public void shouldFindParentCategoryById() {
+        Optional<Category> foundCategory = categoryRepository.findParentById(parentCategory.getId());
 
-        assertThat(category.isPresent()).isTrue();
-        assertThat(category.get().getId()).isEqualTo(parentCategory.getId());
-        assertThat(category.get().getName()).isEqualTo(parentCategory.getName());
+        assertThat(foundCategory).isPresent();
+        assertThat(foundCategory.get().getId()).isEqualTo(parentCategory.getId());
+        assertThat(foundCategory.get().getName()).isEqualTo(parentCategory.getName());
     }
 
     @Test
-    public void shouldFindAllCategoriesByParentId() {
-        List<Category> categories = categoryRepository.findAllByParentId(parentCategory.getId());
+    public void shouldFindAllCategoriesByKeyword() {
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_CATEGORIES_BY).ascending() : Sort.by(AppConstants.SORT_CATEGORIES_BY).descending();
 
-        assertThat(categories.size()).isEqualTo(1);
-        assertThat(categories.get(0).getId()).isEqualTo(childCategory.getId());
-        assertThat(categories.get(0).getName()).isEqualTo(childCategory.getName());
+        List<Category> categories = categoryRepository.findAllByKeyword(sort, "test category");
+
+        assertThat(categories.size()).isEqualTo(2);
+        assertThat(categories.get(0).getId()).isEqualTo(parentCategory.getId());
+        assertThat(categories.get(1).getId()).isEqualTo(childCategory.getId());
     }
 
     @Test

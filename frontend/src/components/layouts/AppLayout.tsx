@@ -7,6 +7,7 @@ import { paths } from "@/config/paths.ts";
 import { AppShell, Burger, Button, Divider, Flex, Image, NavLink, ScrollArea, Text } from "@mantine/core";
 import {
     IconCash,
+    IconCategoryPlus,
     IconCirclePlus,
     IconGridDots,
     IconPackage,
@@ -109,6 +110,18 @@ export function AppLayout() {
                         leftSection={ <IconCirclePlus size={ 18 }/> }
                         component={ RouterNavLink } onClick={ () => setNavBarOpened(false) }
                         to={ paths.app.createProduct.path }
+                    />
+
+
+                    <Text size="xl" fw={ 700 } c="paleIndigo.5">
+                        Admin
+                    </Text>
+
+                    <NavLink
+                        label="Manage Product Categories"
+                        leftSection={ <IconCategoryPlus size={ 18 }/> }
+                        component={ RouterNavLink } onClick={ () => setNavBarOpened(false) }
+                        to={ paths.admin.categories.path }
                     />
                 </AppShell.Section>
 

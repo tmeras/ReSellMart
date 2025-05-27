@@ -2,6 +2,7 @@ package com.tmeras.resellmart.category;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,16 +18,24 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
     Optional<Category> findByName(String name);
 
     @Query("""
-            SELECT c
-            FROM Category c
-            WHERE c.parentCategory.id = :parentId
-        """)
-    List<Category> findAllByParentId(Integer parentId);
+        SELECT c
+        FROM Category c
+        WHERE c.id = :id
+        AND c.parentCategory is NULL
+    """)
+    Optional<Category> findParentById(Integer id);
 
     @Query("""
-            SELECT c
-            FROM Category c
-            WHERE c.parentCategory is NULL
-        """)
+        SELECT c
+        FROM Category c
+        WHERE c.name LIKE %:keyword%
+    """)
+    List<Category> findAllByKeyword(Sort sort, String keyword);
+
+    @Query("""
+        SELECT c
+        FROM Category c
+        WHERE c.parentCategory is NULL
+    """)
     List<Category> findAllParents();
 }

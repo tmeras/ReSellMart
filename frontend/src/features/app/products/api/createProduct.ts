@@ -14,10 +14,10 @@ import { z } from "zod";
 export const createProductInputSchema = z.object({
     name: z.string()
         .min(1, "Name is required")
-        .max(MAX_PRODUCT_NAME_LENGTH, "Name must not exceed 100 characters"),
+        .max(MAX_PRODUCT_NAME_LENGTH, `Name must not exceed ${ MAX_PRODUCT_NAME_LENGTH } characters`),
     description: z.string()
         .min(1, "Description is required")
-        .max(MAX_PRODUCT_DESCRIPTION_LENGTH, "Description must not exceed 5000 characters"),
+        .max(MAX_PRODUCT_DESCRIPTION_LENGTH, `Description must not exceed ${ MAX_PRODUCT_DESCRIPTION_LENGTH } characters`),
     price: z.number().positive("Price must be a positive number"),
     availableQuantity: z.number().positive("Available quantity must be a positive number"),
     condition: z.enum(Object.keys(PRODUCT_CONDITION) as [ProductConditionKeys]),
