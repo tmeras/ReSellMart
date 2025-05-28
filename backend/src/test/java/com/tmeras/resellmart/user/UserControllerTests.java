@@ -121,6 +121,28 @@ public class UserControllerTests {
     }
 
     @Test
+    public void shouldFindAllUsersByKeyword() throws Exception {
+        PageResponse<UserResponse> pageResponse = new PageResponse<>(
+                List.of(userResponseA, userResponseB),
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                2, 1,
+                true, true
+        );
+
+        when(userService.findAllByKeyword(
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                AppConstants.SORT_USERS_BY, AppConstants.SORT_DIR, "test user"
+        )).thenReturn(pageResponse);
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/users?search=test user"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(pageResponse));
+    }
+
+    @Test
     public void shouldFindLoggedInUser() throws Exception {
         when(userService.findMe(any(Authentication.class))).thenReturn(userResponseA);
 
@@ -376,5 +398,13 @@ public class UserControllerTests {
         ).andExpect(status().isOk());
 
         verify(userService, times(1)).disable(eq(userA.getId()), any(Authentication.class));
+    }
+
+    @Test
+    public void shouldPromoteUserToAdmin() throws Exception {
+        mockMvc.perform(post("/api/users/" + userA.getId() + "/promote"))
+                .andExpect(status().isOk());
+
+        verify(userService, times(1)).promoteToAdmin(userA.getId());
     }
 }

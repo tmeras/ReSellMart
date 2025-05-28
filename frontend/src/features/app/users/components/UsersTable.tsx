@@ -1,8 +1,9 @@
 import { useGetUsers } from "@/features/app/users/api/getUsers.ts";
+import { usePromoteUserToAdmin } from "@/features/app/users/api/promoteUserToAdmin.ts";
 import { useUpdateUserActivation } from "@/features/app/users/api/updateUserActivation.ts";
 import { AdminUserResponse } from "@/types/api.ts";
 import { base64ToDataUri } from "@/utils/fileUtils.ts";
-import { Avatar, Button, Flex, Text } from "@mantine/core";
+import { Avatar, Button, Flex, Text, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconX } from "@tabler/icons-react";
 import {
@@ -34,6 +35,7 @@ export function UsersTable() {
         sortDirection
     });
     const updateUserActivationMutation = useUpdateUserActivation();
+    const promoteUserToAdminMutation = usePromoteUserToAdmin();
 
     const columns = useMemo<MRT_ColumnDef<AdminUserResponse>[]>(() => [
         {
@@ -97,6 +99,7 @@ export function UsersTable() {
     async function handleEnableUser({ userId }: { userId: string }) {
         try {
             await updateUserActivationMutation.mutateAsync({ userId, data: { isEnabled: true } });
+            setError("");
         } catch (error) {
             console.log("Error enabling user:", error);
 
@@ -111,6 +114,7 @@ export function UsersTable() {
     async function handleDisableUser({ userId }: { userId: string }) {
         try {
             await updateUserActivationMutation.mutateAsync({ userId, data: { isEnabled: false } });
+            setError("");
         } catch (error) {
             console.log("Error disabling user:", error);
 
@@ -122,10 +126,24 @@ export function UsersTable() {
         }
     }
 
+    async function handlePromoteUserToAdmin({ userId }: { userId: string }) {
+        try {
+            await promoteUserToAdminMutation.mutateAsync({ userId });
+            setError("");
+        } catch (error) {
+            console.log("Error promoting user to admin:", error);
+
+            setError("There was an error promoting the user to admin. Please try again.");
+            notifications.show({
+                title: "Something went wrong", message: "There was an error promoting the user to admin. Please try again.",
+                color: "red", icon: <IconX/>, withBorder: true
+            });
+        }
+    }
+
     const users = getUsersQuery.data?.data.content ?? [];
     const totalUsers = getUsersQuery.data?.data.totalElements || 0;
 
-    // TODO: User promote and disable/enable functionality
     const table = useMantineReactTable({
         columns,
         data: users,
@@ -169,9 +187,18 @@ export function UsersTable() {
                 ) }
 
                 { !row.original.roles.some((role) => role.name.toLowerCase() === "admin") &&
-                    <Button size="compact-sm">
-                        Promote
-                    </Button>
+                    <Tooltip label="Promote to Admin">
+                        <Button
+                            size="compact-sm"
+                            loading = {
+                                promoteUserToAdminMutation.isPending &&
+                                promoteUserToAdminMutation.variables.userId === row.original.id.toString()
+                            }
+                            onClick={() => handlePromoteUserToAdmin({ userId: row.original.id.toString() })}
+                        >
+                            Promote
+                        </Button>
+                    </Tooltip>
                 }
             </Flex>
         ),

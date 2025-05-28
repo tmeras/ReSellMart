@@ -60,7 +60,9 @@ public class UserService {
     }
 
     @PreAuthorize("hasRole('ADMIN')") // Only admins should be able to view all users
-    public PageResponse<UserResponse> findAll(Integer pageNumber, Integer pageSize, String sortBy, String sortDirection) {
+    public PageResponse<UserResponse> findAll(
+            Integer pageNumber, Integer pageSize, String sortBy, String sortDirection
+    ) {
         Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
@@ -71,7 +73,7 @@ public class UserService {
         List<UserResponse> userResponses = users.stream()
                 .map((user) -> {
                     UserResponse userResponse = userMapper.toUserResponse(user);
-                    userResponse.setIsEnabled(user.getIsEnabled()); //TODO: Test
+                    userResponse.setIsEnabled(user.getIsEnabled());
                     return userResponse;
                 })
                 .toList();
@@ -87,7 +89,7 @@ public class UserService {
         );
     }
 
-    // TODO: test
+    @PreAuthorize("hasRole('ADMIN')") // Only admins should be able to view all users
     public PageResponse<UserResponse> findAllByKeyword(
             Integer pageNumber, Integer pageSize, String sortBy, String sortDirection, String keyword
     ) {
@@ -316,7 +318,6 @@ public class UserService {
         wishListItemRepository.deleteByUserIdAndProductId(userId, productId);
     }
 
-    // TODO: Test
     public void disable(Integer userId, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
         boolean isCurrentUserAdmin = currentUser.getRoles().stream()
@@ -354,5 +355,14 @@ public class UserService {
         userRepository.save(existingUser);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    public void promoteToAdmin(Integer userId) {
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("No user found with ID: " + userId));
+        // Admin role exists, so just call .get() on optional
+        Role adminRole = roleRepository.findByName("ADMIN").get();
 
+        existingUser.getRoles().add(adminRole);
+        userRepository.save(existingUser);
+    }
 }

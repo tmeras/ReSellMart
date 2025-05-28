@@ -165,4 +165,11 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PostMapping("/{user-id}/promote")
+    public ResponseEntity<?> promoteUserToAdmin(
+            @PathVariable(name = "user-id") Integer userId
+    ) {
+        userService.promoteToAdmin(userId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
