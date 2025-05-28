@@ -11,7 +11,7 @@ A full-stack E-commerce application for buying and selling second-hand goods. De
 
 ### Orders
 - Checkout products (from various sellers) in cart and place orders, with purchase and sale email notifications to buyer and sellers, respectively
-- Pay for order using Stripe (sandbox mode)
+- Pay for orders using Stripe (sandbox mode)
 - View sales and mark sold products as shipped
 - View purchases and mark bought products as delivered
 
@@ -23,9 +23,8 @@ A full-stack E-commerce application for buying and selling second-hand goods. De
 
 ### Admin (TODO)
 - Enable/disable users and promote them to admins
-- View all products toggle their availability
+- View all products and toggle their availability
 - Add, update, and delete product categories
-- View all orders placed
 - Generate statistics on products sold, revenue, registered users, and orders placed
 
 
@@ -49,7 +48,7 @@ A full-stack E-commerce application for buying and selling second-hand goods. De
 
 
 ## 🔐 Security 
-- Implemented access & refresh token flow with JSON Web Tokens (JWTs)
+-  Access & refresh token flow with JSON Web Tokens (JWTs)
  - Role-Based Access Control (RBAC) to distinguish between user and admin responsibilities
 - Account activation via email upon registration
 - MFA using One-Time Passwords (OTPs)

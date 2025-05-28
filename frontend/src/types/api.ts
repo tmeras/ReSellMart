@@ -51,8 +51,13 @@ export type UserResponse = {
     registeredAt: string;
     isMfaEnabled: boolean;
     profileImage?: string; //base64 string
-    roles: Role[];
     qrImageUri?: string;
+    roles: Role[];
+}
+
+// Admins can also view which users are enabled
+export type AdminUserResponse = UserResponse & {
+    isEnabled: boolean;
 }
 
 export type CategoryResponse = {

@@ -36,9 +36,12 @@ public class UserController {
             @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_USERS_BY, required = false) String sortBy,
-            @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection
+            @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection,
+            @RequestParam(name = "search", required = false) String search
     ) {
-        PageResponse<UserResponse> foundUsers = userService.findAll(pageNumber, pageSize, sortBy, sortDirection);
+        PageResponse<UserResponse> foundUsers = (search == null || search.isBlank() ?
+                userService.findAll(pageNumber, pageSize, sortBy, sortDirection)
+                : userService.findAllByKeyword(pageNumber, pageSize, sortBy, sortDirection, search));
         return new ResponseEntity<>(foundUsers, HttpStatus.OK);
     }
 
@@ -154,11 +157,12 @@ public class UserController {
             @PathVariable(name = "user-id") Integer userId,
             Authentication authentication
     ) {
-        if (userEnableRequest.isEnabled())
+        if (userEnableRequest.getIsEnabled())
             userService.enable(userId);
         else
             userService.disable(userId, authentication);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
 }

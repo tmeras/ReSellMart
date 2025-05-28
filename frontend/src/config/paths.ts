@@ -76,6 +76,10 @@ export const paths = {
         categories: {
             path: "/admin/categories",
             getHref: () => "/admin/categories"
+        },
+        users: {
+            path: "/admin/users",
+            getHref: () => "/admin/users"
         }
     }
 } as const

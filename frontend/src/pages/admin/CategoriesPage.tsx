@@ -1,3 +1,4 @@
+import { Authorisation } from "@/components/Authorisation.tsx";
 import { useGetParentCategories } from "@/features/app/categories/api/getParentCategories";
 import { CategoriesTable } from "@/features/app/categories/components/CategoriesTable.tsx";
 import { Flex, Loader, Text, Title } from "@mantine/core";
@@ -25,13 +26,15 @@ export function CategoriesPage() {
 
     return (
         <>
-            <title>{ `Manage Categories | ReSellMart` }</title>
+            <Authorisation requiresAdminRole={ true }>
+                <title>{ `Manage Categories | ReSellMart` }</title>
 
-            <Title ta="center" mb="md">
-                Product Categories
-            </Title>
+                <Title ta="center" mb="md">
+                    Product Categories
+                </Title>
 
-            <CategoriesTable parentCategories={ getParentCategoriesQuery.data.data }/>
+                <CategoriesTable parentCategories={ getParentCategoriesQuery.data.data }/>
+            </Authorisation>
         </>
     );
 }

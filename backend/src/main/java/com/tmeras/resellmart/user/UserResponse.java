@@ -25,6 +25,8 @@ public class UserResponse {
 
     private LocalDate registeredAt;
 
+    private Boolean isEnabled; // Only shown to admins
+
     private Boolean isMfaEnabled;
 
     private byte[] profileImage;

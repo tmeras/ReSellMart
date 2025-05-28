@@ -18,24 +18,21 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
     Optional<Category> findByName(String name);
 
     @Query("""
-        SELECT c
-        FROM Category c
+        SELECT c FROM Category c
         WHERE c.id = :id
-        AND c.parentCategory is NULL
+        AND c.parentCategory IS NULL
     """)
     Optional<Category> findParentById(Integer id);
 
     @Query("""
-        SELECT c
-        FROM Category c
+        SELECT c FROM Category c
         WHERE c.name LIKE %:keyword%
     """)
     List<Category> findAllByKeyword(Sort sort, String keyword);
 
     @Query("""
-        SELECT c
-        FROM Category c
-        WHERE c.parentCategory is NULL
+        SELECT c FROM Category c
+        WHERE c.parentCategory IS NULL
     """)
     List<Category> findAllParents();
 }

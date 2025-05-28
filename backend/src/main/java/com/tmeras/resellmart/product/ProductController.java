@@ -45,7 +45,6 @@ public class ProductController {
             @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_PRODUCTS_BY, required = false) String sortBy,
             @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection
     ) {
-
         PageResponse<ProductResponse> foundProducts = productService.findAll(pageNumber, pageSize, sortBy, sortDirection);
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
     }

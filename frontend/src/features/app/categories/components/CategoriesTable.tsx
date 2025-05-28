@@ -100,10 +100,11 @@ export function CategoriesTable({ parentCategories }: CategoriesTableProps) {
         setError("");
     }
 
+    // @formatter:off
     const handleCreateCategory: MRT_TableOptions<CategoryResponse>["onCreatingRowSave"] = async function ({
-                                                                                                              values,
-                                                                                                              exitCreatingMode
-                                                                                                          }) {
+        values,
+        exitCreatingMode
+    }) {
         const copiedValues = {
             ...values,
             parentId: parentCategories.find(parent => parent.name === values.parentId)?.id.toString() ?? ""
@@ -134,9 +135,9 @@ export function CategoriesTable({ parentCategories }: CategoriesTableProps) {
     };
 
     const handleUpdateCategory: MRT_TableOptions<CategoryResponse>["onEditingRowSave"] = async function ({
-                                                                                                             values,
-                                                                                                             table
-                                                                                                         }) {
+         values,
+         table
+    }) {
         const copiedValues = {
             ...values,
             parentId: parentCategories.find(parent => parent.name === values.parentId)?.id.toString() ?? ""
@@ -163,10 +164,10 @@ export function CategoriesTable({ parentCategories }: CategoriesTableProps) {
             });
         }
     };
+    // @formatter:on
 
     async function handleDeleteCategory({ categoryId }: { categoryId: string }) {
         try {
-            console.log("delete Category", categoryId);
             await deleteCategoryMutation.mutateAsync({ categoryId });
         } catch (error) {
             console.log("Error deleting category", error);
@@ -204,6 +205,7 @@ export function CategoriesTable({ parentCategories }: CategoriesTableProps) {
         getRowId: (row) => row.id?.toString(),
         enablePagination: false,
         enableColumnFilters: false,
+        enableFilterMatchHighlighting: false,
         enableGrouping: true,
         enableColumnDragging: false,
         enableMultiSort: false,
@@ -217,7 +219,7 @@ export function CategoriesTable({ parentCategories }: CategoriesTableProps) {
         onEditingRowCancel: resetErrors,
         // Only allow non-parent categories to be edited or deleted and
         // prevent deletion of categories that were inserted with database migration
-        renderRowActions: ({ row, table }) => (
+        renderRowActions: ({ row, table }) =>
             row.original.parentId ? (
                 <Flex gap="md">
                     <Tooltip label="Edit Category">
@@ -247,8 +249,7 @@ export function CategoriesTable({ parentCategories }: CategoriesTableProps) {
                         </Tooltip>
                     }
                 </Flex>
-            ) : null
-        ),
+            ) : null,
         renderTopToolbarCustomActions: ({ table }) => (
             <Button
                 leftSection={ <IconPlus/> }
@@ -265,7 +266,7 @@ export function CategoriesTable({ parentCategories }: CategoriesTableProps) {
         mantineToolbarAlertBannerProps: getCategoriesQuery.isError || error ?
             {
                 color: "red",
-                children: error ? error : "There was an error fetching categories. Please refresh and try again"
+                children: error ? error : "There was an error fetching the categories. Please refresh and try again"
             }
             : undefined,
         initialState: {
@@ -280,7 +281,6 @@ export function CategoriesTable({ parentCategories }: CategoriesTableProps) {
             isSaving: createCategoryMutation.isPending || updateCategoryMutation.isPending || deleteCategoryMutation.isPending,
             showAlertBanner: getCategoriesQuery.isError || !!error,
             showProgressBars: getCategoriesQuery.isFetching,
-            showGlobalFilter: true
         }
     });
 

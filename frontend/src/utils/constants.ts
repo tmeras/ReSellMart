@@ -4,7 +4,6 @@ export const SORT_CATEGORIES_BY = "id";
 export const SORT_PRODUCTS_BY = "listedAt";
 export const SORT_ORDERS_BY = "placedAt";
 export const SORT_USERS_BY = "id";
-export const SORT_ADDRESSES_BY = "id";
 export const SORT_DIR = "asc";
 export const PRODUCT_SORT_OPTIONS = [
     {

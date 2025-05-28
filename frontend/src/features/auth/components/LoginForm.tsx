@@ -82,7 +82,7 @@ export function LoginForm() {
                 notifications.show({
                     title: "Account disabled",
                     message: "Your account has not yet been activated via the email that was sent to your address" +
-                        " or it has been disabled by an administrator.",
+                        " or has been disabled by an administrator.",
                     color: "red", icon: <IconX/>, withBorder: true
                 });
             } else {
