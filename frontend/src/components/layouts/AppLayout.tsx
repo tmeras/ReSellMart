@@ -4,6 +4,7 @@ import { CategoryNavLinks } from "@/components/ui/CategoryNavLinks.tsx";
 import { DarkModeButton } from "@/components/ui/DarkModeButton.tsx";
 import { UserMenu } from "@/components/ui/UserMenu.tsx";
 import { paths } from "@/config/paths.ts";
+import { useAuth } from "@/hooks/useAuth.ts";
 import { AppShell, Burger, Button, Divider, Flex, Image, NavLink, ScrollArea, Text } from "@mantine/core";
 import {
     IconCash,
@@ -12,7 +13,8 @@ import {
     IconGridDots,
     IconPackage,
     IconReceipt,
-    IconShoppingCart
+    IconShoppingCart,
+    IconUsers
 } from "@tabler/icons-react";
 import { useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
@@ -20,7 +22,10 @@ import { Link, NavLink as RouterNavLink, Outlet, useNavigate } from "react-route
 
 export function AppLayout() {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [navBarOpened, setNavBarOpened] = useState(false);
+
+    const isAdmin = user!.roles.some(role => role.name.toLowerCase() === "admin");
 
     return (
         <AppShell
@@ -113,16 +118,27 @@ export function AppLayout() {
                     />
 
 
-                    <Text size="xl" fw={ 700 } c="paleIndigo.5">
-                        Admin
-                    </Text>
+                    { isAdmin &&
+                        <>
+                            <Text size="xl" fw={ 700 } c="paleIndigo.5">
+                                Admin
+                            </Text>
 
-                    <NavLink
-                        label="Manage Product Categories"
-                        leftSection={ <IconCategoryPlus size={ 18 }/> }
-                        component={ RouterNavLink } onClick={ () => setNavBarOpened(false) }
-                        to={ paths.admin.categories.path }
-                    />
+                            <NavLink
+                                label="Product Categories Management"
+                                leftSection={ <IconCategoryPlus size={ 18 }/> }
+                                component={ RouterNavLink } onClick={ () => setNavBarOpened(false) }
+                                to={ paths.admin.categories.path }
+                            />
+
+                            <NavLink
+                                label="Users Management"
+                                leftSection={ <IconUsers size={ 18 }/> }
+                                component={ RouterNavLink } onClick={ () => setNavBarOpened(false) }
+                                to={ paths.admin.users.path }
+                            />
+                        </>
+                    }
                 </AppShell.Section>
 
                 <AppShell.Section>
