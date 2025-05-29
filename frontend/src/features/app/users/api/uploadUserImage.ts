@@ -1,6 +1,6 @@
 import { api } from "@/lib/apiClient.ts";
 import { uploadImageInputSchema, UserResponse } from "@/types/api.ts";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { z } from "zod";
 
@@ -25,7 +25,7 @@ export function uploadUserImage(
 
 export function useUploadUserImage() {
     //TODO: Invalidate all users query
-    const queryClient = useQueryClient();
+    //const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: uploadUserImage

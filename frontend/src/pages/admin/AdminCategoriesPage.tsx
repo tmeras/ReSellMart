@@ -3,7 +3,7 @@ import { useGetParentCategories } from "@/features/app/categories/api/getParentC
 import { CategoriesTable } from "@/features/app/categories/components/CategoriesTable.tsx";
 import { Flex, Loader, Text, Title } from "@mantine/core";
 
-export function CategoriesPage() {
+export function AdminCategoriesPage() {
 
     const getParentCategoriesQuery = useGetParentCategories();
 

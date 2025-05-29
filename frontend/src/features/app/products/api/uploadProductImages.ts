@@ -1,4 +1,4 @@
-import { getProductsQueryOptions } from "@/features/app/products/api/getProducts.ts";
+import { getOtherUsersProductsQueryOptions } from "@/features/app/products/api/getOtherUsersProducts.ts";
 import { api } from "@/lib/apiClient.ts";
 import { ProductResponse, uploadImageInputSchema } from "@/types/api.ts";
 import { MAX_IMAGE_COUNT } from "@/utils/constants.ts";
@@ -35,7 +35,7 @@ export function useUploadProductImages() {
     return useMutation({
         onSuccess: async () => {
             await queryClient.invalidateQueries({
-                queryKey: getProductsQueryOptions().queryKey
+                queryKey: getOtherUsersProductsQueryOptions().queryKey
             });
         },
         mutationFn: uploadProductImages

@@ -1,5 +1,4 @@
 import { getPurchasesByUserQueryOptions } from "@/features/app/orders/api/getPurchasesByUser.ts";
-import { getSalesByUserQueryOptions } from "@/features/app/orders/api/getSalesByUser.ts";
 import { api } from "@/lib/apiClient.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 

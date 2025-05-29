@@ -2,7 +2,7 @@ import { Authorisation } from "@/components/Authorisation.tsx";
 import { UsersTable } from "@/features/app/users/components/UsersTable.tsx";
 import { Title } from "@mantine/core";
 
-export function UsersPage() {
+export function AdminUsersPage() {
 
     return (
         <>

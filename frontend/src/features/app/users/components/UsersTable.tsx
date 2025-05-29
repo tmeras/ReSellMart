@@ -1,6 +1,7 @@
 import { useGetUsers } from "@/features/app/users/api/getUsers.ts";
 import { usePromoteUserToAdmin } from "@/features/app/users/api/promoteUserToAdmin.ts";
 import { useUpdateUserActivation } from "@/features/app/users/api/updateUserActivation.ts";
+import { useAuth } from "@/hooks/useAuth.ts";
 import { AdminUserResponse } from "@/types/api.ts";
 import { base64ToDataUri } from "@/utils/fileUtils.ts";
 import { Avatar, Button, Flex, Text, Tooltip } from "@mantine/core";
@@ -16,6 +17,8 @@ import {
 import { useMemo, useState } from "react";
 
 export function UsersTable() {
+    const {user: currentUser} = useAuth();
+
     const [globalFilter, setGlobalFilter] = useState("");
     const [sorting, setSorting] = useState<MRT_SortingState>([]);
     const [pagination, setPagination] = useState<MRT_PaginationState>({
@@ -50,6 +53,7 @@ export function UsersTable() {
             enableGrouping: false,
             Cell: ({ cell }) => {
                 const user = cell.row.original;
+                const isCurrentUser = user.id === currentUser!.id;
 
                 return (
                     <Flex gap="xs" align="center">
@@ -58,8 +62,8 @@ export function UsersTable() {
                             name={ user.name } color="initials"
                         />
 
-                        <Text>
-                            { user.name }
+                        <Text c={isCurrentUser ? "paleIndigo" : ""}>
+                            { user.name } {isCurrentUser && <>(me)</>}
                         </Text>
                     </Flex>
                 );
@@ -81,7 +85,7 @@ export function UsersTable() {
         },
         {
             accessorKey: "registeredAt",
-            header: "Registered At",
+            header: "Registered On",
             enableGrouping: false
         },
         {
@@ -94,11 +98,14 @@ export function UsersTable() {
                     { cell.getValue<boolean>() ? "Enabled" : "Disabled" }
                 </Text>
         }
-    ], []);
+    ], [currentUser]);
 
     async function handleEnableUser({ userId }: { userId: string }) {
         try {
-            await updateUserActivationMutation.mutateAsync({ userId, data: { isEnabled: true } });
+            await updateUserActivationMutation.mutateAsync({
+                userId,
+                data: { isEnabled: true }
+            });
             setError("");
         } catch (error) {
             console.log("Error enabling user:", error);
@@ -113,7 +120,10 @@ export function UsersTable() {
 
     async function handleDisableUser({ userId }: { userId: string }) {
         try {
-            await updateUserActivationMutation.mutateAsync({ userId, data: { isEnabled: false } });
+            await updateUserActivationMutation.mutateAsync({
+                userId,
+                data: { isEnabled: false }
+            });
             setError("");
         } catch (error) {
             console.log("Error disabling user:", error);
@@ -187,7 +197,7 @@ export function UsersTable() {
                 ) }
 
                 { !row.original.roles.some((role) => role.name.toLowerCase() === "admin") &&
-                    <Tooltip label="Promote to Admin">
+                    <Tooltip label="Promote to Admin" withArrow>
                         <Button
                             size="compact-sm"
                             loading = {
@@ -219,7 +229,7 @@ export function UsersTable() {
             sorting,
             pagination,
             isLoading: getUsersQuery.isLoading,
-            isSaving: updateUserActivationMutation.isPending,
+            isSaving: updateUserActivationMutation.isPending || promoteUserToAdminMutation.isPending,
             showAlertBanner: getUsersQuery.isError || !!error,
             showProgressBars: getUsersQuery.isFetching
         }

@@ -273,6 +273,33 @@ public class ProductControllerIT {
     }
 
     @Test
+    public void shouldFindAllProductsByKeyword() {
+        ResponseEntity<PageResponse<ProductResponse>> response =
+                restTemplate.exchange("/api/products?search=Test product", HttpMethod.GET,
+                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
+                        });
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getContent().size()).isEqualTo(2);
+        assertThat(response.getBody().getContent().get(0).getName()).isEqualTo(productA.getName());
+        assertThat(response.getBody().getContent().get(1).getName()).isEqualTo(productB.getName());
+    }
+
+    @Test
+    public void shouldNotFindAllProductsByKeywordWhenNonAdminUser() {
+        // Generate JWT with non-admin user details
+        String testJwt = jwtService.generateAccessToken(new HashMap<>(), productB.getSeller());
+        headers.set("Authorization", "Bearer " + testJwt);
+
+        ResponseEntity<?> response =
+                restTemplate.exchange("/api/products?search=Test product", HttpMethod.GET,
+                        new HttpEntity<>(headers), Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
     public void shouldFindAllProductsExceptSellerProducts() {
         ResponseEntity<PageResponse<ProductResponse>> response =
                 restTemplate.exchange("/api/products/others", HttpMethod.GET,
@@ -285,7 +312,7 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void shouldFindAllProductsByKeywordExceptSellerProducts() {
+    public void shouldFindAllProductsExceptSellerProductsByKeyword() {
         ResponseEntity<PageResponse<ProductResponse>> response =
                 restTemplate.exchange("/api/products/others?search=Test product", HttpMethod.GET,
                         new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
@@ -502,38 +529,58 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void shouldDeleteProduct() {
+    public void shouldUpdateProductAvailabilityWhenValidRequest() {
+        ProductAvailabilityRequest productAvailabilityRequest = new ProductAvailabilityRequest(true);
+
         ResponseEntity<?> response =
-                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.DELETE,
-                        new HttpEntity<>(headers), Object.class);
+                restTemplate.exchange("/api/products/" + productA.getId() + "/availability", HttpMethod.PATCH,
+                        new HttpEntity<>(productAvailabilityRequest, headers), Object.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-        assertThat(productRepository.findById(productA.getId())).isPresent();
         assertThat(productRepository.findById(productA.getId()).get().getIsDeleted()).isTrue();
     }
 
     @Test
-    public void shouldNotDeleteProductWhenNonAdminUser() {
+    public void shouldNotUpdateProductAvailabilityWhenInvalidRequest() {
+        Map<String, String> expectedErrors = new HashMap<>();
+        expectedErrors.put("isDeleted", "Deleted flag must not be empty");
+        ProductAvailabilityRequest productAvailabilityRequest = new ProductAvailabilityRequest(null);
+
+        ResponseEntity<Map<String, String>> response =
+                restTemplate.exchange("/api/products/" + productA.getId() + "/availability", HttpMethod.PATCH,
+                        new HttpEntity<>(productAvailabilityRequest, headers), new ParameterizedTypeReference<Map<String, String>>() {
+                        });
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).isEqualTo(expectedErrors);
+    }
+
+    @Test
+    public void shouldNotUpdateProductAvailabilityWhenNonAdminUser() {
         // Generate JWT with non-admin user details
         String testJwt = jwtService.generateAccessToken(new HashMap<>(), productB.getSeller());
         headers.set("Authorization", "Bearer " + testJwt);
 
-        ResponseEntity<?> response =
-                restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.DELETE,
-                        new HttpEntity<>(headers), Object.class);
+        ProductAvailabilityRequest productAvailabilityRequest = new ProductAvailabilityRequest(false);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/products/" + productA.getId() + "/availability", HttpMethod.PATCH,
+                        new HttpEntity<>(productAvailabilityRequest, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
-    public void shouldNotDeleteProductWhenInvalidProductId() {
+    public void shouldNotUpdateProductAvailabilityWhenInvalidProductId() {
+        ProductAvailabilityRequest productAvailabilityRequest = new ProductAvailabilityRequest(false);
+
         ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/products/99", HttpMethod.DELETE,
-                        new HttpEntity<>(headers), ExceptionResponse.class);
+                restTemplate.exchange("/api/products/99/availability", HttpMethod.PATCH,
+                        new HttpEntity<>(productAvailabilityRequest, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getMessage())
-                .isEqualTo("No product found with ID: 99");
+        assertThat(response.getBody().getMessage()).isEqualTo("No product found with ID: 99");
     }
 }

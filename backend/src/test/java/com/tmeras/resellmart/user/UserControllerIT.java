@@ -733,7 +733,7 @@ public class UserControllerIT {
         ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userB.getId() + "/activation",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), Object.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         assertThat(userRepository.findById(userB.getId()).get().isEnabled()).isFalse();
         assertThat(productRepository.findAllBySellerId(userB.getId()).get(0).getIsDeleted()).isTrue();
         assertThat(tokenRepository.findById(testToken.getId()).get().getIsRevoked()).isTrue();
@@ -777,7 +777,7 @@ public class UserControllerIT {
         ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userB.getId() + "/activation",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), Object.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         assertThat(userRepository.findById(userB.getId()).get().isEnabled()).isTrue();
     }
 
@@ -810,7 +810,7 @@ public class UserControllerIT {
         ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userB.getId() + "/promote",
                 HttpMethod.POST, new HttpEntity<>(headers), Object.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         assertThat(userRepository.findWithAssociationsById(userB.getId()).get().getRoles().stream()
                 .anyMatch(role -> role.getName().equals("ADMIN"))).isTrue();
     }

@@ -80,6 +80,10 @@ export const paths = {
         users: {
             path: "/admin/users",
             getHref: () => "/admin/users"
+        },
+        products: {
+            path: "/admin/products",
+            getHref: () => "/admin/products"
         }
     }
 } as const

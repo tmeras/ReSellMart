@@ -8,6 +8,7 @@ A full-stack E-commerce application for buying and selling second-hand goods. De
 - Add products to the cart or wishlist
 - View products by category and by seller
 - List products for sale by specifying product details including name, category, price, condition, images etc.
+- View listed products and update their details
 
 ### Orders
 - Checkout products (from various sellers) in cart and place orders, with purchase and sale email notifications to buyer and sellers, respectively

@@ -162,7 +162,7 @@ public class UserController {
         else
             userService.disable(userId, authentication);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping("/{user-id}/promote")
@@ -170,6 +170,6 @@ public class UserController {
             @PathVariable(name = "user-id") Integer userId
     ) {
         userService.promoteToAdmin(userId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

@@ -157,6 +157,28 @@ public class ProductControllerTests {
     }
 
     @Test
+    public void shouldFindAllProductsByKeyword() throws Exception {
+        PageResponse<ProductResponse> pageResponse = new PageResponse<>(
+                List.of(productResponseA, productResponseB),
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                2, 1,
+                true, true
+        );
+
+        when(productService.findAllByKeyword(
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR, "Test product"
+        )).thenReturn(pageResponse);
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/products?search=Test product"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(pageResponse));
+    }
+
+    @Test
     public void shouldFindAllProductsExceptSellerProducts() throws Exception {
         PageResponse<ProductResponse> pageResponse = new PageResponse<>(
                 List.of(productResponseB),
@@ -188,7 +210,7 @@ public class ProductControllerTests {
                 true, true
         );
 
-        when(productService.findAllByKeyword(
+        when(productService.findAllExceptSellerProductsByKeyword(
                 eq(AppConstants.PAGE_NUMBER_INT), eq(AppConstants.PAGE_SIZE_INT),
                 eq(AppConstants.SORT_PRODUCTS_BY), eq(AppConstants.SORT_DIR),
                 eq("Test product"), any(Authentication.class)
@@ -374,11 +396,30 @@ public class ProductControllerTests {
     }
 
     @Test
-    public void shouldDeleteProduct() throws Exception {
-        mockMvc.perform(delete("/api/products/" + productRequestA.getId()))
-                .andExpect(status().isNoContent())
-                .andReturn();
+    public void shouldUpdateProductAvailabilityWhenValidRequest() throws Exception {
+        ProductAvailabilityRequest productAvailabilityRequest = new ProductAvailabilityRequest(true);
 
-        verify(productService, times(1)).delete(productRequestA.getId());
+        mockMvc.perform(patch("/api/products/" + productRequestA.getId() + "/availability")
+                .content(objectMapper.writeValueAsString(productAvailabilityRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isNoContent());
+
+        verify(productService, times(1))
+                .updateAvailability(productRequestA.getId(), productAvailabilityRequest.getIsDeleted());
+    }
+
+    @Test
+    public void shouldNotUpdateProductAvailabilityWhenInvalidRequest() throws Exception {
+        Map<String, String> expectedErrors = new HashMap<>();
+        expectedErrors.put("isDeleted", "Deleted flag must not be empty");
+        ProductAvailabilityRequest productAvailabilityRequest = new ProductAvailabilityRequest(null);
+
+        MvcResult mvcResult = mockMvc.perform(patch("/api/products/" + productRequestA.getId() + "/availability")
+                .content(objectMapper.writeValueAsString(productAvailabilityRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isBadRequest()).andReturn();
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+
+        assertThat(jsonResponse).isEqualTo(objectMapper.writeValueAsString(expectedErrors));
     }
 }

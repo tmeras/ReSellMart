@@ -43,9 +43,12 @@ public class ProductController {
             @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_PRODUCTS_BY, required = false) String sortBy,
-            @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection
+            @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection,
+            @RequestParam(name = "search", required = false) String search
     ) {
-        PageResponse<ProductResponse> foundProducts = productService.findAll(pageNumber, pageSize, sortBy, sortDirection);
+        PageResponse<ProductResponse> foundProducts = (search == null || search.isBlank()) ?
+                productService.findAll(pageNumber, pageSize, sortBy, sortDirection)
+                : productService.findAllByKeyword(pageNumber, pageSize, sortBy, sortDirection, search);
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
     }
 
@@ -61,7 +64,7 @@ public class ProductController {
         // Get all products excluding those sold by the logged-in user
         PageResponse<ProductResponse> foundProducts = (search == null || search.isBlank()) ?
                 productService.findAllExceptSellerProducts(pageNumber, pageSize, sortBy, sortDirection, authentication)
-                : productService.findAllByKeyword(pageNumber, pageSize, sortBy, sortDirection, search, authentication);
+                : productService.findAllExceptSellerProductsByKeyword(pageNumber, pageSize, sortBy, sortDirection, search, authentication);
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
     }
 
@@ -129,12 +132,12 @@ public class ProductController {
         return new ResponseEntity<>(productImage.getImage(), headers, HttpStatus.OK);
     }
 
-    // Soft-deletes the product
-    @DeleteMapping("/{product-id}")
-    public ResponseEntity<?> delete(
-            @PathVariable(name = "product-id") Integer productId
+    @PatchMapping("/{product-id}/availability")
+    public ResponseEntity<?> updateProductAvailability(
+            @PathVariable(name = "product-id") Integer productId,
+            @Valid @RequestBody ProductAvailabilityRequest productAvailabilityRequest
     ) {
-        productService.delete(productId);
+        productService.updateAvailability(productId, productAvailabilityRequest.getIsDeleted());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

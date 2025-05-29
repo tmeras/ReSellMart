@@ -1,4 +1,4 @@
-import { useGetProducts } from "@/features/app/products/api/getProducts.ts";
+import { useGetOtherUsersProducts } from "@/features/app/products/api/getOtherUsersProducts.ts";
 import { ProductsList } from "@/features/app/products/components/ProductsList.tsx";
 import { SearchProducts } from "@/features/app/products/components/SearchProducts.tsx";
 import { PRODUCT_SORT_OPTIONS, SORT_PRODUCTS_BY } from "@/utils/constants.ts";
@@ -13,7 +13,7 @@ export function ProductsPage() {
     const sortDirection = searchParams.get("sortDirection") || "desc";
     const sort = `${ sortBy } ${ sortDirection }`;
 
-    const getProductsQuery = useGetProducts({
+    const getProductsQuery = useGetOtherUsersProducts({
         page,
         search,
         sortBy,

@@ -204,6 +204,26 @@ public class ProductServiceTests {
     }
 
     @Test
+    public void shouldFindAllProductsByKeyword() {
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
+        Page<Product> page = new PageImpl<>(List.of(productA, productB));
+
+        when(productRepository.findAllByKeyword(pageable, "Test product")).thenReturn(page);
+        when(productMapper.toProductResponse(productA)).thenReturn(productResponseA);
+        when(productMapper.toProductResponse(productB)).thenReturn(productResponseB);
+
+        PageResponse<ProductResponse> pageResponse =
+                productService.findAllByKeyword(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR, "Test product");
+
+        assertThat(pageResponse.getContent().size()).isEqualTo(2);
+        assertThat(pageResponse.getContent().get(0)).isEqualTo(productResponseA);
+        assertThat(pageResponse.getContent().get(1)).isEqualTo(productResponseB);
+    }
+
+    @Test
     public void shouldFindAllProductsExceptSellerProducts() {
         Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
                 Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
@@ -258,17 +278,17 @@ public class ProductServiceTests {
     }
 
     @Test
-    public void shouldFindAllProductsByKeyword() {
+    public void shouldFindAllProductsExceptSellerProductsByKeyword() {
         Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
                 Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
         Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
         Page<Product> page = new PageImpl<>(List.of(productB));
 
-        when(productRepository.findAllByKeyword(pageable, "Test product", userA.getId())).thenReturn(page);
+        when(productRepository.findAllBySellerIdNotAndKeyword(pageable, "Test product", userA.getId())).thenReturn(page);
         when(productMapper.toProductResponse(productB)).thenReturn(productResponseB);
 
         PageResponse<ProductResponse> pageResponse =
-                productService.findAllByKeyword(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                productService.findAllExceptSellerProductsByKeyword(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                         AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR, "Test product", authentication);
 
         assertThat(pageResponse.getContent().size()).isEqualTo(1);
@@ -492,20 +512,20 @@ public class ProductServiceTests {
     }
 
     @Test
-    public void shouldDeleteProduct() {
+    public void shouldUpdateProductAvailabilityWhenValidRequest() {
         when(productRepository.findById(productA.getId())).thenReturn(Optional.of(productA));
 
-        productService.delete(productA.getId());
+        productService.updateAvailability(productA.getId(), true);
 
         assertThat(productA.getIsDeleted()).isTrue();
     }
 
     @Test
-    public void shouldNotDeleteProductWhenInvalidProductId() {
-        when(productRepository.findById(productA.getId())).thenReturn(Optional.empty());
+    public void shouldNotUpdateProductAvailabilityWhenInvalidProductId() {
+        when(productRepository.findById(99)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> productService.delete(productA.getId()))
+        assertThatThrownBy(() -> productService.updateAvailability(99, true))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("No product found with ID: " + productA.getId());
+                .hasMessage("No product found with ID: 99");
     }
 }

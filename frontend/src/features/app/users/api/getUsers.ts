@@ -5,6 +5,7 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 
 // @formatter:off
+
 export function getUsers({
     page = 0,
     pageSize = DEFAULT_PAGE_SIZE,

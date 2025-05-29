@@ -71,6 +71,9 @@ public class ProductService {
             Integer pageNumber, Integer pageSize, String sortBy, String sortDirection
     ) {
         Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        if (!sortBy.equalsIgnoreCase("id")) { // Add secondary sort by unique field to ensure consistent ordering if needed
+            sort = sort.and(Sort.by("id").ascending());
+        }
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
         Page<Product> products = productRepository.findAll(pageable);
@@ -94,11 +97,45 @@ public class ProductService {
         );
     }
 
+    @PreAuthorize("hasRole('ADMIN')") //Only admins should be able to view both available and unavailable products
+    public PageResponse<ProductResponse> findAllByKeyword(
+            Integer pageNumber, Integer pageSize, String sortBy, String sortDirection, String keyword
+    ) {
+        Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        if (!sortBy.equalsIgnoreCase("id")) { // Add secondary sort by unique field to ensure consistent ordering if needed
+            sort = sort.and(Sort.by("id").ascending());
+        }
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        Page<Product> products = productRepository.findAllByKeyword(pageable, keyword);
+        // Initialize lazy associations
+        for (Product product : products) {
+            product.getImages().size();
+            product.getSeller().getRoles().size();
+        }
+        List<ProductResponse> productResponses = products.stream()
+                .map(productMapper::toProductResponse)
+                .toList();
+
+        return new PageResponse<>(
+                productResponses,
+                products.getNumber(),
+                products.getSize(),
+                products.getTotalElements(),
+                products.getTotalPages(),
+                products.isFirst(),
+                products.isLast()
+        );
+    }
+
     public PageResponse<ProductResponse> findAllExceptSellerProducts(
             Integer pageNumber, Integer pageSize, String sortBy, String sortDirection, Authentication authentication
     ) {
         User currentUser = (User) authentication.getPrincipal();
         Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        if (!sortBy.equalsIgnoreCase("id")) { // Add secondary sort by unique field to ensure consistent ordering if needed
+            sort = sort.and(Sort.by("id").ascending());
+        }
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
         Page<Product> products = productRepository.findAllBySellerIdNot(pageable, currentUser.getId());
@@ -126,6 +163,9 @@ public class ProductService {
             Integer pageNumber, Integer pageSize, String sortBy, String sortDirection, Integer sellerId
     ) {
         Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        if (!sortBy.equalsIgnoreCase("id")) { // Add secondary sort by unique field to ensure consistent ordering if needed
+            sort = sort.and(Sort.by("id").ascending());
+        }
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
         Page<Product> products = productRepository.findAllBySellerId(pageable, sellerId);
@@ -154,6 +194,9 @@ public class ProductService {
     ) {
         User currentUser = (User) authentication.getPrincipal();
         Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        if (!sortBy.equalsIgnoreCase("id")) { // Add secondary sort by unique field to ensure consistent ordering if needed
+            sort = sort.and(Sort.by("id").ascending());
+        }
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
         Page<Product> products = productRepository.findAllByCategoryId(pageable, categoryId, currentUser.getId());
@@ -177,14 +220,17 @@ public class ProductService {
         );
     }
 
-    public PageResponse<ProductResponse> findAllByKeyword(
+    public PageResponse<ProductResponse> findAllExceptSellerProductsByKeyword(
             Integer pageNumber, Integer pageSize, String sortBy, String sortDirection, String keyword, Authentication authentication
     ) {
         User currentUser = (User) authentication.getPrincipal();
         Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        if (!sortBy.equalsIgnoreCase("id")) { // Add secondary sort by unique field to ensure consistent ordering if needed
+            sort = sort.and(Sort.by("id").ascending());
+        }
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
-        Page<Product> products = productRepository.findAllByKeyword(pageable, keyword, currentUser.getId());
+        Page<Product> products = productRepository.findAllBySellerIdNotAndKeyword(pageable, keyword, currentUser.getId());
         // Initialize lazy associations
         for(Product product : products) {
             product.getImages().size();
@@ -209,6 +255,9 @@ public class ProductService {
         Integer pageNumber, Integer pageSize, String sortBy, String sortDirection, Integer sellerId, String keyword
     ) {
         Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        if (!sortBy.equalsIgnoreCase("id")) { // Add secondary sort by unique field to ensure consistent ordering if needed
+            sort = sort.and(Sort.by("id").ascending());
+        }
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
         Page<Product> products = productRepository.findAllBySellerIdAndKeyword(pageable, sellerId, keyword);
@@ -238,6 +287,9 @@ public class ProductService {
     ) {
         User currentUser = (User) authentication.getPrincipal();
         Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        if (!sortBy.equalsIgnoreCase("id")) { // Add secondary sort by unique field to ensure consistent ordering if needed
+            sort = sort.and(Sort.by("id").ascending());
+        }
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
         Page<Product> products = productRepository.findAllByCategoryIdAndKeyword(pageable, categoryId, keyword, currentUser.getId());
@@ -355,11 +407,11 @@ public class ProductService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public void delete(Integer productId) {
-        Product existingProduct = productRepository.findById(productId)
+    public void updateAvailability(Integer productId, Boolean isDeleted) {
+        Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
 
-        existingProduct.setIsDeleted(true);
-        productRepository.save(existingProduct);
+        product.setIsDeleted(isDeleted);
+        productRepository.save(product);
     }
 }

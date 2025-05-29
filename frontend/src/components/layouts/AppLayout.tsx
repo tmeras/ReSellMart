@@ -11,7 +11,7 @@ import {
     IconCategoryPlus,
     IconCirclePlus,
     IconGridDots,
-    IconPackage,
+    IconPackage, IconPackages,
     IconReceipt,
     IconShoppingCart,
     IconUsers
@@ -129,6 +129,13 @@ export function AppLayout() {
                                 leftSection={ <IconCategoryPlus size={ 18 }/> }
                                 component={ RouterNavLink } onClick={ () => setNavBarOpened(false) }
                                 to={ paths.admin.categories.path }
+                            />
+
+                            <NavLink
+                                label="Products Management"
+                                leftSection={ <IconPackages size={ 18 }/> }
+                                component={ RouterNavLink } onClick={ () => setNavBarOpened(false) }
+                                to={ paths.admin.products.path }
                             />
 
                             <NavLink

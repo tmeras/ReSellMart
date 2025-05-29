@@ -222,7 +222,7 @@ export function CategoriesTable({ parentCategories }: CategoriesTableProps) {
         renderRowActions: ({ row, table }) =>
             row.original.parentId ? (
                 <Flex gap="md">
-                    <Tooltip label="Edit Category">
+                    <Tooltip label="Edit Category" withArrow>
                         <ActionIcon
                             onClick={ () => {
                                 table.setGrouping([]); // Ungroup before editing
@@ -236,14 +236,14 @@ export function CategoriesTable({ parentCategories }: CategoriesTableProps) {
                     </Tooltip>
 
                     { row.original.id > FLYWAY_CATEGORIES_NUMBER &&
-                        <Tooltip
-                            label="Delete Category"
-                            onClick={ () => {
-                                categoryIdToDelete.current = row.original.id.toString();
-                                setDeleteModalOpened(true);
-                            } }
-                        >
-                            <ActionIcon color="red">
+                        <Tooltip label="Delete Category" withArrow>
+                            <ActionIcon
+                                color="red"
+                                onClick={ () => {
+                                    categoryIdToDelete.current = row.original.id.toString();
+                                    setDeleteModalOpened(true);
+                                } }
+                            >
                                 <IconTrash/>
                             </ActionIcon>
                         </Tooltip>

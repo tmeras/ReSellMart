@@ -1,6 +1,7 @@
 import { ScrollToTop } from "@/components/ScrollToTop.tsx";
-import { CategoriesPage } from "@/pages/admin/CategoriesPage.tsx";
-import { UsersPage } from "@/pages/admin/UsersPage.tsx";
+import { AdminCategoriesPage } from "@/pages/admin/AdminCategoriesPage.tsx";
+import { AdminProductsPage } from "@/pages/admin/AdminProductsPage.tsx";
+import { AdminUsersPage } from "@/pages/admin/AdminUsersPage.tsx";
 import { CheckoutPage } from "@/pages/app/orders/CheckoutPage.tsx";
 import { PurchasesPage } from "@/pages/app/orders/PurchasesPage.tsx";
 import { SalesPage } from "@/pages/app/orders/SalesPage.tsx";
@@ -121,11 +122,15 @@ const createAppRouter = () =>
                 },
                 {
                     path: paths.admin.categories.path,
-                    element: <CategoriesPage/>
+                    element: <AdminCategoriesPage/>
                 },
                 {
                     path: paths.admin.users.path,
-                    element: <UsersPage/>
+                    element: <AdminUsersPage/>
+                },
+                {
+                    path: paths.admin.products.path,
+                    element: <AdminProductsPage />
                 }
             ]
         },

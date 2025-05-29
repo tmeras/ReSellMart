@@ -383,7 +383,7 @@ public class UserControllerTests {
         mockMvc.perform(patch("/api/users/" + userA.getId() + "/activation")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userEnableRequest))
-        ).andExpect(status().isOk());
+        ).andExpect(status().isNoContent());
 
         verify(userService, times(1)).enable(userA.getId());
     }
@@ -395,7 +395,7 @@ public class UserControllerTests {
         mockMvc.perform(patch("/api/users/" + userA.getId() + "/activation")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userEnableRequest))
-        ).andExpect(status().isOk());
+        ).andExpect(status().isNoContent());
 
         verify(userService, times(1)).disable(eq(userA.getId()), any(Authentication.class));
     }
@@ -403,7 +403,7 @@ public class UserControllerTests {
     @Test
     public void shouldPromoteUserToAdmin() throws Exception {
         mockMvc.perform(post("/api/users/" + userA.getId() + "/promote"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         verify(userService, times(1)).promoteToAdmin(userA.getId());
     }
