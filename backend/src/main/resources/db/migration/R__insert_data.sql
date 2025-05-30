@@ -16,7 +16,7 @@ VALUES (1, 'Electronics', NULL),
        (15, 'Videogames', 12),
        (16, 'Cameras', 1);
 
--- TODO: More categories and products
+-- TODO: More categories and products + change password for first three users
 
 INSERT IGNORE INTO role(id, name)
 VALUES (1, 'ADMIN'),

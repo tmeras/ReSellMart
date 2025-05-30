@@ -22,6 +22,7 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.time.ZonedDateTime;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -177,5 +178,16 @@ public class ProductRepositoryTests {
         assertThat(page.getContent().size()).isEqualTo(1);
         assertThat(page.getContent().get(0).getId()).isEqualTo(productB.getId());
         assertThat(page.getContent().get(0).getName()).isEqualTo(productB.getName());
+    }
+
+    @Test
+    public void shouldCalculateProductStatistics() {
+        ZonedDateTime to = ZonedDateTime.now();
+        ZonedDateTime from = to.minusMonths(1);
+
+        ProductStatsResponse statistics = productRepository.calculateStatistics(from, to);
+
+        assertThat(statistics).isNotNull();
+        assertThat(statistics.getMonthlyListedProducts()).isEqualTo(2);
     }
 }

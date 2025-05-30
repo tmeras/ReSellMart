@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
@@ -24,4 +25,13 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             OR u.email LIKE %:keyword%
     """)
     Page<User> findAllByKeyword(Pageable pageable, String keyword);
+
+    @Query("""
+                    SELECT new com.tmeras.resellmart.user.UserStatsResponse(
+                        COUNT(u.id)
+                    )
+                    from User u
+                    WHERE u.registeredAt >= :from AND u.registeredAt <= :to
+            """)
+    UserStatsResponse calculateStatistics(LocalDate from, LocalDate to);
 }

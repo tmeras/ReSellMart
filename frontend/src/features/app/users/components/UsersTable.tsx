@@ -173,16 +173,18 @@ export function UsersTable() {
         renderRowActions: ({ row }) => (
             <Flex gap="xs">
                 { row.original.isEnabled ? (
-                    <Button
-                        color="red" size="compact-sm"
-                        loading={
-                            updateUserActivationMutation.isPending &&
-                            updateUserActivationMutation.variables.userId === row.original.id.toString()
-                        }
-                        onClick={ () => handleDisableUser({ userId: row.original.id.toString() }) }
-                    >
-                        Disable
-                    </Button>
+                    <Tooltip label="This will also mark the user's products as unavailable">
+                        <Button
+                            color="red" size="compact-sm"
+                            loading={
+                                updateUserActivationMutation.isPending &&
+                                updateUserActivationMutation.variables.userId === row.original.id.toString()
+                            }
+                            onClick={ () => handleDisableUser({ userId: row.original.id.toString() }) }
+                        >
+                            Disable
+                        </Button>
+                    </Tooltip>
                 ) : (
                     <Button
                         color="teal" size="compact-sm"

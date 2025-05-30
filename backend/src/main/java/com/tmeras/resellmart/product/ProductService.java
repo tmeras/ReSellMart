@@ -414,4 +414,13 @@ public class ProductService {
         product.setIsDeleted(isDeleted);
         productRepository.save(product);
     }
+
+    // Calculates the total number of products listed in the past 30-31 days
+    @PreAuthorize("hasRole('ADMIN')")
+    public ProductStatsResponse calculateStatistics() {
+        ZonedDateTime to = ZonedDateTime.now();
+        ZonedDateTime from = to.minusMonths(1);
+
+        return productRepository.calculateStatistics(from, to);
+    }
 }

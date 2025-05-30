@@ -9,8 +9,8 @@ import { AppShell, Burger, Button, Divider, Flex, Image, NavLink, ScrollArea, Te
 import {
     IconCash,
     IconCategoryPlus,
-    IconCirclePlus,
-    IconGridDots,
+    IconCirclePlus, IconDashboard,
+    IconGridDots, IconLayoutDashboard,
     IconPackage, IconPackages,
     IconReceipt,
     IconShoppingCart,
@@ -123,6 +123,13 @@ export function AppLayout() {
                             <Text size="xl" fw={ 700 } c="paleIndigo.5">
                                 Admin
                             </Text>
+
+                            <NavLink
+                                label="Dashboard"
+                                leftSection={ <IconDashboard size={ 18 }/> }
+                                component={ RouterNavLink } onClick={ () => setNavBarOpened(false) }
+                                to={ paths.admin.dashboard.path }
+                            />
 
                             <NavLink
                                 label="Product Categories Management"

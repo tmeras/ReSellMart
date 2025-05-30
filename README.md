@@ -105,11 +105,13 @@ cd frontend
 npm install
 npm run dev
 ```
-4. App now running at http://localhost:5173/auth/login  and login with:
+4. App now running at http://localhost:5173/auth/login  
 
-| email         | password    |
-|--------------|--------------|
-| john@gmail.com| pass123|
+Login and pay with the following:
+
+| email         | password    | card |
+|--------------|--------------|--------------|
+| john@gmail.com| pass123| 4242 4242 4242 4242 |
 
 **NOTES**:
 -  Product images in stripe checkout page will not be visible as webhook endpoint  is served over HTTP (not HTTPS) during development

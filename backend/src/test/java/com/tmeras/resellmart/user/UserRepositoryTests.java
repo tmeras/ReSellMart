@@ -18,6 +18,7 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,5 +71,16 @@ public class UserRepositoryTests {
         assertThat(page.getContent().size()).isEqualTo(2);
         assertThat(page.getContent().get(0).getId()).isEqualTo(userA.getId());
         assertThat(page.getContent().get(1).getId()).isEqualTo(userB.getId());
+    }
+
+    @Test
+    public void shouldCalculateUserStatistics() {
+        LocalDate to = LocalDate.now();
+        LocalDate from = to.minusMonths(1);
+
+        UserStatsResponse statistics = userRepository.calculateStatistics(from, to);
+
+        assertThat(statistics).isNotNull();
+        assertThat(statistics.getMonthlyRegisteredUsers()).isEqualTo(2);
     }
 }

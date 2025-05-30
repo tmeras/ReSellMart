@@ -172,4 +172,10 @@ public class UserController {
         userService.promoteToAdmin(userId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<UserStatsResponse> calculateStatistics() {
+        UserStatsResponse userStatistics = userService.calculateStatistics();
+        return new ResponseEntity<>(userStatistics, HttpStatus.OK);
+    }
 }

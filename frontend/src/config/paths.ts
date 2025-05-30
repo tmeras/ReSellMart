@@ -73,6 +73,10 @@ export const paths = {
         }
     },
     admin: {
+        dashboard: {
+            path: "/admin/dashboard",
+            getHref: () => "/admin/dashboard"
+        },
         categories: {
             path: "/admin/categories",
             getHref: () => "/admin/categories"

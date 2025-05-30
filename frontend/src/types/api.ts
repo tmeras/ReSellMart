@@ -140,3 +140,17 @@ export type OrderResponse = {
     buyer: UserResponse;
     orderItems: OrderItemResponse[];
 }
+
+export type ProductStatsResponse = {
+    monthlyListedProducts: number;
+}
+
+export type OrderStatsResponse = {
+    monthlyOrderCount: number;
+    monthlyProductSales: number;
+    monthlyRevenue: number;
+}
+
+export type UserStatsResponse = {
+    monthlyRegisteredUsers: number;
+}

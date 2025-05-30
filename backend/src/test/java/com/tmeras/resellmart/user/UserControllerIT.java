@@ -835,4 +835,14 @@ public class UserControllerIT {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage()).isEqualTo("No user found with ID: 99");
     }
+
+    @Test
+    public void shouldCalculateUserStatistics() {
+        ResponseEntity<UserStatsResponse> response = restTemplate.exchange("/api/users/statistics",
+                HttpMethod.GET, new HttpEntity<>(headers), UserStatsResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMonthlyRegisteredUsers()).isEqualTo(2);
+    }
 }

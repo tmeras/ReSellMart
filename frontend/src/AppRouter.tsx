@@ -1,5 +1,6 @@
 import { ScrollToTop } from "@/components/ScrollToTop.tsx";
 import { AdminCategoriesPage } from "@/pages/admin/AdminCategoriesPage.tsx";
+import { AdminDashboardPage } from "@/pages/admin/AdminDashboardPage.tsx";
 import { AdminProductsPage } from "@/pages/admin/AdminProductsPage.tsx";
 import { AdminUsersPage } from "@/pages/admin/AdminUsersPage.tsx";
 import { CheckoutPage } from "@/pages/app/orders/CheckoutPage.tsx";
@@ -40,6 +41,10 @@ const createAppRouter = () =>
             ),
             children: [
                 // TODO: Home page with latest products
+                {
+                    path: "",
+                    element: <LoginPage />
+                },
                 {
                     path: paths.auth.login.path,
                     element: <LoginPage/>
@@ -119,6 +124,10 @@ const createAppRouter = () =>
                 {
                     path: paths.app.sales.path,
                     element: <SalesPage/>
+                },
+                {
+                    path: paths.admin.dashboard.path,
+                    element: <AdminDashboardPage />
                 },
                 {
                     path: paths.admin.categories.path,

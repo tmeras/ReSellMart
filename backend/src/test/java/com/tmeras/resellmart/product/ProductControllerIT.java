@@ -583,4 +583,15 @@ public class ProductControllerIT {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage()).isEqualTo("No product found with ID: 99");
     }
+
+    @Test
+    public void shouldCalculateProductStatistics() {
+        ResponseEntity<ProductStatsResponse> response =
+                restTemplate.exchange("/api/products/statistics", HttpMethod.GET,
+                        new HttpEntity<>(headers), ProductStatsResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMonthlyListedProducts()).isEqualTo(2);
+    }
 }

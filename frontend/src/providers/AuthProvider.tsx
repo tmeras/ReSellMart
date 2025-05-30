@@ -3,7 +3,6 @@ import { UserResponse } from "@/types/api.ts";
 import { InternalAxiosRequestConfig } from "axios";
 import { createContext, ReactNode, useLayoutEffect, useMemo, useState } from "react";
 
-
 type AuthContext = {
     accessToken: string | null;
     user: UserResponse | null;
@@ -99,16 +98,14 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
         }
     };
 
-    const contextValue = useMemo(
-        () => ({
-            accessToken,
-            user,
-            setAccessToken,
-            setUser,
-            isLoadingUser,
-            setIsLoadingUser
-        }), [accessToken, user, isLoadingUser]
-    )
+    const contextValue = useMemo(() => ({
+        accessToken,
+        user,
+        setAccessToken,
+        setUser,
+        isLoadingUser,
+        setIsLoadingUser
+    }), [accessToken, user, isLoadingUser])
 
     return (
         <AuthContext.Provider value={contextValue}>

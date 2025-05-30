@@ -29,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -364,5 +365,13 @@ public class UserService {
 
         existingUser.getRoles().add(adminRole);
         userRepository.save(existingUser);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserStatsResponse calculateStatistics() {
+        LocalDate to = LocalDate.now();
+        LocalDate from = to.minusMonths(1);
+
+        return userRepository.calculateStatistics(from, to);
     }
 }

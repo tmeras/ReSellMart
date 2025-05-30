@@ -140,4 +140,10 @@ public class ProductController {
         productService.updateAvailability(productId, productAvailabilityRequest.getIsDeleted());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<ProductStatsResponse> calculateStatistics() {
+        ProductStatsResponse productStatistics = productService.calculateStatistics();
+        return new ResponseEntity<>(productStatistics, HttpStatus.OK);
+    }
 }
