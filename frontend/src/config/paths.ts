@@ -72,4 +72,22 @@ export const paths = {
             getHref: () => "/app/my-sales"
         }
     },
+    admin: {
+        dashboard: {
+            path: "/admin/dashboard",
+            getHref: () => "/admin/dashboard"
+        },
+        categories: {
+            path: "/admin/categories",
+            getHref: () => "/admin/categories"
+        },
+        users: {
+            path: "/admin/users",
+            getHref: () => "/admin/users"
+        },
+        products: {
+            path: "/admin/products",
+            getHref: () => "/admin/products"
+        }
+    }
 } as const

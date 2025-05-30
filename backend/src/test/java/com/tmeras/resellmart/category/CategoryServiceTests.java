@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,30 +64,31 @@ public class CategoryServiceTests {
 
     @Test
     public void shouldSaveCategoryWhenValidRequest() {
-        when(categoryRepository.findByName(categoryRequestA.getName())).thenReturn(Optional.empty());
-        when(categoryMapper.toCategory(categoryRequestA)).thenReturn(categoryA);
-        when(categoryRepository.save(categoryA)).thenReturn(categoryA);
-        when(categoryMapper.toCategoryResponse(categoryA)).thenReturn(categoryResponseA);
+        when(categoryRepository.findByName(categoryRequestB.getName())).thenReturn(Optional.empty());
+        when(categoryRepository.findParentById(categoryRequestB.getParentId())).thenReturn(Optional.of(categoryA));
+        when(categoryMapper.toCategory(categoryRequestB)).thenReturn(categoryB);
+        when(categoryRepository.save(categoryB)).thenReturn(categoryB);
+        when(categoryMapper.toCategoryResponse(categoryB)).thenReturn(categoryResponseB);
 
-        CategoryResponse categoryResponse = categoryService.save(categoryRequestA);
+        CategoryResponse categoryResponse = categoryService.save(categoryRequestB);
 
-        assertThat(categoryResponse).isEqualTo(categoryResponseA);
+        assertThat(categoryResponse).isEqualTo(categoryResponseB);
     }
 
     @Test
     public void shouldNotSaveCategoryWhenDuplicateCategoryName() {
-        when(categoryRepository.findByName(categoryRequestA.getName())).thenReturn(Optional.of(categoryA));
+        when(categoryRepository.findByName(categoryRequestB.getName())).thenReturn(Optional.of(categoryB));
 
-        assertThatThrownBy(() -> categoryService.save(categoryRequestA))
+        assertThatThrownBy(() -> categoryService.save(categoryRequestB))
                 .isInstanceOf(ResourceAlreadyExistsException.class)
-                .hasMessage("A category with the name: '" + categoryRequestA.getName() + "' already exists");
+                .hasMessage("A category with the name: '" + categoryRequestB.getName() + "' already exists");
     }
 
     @Test
     public void shouldNotSaveCategoryWhenInvalidParentId() {
         categoryRequestB.setParentId(99);
         when(categoryRepository.findByName(categoryRequestB.getName())).thenReturn(Optional.empty());
-        when(categoryRepository.findById(99)).thenReturn(Optional.empty());
+        when(categoryRepository.findParentById(99)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> categoryService.save(categoryRequestB))
                 .isInstanceOf(ResourceNotFoundException.class)
@@ -94,20 +96,7 @@ public class CategoryServiceTests {
     }
 
     @Test
-    public void shouldNotSaveCategoryWhenInvalidParent() {
-        Category categoryC = new Category(3, "Test category A", null);
-        categoryA.setParentCategory(categoryC);
-
-        when(categoryRepository.findByName(categoryRequestB.getName())).thenReturn(Optional.empty());
-        when(categoryRepository.findById(categoryRequestA.getId())).thenReturn(Optional.of(categoryA));
-
-        assertThatThrownBy(() -> categoryService.save(categoryRequestB))
-                .isInstanceOf(APIException.class)
-                .hasMessage("Parent category should not have a parent");
-    }
-
-    @Test
-    public void shouldFindCategoryByIdWhenValidCategoryId() {
+    public void shouldFindCategoryByIdWhenValidRequest() {
         when(categoryRepository.findById(categoryA.getId())).thenReturn(Optional.of(categoryA));
         when(categoryMapper.toCategoryResponse(categoryA)).thenReturn(categoryResponseA);
 
@@ -127,32 +116,36 @@ public class CategoryServiceTests {
 
     @Test
     public void shouldFindAllCategories() {
-        when(categoryRepository.findAll()).thenReturn(List.of(categoryA, categoryB));
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_CATEGORIES_BY).ascending() : Sort.by(AppConstants.SORT_CATEGORIES_BY).descending();
+
+        when(categoryRepository.findAll(sort)).thenReturn(List.of(categoryA, categoryB));
         when(categoryMapper.toCategoryResponse(categoryA)).thenReturn(categoryResponseA);
         when(categoryMapper.toCategoryResponse(categoryB)).thenReturn(categoryResponseB);
 
-        List<CategoryResponse> pageResponse = categoryService.findAll();
+        List<CategoryResponse> categoryResponses =
+                categoryService.findAll(AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR);
 
-        assertThat(pageResponse.size()).isEqualTo(2);
-        assertThat(pageResponse.get(0)).isEqualTo(categoryResponseA);
-        assertThat(pageResponse.get(1)).isEqualTo(categoryResponseB);
+        assertThat(categoryResponses.size()).isEqualTo(2);
+        assertThat(categoryResponses.get(0)).isEqualTo(categoryResponseA);
+        assertThat(categoryResponses.get(1)).isEqualTo(categoryResponseB);
     }
 
     @Test
-    public void shouldFindAllCategoriesByParentId() {
+    public void shouldFindAllCategoriesByKeyword() {
         Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
                 Sort.by(AppConstants.SORT_CATEGORIES_BY).ascending() : Sort.by(AppConstants.SORT_CATEGORIES_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
-        Page<Category> page = new PageImpl<>(List.of(categoryB));
 
-        when(categoryRepository.findAllByParentId(categoryB.getParentCategory().getId())).thenReturn(List.of(categoryB));
+        when(categoryRepository.findAllByKeyword(sort, "test category")).thenReturn(List.of(categoryA, categoryB));
+        when(categoryMapper.toCategoryResponse(categoryA)).thenReturn(categoryResponseA);
         when(categoryMapper.toCategoryResponse(categoryB)).thenReturn(categoryResponseB);
 
-        List<CategoryResponse> pageResponse =
-                categoryService.findAllByParentId( categoryB.getParentCategory().getId());
+        List<CategoryResponse> categoryResponses =
+                categoryService.findAllByKeyword(AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR, "test category");
 
-        assertThat(pageResponse.size()).isEqualTo(1);
-        assertThat(pageResponse.get(0)).isEqualTo(categoryResponseB);
+        assertThat(categoryResponses.size()).isEqualTo(2);
+        assertThat(categoryResponses.get(0)).isEqualTo(categoryResponseA);
+        assertThat(categoryResponses.get(1)).isEqualTo(categoryResponseB);
     }
 
     @Test
@@ -168,17 +161,18 @@ public class CategoryServiceTests {
 
     @Test
     public void shouldUpdateCategoryWhenValidRequest() {
-        categoryRequestA.setName("Updated test category A");
-        categoryResponseA.setName("Updated test category A");
+        categoryRequestB.setName("Updated test category A");
+        categoryResponseB.setName("Updated test category A");
 
-        when(categoryRepository.findById(categoryA.getId())).thenReturn(Optional.of(categoryA));
-        when(categoryRepository.save(categoryA)).thenReturn(categoryA);
-        when(categoryMapper.toCategoryResponse(categoryA)).thenReturn(categoryResponseA);
+        when(categoryRepository.findById(categoryB.getId())).thenReturn(Optional.of(categoryB));
+        when(categoryRepository.findParentById(categoryRequestB.getParentId())).thenReturn(Optional.of(categoryA));
+        when(categoryRepository.save(categoryB)).thenReturn(categoryB);
+        when(categoryMapper.toCategoryResponse(categoryB)).thenReturn(categoryResponseB);
 
-        CategoryResponse categoryResponse = categoryService.update(categoryRequestA, categoryA.getId());
+        CategoryResponse categoryResponse = categoryService.update(categoryRequestB, categoryB.getId());
 
-        assertThat(categoryResponse).isEqualTo(categoryResponseA);
-        assertThat(categoryA.getName()).isEqualTo("Updated test category A");
+        assertThat(categoryResponse).isEqualTo(categoryResponseB);
+        assertThat(categoryB.getName()).isEqualTo("Updated test category A");
     }
 
     @Test
@@ -191,18 +185,76 @@ public class CategoryServiceTests {
     }
 
     @Test
-    public void shouldDeleteCategoryWhenValidRequest() {
-        categoryService.delete(categoryA.getId());
+    public void shouldNotUpdateCategoryWhenInvalidParentId() {
+        categoryRequestB.setParentId(99);
+        when(categoryRepository.findById(categoryB.getId())).thenReturn(Optional.of(categoryB));
+        when(categoryRepository.findParentById(99)).thenReturn(Optional.empty());
 
-        verify(categoryRepository, times(1)).deleteById(categoryA.getId());
+        assertThatThrownBy(() -> categoryService.update(categoryRequestB, categoryB.getId()))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No parent category found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotUpdateCategoryWhenParent() {
+        categoryRequestA.setParentId(categoryB.getId());
+
+        when(categoryRepository.findById(categoryA.getId())).thenReturn(Optional.of(categoryA));
+        when(categoryRepository.findParentById(categoryRequestA.getParentId())).thenReturn(Optional.of(categoryB));
+
+        assertThatThrownBy(() -> categoryService.update(categoryRequestA, categoryA.getId()))
+                .isInstanceOf(APIException.class)
+                .hasMessage("Modification of parent categories is not allowed");
+    }
+
+    @Test
+    public void shouldNotUpdateCategoryWhenDuplicateCategoryName() {
+        categoryRequestB.setName(categoryA.getName());
+
+        when(categoryRepository.findById(categoryB.getId())).thenReturn(Optional.of(categoryB));
+        when(categoryRepository.findParentById(categoryRequestB.getParentId())).thenReturn(Optional.of(categoryA));
+        when(categoryRepository.findByName(categoryRequestB.getName())).thenReturn(Optional.of(categoryA));
+
+        assertThatThrownBy(() -> categoryService.update(categoryRequestB, categoryB.getId()))
+                .isInstanceOf(ResourceAlreadyExistsException.class)
+                .hasMessage("A category with the name: '" + categoryRequestB.getName() + "' already exists");
+    }
+
+    @Test
+    public void shouldDeleteCategoryWhenValidRequest() {
+        when(categoryRepository.findById(categoryB.getId())).thenReturn(Optional.of(categoryB));
+        when(productRepository.existsByCategoryId(categoryB.getId())).thenReturn(false);
+
+        categoryService.delete(categoryB.getId());
+
+        verify(categoryRepository, times(1)).deleteById(categoryB.getId());
+    }
+
+    @Test
+    public void shouldNotDeleteCategoryWhenInvalidCategoryId() {
+        when(categoryRepository.findById(99)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> categoryService.delete(99))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No category found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotDeleteCategoryWhenParentCategory() {
+        when(categoryRepository.findById(categoryA.getId())).thenReturn(Optional.of(categoryA));
+
+        assertThatThrownBy(() -> categoryService.delete(categoryA.getId()))
+                .isInstanceOf(APIException.class)
+                .hasMessage("Deletion of parent categories is not allowed");
     }
 
     @Test
     public void shouldNotDeleteCategoryWhenForeignKeyConstraint() {
-        when(productRepository.existsByCategoryId(categoryA.getId())).thenReturn(true);
+        when(categoryRepository.findById(categoryB.getId())).thenReturn(Optional.of(categoryB));
+        when(productRepository.existsByCategoryId(categoryB.getId())).thenReturn(true);
 
-        assertThatThrownBy(() -> categoryService.delete(categoryA.getId()))
+        assertThatThrownBy(() -> categoryService.delete(categoryB.getId()))
                 .isInstanceOf(ForeignKeyConstraintException.class)
-                .hasMessage("Cannot delete category due to existing products that reference it");
+                .hasMessage("Cannot delete category because existing products reference it");
     }
 }

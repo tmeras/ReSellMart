@@ -5,6 +5,7 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 
 // @formatter:off
+
 export function getProductsByUser({
     userId,
     page = 0,
@@ -30,7 +31,6 @@ export function getProductsByUser({
     return api.get(`/api/products/users/${ userId }?${ params.toString() }`);
 }
 
-// @formatter:off
 export function getProductsByUserQueryOptions({
     userId,
     page,

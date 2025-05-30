@@ -6,10 +6,17 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Integer> {
+
+    @Query("""
+                    SELECT p FROM Product p
+                    WHERE (p.name LIKE %:keyword% OR p.description LIKE %:keyword%)
+            """)
+    Page<Product> findAllByKeyword(Pageable pageable, String keyword);
 
     @Query("""
             SELECT p FROM Product p WHERE p.availableQuantity > 0
@@ -36,7 +43,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
             AND p.isDeleted <> true AND p.seller.id <> :sellerId
             AND (p.name LIKE %:keyword% OR p.description LIKE %:keyword%)
     """)
-    Page<Product> findAllByKeyword(Pageable pageable, String keyword, Integer sellerId);
+    Page<Product> findAllBySellerIdNotAndKeyword(Pageable pageable, String keyword, Integer sellerId);
 
     @Query("""
             SELECT p FROM Product p WHERE p.isDeleted <> true
@@ -59,4 +66,13 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     Optional<Product> findWithImagesById(Integer id);
 
     List<Product> findAllBySellerId(Integer sellerId);
+
+    @Query("""
+                    SELECT new com.tmeras.resellmart.product.ProductStatsResponse(
+                        COUNT(p)
+                    )
+                    FROM Product p
+                    WHERE p.listedAt >= :from AND p.listedAt < :to
+            """)
+    ProductStatsResponse calculateStatistics(ZonedDateTime from, ZonedDateTime to);
 }

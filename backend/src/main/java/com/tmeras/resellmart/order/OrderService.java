@@ -397,4 +397,12 @@ public class OrderService {
         orderItem.setStatus(OrderItemStatus.DELIVERED);
         orderRepository.save(order);
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public OrderStatsResponse calculateStatistics() {
+        ZonedDateTime to = ZonedDateTime.now();
+        ZonedDateTime from = to.minusMonths(1);
+
+        return orderRepository.calculateStatistics(from, to);
+    }
 }

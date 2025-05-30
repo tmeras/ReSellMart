@@ -22,6 +22,7 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.time.ZonedDateTime;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -81,6 +82,21 @@ public class ProductRepositoryTests {
     }
 
     @Test
+    public void shouldFindAllProductsByKeyword() {
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
+
+        Page<Product> page = productRepository.findAllByKeyword(pageable, "Test product");
+
+        assertThat(page.getContent().size()).isEqualTo(2);
+        assertThat(page.getContent().get(0).getId()).isEqualTo(productA.getId());
+        assertThat(page.getContent().get(0).getName()).isEqualTo(productA.getName());
+        assertThat(page.getContent().get(1).getId()).isEqualTo(productB.getId());
+        assertThat(page.getContent().get(1).getName()).isEqualTo(productB.getName());
+    }
+
+    @Test
     public void shouldFindAllProductsBySellerIdNot() {
         Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
                 Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
@@ -121,13 +137,13 @@ public class ProductRepositoryTests {
     }
 
     @Test
-    public void shouldFindAllProductsByKeyword() {
+    public void shouldFindAllProductsExceptSellerProductsByKeyword() {
         Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
                 Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
         Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
 
         Page<Product> page =
-                productRepository.findAllByKeyword(pageable, "Test product", productA.getSeller().getId());
+                productRepository.findAllBySellerIdNotAndKeyword(pageable, "Test product", productA.getSeller().getId());
 
         assertThat(page.getContent().size()).isEqualTo(1);
         assertThat(page.getContent().get(0).getId()).isEqualTo(productB.getId());
@@ -162,5 +178,16 @@ public class ProductRepositoryTests {
         assertThat(page.getContent().size()).isEqualTo(1);
         assertThat(page.getContent().get(0).getId()).isEqualTo(productB.getId());
         assertThat(page.getContent().get(0).getName()).isEqualTo(productB.getName());
+    }
+
+    @Test
+    public void shouldCalculateProductStatistics() {
+        ZonedDateTime to = ZonedDateTime.now();
+        ZonedDateTime from = to.minusMonths(1);
+
+        ProductStatsResponse statistics = productRepository.calculateStatistics(from, to);
+
+        assertThat(statistics).isNotNull();
+        assertThat(statistics.getMonthlyListedProducts()).isEqualTo(2);
     }
 }

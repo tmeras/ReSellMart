@@ -11,5 +11,5 @@ import lombok.*;
 public class UserEnableRequest {
 
     @NotNull(message = "Enabled flag must not be empty")
-    private boolean enabled;
+    private Boolean isEnabled;
 }

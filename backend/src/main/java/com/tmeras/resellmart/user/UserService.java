@@ -9,6 +9,8 @@ import com.tmeras.resellmart.exception.ResourceNotFoundException;
 import com.tmeras.resellmart.file.FileService;
 import com.tmeras.resellmart.product.Product;
 import com.tmeras.resellmart.product.ProductRepository;
+import com.tmeras.resellmart.role.Role;
+import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.security.MfaService;
 import com.tmeras.resellmart.token.Token;
 import com.tmeras.resellmart.token.TokenRepository;
@@ -27,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -44,6 +47,7 @@ public class UserService {
     private final ProductRepository productRepository;
     private final CartItemRepository cartItemRepository;
     private final WishListItemRepository wishListItemRepository;
+    private final RoleRepository roleRepository;
     private final UserMapper userMapper;
     private final CartItemMapper cartItemMapper;
     private final WishListItemMapper wishListItemMapper;
@@ -57,7 +61,9 @@ public class UserService {
     }
 
     @PreAuthorize("hasRole('ADMIN')") // Only admins should be able to view all users
-    public PageResponse<UserResponse> findAll(Integer pageNumber, Integer pageSize, String sortBy, String sortDirection) {
+    public PageResponse<UserResponse> findAll(
+            Integer pageNumber, Integer pageSize, String sortBy, String sortDirection
+    ) {
         Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
@@ -66,7 +72,41 @@ public class UserService {
         for (User user : users)
             user.getRoles().size();
         List<UserResponse> userResponses = users.stream()
-                .map(userMapper::toUserResponse)
+                .map((user) -> {
+                    UserResponse userResponse = userMapper.toUserResponse(user);
+                    userResponse.setIsEnabled(user.getIsEnabled());
+                    return userResponse;
+                })
+                .toList();
+
+        return new PageResponse<>(
+                userResponses,
+                users.getNumber(),
+                users.getSize(),
+                users.getTotalElements(),
+                users.getTotalPages(),
+                users.isFirst(),
+                users.isLast()
+        );
+    }
+
+    @PreAuthorize("hasRole('ADMIN')") // Only admins should be able to view all users
+    public PageResponse<UserResponse> findAllByKeyword(
+            Integer pageNumber, Integer pageSize, String sortBy, String sortDirection, String keyword
+    ) {
+        Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        Page<User> users = userRepository.findAllByKeyword(pageable, keyword);
+        // Initialize lazy associations
+        for (User user : users)
+            user.getRoles().size();
+        List<UserResponse> userResponses = users.stream()
+                .map((user) -> {
+                    UserResponse userResponse = userMapper.toUserResponse(user);
+                    userResponse.setIsEnabled(user.getIsEnabled());
+                    return userResponse;
+                })
                 .toList();
 
         return new PageResponse<>(
@@ -284,16 +324,12 @@ public class UserService {
         boolean isCurrentUserAdmin = currentUser.getRoles().stream()
                 .anyMatch(role -> role.getName().equals("ADMIN"));
 
-        // Users can disable (soft-delete) their own accounts and admins can disable any non-admin user
-        if (!Objects.equals(currentUser.getId(), userId) && !isCurrentUserAdmin)
+        // Users can disable (soft-delete) their own accounts and admins can disable any user
+        if (!currentUser.getId().equals(userId) && !isCurrentUserAdmin)
             throw new OperationNotPermittedException("You do not have permission to disable this user");
 
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("No user found with ID: " + userId));
-        boolean isExistingUserAdmin = existingUser.getRoles().stream()
-                .anyMatch(role -> role.getName().equals("ADMIN"));
-        if (isExistingUserAdmin)
-            throw new APIException("You cannot disable an admin user");
 
         // Disable user
         existingUser.setIsEnabled(false);
@@ -306,7 +342,7 @@ public class UserService {
 
         // Mark all user products as unavailable
         List<Product> userProducts = productRepository.findAllBySellerId(userId);
-        userProducts.forEach(product -> product.setIsDeleted(false));
+        userProducts.forEach(product -> product.setIsDeleted(true));
 
         productRepository.saveAll(userProducts);
     }
@@ -318,5 +354,24 @@ public class UserService {
 
         existingUser.setIsEnabled(true);
         userRepository.save(existingUser);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public void promoteToAdmin(Integer userId) {
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("No user found with ID: " + userId));
+        // Admin role exists, so just call .get() on optional
+        Role adminRole = roleRepository.findByName("ADMIN").get();
+
+        existingUser.getRoles().add(adminRole);
+        userRepository.save(existingUser);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserStatsResponse calculateStatistics() {
+        LocalDate to = LocalDate.now();
+        LocalDate from = to.minusMonths(1);
+
+        return userRepository.calculateStatistics(from, to);
     }
 }

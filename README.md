@@ -8,10 +8,11 @@ A full-stack E-commerce application for buying and selling second-hand goods. De
 - Add products to the shopping cart or wishlist
 - View products by category and by seller
 - List products for sale by specifying product details including name, category, price, condition, images etc.
+- View listed products and update their details
 
 ### Orders
 - Checkout products (from various sellers) in cart and place orders, with purchase and sale email notifications to buyer and sellers, respectively
-- Pay for order using Stripe (sandbox mode)
+- Pay for orders using Stripe (sandbox mode)
 - View sales and mark sold products as shipped
 - View purchases and mark bought products as delivered
 
@@ -23,9 +24,8 @@ A full-stack E-commerce application for buying and selling second-hand goods. De
 
 ### Admin (TODO)
 - Enable/disable users and promote them to admins
-- View all products toggle their availability
+- View all products and toggle their availability
 - Add, update, and delete product categories
-- View all orders placed
 - Generate statistics on products sold, revenue, registered users, and orders placed
 
 
@@ -105,11 +105,13 @@ cd frontend
 npm install
 npm run dev
 ```
-4. App now running at http://localhost:5173/auth/login  and login with:
+4. App now running at http://localhost:5173/auth/login  
 
-| email         | password    |
-|--------------|--------------|
-| john@gmail.com| pass123|
+Login and pay with the following:
+
+| email         | password    | card |
+|--------------|--------------|--------------|
+| john@gmail.com| pass123| 4242 4242 4242 4242 |
 
 **NOTES**:
 -  Product images in stripe checkout page will not be visible as webhook endpoint  is served over HTTP (not HTTPS) during development

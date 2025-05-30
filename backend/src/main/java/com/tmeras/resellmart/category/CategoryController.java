@@ -34,18 +34,14 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoryResponse>> findAll() {
-        List<CategoryResponse> foundCategories =
-                categoryService.findAll();
-        return new ResponseEntity<>(foundCategories, HttpStatus.OK);
-    }
-
-    @GetMapping("/parents/{parent-id}")
-    public ResponseEntity<List<CategoryResponse>> findAllByParentId(
-            @PathVariable(name = "parent-id") Integer parentId
+    public ResponseEntity<List<CategoryResponse>> findAll(
+            @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_CATEGORIES_BY, required = false) String sortBy,
+            @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection,
+            @RequestParam(name = "search", required = false) String search
     ) {
-        List<CategoryResponse> foundCategories =
-                categoryService.findAllByParentId(parentId);
+        List<CategoryResponse> foundCategories = (search == null || search.isBlank()) ?
+                categoryService.findAll(sortBy, sortDirection)
+                : categoryService.findAllByKeyword(sortBy, sortDirection, search);
         return new ResponseEntity<>(foundCategories, HttpStatus.OK);
     }
 

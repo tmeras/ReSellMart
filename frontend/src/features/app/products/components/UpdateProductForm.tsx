@@ -47,7 +47,7 @@ export function UpdateProductForm({ product }: UpdateProductFormProps) {
     const [images, setImages] = useState<File[]>([]);
     const [mainImageValue, setMainImageValue] = useState("0");
 
-    const getCategoriesQuery = useGetCategories();
+    const getCategoriesQuery = useGetCategories({});
     const updateProductMutation = useUpdateProduct({
         sellerId: user!.id.toString(),
         productId: product.id.toString()

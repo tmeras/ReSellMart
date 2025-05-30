@@ -24,7 +24,7 @@ export function ProductsByCategoryPage() {
         sortDirection
     });
     // Use cached categories that were previously fetched to be displayed in the navbar
-    const getCategoriesQuery = useGetCategories();
+    const getCategoriesQuery = useGetCategories({});
 
     if (getProductsByCategoryQuery.isError) {
         console.log("Error fetching products by category", getProductsByCategoryQuery.error);
@@ -52,7 +52,7 @@ export function ProductsByCategoryPage() {
             <SearchProducts
                 handleSearch={ (search) => {
                     setSearchParams({
-                        search,
+                        search: search.trim(),
                         page: "0",
                         sortBy,
                         sortDirection

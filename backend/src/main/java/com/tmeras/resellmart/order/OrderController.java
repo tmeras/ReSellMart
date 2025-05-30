@@ -107,4 +107,10 @@ public class OrderController {
         orderService.markOrderItemAsDelivered(orderId, productId, authentication);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @GetMapping("/orders/statistics")
+    public ResponseEntity<OrderStatsResponse> calculateStatistics() {
+        OrderStatsResponse orderStatistics = orderService.calculateStatistics();
+        return new ResponseEntity<>(orderStatistics, HttpStatus.OK);
+    }
 }

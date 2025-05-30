@@ -51,7 +51,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-// TODO: Code coverage
+// TODO: Code coverage + results and testing approach in README
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
@@ -118,6 +118,7 @@ public class UserControllerIT {
         Role adminRole = roleRepository.save(Role.builder().name("ADMIN").build());
         userA = TestDataUtils.createUserA(Set.of(adminRole));
         userA.setId(null);
+        userA.setIsEnabled(true);
         userA.setPassword(passwordEncoder.encode(userA.getPassword()));
         userA = userRepository.save(userA);
         userRequestA = TestDataUtils.createUserRequestA();
@@ -125,6 +126,7 @@ public class UserControllerIT {
         Role userRole = roleRepository.save(Role.builder().name("USER").build());
         userB = TestDataUtils.createUserB(Set.of(userRole));
         userB.setId(null);
+        userB.setIsEnabled(true);
         userB.setPassword(passwordEncoder.encode(userB.getPassword()));
         userB = userRepository.save(userB);
 
@@ -187,7 +189,9 @@ public class UserControllerIT {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getContent().size()).isEqualTo(2);
         assertThat(response.getBody().getContent().get(0).getName()).isEqualTo(userA.getRealName());
+        assertThat(response.getBody().getContent().get(0).getIsEnabled()).isEqualTo(userA.getIsEnabled());
         assertThat(response.getBody().getContent().get(1).getName()).isEqualTo(userB.getRealName());
+        assertThat(response.getBody().getContent().get(1).getIsEnabled()).isEqualTo(userB.getIsEnabled());
     }
 
     @Test
@@ -203,7 +207,35 @@ public class UserControllerIT {
     }
 
     @Test
-    public void shouldFetchLoggedInUser() {
+    public void shouldFindAllUsersByKeyword() {
+        ResponseEntity<PageResponse<UserResponse>> response =
+                restTemplate.exchange("/api/users?search=test user", HttpMethod.GET,
+                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
+                        });
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getContent().size()).isEqualTo(2);
+        assertThat(response.getBody().getContent().get(0).getName()).isEqualTo(userA.getRealName());
+        assertThat(response.getBody().getContent().get(0).getIsEnabled()).isEqualTo(userA.getIsEnabled());
+        assertThat(response.getBody().getContent().get(1).getName()).isEqualTo(userB.getRealName());
+        assertThat(response.getBody().getContent().get(1).getIsEnabled()).isEqualTo(userB.getIsEnabled());
+    }
+
+    @Test
+    public void shouldNotFindAllUsersByKeywordWhenNonAdminUser() {
+        String testJwt = jwtService.generateAccessToken(new HashMap<>(), userB);
+        headers.set("Authorization", "Bearer " + testJwt);
+
+        ResponseEntity<?> response =
+                restTemplate.exchange("/api/users?search=test user", HttpMethod.GET,
+                        new HttpEntity<>(headers), Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    public void shouldFindLoggedInUser() {
         ResponseEntity<UserResponse> response =
                 restTemplate.exchange("/api/users/me", HttpMethod.GET,
                         new HttpEntity<>(headers), UserResponse.class);
@@ -692,31 +724,30 @@ public class UserControllerIT {
     @Test
     public void shouldDisableUserWhenValidRequest() {
         UserEnableRequest userEnableRequest = new UserEnableRequest(false);
-        // Downgrade admin user
-        userA.setRoles(Set.of(userB.getRoles().stream().findFirst().get()));
-        userRepository.save(userA);
+
         // Manually save refresh token for the relevant user
         Token testToken = new Token(null, "token", TokenType.BEARER, LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(1), null, false, userA);
+                LocalDateTime.now().plusMinutes(1), null, false, userB);
         testToken = tokenRepository.save(testToken);
 
-        ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userA.getId() + "/activation",
+        ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userB.getId() + "/activation",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), Object.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(userRepository.findById(userA.getId()).get().isEnabled()).isFalse();
-        assertThat(productRepository.findAllBySellerId(userA.getId()).get(0).getIsDeleted()).isFalse();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(userRepository.findById(userB.getId()).get().isEnabled()).isFalse();
+        assertThat(productRepository.findAllBySellerId(userB.getId()).get(0).getIsDeleted()).isTrue();
         assertThat(tokenRepository.findById(testToken.getId()).get().getIsRevoked()).isTrue();
     }
 
     @Test
     public void shouldNotDisableUserWhenUserOrAdminIsNotLoggedIn() {
         UserEnableRequest userEnableRequest = new UserEnableRequest(false);
-        // Downgrade admin user
-        userA.setRoles(Set.of(userB.getRoles().stream().findFirst().get()));
-        userRepository.save(userA);
 
-        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userB.getId() + "/activation",
+        // Authenticate as non-admin user
+        String testJwt = jwtService.generateAccessToken(new HashMap<>(), userB);
+        headers.set("Authorization", "Bearer " + testJwt);
+
+        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userA.getId() + "/activation",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
@@ -738,18 +769,6 @@ public class UserControllerIT {
     }
 
     @Test
-    public void shouldNotDisableAdminUser() {
-        UserEnableRequest userEnableRequest = new UserEnableRequest(false);
-
-        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userA.getId() + "/activation",
-                HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), ExceptionResponse.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getMessage()).isEqualTo("You cannot disable an admin user");
-    }
-
-    @Test
     public void shouldEnableUserWhenValidRequest() {
         UserEnableRequest userEnableRequest = new UserEnableRequest(true);
         userB.setIsEnabled(false);
@@ -758,7 +777,7 @@ public class UserControllerIT {
         ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userB.getId() + "/activation",
                 HttpMethod.PATCH, new HttpEntity<>(userEnableRequest, headers), Object.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         assertThat(userRepository.findById(userB.getId()).get().isEnabled()).isTrue();
     }
 
@@ -784,5 +803,46 @@ public class UserControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage()).isEqualTo("No user found with ID: 99");
+    }
+
+    @Test
+    public void shouldPromoteUserToAdminWhenValidRequest() {
+        ResponseEntity<?> response = restTemplate.exchange("/api/users/" + userB.getId() + "/promote",
+                HttpMethod.POST, new HttpEntity<>(headers), Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(userRepository.findWithAssociationsById(userB.getId()).get().getRoles().stream()
+                .anyMatch(role -> role.getName().equals("ADMIN"))).isTrue();
+    }
+
+    @Test
+    public void shouldNotPromoteUserToAdminWhenNonAdminUserIsLoggedIn() {
+        String testJwt = jwtService.generateAccessToken(new HashMap<>(), userB);
+        headers.set("Authorization", "Bearer " + testJwt);
+
+        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + userA.getId() + "/promote",
+                HttpMethod.POST, new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    public void shouldNotPromoteUserToAdminWhenInvalidUserId() {
+        ResponseEntity<ExceptionResponse> response = restTemplate.exchange("/api/users/" + 99 + "/promote",
+                HttpMethod.POST, new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("No user found with ID: 99");
+    }
+
+    @Test
+    public void shouldCalculateUserStatistics() {
+        ResponseEntity<UserStatsResponse> response = restTemplate.exchange("/api/users/statistics",
+                HttpMethod.GET, new HttpEntity<>(headers), UserStatsResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMonthlyRegisteredUsers()).isEqualTo(2);
     }
 }

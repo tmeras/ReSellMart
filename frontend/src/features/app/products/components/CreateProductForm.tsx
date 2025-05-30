@@ -42,7 +42,7 @@ export function CreateProductForm() {
     const [images, setImages] = useState<File[]>([]);
     const [mainImageValue, setMainImageValue] = useState("0");
 
-    const getCategoriesQuery = useGetCategories();
+    const getCategoriesQuery = useGetCategories({});
     const createProductMutation = useCreateProduct({ sellerId: user!.id.toString() });
     const uploadProductImagesMutation = useUploadProductImages();
 

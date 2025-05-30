@@ -16,7 +16,7 @@ VALUES (1, 'Electronics', NULL),
        (15, 'Videogames', 12),
        (16, 'Cameras', 1);
 
--- TODO: More categories and products
+-- TODO: More categories and products + change password for first three users
 
 INSERT IGNORE INTO role(id, name)
 VALUES (1, 'ADMIN'),
@@ -31,7 +31,7 @@ VALUES (1, 'Theodore Meras', 'tmeras@yahoo.gr', '$2a$10$h2UMOIQGcBEjM0Dc3if4BuRB
        (3, 'Mary Cole', 'mary@gmail.com', '$2a$10$h2UMOIQGcBEjM0Dc3if4BuRBLzKKhnGy8i.vesnGwphl0BmTI/yMi',
         'United Kingdom', './uploads/flyway-user-images/user_image_2.png', true, false, null, CURDATE()),
         (4, 'John Doe', 'john@gmail.com', '$2a$10$uu9TwmhE0hMAPAmTNFsPjes8lUuw1RCC5iZPuPlk7aU.xWAYmJyDy',
-        'Greece', './uploads/flyway-user-images/admin_image.png', true, false, null, CURDATE());
+        'Greece', null, true, false, null, CURDATE());
 
 INSERT IGNORE INTO user_role(user_id, role_id)
 VALUES (1, 2),

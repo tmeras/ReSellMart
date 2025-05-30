@@ -108,7 +108,7 @@ class CategoryControllerIT {
 
     @Test
     public void shouldSaveCategoryWhenValidRequest() {
-        CategoryRequest categoryRequest = CategoryRequest.builder().name("New category").build();
+        CategoryRequest categoryRequest = new CategoryRequest(null, "Test category C", parentCategory.getId());
 
         ResponseEntity<CategoryResponse> response =
                 restTemplate.exchange("/api/categories", HttpMethod.POST,
@@ -123,6 +123,7 @@ class CategoryControllerIT {
         CategoryRequest categoryRequest = CategoryRequest.builder().name(null).build();
         Map<String, String> expectedErrors = new HashMap<>();
         expectedErrors.put("name", "Name must not be empty");
+        expectedErrors.put("parentId", "Parent category ID must not be empty");
 
         ResponseEntity<Map<String,String>> response =
                 restTemplate.exchange("/api/categories", HttpMethod.POST,
@@ -134,8 +135,21 @@ class CategoryControllerIT {
     }
 
     @Test
+    public void shouldNotSaveCategoryWhenNonAdminUser() {
+        CategoryRequest categoryRequest = new CategoryRequest(null, "Test category C", parentCategory.getId());
+        String testJwt = jwtService.generateAccessToken(new HashMap<>(), user);
+        headers.set("Authorization", "Bearer " + testJwt);
+
+        ResponseEntity<CategoryResponse> response =
+                restTemplate.exchange("/api/categories", HttpMethod.POST,
+                        new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
     public void shouldNotSaveCategoryWhenDuplicateCategoryName() {
-        CategoryRequest categoryRequest = new CategoryRequest(3, "Test category A", null);
+        CategoryRequest categoryRequest = new CategoryRequest(3, "Test category A", parentCategory.getId());
 
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/categories", HttpMethod.POST,
@@ -157,19 +171,6 @@ class CategoryControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage()).isEqualTo("No parent category found with ID: 99");
-    }
-
-    @Test
-    public void shouldNotSaveCategoryWhenInvalidParent() {
-        CategoryRequest categoryRequest = new CategoryRequest(3, "Test category C", childCategory.getId());
-
-        ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/categories", HttpMethod.POST,
-                        new HttpEntity<>(categoryRequest, headers), ExceptionResponse.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getMessage()).isEqualTo("Parent category should not have a parent");
     }
 
     @Test
@@ -206,15 +207,15 @@ class CategoryControllerIT {
     }
 
     @Test
-    public void shouldFindAllCategoriesByParentId() {
+    public void shouldFindAllCategoriesByKeyword() {
         ResponseEntity<List<CategoryResponse>> response =
-                restTemplate.exchange("/api/categories/parents/" + parentCategory.getId(), HttpMethod.GET,
+                restTemplate.exchange("/api/categories?search=test category a", HttpMethod.GET,
                         new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().size()).isEqualTo(1);
-        assertThat(response.getBody().get(0).getName()).isEqualTo(childCategory.getName());
+        assertThat(response.getBody().get(0).getName()).isEqualTo(parentCategory.getName());
     }
 
     @Test
@@ -231,27 +232,42 @@ class CategoryControllerIT {
 
     @Test
     public void shouldUpdateCategoryWhenValidRequest() {
-        CategoryRequest categoryRequest = new CategoryRequest(1, "Updated category", null);
+        CategoryRequest categoryRequest = new CategoryRequest(childCategory.getId(), "Updated category", parentCategory.getId());
 
         ResponseEntity<CategoryResponse> response =
-                restTemplate.exchange("/api/categories/" + parentCategory.getId(), HttpMethod.PUT,
+                restTemplate.exchange("/api/categories/" + childCategory.getId(), HttpMethod.PUT,
                         new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getId()).isEqualTo(parentCategory.getId());
+        assertThat(response.getBody().getId()).isEqualTo(childCategory.getId());
         assertThat(response.getBody().getName()).isEqualTo(categoryRequest.getName());
-        assertThat(response.getBody().getParentId()).isNull();
+        assertThat(response.getBody().getParentId()).isEqualTo(parentCategory.getId());
+    }
+
+    @Test
+    public void shouldNotUpdateCategoryWhenInvalidRequest() {
+        CategoryRequest categoryRequest = new CategoryRequest(childCategory.getId(), null, parentCategory.getId());
+        Map<String, String> expectedErrors = new HashMap<>();
+        expectedErrors.put("name", "Name must not be empty");
+
+        ResponseEntity<Map<String,String>> response =
+                restTemplate.exchange("/api/categories/" + childCategory.getId(), HttpMethod.PUT,
+                        new HttpEntity<>(categoryRequest, headers), new ParameterizedTypeReference<>() {});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).isEqualTo(expectedErrors);
     }
 
     @Test
     public void shouldNotUpdateCategoryWhenNonAdminUser() {
-        CategoryRequest categoryRequest = new CategoryRequest(1, "Updated category", null);
+        CategoryRequest categoryRequest = new CategoryRequest(childCategory.getId(), "Updated category", parentCategory.getId());
         String testJwt = jwtService.generateAccessToken(new HashMap<>(), user);
         headers.set("Authorization", "Bearer " + testJwt);
 
         ResponseEntity<CategoryResponse> response =
-                restTemplate.exchange("/api/categories/" + parentCategory.getId(), HttpMethod.PUT,
+                restTemplate.exchange("/api/categories/" + childCategory.getId(), HttpMethod.PUT,
                         new HttpEntity<>(categoryRequest, headers), CategoryResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
@@ -259,7 +275,7 @@ class CategoryControllerIT {
 
     @Test
     public void shouldNotUpdateCategoryWhenInvalidCategoryId() {
-        CategoryRequest categoryRequest = new CategoryRequest(1, "Updated category", null);
+        CategoryRequest categoryRequest = new CategoryRequest(childCategory.getId(), "Updated category", parentCategory.getId());
 
         ResponseEntity<ExceptionResponse> response =
                 restTemplate.exchange("/api/categories/99", HttpMethod.PUT,
@@ -268,6 +284,48 @@ class CategoryControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage()).isEqualTo("No category found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotUpdateCategoryWhenInvalidParentId() {
+        CategoryRequest categoryRequest = new CategoryRequest(childCategory.getId(), "Updated category", 99);
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/categories/" + childCategory.getId(), HttpMethod.PUT,
+                        new HttpEntity<>(categoryRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("No parent category found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotUpdateCategoryWhenParentCategory() {
+        CategoryRequest categoryRequest =
+                new CategoryRequest(parentCategory.getId(), "Updated parent category", parentCategory.getId());
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/categories/" + parentCategory.getId(), HttpMethod.PUT,
+                        new HttpEntity<>(categoryRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("Modification of parent categories is not allowed");
+    }
+
+    @Test
+    public void shouldNotUpdateCategoryWhenDuplicateCategoryName() {
+        CategoryRequest categoryRequest =
+                new CategoryRequest(childCategory.getId(), parentCategory.getName(), parentCategory.getId());
+
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/categories/" + childCategory.getId(), HttpMethod.PUT,
+                        new HttpEntity<>(categoryRequest, headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("A category with the name: '" + parentCategory.getName() + "' already exists");
     }
 
     @Test
@@ -293,19 +351,42 @@ class CategoryControllerIT {
     }
 
     @Test
+    public void shouldNotDeleteCategoryWhenInvalidCategoryId() {
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/categories/99", HttpMethod.DELETE,
+                        new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("No category found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotDeleteCategoryWhenParentCategory() {
+        ResponseEntity<ExceptionResponse> response =
+                restTemplate.exchange("/api/categories/" + parentCategory.getId(), HttpMethod.DELETE,
+                        new HttpEntity<>(headers), ExceptionResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("Deletion of parent categories is not allowed");
+    }
+
+    @Test
     public void shouldNotDeleteCategoryWhenForeignKeyConstraint() {
         // Create product that references parent category
-        Product product = TestDataUtils.createProductA(parentCategory, user);
+        Product product = TestDataUtils.createProductA(childCategory, user);
         product.setId(null);
         productRepository.save(product);
 
         ResponseEntity<ExceptionResponse> response =
-                restTemplate.exchange("/api/categories/" + parentCategory.getId(), HttpMethod.DELETE,
+                restTemplate.exchange("/api/categories/" + childCategory.getId(), HttpMethod.DELETE,
                         new HttpEntity<>(headers), ExceptionResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage())
-                .isEqualTo("Cannot delete category due to existing products that reference it");
+                .isEqualTo("Cannot delete category because existing products reference it");
     }
 }

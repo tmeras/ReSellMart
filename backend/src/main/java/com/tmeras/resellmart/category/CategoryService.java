@@ -24,19 +24,15 @@ public class CategoryService {
     private final ProductRepository productRepository;
     private final CategoryMapper categoryMapper;
 
+    @PreAuthorize("hasRole('ADMIN')")
     public CategoryResponse save(CategoryRequest categoryRequest) {
         categoryRequest.setId(null);
 
         if (categoryRepository.findByName(categoryRequest.getName()).isPresent())
             throw new ResourceAlreadyExistsException("A category with the name: '" + categoryRequest.getName() + "' already exists");
 
-        Category parentCategory = categoryRequest.getParentId() == null ? null :
-                categoryRepository.findById(categoryRequest.getParentId())
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                "No parent category found with ID: " + categoryRequest.getParentId())
-                        );
-        if (parentCategory != null && parentCategory.getParentCategory() != null)
-            throw new APIException("Parent category should not have a parent");
+        Category parentCategory = categoryRepository.findParentById(categoryRequest.getParentId()).orElseThrow(
+                () -> new ResourceNotFoundException("No parent category found with ID: " + categoryRequest.getParentId()));
 
         Category category = categoryMapper.toCategory(categoryRequest);
         category.setParentCategory(parentCategory);
@@ -51,16 +47,20 @@ public class CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("No category found with ID: " + categoryId));
     }
 
-    public List<CategoryResponse> findAll() {
-        List<Category> categories = categoryRepository.findAll();
+    public List<CategoryResponse> findAll(String sortBy, String sortDirection) {
+        Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+
+        List<Category> categories = categoryRepository.findAll(sort);
 
         return categories.stream()
                 .map(categoryMapper::toCategoryResponse)
                 .toList();
     }
 
-    public List<CategoryResponse> findAllByParentId(Integer parentId) {
-        List<Category> categories = categoryRepository.findAllByParentId(parentId);
+    public List<CategoryResponse> findAllByKeyword(String sortBy, String sortDirection, String keyword) {
+        Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+
+        List<Category> categories = categoryRepository.findAllByKeyword(sort, keyword);
 
         return categories.stream()
                 .map(categoryMapper::toCategoryResponse)
@@ -79,9 +79,18 @@ public class CategoryService {
     public CategoryResponse update(CategoryRequest categoryRequest, Integer categoryId) {
         Category existingCategory = categoryRepository.findById(categoryId)
                 .orElseThrow(() ->new ResourceNotFoundException("No category found with ID: " + categoryId));
+        Category parentCategory = categoryRepository.findParentById(categoryRequest.getParentId()).orElseThrow(
+                () -> new ResourceNotFoundException("No parent category found with ID: " + categoryRequest.getParentId()));
 
-        // Only allow updates to category name
+        if (existingCategory.getParentCategory() == null)
+            throw new APIException("Modification of parent categories is not allowed");
+
+        if (!existingCategory.getName().equals(categoryRequest.getName()) &&
+                categoryRepository.findByName(categoryRequest.getName()).isPresent())
+            throw new ResourceAlreadyExistsException("A category with the name: '" + categoryRequest.getName() + "' already exists");
+
         existingCategory.setName(categoryRequest.getName());
+        existingCategory.setParentCategory(parentCategory);
 
         Category updatedCategory = categoryRepository.save(existingCategory);
         return categoryMapper.toCategoryResponse(updatedCategory);
@@ -89,9 +98,14 @@ public class CategoryService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public void delete(Integer categoryId) {
-        // TODO: check constraint when another category refers to this
+        Category existingCategory = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("No category found with ID: " + categoryId));
+
+        if (existingCategory.getParentCategory() == null)
+            throw new APIException("Deletion of parent categories is not allowed");
+
         if (productRepository.existsByCategoryId(categoryId))
-            throw new ForeignKeyConstraintException("Cannot delete category due to existing products that reference it");
+            throw new ForeignKeyConstraintException("Cannot delete category because existing products reference it");
 
         categoryRepository.deleteById(categoryId);
     }

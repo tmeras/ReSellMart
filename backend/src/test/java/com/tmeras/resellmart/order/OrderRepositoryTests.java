@@ -26,7 +26,10 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -139,5 +142,22 @@ public class OrderRepositoryTests {
 
         assertThat(page.getContent().size()).isEqualTo(1);
         assertThat(page.getContent().get(0).getId()).isEqualTo(orderB1.getId());
+    }
+
+    @Test
+    public void shouldCalculateOrderStatistics() {
+        Integer expectedProductSales = Stream.of(orderA1, orderB1)
+                .flatMap(order -> order.getOrderItems().stream())
+                .map(OrderItem::getProductQuantity)
+                .reduce(0, Integer::sum);
+        BigDecimal expectedRevenue = orderA1.calculateTotalPrice().add(orderB1.calculateTotalPrice());
+        ZonedDateTime to = ZonedDateTime.now();
+        ZonedDateTime from = to.minusMonths(1);
+
+        OrderStatsResponse statistics = orderRepository.calculateStatistics(from, to);
+
+        assertThat(statistics.getMonthlyOrderCount()).isEqualTo(2);
+        assertThat(statistics.getMonthlyProductSales()).isEqualTo(expectedProductSales);
+        assertThat(statistics.getMonthlyRevenue()).isEqualTo(expectedRevenue);
     }
 }

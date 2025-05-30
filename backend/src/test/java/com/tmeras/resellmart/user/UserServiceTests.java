@@ -15,6 +15,7 @@ import com.tmeras.resellmart.product.Product;
 import com.tmeras.resellmart.product.ProductRepository;
 import com.tmeras.resellmart.product.ProductResponse;
 import com.tmeras.resellmart.role.Role;
+import com.tmeras.resellmart.role.RoleRepository;
 import com.tmeras.resellmart.security.MfaService;
 import com.tmeras.resellmart.token.Token;
 import com.tmeras.resellmart.token.TokenRepository;
@@ -38,6 +39,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -66,6 +68,9 @@ public class UserServiceTests {
 
     @Mock
     private WishListItemRepository wishListItemRepository;
+
+    @Mock
+    private RoleRepository roleRepository;
 
     @Mock
     private UserMapper userMapper;
@@ -101,8 +106,8 @@ public class UserServiceTests {
         // Initialise test objects
         Role adminRole = new Role(1, "ADMIN");
         Role userRole = new Role(2, "USER");
-        userA = TestDataUtils.createUserA(Set.of(adminRole));
-        userB = TestDataUtils.createUserB(Set.of(userRole));
+        userA = TestDataUtils.createUserA(new HashSet<>(List.of(adminRole)));
+        userB = TestDataUtils.createUserB(new HashSet<>(List.of(userRole)));
         userRequestA = TestDataUtils.createUserRequestA();
         userResponseA = TestDataUtils.createUserResponseA(Set.of(adminRole));
         userResponseB = TestDataUtils.createUserResponseB(Set.of(userRole));
@@ -143,6 +148,8 @@ public class UserServiceTests {
         Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
                 Sort.by(AppConstants.SORT_USERS_BY).ascending() : Sort.by(AppConstants.SORT_USERS_BY).descending();
         Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
+        userA.setIsEnabled(true);
+        userB.setIsEnabled(false);
         Page<User> page = new PageImpl<>(List.of(userA, userB));
 
         when(userRepository.findAll(pageable)).thenReturn(page);
@@ -153,6 +160,32 @@ public class UserServiceTests {
                 userService.findAll(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                         AppConstants.SORT_USERS_BY, AppConstants.SORT_DIR);
 
+        userResponseA.setIsEnabled(true);
+        userResponseB.setIsEnabled(false);
+        assertThat(pageResponse.getContent().size()).isEqualTo(2);
+        assertThat(pageResponse.getContent().get(0)).isEqualTo(userResponseA);
+        assertThat(pageResponse.getContent().get(1)).isEqualTo(userResponseB);
+    }
+
+    @Test
+    public void shouldFindAllUsersByKeyword() {
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_USERS_BY).ascending() : Sort.by(AppConstants.SORT_USERS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
+        userA.setIsEnabled(true);
+        userB.setIsEnabled(false);
+        Page<User> page = new PageImpl<>(List.of(userA, userB));
+
+        when(userRepository.findAllByKeyword(pageable, "test product")).thenReturn(page);
+        when(userMapper.toUserResponse(userA)).thenReturn(userResponseA);
+        when(userMapper.toUserResponse(userB)).thenReturn(userResponseB);
+
+        PageResponse<UserResponse> pageResponse =
+                userService.findAllByKeyword(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_USERS_BY, AppConstants.SORT_DIR, "test product");
+
+        userResponseA.setIsEnabled(true);
+        userResponseB.setIsEnabled(false);
         assertThat(pageResponse.getContent().size()).isEqualTo(2);
         assertThat(pageResponse.getContent().get(0)).isEqualTo(userResponseA);
         assertThat(pageResponse.getContent().get(1)).isEqualTo(userResponseB);
@@ -543,27 +576,26 @@ public class UserServiceTests {
     @Test
     public void shouldDisableUserWhenValidRequest() {
         Token testToken = new Token(1, "token", TokenType.BEARER, LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(1), null, false, userA);
-        // Downgrade admin user
-        userA.setRoles(Set.of(new Role(1, "USER")));
+                LocalDateTime.now().plusMinutes(1), null, false, userB);
 
-        when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
-        when(tokenRepository.findAllValidRefreshTokensByUserEmail(userA.getEmail())).thenReturn(List.of(testToken));
-        when(productRepository.findAllBySellerId(userA.getId())).thenReturn(List.of(productA));
+        when(userRepository.findById(userB.getId())).thenReturn(Optional.of(userB));
+        when(tokenRepository.findAllValidRefreshTokensByUserEmail(userB.getEmail())).thenReturn(List.of(testToken));
+        when(productRepository.findAllBySellerId(userB.getId())).thenReturn(List.of(productB));
 
-        userService.disable(userA.getId(), authentication);
+        userService.disable(userB.getId(), authentication);
 
-        assertThat(userA.isEnabled()).isFalse();
+        assertThat(userB.isEnabled()).isFalse();
         assertThat(testToken.getIsRevoked()).isTrue();
-        assertThat(productA.getIsDeleted()).isFalse();
+        assertThat(productB.getIsDeleted()).isTrue();
     }
 
     @Test
     public void shouldNotDisableUserWhenUserOrAdminIsNotLoggedIn() {
-        // Downgrade admin user
-        userA.setRoles(Set.of(new Role(1, "USER")));
+        authentication = new UsernamePasswordAuthenticationToken(
+                userB, userB.getPassword(), userB.getAuthorities()
+        );
 
-        assertThatThrownBy(() -> userService.disable(userB.getId(), authentication))
+        assertThatThrownBy(() -> userService.disable(userA.getId(), authentication))
                 .isInstanceOf(OperationNotPermittedException.class)
                 .hasMessage("You do not have permission to disable this user");
     }
@@ -578,23 +610,14 @@ public class UserServiceTests {
     }
 
     @Test
-    public void shouldNotDisableAdminUser() {
-        when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
-
-        assertThatThrownBy(() -> userService.disable(userA.getId(), authentication))
-                .isInstanceOf(APIException.class)
-                .hasMessage("You cannot disable an admin user");
-    }
-
-    @Test
     public void shouldEnableUserWhenValidRequest() {
-        userA.setIsEnabled(false);
+        userB.setIsEnabled(false);
 
-        when(userRepository.findById(userA.getId())).thenReturn(Optional.of(userA));
+        when(userRepository.findById(userB.getId())).thenReturn(Optional.of(userB));
 
-        userService.enable(userA.getId());
+        userService.enable(userB.getId());
 
-        assertThat(userA.isEnabled()).isTrue();
+        assertThat(userB.isEnabled()).isTrue();
     }
 
     @Test
@@ -602,6 +625,25 @@ public class UserServiceTests {
         when(userRepository.findById(99)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.enable(99))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No user found with ID: 99");
+    }
+
+    @Test
+    public void shouldPromoteUserToAdminWhenValidRequest() {
+        when(userRepository.findById(userB.getId())).thenReturn(Optional.of(userB));
+        when(roleRepository.findByName("ADMIN")).thenReturn(Optional.of(new Role(1, "ADMIN")));
+
+        userService.promoteToAdmin(userB.getId());
+
+        assertThat(userB.getRoles().stream().anyMatch(role -> role.getName().equals("ADMIN"))).isTrue();
+    }
+
+    @Test
+    public void shouldNotPromoteUserToAdminWhenInvalidUserId() {
+        when(userRepository.findById(99)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.promoteToAdmin(99))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("No user found with ID: 99");
     }
