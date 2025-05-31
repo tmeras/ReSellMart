@@ -9,14 +9,15 @@ VALUES (1, 'Electronics', NULL),
        (8, 'Clothing', NULL),
        (9, 'Men\'s Fashion', 8),
        (10, 'Women\'s Fashion', 8),
-       (11, 'Home & Kitchen', NULL),
+       (11, 'Home', NULL),
        (12, 'Entertainment', NULL),
        (13, 'TV & Movies', 12),
        (14, 'Books', 12),
        (15, 'Videogames', 12),
-       (16, 'Cameras', 1);
-
--- TODO: More categories and products + change password for first three users
+       (16, 'Cameras', 1),
+       (17, 'Furniture', 11),
+       (18, 'Kitchen', 11),
+       (19, 'Computer Accessories', 1);
 
 INSERT IGNORE INTO role(id, name)
 VALUES (1, 'ADMIN'),
@@ -24,14 +25,14 @@ VALUES (1, 'ADMIN'),
 
 INSERT IGNORE INTO user(id, name, email, password, home_country, image_path, is_enabled, is_mfa_enabled, secret,
                         registered_at)
-VALUES (1, 'Theodore Meras', 'tmeras@yahoo.gr', '$2a$10$h2UMOIQGcBEjM0Dc3if4BuRBLzKKhnGy8i.vesnGwphl0BmTI/yMi',
+VALUES (1, 'Theodore Meras', 'tmeras@yahoo.gr', '$2a$10$uu9TwmhE0hMAPAmTNFsPjes8lUuw1RCC5iZPuPlk7aU.xWAYmJyDy',
         'Greece', './uploads/flyway-user-images/user_image.png', true, false, null, CURDATE()),
-       (2, 'Edmund Smith', 'admin@yahoo.gr', '$2a$10$h2UMOIQGcBEjM0Dc3if4BuRBLzKKhnGy8i.vesnGwphl0BmTI/yMi',
+       (2, 'Edmund Smith', 'admin@yahoo.gr', '$2a$10$uu9TwmhE0hMAPAmTNFsPjes8lUuw1RCC5iZPuPlk7aU.xWAYmJyDy',
         'United Kingdom', './uploads/flyway-user-images/admin_image.png', true, false, null, CURDATE()),
-       (3, 'Mary Cole', 'mary@gmail.com', '$2a$10$h2UMOIQGcBEjM0Dc3if4BuRBLzKKhnGy8i.vesnGwphl0BmTI/yMi',
+       (3, 'Mary Cole', 'mary@gmail.com', '$2a$10$uu9TwmhE0hMAPAmTNFsPjes8lUuw1RCC5iZPuPlk7aU.xWAYmJyDy',
         'United Kingdom', './uploads/flyway-user-images/user_image_2.png', true, false, null, CURDATE()),
         (4, 'John Doe', 'john@gmail.com', '$2a$10$uu9TwmhE0hMAPAmTNFsPjes8lUuw1RCC5iZPuPlk7aU.xWAYmJyDy',
-        'Greece', null, true, false, null, CURDATE());
+        'United Kingdom', null, true, false, null, CURDATE());
 
 INSERT IGNORE INTO user_role(user_id, role_id)
 VALUES (1, 2),
@@ -46,8 +47,8 @@ VALUES (1, 'Greece', 'Ermou Street', 'Attica', 'Athens', '10563',
         true, 'WORK', 2, 'Edmund Smith', '+441234567890'),
        (3, 'United Kingdom', 'Oxford Road', 'Greater Manchester', 'Manchester', 'M13 9PL',
         true, 'HOME', 3, 'Mary Cole', '+441612345678'),
-        (4, 'Greece', 'Ermou Street', 'Attica', 'Athens', '10563',
-        true, 'HOME', 4, 'John Doe', '+302101234567');
+        (4, 'United Kingdom', '221B Baker Street', 'Greater London', 'London', 'NW1 6XE',
+        true, 'HOME', 4, 'John Doe', '+447911123456');
 
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id, listed_at)
@@ -76,7 +77,7 @@ VALUES
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id, listed_at)
 VALUES (4, 'Sony WH-1000XM4', 'Top-rated noise-canceling headphones, like new condition.', 350, NULL,
-        'LIKE_NEW', 10, false, 1, 1, UTC_TIMESTAMP());
+        'LIKE_NEW', 10, false, 19, 1, UTC_TIMESTAMP());
 INSERT IGNORE INTO product_image(id, image_path, name, type, product_id)
 VALUES
 (6, './uploads/flyway-product-images/xm4_1.png', 'xm4_1.png', 'image/png', 4),
@@ -105,7 +106,7 @@ VALUES
 INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
                            available_quantity, is_deleted, category_id, seller_id, listed_at)
 VALUES (7, 'Bose QuietComfort', 'Amazing noise-canceling headphones in mint condition. Comes with carrying pouch.', 300,
-        NULL, 'LIKE_NEW', 1, false, 1, 2, UTC_TIMESTAMP());
+        NULL, 'LIKE_NEW', 1, false, 19, 2, UTC_TIMESTAMP());
 INSERT IGNORE INTO product_image(id, image_path, name, type, product_id)
 VALUES
 (13, './uploads/flyway-product-images/bose_1.png', 'bose_1.png', 'image/png', 7),
@@ -198,9 +199,104 @@ VALUES
 (32, './uploads/flyway-product-images/witcher3_1.jpeg', 'witcher3_1.jpeg', 'image/jpeg', 17),
 (33, './uploads/flyway-product-images/witcher3_2.jpeg', 'witcher3_2.jpeg', 'image/jpeg', 17);
 
+INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
+                           available_quantity, is_deleted, category_id, seller_id, listed_at)
+VALUES (18, 'Logitech M220 Wireless Mouse',
+        'Silent, compact wireless mouse with long battery life and smooth tracking.', 100, NULL,
+        'NEW', 8, false, 19, 4, UTC_TIMESTAMP());
+INSERT IGNORE INTO product_image(id, image_path, name, type, product_id)
+VALUES
+(34, './uploads/flyway-product-images/m220_1.png', 'm220_1.png', 'image/png', 18);
+
+INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
+                           available_quantity, is_deleted, category_id, seller_id, listed_at)
+VALUES (19, 'White Double Wardrobe',
+        'Spacious double wardrobe with clean white finish and ample storage.', 250, 300,
+        'LIKE_NEW', 1, false, 17, 4, UTC_TIMESTAMP());
+INSERT IGNORE INTO product_image(id, image_path, name, type, product_id)
+VALUES
+(35, './uploads/flyway-product-images/wardrobe_1.png', 'wardrobe_1.png', 'image/png', 19),
+(36, './uploads/flyway-product-images/wardrobe_2.png', 'wardrobe_2.png', 'image/png', 19);
+
+INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
+                           available_quantity, is_deleted, category_id, seller_id, listed_at)
+VALUES (20, 'Kitchen Table',
+        'Simple and sturdy kitchen table, seats four comfortably.', 30, NULL,
+        'FAIR', 3, false, 18, 4, UTC_TIMESTAMP());
+INSERT IGNORE INTO product_image(id, image_path, name, type, product_id)
+VALUES
+(37, './uploads/flyway-product-images/table_1.png', 'table_1.png', 'image/png', 20);
+
+INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
+                           available_quantity, is_deleted, category_id, seller_id, listed_at)
+VALUES (21, 'Stainless Steel Knife Set',
+        'Durable and sharp stainless steel knives for everyday kitchen use.', 150, NULL,
+        'NEW', 8, false, 18, 4, UTC_TIMESTAMP());
+INSERT IGNORE INTO product_image(id, image_path, name, type, product_id)
+VALUES
+(38, './uploads/flyway-product-images/knife_1.png', 'table_1.png', 'image/png', 21),
+(39, './uploads/flyway-product-images/knife_2.png', 'table_2.png', 'image/png', 21);
+
+INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
+                           available_quantity, is_deleted, category_id, seller_id, listed_at)
+VALUES (22, 'Tesla Minibar',
+        'Compact and energy-efficient minibar, ideal for bedrooms or small offices.', 500, NULL,
+        'NEW', 3, false, 18, 4, UTC_TIMESTAMP());
+INSERT IGNORE INTO product_image(id, image_path, name, type, product_id)
+VALUES
+(40, './uploads/flyway-product-images/tesla_minibar_1.png', 'tesla_minibar_1.png', 'image/png', 22);
+
+INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
+                           available_quantity, is_deleted, category_id, seller_id, listed_at)
+VALUES (23, 'Epson L6270 All-in-One Printer',
+        'Compact inkjet printer with wireless, print, scan, and copy capabilities.', 300, 600,
+        'FAIR', 2, false, 7, 4, UTC_TIMESTAMP());
+INSERT IGNORE INTO product_image(id, image_path, name, type, product_id)
+VALUES
+(41, './uploads/flyway-product-images/epson_l6270_1.png', 'epson_l6270_1.png', 'image/png', 23),
+(42, './uploads/flyway-product-images/epson_l6270_2.png', 'epson_l6270_2.png', 'image/png', 23),
+(43, './uploads/flyway-product-images/epson_l6270_3.png', 'epson_l6270_3.png', 'image/png', 23);
+
+INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
+                           available_quantity, is_deleted, category_id, seller_id, listed_at)
+VALUES (24, 'HP Officejet Pro 9730e AiO A3 Colour All In One Inkjet Printer',
+        'High-performance all-in-one printer with A3 color printing, scanning, and copying.', 500, NULL,
+        'LIKE_NEW', 5, false, 7, 3, UTC_TIMESTAMP());
+INSERT IGNORE INTO product_image(id, image_path, name, type, product_id)
+VALUES
+(44, './uploads/flyway-product-images/officejet_1.png', 'officejet_1.png', 'image/png', 24);
+
+INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
+                           available_quantity, is_deleted, category_id, seller_id, listed_at)
+VALUES (25, 'Brown Straw Hat',
+        'Lightweight and breathable straw hat ideal for sunny days and outdoor events.', 15, NULL,
+        'NEW', 15, false, 10, 3, UTC_TIMESTAMP());
+INSERT IGNORE INTO product_image(id, image_path, name, type, product_id)
+VALUES
+(45, './uploads/flyway-product-images/hat_1.png', 'hat_1.png', 'image/png', 25);
+
+INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
+                           available_quantity, is_deleted, category_id, seller_id, listed_at)
+VALUES (26, 'Tamaris Leather Black Heels with Strap',
+        'Elegant black leather heels with ankle strap, perfect for formal occasions.', 70, NULL,
+        'NEW', 10, false, 10, 3, UTC_TIMESTAMP());
+INSERT IGNORE INTO product_image(id, image_path, name, type, product_id)
+VALUES
+(46, './uploads/flyway-product-images/heels_1.png', 'heels_1.png', 'image/png', 26),
+(47, './uploads/flyway-product-images/heels_2.png', 'heels_2.png', 'image/png', 26);
+
+INSERT IGNORE INTO product(id, name, description, price, previous_price, product_condition,
+                           available_quantity, is_deleted, category_id, seller_id, listed_at)
+VALUES (27, 'Vengeance Tornado-X8 Gaming Desktop PC (Ryzen 7-5700/32GB DDR4/1TB SSD/Radeon RX 6400/No OS)',
+        'High-performance gaming PC with Ryzen 7 processor, 32GB RAM, 1TB SSD, and Radeon RX 6400 graphics—ideal for smooth 1080p gaming and multitasking. No operating system included.',
+         700, NULL, 'LIKE_NEW', 4, false, 3, 2, UTC_TIMESTAMP());
+INSERT IGNORE INTO product_image(id, image_path, name, type, product_id)
+VALUES
+(48, './uploads/flyway-product-images/pc.png', 'pc.png', 'image/png', 27);
+
 INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address,
                                  delivery_address, buyer_id, status, stripe_checkout_id)
-VALUES (1, NOW(), 'card', "Mary Cole, Oxford Road, Greater Manchester, Manchester, M13 9PL, United Kingdom, +441612345678",
+VALUES (1, UTC_TIMESTAMP(), 'card', "Mary Cole, Oxford Road, Greater Manchester, Manchester, M13 9PL, United Kingdom, +441612345678",
         "Mary Cole, Oxford Road, Greater Manchester, Manchester, M13 9PL, United Kingdom, +441612345678", 3, "PAID", NULL);
 INSERT IGNORE INTO order_item(id, product_id, product_quantity, order_id, status, product_name, product_price,
                              product_condition, product_image_path, product_seller_id)
@@ -209,7 +305,7 @@ VALUES (1, 8, 2, 1, 'SHIPPED', 'Nike T-shirt', 25, 'NEW', './uploads/flyway-orde
 
 INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address,
                                  delivery_address, buyer_id, status, stripe_checkout_id)
-VALUES (2, NOW(), 'card', "Theodore Meras, Ermou Street, Attica, Athens, 10563, Greece, +302101234567",
+VALUES (2, UTC_TIMESTAMP(), 'card', "Theodore Meras, Ermou Street, Attica, Athens, 10563, Greece, +302101234567",
         "Theodore Meras, Ermou Street, Attica, Athens, 10563, Greece, +302101234567", 1, "PAID", NULL);
 INSERT IGNORE INTO order_item(id, product_id, product_quantity, order_id, status, product_name, product_price,
                              product_condition, product_image_path, product_seller_id)
@@ -217,7 +313,7 @@ VALUES (3, 11, 1, 2, 'PENDING_SHIPMENT', 'Canon EOS 5D Mark IV', 1000, 'LIKE_NEW
 
 INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address,
                                  delivery_address, buyer_id, status, stripe_checkout_id)
-VALUES (3, NOW(), 'card', "Theodore Meras, Ermou Street, Attica, Athens, 10563, Greece, +302101234567",
+VALUES (3, UTC_TIMESTAMP(), 'card', "Theodore Meras, Ermou Street, Attica, Athens, 10563, Greece, +302101234567",
         "Theodore Meras, Ermou Street, Attica, Athens, 10563, Greece, +302101234567", 1, "PAID", NULL);
 INSERT IGNORE INTO order_item(id, product_id, product_quantity, order_id, status, product_name, product_price,
                              product_condition, product_image_path, product_seller_id)
@@ -226,7 +322,7 @@ VALUES (4, 12, 1, 3, 'DELIVERED', 'Nintendo Switch OLED', 35, 'NEW', './uploads/
 
 INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address,
                                  delivery_address, buyer_id, status, stripe_checkout_id)
-VALUES (4, NOW(), 'card', "Edmund Smith, Mappin Street, South Yorkshire, Sheffield, S1 4DT, United Kingdom, +441234567890",
+VALUES (4, UTC_TIMESTAMP(), 'card', "Edmund Smith, Mappin Street, South Yorkshire, Sheffield, S1 4DT, United Kingdom, +441234567890",
         "Edmund Smith, Mappin Street, South Yorkshire, Sheffield, S1 4DT, United Kingdom, +441234567890", 2, "PAID", NULL);
 INSERT IGNORE INTO order_item(id, product_id, product_quantity, order_id, status, product_name, product_price,
                              product_condition, product_image_path, product_seller_id)
@@ -235,9 +331,27 @@ VALUES (6, 15, 1, 4, 'SHIPPED', 'Assassin\'s Creed Valhalla PS4', 60, 'NEW', './
 
 INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address,
                                  delivery_address, buyer_id, status, stripe_checkout_id)
-VALUES (5, NOW(), 'card', "Mary Cole, Oxford Road, Greater Manchester, Manchester, M13 9PL, United Kingdom, +441612345678",
+VALUES (5, UTC_TIMESTAMP(), 'card', "Mary Cole, Oxford Road, Greater Manchester, Manchester, M13 9PL, United Kingdom, +441612345678",
         "Mary Cole, Oxford Road, Greater Manchester, Manchester, M13 9PL, United Kingdom, +441612345678", 3, "PAID", NULL);
 INSERT IGNORE INTO order_item(id, product_id, product_quantity, order_id, status, product_name, product_price,
                              product_condition, product_image_path, product_seller_id)
 VALUES (8, 4, 2, 5, 'SHIPPED', 'Sony WH-1000XM4', 350, 'LIKE_NEW', './uploads/flyway-order-item-images/xm4_1.png', 1),
        (9, 3, 1, 5, 'PENDING_SHIPMENT', 'Samsung Galaxy S22', 750, 'NEW', './uploads/flyway-order-item-images/s22_1.png', 1);
+
+INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address,
+                                 delivery_address, buyer_id, status, stripe_checkout_id)
+VALUES (6, UTC_TIMESTAMP(), 'card', "John Doe, 221B Baker Street, Greater London, London, NW1 6XE, United Kingdom, +447911123456",
+        "John Doe, 221B Baker Street, Greater London, London, NW1 6XE, United Kingdom, +447911123456", 4, "PAID", NULL);
+INSERT IGNORE INTO order_item(id, product_id, product_quantity, order_id, status, product_name, product_price,
+                             product_condition, product_image_path, product_seller_id)
+VALUES (10, 24, 2, 6, 'DELIVERED', 'HP Officejet Pro 9730e AiO A3 Colour All In One Inkjet Printer', 500, 'LIKE_NEW', './uploads/flyway-order-item-images/officejet_1.png', 3),
+       (11, 11, 1, 6, 'SHIPPED', 'Canon EOS 5D Mark IV', 1000, 'LIKE_NEW', './uploads/flyway-order-item-images/canon_1.png', 2);
+
+INSERT IGNORE INTO customer_order(id, placed_at, payment_method, billing_address,
+                                 delivery_address, buyer_id, status, stripe_checkout_id)
+VALUES (7, UTC_TIMESTAMP(), 'card', "John Doe, 221B Baker Street, Greater London, London, NW1 6XE, United Kingdom, +447911123456",
+        "John Doe, 221B Baker Street, Greater London, London, NW1 6XE, United Kingdom, +447911123456", 4, "PAID", NULL);
+INSERT IGNORE INTO order_item(id, product_id, product_quantity, order_id, status, product_name, product_price,
+                             product_condition, product_image_path, product_seller_id)
+VALUES (12, 25, 4, 7, 'PENDING_SHIPMENT', 'Brown Straw Hat', 15, 'NEW', './uploads/flyway-order-item-images/hat_1.png', 3),
+       (13, 26, 2, 7, 'SHIPPED', 'Tamaris Leather Black Heels with Strap', 70, 'NEW', './uploads/flyway-order-item-images/heels_1.png', 3);

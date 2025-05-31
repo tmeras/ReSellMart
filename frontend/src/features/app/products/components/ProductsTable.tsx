@@ -67,7 +67,7 @@ export function ProductsTable() {
                             bg={ colorScheme === "dark" ? "dark.4" : "gray.2" }
                         />
 
-                        <Text>
+                        <Text maw={250}>
                             { product.name }
                         </Text>
                     </Flex>

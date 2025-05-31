@@ -8,7 +8,7 @@ import { NavLink as RouterNavLink } from "react-router";
 const categoryIconMap = new Map([
     ["Electronics", <IconCpu2 size={ 18 }/>],
     ["Clothing", <IconShirt size={ 18 }/>],
-    ["Home & Kitchen", <IconHome size={ 18 }/>],
+    ["Home", <IconHome size={ 18 }/>],
     ["Entertainment", <IconBrandAppleArcade size={ 18 }/>]
 ]);
 

@@ -38,10 +38,10 @@ public final class AppConstants {
     public static final String SHIPPING_CONFIRMATION_TEMPLATE = "shipping_confirmation";
 
     // Number of entities manually created using flyway
-    // used to prevent deletion of related images       TODO: Update when more data is added
-    public static final Integer FLYWAY_PRODUCTS_NUMBER = 17;
+    // used to prevent deletion of related images
+    public static final Integer FLYWAY_PRODUCTS_NUMBER = 27;
     public static final Integer FLYWAY_USERS_NUMBER = 4;
-    public static final Integer FLYWAY_ORDERS_NUMBER = 5;
-    public static final Integer FLYWAY_CATEGORIES_NUMBER = 16;
+    public static final Integer FLYWAY_ORDERS_NUMBER = 7;
+    public static final Integer FLYWAY_CATEGORIES_NUMBER = 19;
 
 }
