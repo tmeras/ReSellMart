@@ -32,7 +32,7 @@ services:
     networks:
       - resellmart_network
     depends_on:
-      - db
+      - mysql-resellmart
 
 volumes:
   db_data:
