@@ -109,7 +109,6 @@ jobs:
             export EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
             export JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
             export STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
-            printenv
             cd ci-cd
             sudo docker-compose -f docker-compose.yml pull -q
             sudo docker-compose -f docker-compose.yml up -d
