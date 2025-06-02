@@ -106,10 +106,12 @@ jobs:
       - name: Set environment variables and deploy
         run: |
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{secrets.EC2_IP}} << EOF
-            export EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
-            export JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
-            export STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
             cd ci-cd
+            cat > .env << EOL
+            EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
+            JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+            STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+            EOL
             sudo docker-compose -f docker-compose.yml pull -q
             sudo docker-compose -f docker-compose.yml up -d
           EOF
