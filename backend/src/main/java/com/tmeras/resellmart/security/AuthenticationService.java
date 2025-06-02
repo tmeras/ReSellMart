@@ -243,7 +243,7 @@ public class AuthenticationService {
         ResponseCookie refreshCookie = ResponseCookie
                 .from("refresh-token", refreshToken)
                 .httpOnly(true)
-                .secure(false) //TODO: Use secure in prod?
+                .secure(false)
                 .path("/")
                 .maxAge(refreshExpirationTime / 1000)
                 .build();

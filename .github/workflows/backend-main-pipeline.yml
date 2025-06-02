@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - devops_pipeline
     paths:
       - backend/**
       - .github/workflows/backend-main-pipeline.yml
@@ -13,8 +14,27 @@ on:
     paths:
       - backend/**
       - .github/workflows/backend-main-pipeline.yml
+  workflow-dispatch:
 
 jobs:
+  compile:
+    runs-on: ubuntu-latest
+    name: Compile project
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+      
+      - name: Compile project
+        run: |
+          cd backend
+          ./mvnw clean compile
+
   test:
     runs-on: ubuntu-latest
     name: Run unit and integration tests
@@ -22,9 +42,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run docker compose file
+      - name: Run mock SMTP server
         run: |
-          docker compose -f backend/docker-compose.yml up -d
+          docker compose -f backend/docker-compose.yml up -d mail-dev
           docker ps
 
       - name: Setup JDK
@@ -35,7 +55,65 @@ jobs:
 
       - name: Run unit and integration tests
         env:
-          STRIPE_SECRET_KEY: ${{secrets.STRIPE_SECRET_KEY}}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
         run: |
           cd backend
           ./mvnw clean verify
+    
+  build-project:
+    runs-on: ubuntu-latest
+    name: Build project
+    needs: [compile, test]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+      
+      - name: Build project
+        run: |
+          cd backend
+          ./mvnw clean package -DskipTests
+
+  build-image:
+    runs-on: ubuntu-latest
+    name: Build Docker image
+    needs: [build-project]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+      
+      - name: Extract project version
+        id: extract_version
+        run: |
+          cd backend
+          echo "VERSION=$(./mvnw -q -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive exec:exec)" >> $GITHUB_OUTPUT
+      
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: tmeras
+          password: ${{ secrets.DOCKERHUB_API_KEY }}
+
+      - name: Build image and push to DockerHub
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          file: Dockerfile
+          push: true
+          platforms: linux/amd64
+          tags: tmeras/resellmart-api:${{ steps.extract_version.outputs.VERSION }},tmeras/resellmart-api:latest
+          build-args: |
+            PROFILE=prod
+            APP_VERSION=${{ steps.extract_version.outputs.VERSION }}
+

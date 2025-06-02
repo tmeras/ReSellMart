@@ -20,6 +20,19 @@ services:
     ports:
       - "1080:1080"
       - "1025:1025"
+  resellmart-api:
+    container_name: resellmart_api
+    image: tmeras/resellmart-api:latest
+    environment:
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+    ports:
+      - "8080:8080"
+    networks:
+      - resellmart_network
+    depends_on:
+      - db
 
 volumes:
   db_data:

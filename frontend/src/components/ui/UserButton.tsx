@@ -10,7 +10,7 @@ type UserButtonProps = ComponentPropsWithoutRef<"button"> & {
 
 export const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
     ({ name, email, image, ...others }: UserButtonProps, ref) => (
-        <UnstyledButton ref={ ref } w="fit-content" { ...others }>
+        <UnstyledButton ref={ ref } { ...others }>
             <Flex gap="xs" align="center">
                 <Avatar
                     src={ image ? image : null }
@@ -23,12 +23,12 @@ export const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
                         { name }
                     </Text>
 
-                    <Text size="xs" c="dimmed">
+                    <Text size="xs" c="dimmed" truncate="end" w={135} >
                         { email }
                     </Text>
                 </Flex>
 
-                <IconChevronRight size={ 16 } style={ { marginLeft: "15px" } }/>
+                <IconChevronRight size={ 16 } style={ { marginLeft: "5px" } }/>
             </Flex>
         </UnstyledButton>
     )
