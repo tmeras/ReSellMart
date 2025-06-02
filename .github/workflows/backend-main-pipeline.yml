@@ -14,7 +14,7 @@ on:
     paths:
       - backend/**
       - .github/workflows/backend-main-pipeline.yml
-  workflow-dispatch:
+  workflow_dispatch:
 
 jobs:
   compile:
