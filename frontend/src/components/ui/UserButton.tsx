@@ -23,12 +23,12 @@ export const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
                         { name }
                     </Text>
 
-                    <Text size="xs" c="dimmed" truncate="end" w={135} >
+                    <Text size="xs" c="dimmed" truncate="end" maw={135} >
                         { email }
                     </Text>
                 </Flex>
 
-                <IconChevronRight size={ 16 } style={ { marginLeft: "5px" } }/>
+                <IconChevronRight size={ 16 } style={ { marginLeft: "2px" } }/>
             </Flex>
         </UnstyledButton>
     )

@@ -17,24 +17,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  compile:
-    runs-on: ubuntu-latest
-    name: Compile project
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'corretto'
-      
-      - name: Compile project
-        run: |
-          cd backend
-          ./mvnw clean compile
-
   # test:
   #   runs-on: ubuntu-latest
   #   name: Run unit and integration tests
@@ -59,15 +41,15 @@ jobs:
   #       run: |
   #         cd backend
   #         ./mvnw clean verify
-    
-  build-project:
+
+  build-image:
     runs-on: ubuntu-latest
-    name: Build project
-    needs: [compile] #[compile, test]
+    name: Build Docker image
+    #needs: [test]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
@@ -78,20 +60,6 @@ jobs:
         run: |
           cd backend
           ./mvnw clean package -DskipTests
-
-  build-image:
-    runs-on: ubuntu-latest
-    name: Build Docker image
-    needs: [build-project]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'corretto'
       
       - name: Extract project version
         id: extract_version
@@ -114,6 +82,34 @@ jobs:
           platforms: linux/amd64
           tags: tmeras/resellmart-api:${{ steps.extract_version.outputs.VERSION }},tmeras/resellmart-api:latest
           build-args: |
-            PROFILE=prod
             APP_VERSION=${{ steps.extract_version.outputs.VERSION }}
 
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to EC2 instance
+    needs: [build-image]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
+          chmod 400 ec2_key.pem
+
+      - name: Create deployment folder
+        run: ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{secrets.EC2_IP}} "mkdir -p ci-cd"
+
+      - name: Copy docker compose file
+        run: scp -o StrictHostKeyChecking=no -i ec2_key.pem backend/docker-compose.yml ec2-user@${{secrets.EC2_IP}}:ci-cd/docker-compose.yml
+      
+      - name: Set environment variables and deploy
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{secrets.EC2_IP}} << 'EOF'
+            export EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
+            export JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+            export STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+            cd ci-cd
+            docker compose -f docker-compose.yml pull -q
+            docker compose -f docker-compose.yml up -d
+          EOF

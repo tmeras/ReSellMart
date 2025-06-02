@@ -156,7 +156,7 @@ export function AppLayout() {
                 </AppShell.Section>
 
                 <AppShell.Section>
-                    <Flex justify="space-between" align="center" w={250}>
+                    <Flex justify="space-between" align="center" maw={250}>
                         <UserMenu closeNavBar={ () => setNavBarOpened(false) }/>
 
                         <DarkModeButton/>
