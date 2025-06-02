@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://mysql_resellmart:3306/resellmart_db
+    url: "jdbc:mysql://mysql-resellmart:3306/resellmart_db?allowPublicKeyRetrieval=true&useSSL=false"
     username: user
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver

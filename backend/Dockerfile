@@ -25,6 +25,6 @@ EXPOSE 8080
 
 ENV ACTIVE_PROFILE=${PROFILE}
 ENV JAR_VERSION=${APP_VERSION}
-ENV DB_URL=jdbc:mysql://mysql-resellmart:3306/resellmart_db
+ENV DB_URL="jdbc:mysql://mysql-resellmart:3306/resellmart_db?allowPublicKeyRetrieval=true&useSSL=false"
 
 CMD java -jar -Dspring.profiles.active=${ACTIVE_PROFILE} -Dspring.datasource.url=${DB_URL} resellmart-${JAR_VERSION}.jar
