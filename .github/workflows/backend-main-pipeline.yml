@@ -110,6 +110,6 @@ jobs:
             export JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
             export STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
             cd ci-cd
-            docker compose -f docker-compose.yml pull -q
-            docker compose -f docker-compose.yml up -d
+            docker-compose -f docker-compose.yml pull -q
+            docker-compose -f docker-compose.yml up -d
           EOF
