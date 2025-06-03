@@ -37,6 +37,8 @@ services:
       - FRONTEND_URL=${FRONTEND_URL}
     ports:
       - "8080:8080"
+    volumes:
+      - uploads:/app/uploads
     networks:
       - resellmart_network
     depends_on:
@@ -45,6 +47,8 @@ services:
 
 volumes:
   db_data:
+    driver: local
+  uploads:
     driver: local
 
 networks:
