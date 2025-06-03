@@ -22,7 +22,7 @@ A full-stack E-commerce application for buying and selling second-hand goods. De
 - Manage addresses
 - Reset password (TODO)
 
-### Admin (TODO)
+### Admin
 - Enable/disable users and promote them to admins
 - View all products and toggle their availability
 - Add, update, and delete product categories
@@ -47,6 +47,11 @@ A full-stack E-commerce application for buying and selling second-hand goods. De
 ### Database
 - MySQL (Dockerised)
 
+### Deployment
+- Amazon EC2 instance running Spring Boot application
+- Amazon S3 bucket hosting React frontend
+- Custom domain configured with Amazon Route 53
+- CloudFront used as CDN for improved performance and HTTPS support
 
 ## 🔐 Security 
 -  Access & refresh token flow with JSON Web Tokens (JWTs)
@@ -57,10 +62,9 @@ A full-stack E-commerce application for buying and selling second-hand goods. De
 
 ## ⚙️ CI/CD (GitHub Actions)
 - Pipeline to build and run unit tests on push to feature branch
-- Pipeline to build, run unit and integration tests, and deploy on pull request and on push to main branch
+- Pipelines to build, run unit and integration tests, and deploy on pull request and on push to main branch
 
-
-## 🚀 Deployment (TODO)
+## 🚀 Deployment (In progress)
 - Deployed Spring Boot backend to an Amazon EC2 instance
 - Deployed React frontend to Amazon S3 
 
