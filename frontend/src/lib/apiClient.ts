@@ -1,10 +1,11 @@
 import axios from "axios";
 
-// TODO: Use environment variables for URL
-const BACKEND_BASE_URL = "http://localhost:8080";
+const API_URL = import.meta.env.VITE_API_URL;
+
+console.log(API_URL)
 
 export const api = axios.create({
-    baseURL: BACKEND_BASE_URL,
+    baseURL: API_URL,
     headers: {
         "Content-Type": "application/json"
     },

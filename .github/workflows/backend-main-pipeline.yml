@@ -111,6 +111,7 @@ jobs:
           EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
           JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
           STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+          FRONTEND_URL=${{ secrets.FRONTEND_URL }}
           EOL
             sudo docker-compose -f docker-compose.yml pull -q
             sudo docker-compose -f docker-compose.yml up -d
