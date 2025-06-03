@@ -244,6 +244,7 @@ public class AuthenticationService {
                 .from("refresh-token", refreshToken)
                 .httpOnly(true)
                 .secure(false)
+                .sameSite("None")
                 .path("/")
                 .maxAge(refreshExpirationTime / 1000)
                 .build();
