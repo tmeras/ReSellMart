@@ -17,30 +17,30 @@ on:
   workflow_dispatch:
 
 jobs:
-  # test:
-  #   runs-on: ubuntu-latest
-  #   name: Run unit and integration tests
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
+  test:
+    runs-on: ubuntu-latest
+    name: Run unit and integration tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  #     - name: Run mock SMTP server
-  #       run: |
-  #         docker compose -f backend/docker-compose.yml up -d mail-dev
-  #         docker ps
+      - name: Run mock SMTP server
+        run: |
+          docker compose -f backend/docker-compose.yml up -d mail-dev
+          docker ps
 
-  #     - name: Setup JDK
-  #       uses: actions/setup-java@v4
-  #       with:
-  #         java-version: '17'
-  #         distribution: 'corretto'
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
 
-  #     - name: Run unit and integration tests
-  #       env:
-  #         STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-  #       run: |
-  #         cd backend
-  #         ./mvnw clean verify
+      - name: Run unit and integration tests
+        env:
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+        run: |
+          cd backend
+          ./mvnw clean verify
 
   build-image:
     runs-on: ubuntu-latest
