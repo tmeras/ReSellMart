@@ -38,6 +38,7 @@ jobs:
       - name: Run unit and integration tests
         env:
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          
         run: |
           cd backend
           ./mvnw clean verify
@@ -45,7 +46,7 @@ jobs:
   build-image:
     runs-on: ubuntu-latest
     name: Build Docker image
-    #needs: [test]
+    needs: [test]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

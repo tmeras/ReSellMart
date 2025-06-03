@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: ReSellMart
+  profiles:
+    active: test
   servlet:
     multipart:
       enabled: true
