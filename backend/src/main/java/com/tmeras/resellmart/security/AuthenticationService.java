@@ -50,6 +50,9 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final MfaService mfaService;
 
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
+
     @Value("${application.frontend.base-url}")
     private String frontendBaseUrl;
 
@@ -244,7 +247,6 @@ public class AuthenticationService {
                 .from("refresh-token", refreshToken)
                 .httpOnly(true)
                 .secure(false)
-                .sameSite("None")
                 .path("/")
                 .maxAge(refreshExpirationTime / 1000)
                 .build();
