@@ -98,14 +98,14 @@ jobs:
           chmod 400 ec2_key.pem
 
       - name: Create deployment folder
-        run: ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{secrets.EC2_IP}} "mkdir -p ci-cd"
+        run: ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_IP }} "mkdir -p ci-cd"
 
       - name: Copy docker compose file
-        run: scp -o StrictHostKeyChecking=no -i ec2_key.pem backend/docker-compose.yml ec2-user@${{secrets.EC2_IP}}:ci-cd/docker-compose.yml
+        run: scp -o StrictHostKeyChecking=no -i ec2_key.pem backend/docker-compose.yml ec2-user@${{ secrets.EC2_IP }}:ci-cd/docker-compose.yml
       
       - name: Set environment variables and deploy
         run: |
-          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{secrets.EC2_IP}} << EOF
+          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_IP }} << EOF
             cd ci-cd
             cat > .env << EOL
           EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}

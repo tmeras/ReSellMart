@@ -17,7 +17,7 @@ ARG APP_VERSION=1.0.0
 
 WORKDIR /app
 
-# Copy images to be added via migration script and the jar file
+# Copy the jar file and the images that are referenced in the migration script
 COPY uploads ./uploads
 COPY --from=build /build/target/resellmart-*.jar .
 

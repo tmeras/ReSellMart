@@ -2,7 +2,7 @@ import { paths } from "@/config/paths.ts";
 import { OrderStatisticsCard } from "@/features/app/orders/components/OrderStatisticsCard.tsx";
 import { ProductStatisticsCard } from "@/features/app/products/components/ProductStatisticsCard.tsx";
 import { UserStatisticsCard } from "@/features/app/users/components/UserStatisticsCard.tsx";
-import { Button, Flex, Paper, ScrollArea, Title } from "@mantine/core";
+import { Button, Flex, Paper, Title } from "@mantine/core";
 import { IconCategoryPlus, IconPackages, IconUsers } from "@tabler/icons-react";
 import { Link } from "react-router";
 

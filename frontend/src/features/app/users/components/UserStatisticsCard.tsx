@@ -1,7 +1,7 @@
 import { useGetUserStatistics } from "@/features/app/users/api/getUserStatistics.ts";
 import { Flex, Loader, Paper, Text, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconPackage, IconUser, IconX } from "@tabler/icons-react";
+import { IconUser, IconX } from "@tabler/icons-react";
 
 export function UserStatisticsCard() {
     const getUserStatisticsQuery = useGetUserStatistics();

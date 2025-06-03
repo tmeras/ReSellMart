@@ -10,8 +10,7 @@ import {
     IconCash,
     IconCategoryPlus,
     IconCirclePlus, IconDashboard,
-    IconGridDots, IconLayoutDashboard,
-    IconPackage, IconPackages,
+    IconGridDots, IconPackage, IconPackages,
     IconReceipt,
     IconShoppingCart,
     IconUsers

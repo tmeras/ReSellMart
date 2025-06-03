@@ -95,7 +95,7 @@ the provided webhook signing secret
 (from project root)
 ```bash
 cd backend
-docker compose up -d
+docker compose up -d mysql-resellmart mail-dev
 ./mvnw spring-boot:run
 ```
 
@@ -114,12 +114,12 @@ Login and pay with the following:
 | john@gmail.com| pass123| 4242 4242 4242 4242 |
 
 **NOTES**:
--  Product images in stripe checkout page will not be visible as webhook endpoint  is served over HTTP (not HTTPS) during development
+-  Product images in stripe checkout page will not be visible as webhook endpoint is served over HTTP (not HTTPS) during development
 - Emails can be viewed at http://localhost:1080/#/
 
 ### Running Tests (from project root)
 ```bash
 cd backend
-docker compose up -d
+docker compose up -d mail-dev
 ./mvnw clean verify
 ```

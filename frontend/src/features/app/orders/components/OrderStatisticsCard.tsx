@@ -3,9 +3,6 @@ import { Flex, Loader, Paper, Text, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import {
     IconCoinPound,
-    IconPackage,
-    IconPackages,
-    IconReceipt,
     IconReceipt2,
     IconTruckDelivery,
     IconX
