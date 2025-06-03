@@ -1,6 +1,6 @@
 services:
-  db:
-    container_name: mysql_resellmart
+  mysql-resellmart:
+    container_name: mysql-resellmart
     image: mysql:9.2.0
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -14,6 +14,12 @@ services:
     networks:
       - resellmart_network
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "mysql", "-u", "root", "-proot", "--execute", "SHOW DATABASES;" ]
+      interval: 3s
+      retries: 5
+      timeout: 5s
+
   mail-dev:
     container_name: mail_dev_resellmart
     image: maildev/maildev
@@ -21,8 +27,28 @@ services:
       - "1080:1080"
       - "1025:1025"
 
+  resellmart-api:
+    container_name: resellmart_api
+    image: tmeras/resellmart-api:latest
+    environment:
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - FRONTEND_URL=${FRONTEND_URL}
+    ports:
+      - "8080:8080"
+    volumes:
+      - uploads:/app/uploads
+    networks:
+      - resellmart_network
+    depends_on:
+      mysql-resellmart:
+        condition: service_healthy
+
 volumes:
   db_data:
+    driver: local
+  uploads:
     driver: local
 
 networks:

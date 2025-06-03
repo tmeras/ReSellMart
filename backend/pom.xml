@@ -10,9 +10,9 @@
 	</parent>
 	<groupId>com.tmeras</groupId>
 	<artifactId>resellmart</artifactId>
-	<version>0.0.1-SNAPSHOT</version> <!-- TODO: Add version -->
+	<version>1.0.0</version>
 	<name>resellmart</name>
-	<description>An eCommerce application for buying and selling second-hand goods</description>
+	<description>An E-commerce application for buying and selling second-hand goods</description>
 	<url/>
 	<licenses>
 		<license/>

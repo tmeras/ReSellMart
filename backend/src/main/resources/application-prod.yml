@@ -1,0 +1,69 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: "jdbc:mysql://mysql-resellmart:3306/resellmart_db?allowPublicKeyRetrieval=true&useSSL=false"
+    username: user
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+    database: mysql
+  sql:
+    init:
+      mode: always
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: resellmartmail@gmail.com
+    password: ${EMAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+application:
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET_KEY}
+      access-token:
+        expiration: 3600000 # 1 hour
+      refresh-token:
+        expiration: 604800000 # 1 week
+
+    # TODO: Update before deployment
+    cors:
+      allowed-origins: ${FRONTEND_URL}
+
+  # TODO: Change for deployment
+  backend:
+    base-https-url: "https://fe25-2a00-23c8-820e-701-b0fe-b493-9617-40ea.ngrok-free.app"
+  frontend:
+    base-url: ${FRONTEND_URL}
+
+  mailing:
+    activation-url: "/auth/activation?code="
+
+  stripe:
+    secret-key: ${STRIPE_SECRET_KEY}
+    webhook-secret: whsec_780cf386c668ec3edc857ffc04088d2f429692b2ec277d27c0b850ef530cde58 # TODO: Environment variable in prod
+    checkout-success-url: "/app/my-purchases"
+    checkout-cancel-url: "/app/checkout"
+
+  file:
+    upload:
+      product-images-path: ./uploads/product-images
+      user-images-path: ./uploads/user-images
+      order-item-images-path: ./uploads/order-item-images

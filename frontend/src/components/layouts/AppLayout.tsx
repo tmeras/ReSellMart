@@ -10,8 +10,7 @@ import {
     IconCash,
     IconCategoryPlus,
     IconCirclePlus, IconDashboard,
-    IconGridDots, IconLayoutDashboard,
-    IconPackage, IconPackages,
+    IconGridDots, IconPackage, IconPackages,
     IconReceipt,
     IconShoppingCart,
     IconUsers
@@ -156,7 +155,7 @@ export function AppLayout() {
                 </AppShell.Section>
 
                 <AppShell.Section>
-                    <Flex justify="space-between" align="center">
+                    <Flex justify="space-between" align="center" maw={250}>
                         <UserMenu closeNavBar={ () => setNavBarOpened(false) }/>
 
                         <DarkModeButton/>

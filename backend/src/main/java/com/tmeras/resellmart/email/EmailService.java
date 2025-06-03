@@ -47,7 +47,7 @@ public class EmailService {
         context.setVariables(variables);
         String template = templateEngine.process(AppConstants.USER_ACTIVATION_TEMPLATE, context);
 
-        mimeMessageHelper.setFrom("resellmart@gmail.com");
+        mimeMessageHelper.setFrom("resellmartmail@gmail.com");
         mimeMessageHelper.setTo(to);
         mimeMessageHelper.setSubject("ReSellMart Account Activation");
         mimeMessageHelper.setText(template, true);
@@ -72,7 +72,7 @@ public class EmailService {
         context.setVariables(variables);
         String template = templateEngine.process(AppConstants.PURCHASE_CONFIRMATION_TEMPLATE, context);
 
-        mimeMessageHelper.setFrom("resellmart@gmail.com");
+        mimeMessageHelper.setFrom("resellmartmail@gmail.com");
         mimeMessageHelper.setTo(to);
         mimeMessageHelper.setSubject("ReSellMart Order Confirmation");
         mimeMessageHelper.setText(template, true);
@@ -101,7 +101,7 @@ public class EmailService {
         context.setVariables(variables);
         String template = templateEngine.process(AppConstants.ORDER_CANCELLATION_TEMPLATE, context);
 
-        mimeMessageHelper.setFrom("resellmart@gmail.com");
+        mimeMessageHelper.setFrom("resellmartmail@gmail.com");
         mimeMessageHelper.setTo(to);
         mimeMessageHelper.setSubject("ReSellMart Order Cancellation");
         mimeMessageHelper.setText(template, true);
@@ -132,7 +132,7 @@ public class EmailService {
         context.setVariables(variables);
         String template = templateEngine.process(AppConstants.SALE_CONFIRMATION_TEMPLATE, context);
 
-        mimeMessageHelper.setFrom("resellmart@gmail.com");
+        mimeMessageHelper.setFrom("resellmartmail@gmail.com");
         mimeMessageHelper.setTo(to);
         mimeMessageHelper.setSubject("ReSellMart Sale Notification");
         mimeMessageHelper.setText(template, true);
@@ -157,7 +157,7 @@ public class EmailService {
         context.setVariables(variables);
         String template = templateEngine.process(AppConstants.SHIPPING_CONFIRMATION_TEMPLATE, context);
 
-        mimeMessageHelper.setFrom("resellmart@gmail.com");
+        mimeMessageHelper.setFrom("resellmartmail@gmail.com");
         mimeMessageHelper.setTo(to);
         mimeMessageHelper.setSubject("ReSellMart Shipping Notification");
         mimeMessageHelper.setText(template, true);

@@ -2,6 +2,7 @@ package com.tmeras.resellmart.configuration;
 
 import com.tmeras.resellmart.token.JwtFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -26,6 +27,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfiguration {
+
+    @Value("${application.security.cors.allowed-origins}")
+    private List<String> allowedOrigins;
 
     private final AuthenticationProvider authenticationProvider;
     private final JwtFilter jwtFilter;
@@ -61,7 +65,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:4173")); // TODO: Update before deployment
+        corsConfiguration.setAllowedOrigins(allowedOrigins);
         corsConfiguration.setAllowedMethods(Arrays.asList("*"));
         corsConfiguration.setAllowedHeaders(List.of("*"));
         corsConfiguration.setAllowCredentials(true);
