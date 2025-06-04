@@ -48,5 +48,5 @@ jobs:
       
       - name: Deploy to S3
         run: |
-          aws s3 sync frontend/dist s3://resellmart --delete
+          aws s3 sync frontend/dist s3://app.resellmart.tmeras.com --delete
           

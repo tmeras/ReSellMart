@@ -43,13 +43,12 @@ application:
       refresh-token:
         expiration: 604800000 # 1 week
 
-    # TODO: Update before deployment
     cors:
       allowed-origins: ${FRONTEND_URL}
 
   # TODO: Change for deployment
   backend:
-    base-https-url: "https://fe25-2a00-23c8-820e-701-b0fe-b493-9617-40ea.ngrok-free.app"
+    base-https-url: ${VITE_API_URL}
   frontend:
     base-url: ${FRONTEND_URL}
 
