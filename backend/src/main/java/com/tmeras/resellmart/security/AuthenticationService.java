@@ -242,18 +242,23 @@ public class AuthenticationService {
                 .build()
         );
 
+        boolean inProduction = "prod".equals(activeProfile);
+
         // Include refresh token in HttpOnly cookie
-        ResponseCookie refreshCookie = ResponseCookie
+        ResponseCookie.ResponseCookieBuilder cookieBuilder = ResponseCookie
                 .from("refresh-token", refreshToken)
                 .httpOnly(true)
-                .secure(false)
+                .secure(inProduction)
                 .path("/")
-                .maxAge(refreshExpirationTime / 1000)
-                .build();
+                .maxAge(refreshExpirationTime / 1000);
+        if (inProduction) {
+            cookieBuilder.sameSite("None")
+                    .domain(".resellmart.tmeras.com");
+        }
 
         return AuthenticationResponse.builder()
                 .accessToken(accessToken)
-                .refreshTokenCookie(refreshCookie.toString())
+                .refreshTokenCookie(cookieBuilder.build().toString())
                 .isMfaEnabled(user.getIsMfaEnabled())
                 .build();
     }

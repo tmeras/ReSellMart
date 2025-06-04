@@ -46,7 +46,6 @@ jobs:
   build-image:
     runs-on: ubuntu-latest
     name: Build Docker image
-    needs: [test]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -88,7 +87,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy to EC2 instance
-    needs: [build-image]
+    needs: [build-image, test]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -112,8 +111,10 @@ jobs:
           EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
           JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
           STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
           FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+          VITE_API_URL=${{ secrets.VITE_API_URL }}
           EOL
             sudo docker-compose -f docker-compose.yml pull -q
-            sudo docker-compose -f docker-compose.yml up -d
+            sudo docker-compose -f docker-compose.yml up -d resellmart-api mysql-resellmart
           EOF

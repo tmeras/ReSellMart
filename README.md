@@ -1,6 +1,8 @@
 # ReSellMart
 A full-stack E-commerce application for buying and selling second-hand goods. Developed using Spring Boot (Java), React (TypeScript), and MySQL. This project is for learning purposes.
 
+## ▶️ Demo
+Live demo available at: https://app.resellmart.tmeras.com/ 
 
 ## 📋 Features
 ### Products
@@ -47,11 +49,6 @@ A full-stack E-commerce application for buying and selling second-hand goods. De
 ### Database
 - MySQL (Dockerised)
 
-### Deployment
-- Amazon EC2 instance running Spring Boot application
-- Amazon S3 bucket hosting React frontend
-- Custom domain configured with Amazon Route 53
-- CloudFront used as CDN for improved performance and HTTPS support
 
 ## 🔐 Security 
 -  Access & refresh token flow with JSON Web Tokens (JWTs)
@@ -59,14 +56,16 @@ A full-stack E-commerce application for buying and selling second-hand goods. De
 - Account activation via email upon registration
 - MFA using One-Time Passwords (OTPs)
 
+## 🚀 Deployment (In progress)
+- Deployed Spring Boot backend to an Amazon EC2 instance
+- Deployed React frontend to an Amazon S3 bucket
+- Custom domain configured with Amazon Route 53
+- CloudFront used as CDN for improved performance and HTTPS support
 
 ## ⚙️ CI/CD (GitHub Actions)
 - Pipeline to build and run unit tests on push to feature branch
 - Pipelines to build, run unit and integration tests, and deploy on pull request and on push to main branch
 
-## 🚀 Deployment (In progress)
-- Deployed Spring Boot backend to an Amazon EC2 instance
-- Deployed React frontend to Amazon S3 
 
 ## API Documentation (TODO)
 - TODO with swagger

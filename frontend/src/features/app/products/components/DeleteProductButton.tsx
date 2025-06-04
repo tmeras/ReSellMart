@@ -19,7 +19,6 @@ export function DeleteProductButton({ productId, sellerId }: DeleteProductButton
     });
 
     async function deleteProduct() {
-        console.log("deleting product");
         try {
             await softDeleteProductMutation.mutateAsync({ productId });
             notifications.show({
