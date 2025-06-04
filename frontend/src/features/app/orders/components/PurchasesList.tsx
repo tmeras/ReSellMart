@@ -1,7 +1,8 @@
 import { useGetPurchasesByUser } from "@/features/app/orders/api/getPurchasesByUser.ts";
 import { PurchaseCard } from "@/features/app/orders/components/PurchaseCard.tsx";
 import { ORDER_SORT_OPTIONS, SORT_ORDERS_BY } from "@/utils/constants.ts";
-import { Flex, Loader, NativeSelect, Pagination, Text } from "@mantine/core";
+import { Alert, Button, Flex, Loader, NativeSelect, Pagination, Text } from "@mantine/core";
+import { IconInfoCircle } from "@tabler/icons-react";
 import { useSearchParams } from "react-router";
 
 export type PurchasesListProps = {
@@ -14,6 +15,7 @@ export function PurchasesList({ userId }: PurchasesListProps) {
     const sortBy = searchParams.get("sortBy") || SORT_ORDERS_BY;
     const sortDirection = searchParams.get("sortDirection") || "desc";
     const sort = `${ sortBy } ${ sortDirection }`;
+    const stripeSessionId = searchParams.get("sessionId");
 
     const getPurchasesByUserQuery = useGetPurchasesByUser({
         userId,
@@ -47,8 +49,25 @@ export function PurchasesList({ userId }: PurchasesListProps) {
     // TODO: Display payment method?
     return (
         <Flex direction="column">
-            <Flex justify="center" mb="sm">
-                <Flex justify="flex-end" w={ { base: 450, xs: 650 } }>
+            <Flex justify="center" my="sm">
+                <Flex
+                    justify={stripeSessionId ? "space-between" : "flex-end"}
+                    align="flex-end" w={ { base: 450, xs: 650 } }
+                >
+                    {stripeSessionId &&
+                        <Alert
+                            variant="light" title="New order not visible?"
+                            icon={<IconInfoCircle />}
+                        >
+                            <Button
+                                variant="light" loading={ getPurchasesByUserQuery.isFetching }
+                                onClick={() => getPurchasesByUserQuery.refetch()}
+                            >
+                                Refresh now
+                            </Button>
+                        </Alert>
+                    }
+
                     <NativeSelect
                         data={ ORDER_SORT_OPTIONS }
                         value={ sort }
