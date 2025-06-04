@@ -1,6 +1,8 @@
 # ReSellMart
 A full-stack E-commerce application for buying and selling second-hand goods. Developed using Spring Boot (Java), React (TypeScript), and MySQL. This project is for learning purposes.
 
+## ▶️ Demo
+Live demo available at: https://app.resellmart.tmeras.com/ 
 
 ## 📋 Features
 ### Products

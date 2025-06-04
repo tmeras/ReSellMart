@@ -17,31 +17,31 @@ on:
   workflow_dispatch:
 
 jobs:
-  # test:
-  #   runs-on: ubuntu-latest
-  #   name: Run unit and integration tests
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
+  test:
+    runs-on: ubuntu-latest
+    name: Run unit and integration tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  #     - name: Run mock SMTP server
-  #       run: |
-  #         docker compose -f backend/docker-compose.yml up -d mail-dev
-  #         docker ps
+      - name: Run mock SMTP server
+        run: |
+          docker compose -f backend/docker-compose.yml up -d mail-dev
+          docker ps
 
-  #     - name: Setup JDK
-  #       uses: actions/setup-java@v4
-  #       with:
-  #         java-version: '17'
-  #         distribution: 'corretto'
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
 
-  #     - name: Run unit and integration tests
-  #       env:
-  #         STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      - name: Run unit and integration tests
+        env:
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
           
-  #       run: |
-  #         cd backend
-  #         ./mvnw clean verify
+        run: |
+          cd backend
+          ./mvnw clean verify
 
   build-image:
     runs-on: ubuntu-latest
@@ -87,7 +87,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy to EC2 instance
-    needs: [build-image] # [build-image, test]
+    needs: [build-image, test]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -116,5 +116,5 @@ jobs:
           VITE_API_URL=${{ secrets.VITE_API_URL }}
           EOL
             sudo docker-compose -f docker-compose.yml pull -q
-            sudo docker-compose -f docker-compose.yml up -d
+            sudo docker-compose -f docker-compose.yml up -d resellmart-api mysql-resellmart
           EOF
