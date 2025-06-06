@@ -34,6 +34,7 @@ export function AuthLayout() {
                         <Text
                             size="lg" variant="gradient" fw={ 700 }
                             gradient={ { from: "paleIndigo.8", to: "paleIndigo.4", deg: 150 } }
+                            component={Link} to={paths.home.path}
                         >
                             ReSellMart
                         </Text>

@@ -48,5 +48,20 @@ jobs:
       
       - name: Deploy to S3
         run: |
+          # Sync new build to S3 and delete old files
           aws s3 sync frontend/dist s3://app.resellmart.tmeras.com --delete
+
+          # Cache all hashed assets (everything except index.html) for 1 year
+          aws s3 cp frontend/dist s3://app.resellmart.tmeras.com \
+            --recursive \
+            --exclude "index.html" \
+            --metadata-directive REPLACE \
+            --cache-control "public, max-age=31536000, immutable"
+          
+          # Do not cache index.html
+          aws s3 cp frontend/dist/index.html s3://app.resellmart.tmeras.com/index.html \
+            --cache-control "no-cache, no-store, must-revalidate" \
+            --content-type "text/html"
+          
+          
           

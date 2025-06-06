@@ -273,6 +273,20 @@ public class ProductControllerIT {
     }
 
     @Test
+    public void shouldFindLatestProducts() {
+        ResponseEntity<List<ProductResponse>> response =
+                restTemplate.exchange("/api/products/latest", HttpMethod.GET,
+                        new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
+                        });
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().size()).isEqualTo(2);
+        assertThat(response.getBody().get(0).getName()).isEqualTo(productA.getName());
+        assertThat(response.getBody().get(1).getName()).isEqualTo(productB.getName());
+    }
+
+    @Test
     public void shouldFindAllProductsByKeyword() {
         ResponseEntity<PageResponse<ProductResponse>> response =
                 restTemplate.exchange("/api/products?search=Test product", HttpMethod.GET,

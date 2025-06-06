@@ -9,18 +9,20 @@ import { AppShell, Burger, Button, Divider, Flex, Image, NavLink, ScrollArea, Te
 import {
     IconCash,
     IconCategoryPlus,
-    IconCirclePlus, IconDashboard,
-    IconGridDots, IconPackage, IconPackages,
+    IconCirclePlus,
+    IconDashboard,
+    IconGridDots,
+    IconPackage,
+    IconPackages,
     IconReceipt,
     IconShoppingCart,
     IconUsers
 } from "@tabler/icons-react";
 import { useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { Link, NavLink as RouterNavLink, Outlet, useNavigate } from "react-router";
+import { Link, NavLink as RouterNavLink, Outlet } from "react-router";
 
 export function AppLayout() {
-    const navigate = useNavigate();
     const { user } = useAuth();
     const [navBarOpened, setNavBarOpened] = useState(false);
 
@@ -48,8 +50,7 @@ export function AppLayout() {
                         <Text
                             size="lg" variant="gradient" fw={ 700 }
                             gradient={ { from: "paleIndigo.8", to: "paleIndigo.4", deg: 150 } }
-                            style={ { cursor: "pointer" } }
-                            onClick={ () => navigate(paths.app.products.path) }
+                            component={Link} to={paths.app.products.path}
                         >
                             ReSellMart
                         </Text>

@@ -204,6 +204,23 @@ public class ProductServiceTests {
     }
 
     @Test
+    public void shouldFindLatestProducts() {
+        Sort sort = Sort.by("listedAt").descending();
+        Pageable pageable = PageRequest.of(0, 12, sort);
+        Page<Product> page = new PageImpl<>(List.of(productA, productB));
+
+        when(productRepository.findAll(pageable)).thenReturn(page);
+        when(productMapper.toProductResponse(productA)).thenReturn(productResponseA);
+        when(productMapper.toProductResponse(productB)).thenReturn(productResponseB);
+
+        List<ProductResponse> latestProducts = productService.findLatest();
+
+        assertThat(latestProducts.size()).isEqualTo(2);
+        assertThat(latestProducts.get(0)).isEqualTo(productResponseA);
+        assertThat(latestProducts.get(1)).isEqualTo(productResponseB);
+    }
+
+    @Test
     public void shouldFindAllProductsByKeyword() {
         Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
                 Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();

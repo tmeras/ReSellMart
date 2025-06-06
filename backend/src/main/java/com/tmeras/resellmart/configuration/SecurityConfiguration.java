@@ -44,7 +44,8 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/products/*/images/primary",
-                                "/api/orders/stripe-webhook"
+                                "/api/orders/stripe-webhook",
+                                "/api/products/latest"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

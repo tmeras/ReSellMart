@@ -97,6 +97,22 @@ public class ProductService {
         );
     }
 
+    public List<ProductResponse> findLatest() {
+        Sort sort = Sort.by("listedAt").descending();
+        Pageable pageable = PageRequest.of(0, 12, sort);
+
+        Page<Product> products = productRepository.findAll(pageable);
+        // Initialize lazy associations
+        for (Product product : products) {
+            product.getImages().size();
+            product.getSeller().getRoles().size();
+        }
+
+        return products.stream()
+                .map(productMapper::toProductResponse)
+                .toList();
+    }
+
     @PreAuthorize("hasRole('ADMIN')") //Only admins should be able to view both available and unavailable products
     public PageResponse<ProductResponse> findAllByKeyword(
             Integer pageNumber, Integer pageSize, String sortBy, String sortDirection, String keyword
@@ -415,7 +431,6 @@ public class ProductService {
         productRepository.save(product);
     }
 
-    // Calculates the total number of products listed in the past 30-31 days
     @PreAuthorize("hasRole('ADMIN')")
     public ProductStatsResponse calculateStatistics() {
         ZonedDateTime to = ZonedDateTime.now();
