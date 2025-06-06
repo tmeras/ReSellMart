@@ -1,3 +1,4 @@
+import imgUrl from "@/assets/home.png";
 import { paths } from "@/config/paths.ts";
 import { api } from "@/lib/apiClient.ts";
 import { ProductResponse } from "@/types/api.ts";
@@ -19,7 +20,6 @@ import {
 import { IconChecklist, IconLeaf, IconList, IconPackages, IconPaywall, IconTool } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
-import imgUrl from "@/assets/home.png";
 
 export function HomePage() {
     const {colorScheme} = useMantineColorScheme();
@@ -117,7 +117,7 @@ export function HomePage() {
                 <Flex gap="xl">
                     <Flex direction="column" maw={480}>
                         <Title fz={{base: 33, md: 44}} >
-                            Buy Smart.
+                            Buy Smart,
                             <br/> Sell Sustainably
                         </Title>
 
