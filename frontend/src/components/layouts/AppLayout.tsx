@@ -9,18 +9,20 @@ import { AppShell, Burger, Button, Divider, Flex, Image, NavLink, ScrollArea, Te
 import {
     IconCash,
     IconCategoryPlus,
-    IconCirclePlus, IconDashboard,
-    IconGridDots, IconPackage, IconPackages,
+    IconCirclePlus,
+    IconDashboard,
+    IconGridDots,
+    IconPackage,
+    IconPackages,
     IconReceipt,
     IconShoppingCart,
     IconUsers
 } from "@tabler/icons-react";
 import { useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { Link, NavLink as RouterNavLink, Outlet, useNavigate } from "react-router";
+import { Link, NavLink as RouterNavLink, Outlet } from "react-router";
 
 export function AppLayout() {
-    const navigate = useNavigate();
     const { user } = useAuth();
     const [navBarOpened, setNavBarOpened] = useState(false);
 
