@@ -48,8 +48,7 @@ export function AppLayout() {
                         <Text
                             size="lg" variant="gradient" fw={ 700 }
                             gradient={ { from: "paleIndigo.8", to: "paleIndigo.4", deg: 150 } }
-                            style={ { cursor: "pointer" } }
-                            onClick={ () => navigate(paths.app.products.path) }
+                            component={Link} to={paths.app.products.path}
                         >
                             ReSellMart
                         </Text>

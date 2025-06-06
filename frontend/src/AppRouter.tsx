@@ -17,6 +17,7 @@ import { AddressesPage } from "@/pages/app/user/AddressesPage.tsx";
 import { CartPage } from "@/pages/app/user/CartPage.tsx";
 import { UpdateUserPage } from "@/pages/app/user/UpdateUserPage.tsx";
 import { WishlistPage } from "@/pages/app/user/WishlistPage.tsx";
+import { HomePage } from "@/pages/HomePage.tsx";
 import { useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { createBrowserRouter, RouterProvider } from "react-router";
@@ -40,10 +41,9 @@ const createAppRouter = () =>
                 </ErrorBoundary>
             ),
             children: [
-                // TODO: Home page with latest products
                 {
                     path: "",
-                    element: <LoginPage />
+                    element: <HomePage />
                 },
                 {
                     path: paths.auth.login.path,

@@ -38,9 +38,9 @@ export function ProductCard(
                 />
             </Card.Section>
 
-            <Card.Section inheritPadding withBorder mt="sm">
+            <Card.Section inheritPadding withBorder mt="sm" h={90}>
                 <Anchor
-                    size="xl" lineClamp={ 2 }
+                    size="xl" lineClamp={ 2 } fw={500}
                     c="var(--mantine-color-text)"
                     component={ Link } to={ paths.app.productDetails.getHref(product.id.toString()) }
                 >

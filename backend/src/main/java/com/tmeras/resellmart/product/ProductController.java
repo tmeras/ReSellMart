@@ -52,6 +52,12 @@ public class ProductController {
         return new ResponseEntity<>(foundProducts, HttpStatus.OK);
     }
 
+    @GetMapping("/latest")
+    public ResponseEntity<List<ProductResponse>> findLatest() {
+        List<ProductResponse> foundProducts = productService.findLatest();
+        return new ResponseEntity<>(foundProducts, HttpStatus.OK);
+    }
+
     @GetMapping("/others")
     public ResponseEntity<PageResponse<ProductResponse>> findAllExceptSellerProducts(
             @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
