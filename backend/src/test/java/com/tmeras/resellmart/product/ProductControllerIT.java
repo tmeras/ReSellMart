@@ -223,7 +223,6 @@ public class ProductControllerIT {
                 restTemplate.exchange("/api/products/" + productA.getId(), HttpMethod.GET,
                         new HttpEntity<>(headers), ProductResponse.class);
 
-        System.out.println(productA.getPrice());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getName()).isEqualTo(productA.getName());
