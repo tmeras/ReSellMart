@@ -35,32 +35,40 @@ Live demo available at: https://app.resellmart.tmeras.com/
 ### Frontend
 - React (TypeScript)
 - TanStack (React) Query
-- TanStack Table
 - React Router
-- Mantine
+- Mantine & Mantine React Table
 
 ### Backend
 - Spring Boot (Java)
-- Spring MVC, Security, Data JPA
+- Spring MVC, Security, Data JPA, Testing
 - Flyway (DB migrations)
 - Stripe API
 -  TODO: Swagger (API documentation)
 
 ### Database
 - MySQL (Dockerised)
+  
+
+## 🧪 Testing
+- **Unit Tests**: Isolate and verify business logic in the service layer using JUnit, Mockito, and AssertJ
+- **Controller Slice Tests**: Lightweight web layer tests using Spring’s @WebMvcTest with MockMvc to simulate HTTP requests
+- **Repository Slice Tests**: Database layer tested using Spring’s @DataJpaTest, with Testcontainers running a Dockerised MySQL instance to ensure realistic DB interactions
+- **Integration Tests**: Loading the full application context using @SpringBootTest and TestRestTemplate, backed by Testcontainers with Dockerised MySQL, verifying behaviour across all layers against a real HTTP server
 
 
 ## 🔐 Security 
--  Access & refresh token flow with JSON Web Tokens (JWTs)
- - Role-Based Access Control (RBAC) to distinguish between user and admin responsibilities
+- Access & refresh token flow with JSON Web Tokens (JWTs)
+- Role-Based Access Control (RBAC) to distinguish between user and admin responsibilities
 - Account activation via email upon registration
 - MFA using One-Time Passwords (OTPs)
+  
 
 ## 🚀 Deployment (In progress)
 - Deployed Spring Boot backend to an Amazon EC2 instance
 - Deployed React frontend to an Amazon S3 bucket
 - Custom domain configured with Amazon Route 53
-- CloudFront used as CDN for improved performance and HTTPS support
+- Amazon CloudFront used as CDN for improved performance and HTTPS support
+  
 
 ## ⚙️ CI/CD (GitHub Actions)
 - Pipeline to build and run unit tests on push to feature branch
@@ -69,6 +77,10 @@ Live demo available at: https://app.resellmart.tmeras.com/
 
 ## API Documentation (TODO)
 - TODO with swagger
+
+
+## Entity Relationship Diagram (ERD)
+![ReSellMart_db_schema drawio](https://github.com/user-attachments/assets/dc7b92de-76c0-4a0f-9472-bb0799c2d553)
 
 
 ## Running Instructions
@@ -126,3 +138,4 @@ cd backend
 docker compose up -d mail-dev
 ./mvnw clean verify
 ```
+JaCoCo coverage report available by opening *backend/target/site/jacoco/index.html* in a browser
