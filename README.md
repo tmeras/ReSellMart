@@ -63,7 +63,7 @@ Live demo available at: https://app.resellmart.tmeras.com/
 - MFA using One-Time Passwords (OTPs)
   
 
-## 🚀 Deployment (In progress)
+## 🚀 Deployment
 - Deployed Spring Boot backend to an Amazon EC2 instance
 - Deployed React frontend to an Amazon S3 bucket
 - Custom domain configured with Amazon Route 53
