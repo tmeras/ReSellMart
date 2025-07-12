@@ -1,7 +1,7 @@
 # ReSellMart
 A full-stack E-commerce application for buying and selling second-hand goods. Developed using Spring Boot (Java), React (TypeScript), and MySQL.
 
-This project is for learning purposes and serves as a sample solution for [this](https://roadmap.sh/projects/ecommerce-api) project suggested by roadmap.sh
+This project is for learning purposes and serves as a sample solution for [this](https://roadmap.sh/projects/ecommerce-api) project, which is suggested by roadmap.sh
 
 ## ▶️ Demo
 Live demo available at: https://app.resellmart.tmeras.com/ 
@@ -24,7 +24,6 @@ Live demo available at: https://app.resellmart.tmeras.com/
 - Update account details including name, profile picture, home country
 - Toggle Multi-Factor Authentication (MFA)
 - Manage addresses
-- Reset password (TODO)
 
 ### Admin
 - Enable/disable users and promote them to admins
@@ -45,7 +44,6 @@ Live demo available at: https://app.resellmart.tmeras.com/
 - Spring MVC, Security, Data JPA, Testing
 - Flyway (DB migrations)
 - Stripe API
--  TODO: Swagger (API documentation)
 
 ### Database
 - MySQL (Dockerised)
