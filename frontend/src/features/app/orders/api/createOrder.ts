@@ -23,7 +23,6 @@ export type UseCreateOrderOptions = {
 
 export function useCreateOrder({ userId }: UseCreateOrderOptions) {
     const queryClient = useQueryClient();
-    // TODO: Invalidate admin order queries (also in other products queries etc.)
 
     return useMutation({
         onSuccess: async () => {

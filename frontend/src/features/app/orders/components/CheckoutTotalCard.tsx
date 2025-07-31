@@ -100,7 +100,6 @@ export function CheckoutTotalCard(
 
             <Divider my="xs"/>
 
-            {/*TODO: Inform about stripe test cards*/}
             { (cartValid && deliveryAddress && billingAddress) ? (
                 <Button
                     fullWidth mt="md"

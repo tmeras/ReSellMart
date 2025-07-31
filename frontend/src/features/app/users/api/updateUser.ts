@@ -19,8 +19,6 @@ export function updateUser(
 }
 
 export function useUpdateUser() {
-    //TODO: Invalidate all users query
-    //const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: updateUser

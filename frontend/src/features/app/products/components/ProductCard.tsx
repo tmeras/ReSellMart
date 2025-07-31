@@ -103,9 +103,15 @@ export function ProductCard(
                 </Flex>
 
                 <Flex justify="space-between" align="center" mt="sm" mb="sm">
-                    <CartButtonGroup
-                        cartItem={ cartItem } product={ product } cartEnabled={ cartEnabled }
-                    />
+                    { product.availableQuantity > 0 ? (
+                        <CartButtonGroup
+                            cartItem={ cartItem } product={ product } cartEnabled={ cartEnabled }
+                        />
+                    ) : (
+                        <Text c="red.6" size="sm">
+                            Out of Stock
+                        </Text>
+                    ) }
 
                     <Text c="dimmed" size="xs">
                         Product #{ product.id }

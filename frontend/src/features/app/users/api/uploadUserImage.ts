@@ -24,8 +24,7 @@ export function uploadUserImage(
 }
 
 export function useUploadUserImage() {
-    //TODO: Invalidate all users query
-    //const queryClient = useQueryClient();
+    ;
 
     return useMutation({
         mutationFn: uploadUserImage
