@@ -20,12 +20,12 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     Page<Order> findAllPaidByBuyerId(Pageable pageable, Integer buyerId);
 
     @Query("""
-            SELECT distinct o
-            FROM Order o
-            JOIN o.orderItems oi
-            WHERE oi.productSeller.id = :productSellerId
-                            AND o.status = 'PAID'
-    """)
+                    SELECT distinct o
+                    FROM Order o
+                    JOIN o.orderItems oi
+                    WHERE oi.productSeller.id = :productSellerId
+                                    AND o.status = 'PAID'
+            """)
     Page<Order> findAllPaidByProductSellerId(Pageable pageable, Integer productSellerId);
 
     @EntityGraph(attributePaths = {"buyer", "orderItems.product", "orderItems.productSeller"})
