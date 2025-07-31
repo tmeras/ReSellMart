@@ -51,7 +51,6 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-// TODO: Code coverage + results and testing approach in README
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )

@@ -36,7 +36,6 @@ export type UseCreateProductOptions = {
 
 export function useCreateProduct({ sellerId }: UseCreateProductOptions) {
     const queryClient = useQueryClient();
-    //TODO: Invalidate admin queries here and elsewhere
 
     return useMutation({
         onSuccess: async () => {
